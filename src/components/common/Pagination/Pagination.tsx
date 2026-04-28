@@ -17,11 +17,17 @@ export function Pagination({
   currentPage,
   onPageChange,
 }: PaginationProps) {
-  const safeTotalPages = Math.max(0, totalPages);
+  const safeTotalPages = Number.isFinite(totalPages)
+    ? Math.max(0, Math.floor(totalPages))
+    : 0;
+
+  const normalizedCurrentPage = Number.isFinite(currentPage)
+    ? Math.floor(currentPage)
+    : 1;
 
   const safeCurrentPage = Math.max(
     1,
-    Math.min(currentPage, Math.max(1, safeTotalPages))
+    Math.min(normalizedCurrentPage, Math.max(1, safeTotalPages))
   );
 
   const currentGroup = Math.ceil(safeCurrentPage / PAGE_GROUP_SIZE);
@@ -37,14 +43,18 @@ export function Pagination({
         );
 
   const handlePrevClick = () => {
-    onPageChange(safeCurrentPage - 1);
+    if (safeCurrentPage > 1) {
+      onPageChange(safeCurrentPage - 1);
+    }
   };
 
   const handleNextClick = () => {
-    onPageChange(safeCurrentPage + 1);
+    if (safeCurrentPage < safeTotalPages) {
+      onPageChange(safeCurrentPage + 1);
+    }
   };
 
-  const handlePageClick = (page: number) => {
+  const handlePageClick = (page: number) => () => {
     onPageChange(page);
   };
 
@@ -71,7 +81,7 @@ export function Pagination({
           type="button"
           aria-label={`${page}페이지`}
           aria-current={safeCurrentPage === page ? 'page' : undefined}
-          onClick={() => handlePageClick(page)}
+          onClick={handlePageClick(page)}
           className={cn(
             'flex h-9 w-9 items-center justify-center rounded-md text-sm',
             safeCurrentPage === page
