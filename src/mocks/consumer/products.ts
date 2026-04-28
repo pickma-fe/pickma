@@ -1,5 +1,6 @@
 import type { ProductStatus } from '@/types';
 
+import type { MockCategory } from '../shared';
 import { mockCategories } from '../shared';
 
 function getCategoryById(categoryId: string) {
@@ -40,11 +41,7 @@ export interface ConsumerProductItem {
   pickupEndTime: string;
   status: ProductStatus;
   store: ConsumerStore;
-  category: {
-    id: string;
-    name: string;
-    icon: string | null;
-  };
+  category: MockCategory;
 }
 
 const consumerProducts: ConsumerProductItem[] = [
@@ -161,8 +158,16 @@ const consumerProducts: ConsumerProductItem[] = [
   },
 ];
 
-export const mockConsumerProductDetailMap: Record<string, ConsumerProductItem> =
-  Object.fromEntries(consumerProducts.map((product) => [product.id, product]));
+const cloneProduct = (product: ConsumerProductItem): ConsumerProductItem => ({
+  ...product,
+  store: { ...product.store },
+  category: { ...product.category },
+});
 
-export const mockConsumerProducts = consumerProducts;
-export const mockConsumerSearchResults = consumerProducts;
+export const mockConsumerProductDetailMap: Record<string, ConsumerProductItem> =
+  Object.fromEntries(
+    consumerProducts.map((product) => [product.id, cloneProduct(product)])
+  );
+
+export const mockConsumerProducts = consumerProducts.map(cloneProduct);
+export const mockConsumerSearchResults = consumerProducts.map(cloneProduct);
