@@ -44,6 +44,10 @@ export interface ConsumerProductItem {
   category: MockCategory;
 }
 
+function makeFutureISO(offsetHours: number): string {
+  return new Date(Date.now() + offsetHours * 60 * 60 * 1000).toISOString();
+}
+
 const consumerProducts: ConsumerProductItem[] = [
   {
     id: 'product-1',
@@ -54,7 +58,7 @@ const consumerProducts: ConsumerProductItem[] = [
     discountPrice: 2700,
     discountRate: 40,
     stock: 6,
-    endTime: '2026-12-28T20:00:00+09:00',
+    endTime: makeFutureISO(4),
     pickupStartTime: '20:00',
     pickupEndTime: '21:00',
     status: 'active',
@@ -77,7 +81,7 @@ const consumerProducts: ConsumerProductItem[] = [
     discountPrice: 5900,
     discountRate: 38,
     stock: 4,
-    endTime: '2026-12-28T19:30:00+09:00',
+    endTime: makeFutureISO(4),
     pickupStartTime: '19:30',
     pickupEndTime: '20:30',
     status: 'active',
@@ -99,7 +103,7 @@ const consumerProducts: ConsumerProductItem[] = [
     discountPrice: 5400,
     discountRate: 39,
     stock: 3,
-    endTime: '2026-12-28T20:30:00+09:00',
+    endTime: makeFutureISO(4),
     pickupStartTime: '20:30',
     pickupEndTime: '21:30',
     status: 'active',
@@ -121,7 +125,7 @@ const consumerProducts: ConsumerProductItem[] = [
     discountPrice: 4200,
     discountRate: 40,
     stock: 5,
-    endTime: '2026-12-28T21:00:00+09:00',
+    endTime: makeFutureISO(4),
     pickupStartTime: '21:00',
     pickupEndTime: '22:00',
     status: 'active',
@@ -143,7 +147,7 @@ const consumerProducts: ConsumerProductItem[] = [
     discountPrice: 3500,
     discountRate: 42,
     stock: 7,
-    endTime: '2026-12-28T19:00:00+09:00',
+    endTime: makeFutureISO(4),
     pickupStartTime: '19:00',
     pickupEndTime: '20:00',
     status: 'active',
