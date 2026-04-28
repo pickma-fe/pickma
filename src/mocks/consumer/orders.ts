@@ -45,9 +45,15 @@ const consumerOrders: Order[] = [
 
 const cloneOrder = (order: Order): Order => ({
   ...order,
+  createdAt: new Date(order.createdAt),
   store: { ...order.store },
   items: order.items.map((item) => ({ ...item })),
-  payment: order.payment ? { ...order.payment } : null,
+  payment: order.payment
+    ? {
+        ...order.payment,
+        paidAt: order.payment.paidAt ? new Date(order.payment.paidAt) : null,
+      }
+    : null,
 });
 
 export const mockConsumerOrderDetailMap: Record<string, Order> =
