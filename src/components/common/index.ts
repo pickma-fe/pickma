@@ -5,3 +5,6 @@ export { Footer } from './Footer/Footer';
 export { Header } from './Header/Header';
 export { Input } from './Input/Input';
 export { Section } from './Section/Section';
+export { Sidebar } from './Sidebar/Sidebar';
+
+export type { SidebarItem, SidebarSection } from './Sidebar/Sidebar.types';
