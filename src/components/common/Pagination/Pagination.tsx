@@ -17,25 +17,35 @@ export function Pagination({
   currentPage,
   onPageChange,
 }: PaginationProps) {
-  const currentGroup = Math.ceil(currentPage / PAGE_GROUP_SIZE);
-  const startPage = (currentGroup - 1) * PAGE_GROUP_SIZE + 1;
-  const endPage = Math.min(currentGroup * PAGE_GROUP_SIZE, totalPages);
+  const safeTotalPages = Math.max(0, totalPages);
 
-  const pages = Array.from(
-    { length: endPage - startPage + 1 },
-    (_, i) => startPage + i
+  const safeCurrentPage = Math.max(
+    1,
+    Math.min(currentPage, Math.max(1, safeTotalPages))
   );
+
+  const currentGroup = Math.ceil(safeCurrentPage / PAGE_GROUP_SIZE);
+  const startPage = (currentGroup - 1) * PAGE_GROUP_SIZE + 1;
+  const endPage = Math.min(currentGroup * PAGE_GROUP_SIZE, safeTotalPages);
+
+  const pages =
+    safeTotalPages === 0
+      ? []
+      : Array.from(
+          { length: endPage - startPage + 1 },
+          (_, i) => startPage + i
+        );
 
   return (
     <nav aria-label="페이지네이션" className="flex items-center gap-1">
       <button
         type="button"
         aria-label="이전 페이지"
-        onClick={() => onPageChange(currentPage - 1)}
-        disabled={currentPage === 1}
+        onClick={() => onPageChange(safeCurrentPage - 1)}
+        disabled={safeCurrentPage === 1 || safeTotalPages === 0}
         className={cn(
           'flex h-9 w-9 items-center justify-center rounded-md border border-gray-200',
-          currentPage === 1
+          safeCurrentPage === 1 || safeTotalPages === 0
             ? 'cursor-default text-gray-300'
             : 'text-gray-500 hover:bg-gray-100'
         )}
@@ -48,11 +58,11 @@ export function Pagination({
           key={page}
           type="button"
           aria-label={`${page}페이지`}
-          aria-current={currentPage === page ? 'page' : undefined}
+          aria-current={safeCurrentPage === page ? 'page' : undefined}
           onClick={() => onPageChange(page)}
           className={cn(
             'flex h-9 w-9 items-center justify-center rounded-md text-sm',
-            currentPage === page
+            safeCurrentPage === page
               ? 'border-primary-500 text-primary-500 border font-semibold'
               : 'text-gray-500 hover:bg-gray-100'
           )}
@@ -64,11 +74,11 @@ export function Pagination({
       <button
         type="button"
         aria-label="다음 페이지"
-        onClick={() => onPageChange(currentPage + 1)}
-        disabled={currentPage === totalPages}
+        onClick={() => onPageChange(safeCurrentPage + 1)}
+        disabled={safeCurrentPage === safeTotalPages || safeTotalPages === 0}
         className={cn(
           'flex h-9 w-9 items-center justify-center rounded-md border border-gray-200',
-          currentPage === totalPages
+          safeCurrentPage === safeTotalPages || safeTotalPages === 0
             ? 'cursor-default text-gray-300'
             : 'text-gray-500 hover:bg-gray-100'
         )}
