@@ -43,7 +43,7 @@ export const CustomerWithAvatar: Story = {
       email: 'customer@example.com',
       provider: 'google',
       role: 'customer',
-      profileImageUrl: '/images/logo.svg',
+      profileImageUrl: 'https://placehold.co/40x40',
     },
     logoHref: '/',
     slot: <SearchInput />,
