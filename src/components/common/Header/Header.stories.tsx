@@ -45,7 +45,7 @@ export const CustomerWithAvatar: Story = {
       email: 'customer@example.com',
       phone: null,
       role: 'customer',
-      profileImageUrl: null,
+      profileImageUrl: '/images/logo.svg',
       status: 'active',
     },
     logoHref: '/',
