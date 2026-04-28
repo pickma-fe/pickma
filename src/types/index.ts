@@ -1,5 +1,5 @@
 export * from './auth';
+export * from './catalog';
 export * from './order';
-export * from './payment';
-export * from './product';
 export * from './store';
+export * from './user';

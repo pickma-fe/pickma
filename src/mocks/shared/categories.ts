@@ -1,4 +1,6 @@
-export const mockCategories: MockCategory[] = [
+import type { Category } from '@/types';
+
+export const mockCategories: Category[] = [
   {
     id: 'category-bakery',
     name: '베이커리',
@@ -25,9 +27,3 @@ export const mockCategories: MockCategory[] = [
     icon: '🍚',
   },
 ];
-
-export interface MockCategory {
-  id: string;
-  name: string;
-  icon: string | null;
-}

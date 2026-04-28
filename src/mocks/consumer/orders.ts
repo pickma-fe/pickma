@@ -1,36 +1,18 @@
-import type { OrderStatus } from '@/types';
+import type { Order } from '@/types';
 
-interface ConsumerOrderStore {
-  id: string;
-  name: string;
-  address: string;
-  phone: string;
-  image: string | null;
-}
+const orderStore = {
+  id: 'store-2',
+  name: '집밥연구소',
+  description: '한식 도시락과 반찬을 판매합니다.',
+  phone: '02-222-2222',
+  address: '서울 마포구 월드컵로 45',
+  addressDetail: null,
+  region: '마포구',
+  imageUrl: null,
+  status: 'approved' as const,
+};
 
-interface ConsumerOrderItem {
-  id: string;
-  productId: string;
-  productName: string;
-  quantity: number;
-  unitPrice: number;
-  subtotal: number;
-}
-
-export interface ConsumerOrder {
-  id: string;
-  orderNumber: string;
-  status: OrderStatus;
-  pickupTime: string;
-  totalAmount: number;
-  discountAmount: number;
-  paymentAmount: number;
-  createdAt: string;
-  store: ConsumerOrderStore;
-  items: ConsumerOrderItem[];
-}
-
-const consumerOrders: ConsumerOrder[] = [
+const consumerOrders: Order[] = [
   {
     id: 'order-1',
     orderNumber: 'PM20260428000001',
@@ -39,28 +21,38 @@ const consumerOrders: ConsumerOrder[] = [
     totalAmount: 9500,
     discountAmount: 3600,
     paymentAmount: 5900,
-    createdAt: '2026-04-28T18:10:00+09:00',
-    store: {
-      id: 'store-2',
-      name: '집밥연구소',
-      address: '서울 마포구 월드컵로 45',
-      phone: '02-123-4567',
-      image: null,
-    },
+    createdAt: new Date('2026-04-28T18:10:00+09:00'),
+    store: orderStore,
     items: [
       {
         id: 'order-item-1',
         productId: 'product-2',
         productName: '제육볶음 도시락',
+        originalPrice: 9500,
+        discountPrice: 5900,
         quantity: 1,
-        unitPrice: 5900,
         subtotal: 5900,
       },
     ],
+    payment: {
+      method: 'card',
+      status: 'completed',
+      amount: 5900,
+      paidAt: new Date('2026-04-28T18:12:00+09:00'),
+    },
   },
 ];
 
-export const mockConsumerOrderDetailMap: Record<string, ConsumerOrder> =
-  Object.fromEntries(consumerOrders.map((order) => [order.id, order]));
+const cloneOrder = (order: Order): Order => ({
+  ...order,
+  store: { ...order.store },
+  items: order.items.map((item) => ({ ...item })),
+  payment: order.payment ? { ...order.payment } : null,
+});
 
-export const mockConsumerOrders = consumerOrders;
+export const mockConsumerOrderDetailMap: Record<string, Order> =
+  Object.fromEntries(
+    consumerOrders.map((order) => [order.id, cloneOrder(order)])
+  );
+
+export const mockConsumerOrders = consumerOrders.map(cloneOrder);

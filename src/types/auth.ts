@@ -1,16 +1,7 @@
-export type SocialProvider = 'google' | 'kakao';
+export type AuthProvider = 'google' | 'kakao';
 
-export interface User {
+export interface AuthUser {
   id: string;
   email: string;
-  name: string;
-  phone: string | null;
-  profileImageUrl?: string;
-  provider?: SocialProvider;
-  role: UserRole;
-  status: UserStatus;
+  provider: AuthProvider;
 }
-
-export type UserRole = 'customer' | 'seller' | 'admin';
-
-export type UserStatus = 'active' | 'suspended';

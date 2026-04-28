@@ -5,7 +5,7 @@ import { ChevronDownIcon, ChevronUpIcon, UserIcon } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
-import type { User } from '@/types/auth';
+import type { User } from '@/types/user';
 
 import { Button } from '../Button/Button';
 import Logo from '../Logo/Logo';
