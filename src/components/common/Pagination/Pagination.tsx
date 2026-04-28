@@ -36,12 +36,24 @@ export function Pagination({
           (_, i) => startPage + i
         );
 
+  const handlePrevClick = () => {
+    onPageChange(safeCurrentPage - 1);
+  };
+
+  const handleNextClick = () => {
+    onPageChange(safeCurrentPage + 1);
+  };
+
+  const handlePageClick = (page: number) => {
+    onPageChange(page);
+  };
+
   return (
     <nav aria-label="페이지네이션" className="flex items-center gap-1">
       <button
         type="button"
         aria-label="이전 페이지"
-        onClick={() => onPageChange(safeCurrentPage - 1)}
+        onClick={handlePrevClick}
         disabled={safeCurrentPage === 1 || safeTotalPages === 0}
         className={cn(
           'flex h-9 w-9 items-center justify-center rounded-md border border-gray-200',
@@ -59,7 +71,7 @@ export function Pagination({
           type="button"
           aria-label={`${page}페이지`}
           aria-current={safeCurrentPage === page ? 'page' : undefined}
-          onClick={() => onPageChange(page)}
+          onClick={() => handlePageClick(page)}
           className={cn(
             'flex h-9 w-9 items-center justify-center rounded-md text-sm',
             safeCurrentPage === page
@@ -74,7 +86,7 @@ export function Pagination({
       <button
         type="button"
         aria-label="다음 페이지"
-        onClick={() => onPageChange(safeCurrentPage + 1)}
+        onClick={handleNextClick}
         disabled={safeCurrentPage === safeTotalPages || safeTotalPages === 0}
         className={cn(
           'flex h-9 w-9 items-center justify-center rounded-md border border-gray-200',
