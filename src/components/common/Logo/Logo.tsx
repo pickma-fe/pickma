@@ -1,4 +1,4 @@
-import LogoIcon from '@/assets/logo.svg?react';
+import { LogoIcon } from './LogoIcon';
 
 interface LogoProps {
   size?: 'sm' | 'md' | 'lg';
