@@ -49,7 +49,7 @@ const TRIGGER_CLASS_NAME =
   'group headlessui-focus-visible:outline-none headlessui-focus-visible:ring-2 headlessui-focus-visible:ring-offset-2 inline-flex items-center justify-center gap-2 rounded-sm border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-900 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-400';
 
 const DROPDOWN_ITEMS_CLASS_NAME =
-  'z-10 mt-2 min-w-[--button-width] w-max rounded-md border border-gray-200 bg-white p-1 shadow-lg focus:outline-none';
+  'z-10 mt-2 min-w-(--button-width) w-max rounded-md border border-gray-200 bg-white p-1 shadow-lg focus:outline-none';
 
 const DROPDOWN_ITEM_CLASS_NAME =
   'block w-full whitespace-nowrap rounded px-3 py-2 text-left text-sm text-gray-700 data-disabled:cursor-not-allowed data-disabled:opacity-50 data-focus:bg-gray-100';
