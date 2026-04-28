@@ -1,10 +1,9 @@
-export interface ConsumerProfile {
-  id: string;
-  email: string;
-  name: string;
-  phone: string | null;
-  profileImageUrl?: string;
-}
+import type { User } from '@/types/auth';
+
+export type ConsumerProfile = Pick<
+  User,
+  'id' | 'email' | 'name' | 'phone' | 'profileImageUrl'
+>;
 
 export const mockConsumerProfile: ConsumerProfile = {
   id: 'user-1',
