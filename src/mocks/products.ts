@@ -68,6 +68,10 @@ export const mockProductDetail: ProductDetailResponse = {
   },
 };
 
+export const mockProductDetailsMap: Record<string, ProductDetailResponse> = {
+  [mockProductDetail.id]: mockProductDetail,
+};
+
 export const mockProductList: ProductListResponse = {
   items: mockProducts,
   page: 1,
