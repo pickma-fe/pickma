@@ -9,7 +9,7 @@ export function mapUser(dto: UserResponse): User {
     phone: dto.phone,
     profileImage: dto.profileImage,
     role: dto.role,
-    status: dto.status as User['status'],
+    status: dto.status,
     createdAt: new Date(dto.createdAt),
     updatedAt: new Date(dto.updatedAt),
   };
