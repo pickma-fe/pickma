@@ -13,7 +13,7 @@ export function useCreateSellerProduct() {
     mutationFn: (body) => sellerProductApi.createProduct(body),
     onSuccess: () => {
       void queryClient.invalidateQueries({
-        queryKey: ['seller', 'products', 'list'],
+        queryKey: ['products', 'seller', 'list'],
       });
     },
   });

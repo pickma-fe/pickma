@@ -18,7 +18,7 @@ export function useUpdateSellerProduct() {
     mutationFn: ({ id, body }) => sellerProductApi.updateProduct(id, body),
     onSuccess: (product) => {
       void queryClient.invalidateQueries({
-        queryKey: ['seller', 'products', 'list'],
+        queryKey: ['products', 'seller', 'list'],
       });
       void queryClient.invalidateQueries({
         queryKey: ['products', 'detail', product.id],

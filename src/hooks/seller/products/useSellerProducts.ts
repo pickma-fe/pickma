@@ -7,7 +7,7 @@ import { sellerProductApi } from '@/api/seller/products/sellerProductApi';
 
 export function useSellerProducts() {
   return useQuery<Product[]>({
-    queryKey: ['seller', 'products', 'list'],
+    queryKey: ['products', 'seller', 'list'],
     queryFn: () => sellerProductApi.getProducts(),
   });
 }
