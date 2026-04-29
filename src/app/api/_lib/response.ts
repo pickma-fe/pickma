@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server';
 
 import type { ValidationIssue } from '@/contracts/common';
+import { AppError } from '@/lib/errors/appError';
 import type { ErrorCode } from '@/lib/errors/errorCodes';
+import { ERROR_CODE } from '@/lib/errors/errorCodes';
 import { ERROR_MESSAGES } from '@/lib/errors/errorMessages';
 
 export function success<T>(data: T, status = 200): NextResponse {
@@ -23,6 +25,14 @@ export function fail(
     },
   };
   return NextResponse.json(body, { status: httpStatus });
+}
+
+export function routeError(error: unknown): NextResponse {
+  if (error instanceof AppError) {
+    return fail(error.code, error.statusCode, error.details);
+  }
+
+  return fail(ERROR_CODE.INTERNAL_SERVER_ERROR);
 }
 
 function inferStatus(code: ErrorCode): number {
