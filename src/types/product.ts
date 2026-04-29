@@ -1,0 +1,50 @@
+import type { Store } from './store';
+
+export type ProductStatus = 'active' | 'closed';
+
+export type ProductDisplayStatus =
+  | 'available'
+  | 'soldOut'
+  | 'expired'
+  | 'closed';
+
+export interface Product {
+  id: string;
+  storeId: string;
+  storeName: string;
+  categoryId?: string;
+  categoryName?: string;
+  menuItemId: string;
+  name: string;
+  description?: string;
+  image?: string;
+  originalPrice: number;
+  discountPrice: number;
+  discountRate: number;
+  stock: number;
+  reservedStock: number;
+  availableStock: number;
+  endAt: Date;
+  pickupStartTime: Date;
+  pickupEndTime: Date;
+  status: ProductStatus;
+  isSoldOut: boolean;
+  isExpired: boolean;
+  displayStatus: ProductDisplayStatus;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface ProductDetail extends Product {
+  store: Pick<
+    Store,
+    | 'id'
+    | 'name'
+    | 'description'
+    | 'phone'
+    | 'address'
+    | 'addressDetail'
+    | 'region'
+    | 'image'
+  >;
+}

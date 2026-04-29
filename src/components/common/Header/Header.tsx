@@ -142,9 +142,9 @@ function UserMenu({
 function ProfileAvatar({ user }: { user: User }) {
   return (
     <div className="bg-primary-100 relative flex h-8 w-8 items-center justify-center overflow-hidden rounded-full">
-      {user.profileImageUrl ? (
+      {user.profileImage ? (
         <Image
-          src={user.profileImageUrl}
+          src={user.profileImage}
           alt=""
           fill
           sizes="32px"
