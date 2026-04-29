@@ -133,6 +133,13 @@ const eslintConfig = defineConfig([
       ],
 
       // Export
+      'sort-exports/sort-exports': 'off',
+    },
+  },
+  // index.ts barrel 파일만 export 순서 강제
+  {
+    files: ['**/index.ts', '**/index.tsx'],
+    rules: {
       'sort-exports/sort-exports': [
         'warn',
         { sortDir: 'asc', ignoreCase: true },
