@@ -25,14 +25,14 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
   const supabase = createProxyClient(request, response);
 
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
+    data: { user },
+  } = await supabase.auth.getUser();
 
   const { pathname, search } = request.nextUrl;
   const next = encodeURIComponent(pathname + search);
 
   if (matchesAnyPrefix(pathname, ADMIN_PROTECTED)) {
-    if (!session) {
+    if (!user) {
       return NextResponse.redirect(
         new URL(`/?auth=required&next=${next}`, request.url)
       );
@@ -41,7 +41,7 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
   }
 
   if (matchesAnyPrefix(pathname, SELLER_PROTECTED)) {
-    if (!session) {
+    if (!user) {
       return NextResponse.redirect(
         new URL(`/seller?auth=required&next=${next}`, request.url)
       );
@@ -50,7 +50,7 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
   }
 
   if (matchesAnyPrefix(pathname, CONSUMER_PROTECTED)) {
-    if (!session) {
+    if (!user) {
       return NextResponse.redirect(
         new URL(`/?auth=required&next=${next}`, request.url)
       );
