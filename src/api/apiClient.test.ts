@@ -6,6 +6,7 @@ import { apiClient } from './apiClient';
 describe('apiClient', () => {
   afterEach(() => {
     vi.restoreAllMocks();
+    vi.unstubAllGlobals();
   });
 
   it('성공 envelope에서 data만 반환한다', async () => {
