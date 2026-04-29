@@ -19,29 +19,63 @@ reviews:
     - '!node_modules/**'
     - '!*.lock'
     - '!package-lock.json'
-    - '!docs/**'
     - '!design/**'
-    - '!.claude/**'
     - '!.vscode/**'
     - '!.cursorrules'
-    - '!.codex/**'
-    - '!*.md'
-    - '!AGENTS.md'
 
   path_instructions:
+    - path: 'docs/**'
+      instructions: |
+        ## 설계 문서 검토 기준
+        - 현재 기준 문서는 docs/system_architecture.md, docs/type_architecture.md, docs/domain.md, docs/api_spec.md 이다.
+        - docs/type_architecture.md는 Domain/Contract/Mapper 가이드, docs/domain.md는 실제 Domain Type 명세이다.
+        - API/Domain/DB 상태값이 1:1 대응이라고 가정하지 않는가.
+        - API contract DTO는 JSON-safe, camelCase, ISO string 날짜 정책을 따르는가.
+        - Supabase DB 접근은 src/api -> /api/* Route Handler -> Supabase 경유로 설명되는가.
+        - Auth는 Supabase SDK 래퍼, 세션은 @supabase/ssr 기반 cookie session, proxy는 세션 refresh/보호 라우트 역할로 설명되는가.
+        - Mock 환경 변수는 API_MOCK_ENABLED를 사용하는가.
+
+    - path: 'AGENTS.md'
+      instructions: |
+        ## 에이전트 지침 검토 기준
+        - docs/system_architecture.md, docs/type_architecture.md, docs/domain.md, docs/api_spec.md의 최신 설계와 일치하는가.
+        - 레이어 방향이 types/contracts -> lib -> api -> stores -> hooks -> components -> app 으로 되어 있는가.
+        - src/contracts, src/api, TanStack Query, Zod, proxy 기준이 누락되지 않았는가.
+
+    - path: '.claude/**'
+      instructions: |
+        ## Claude 지침/스킬 검토 기준
+        - 최신 설계 문서와 충돌하는 오래된 레이어/DTO/Auth/proxy 표현이 없는가.
+        - create-plan skill은 temp/ 아래 계획 markdown 문서를 생성하도록 안내하는가.
+        - code-review/create-test skill이 src/contracts, src/api, TanStack Query, Zod 기준을 반영하는가.
+
+    - path: '.codex/**'
+      instructions: |
+        ## Codex 지침 검토 기준
+        - 최신 설계 문서와 충돌하는 오래된 레이어/DTO/Auth/proxy 표현이 없는가.
+        - API request/response DTO는 src/contracts, Domain type은 src/types로 안내하는가.
+        - lint/import layer 규칙과 문서가 일치하는가.
+
     - path: 'src/types/**'
       instructions: |
-        ## 타입 정의 검토 기준
+        ## Domain 타입 검토 기준
         - any 타입 사용 절대 금지
-        - 모든 필드는 명시적으로 타입 선언 (암묵적 추론에만 의존 금지)
-        - interface vs type alias 선택이 의도에 맞는지 (확장 가능성 여부)
-        - 도메인 enum 값 준수:
-          - 사용자 역할: customer | seller | admin
-          - 주문 상태: reserved | ready | completed | cancelled | no_show
-          - 가게 상태: pending | approved | rejected | suspended
-          - 상품 상태: active | soldout | expired | hidden
-          - 결제 수단: card | kakao | naver | toss
-          - 결제 상태: pending | completed | failed | refunded
+        - 앱 내부 Domain 타입만 정의하는가
+        - HTTP API request/response DTO가 섞이지 않았는가 (DTO는 src/contracts)
+        - Domain 날짜는 필요 시 Date로 표현하고, contract DTO와 구분되는가
+        - DB/API/Domain 상태값이 1:1 대응이라고 강제하지 않는가
+        - 계산 필드(isSoldOut, isExpired, availableStock 등)가 Domain 의도와 맞는가
+        - src/types/supabase.ts는 Supabase CLI generated file로 취급되고 직접 수정되지 않는가
+
+    - path: 'src/contracts/**'
+      instructions: |
+        ## API Contract DTO 검토 기준
+        - any 타입 사용 절대 금지
+        - request/response DTO와 공통 API contract만 정의하는가
+        - 필드명은 camelCase인가
+        - 날짜는 ISO string인가
+        - response envelope, pagination, validation issue 타입이 docs/api_spec.md와 일치하는가
+        - Domain Date 객체나 UI 전용 타입이 섞이지 않았는가
 
     - path: 'src/lib/**'
       instructions: |
@@ -53,16 +87,39 @@ reviews:
           - 서버용 클라이언트는 Server Component, API Route, Server Action에서만 사용
           - 클라이언트용 클라이언트는 Client Component에서만 사용
           - SUPABASE_SERVICE_ROLE_KEY 가 클라이언트 번들에 노출되지 않는가
+        - 공통 AppError/error code/message가 docs/api_spec.md의 에러 정책과 일치하는가
+
+    - path: 'src/api/**'
+      instructions: |
+        ## 클라이언트 API 레이어 검토 기준
+        - apiClient는 공통 envelope을 파싱하고 성공 시 data만 반환하는가
+        - cookie 기반 세션을 사용하므로 Authorization Bearer를 임의로 주입하지 않는가
+        - fetch에는 credentials: 'include'가 적용되는가
+        - 도메인 API 객체명은 단수형(productApi, orderApi 등)인가
+        - 공개/소비자 API, seller API, admin API가 역할별 폴더로 분리되어 있는가
+        - client mapper가 contract DTO를 Domain 타입으로 변환하는가
+        - ISO string 날짜를 Domain Date로 변환하는가
+        - 컴포넌트에서 Supabase Auth SDK를 직접 호출하지 않고 authApi 래퍼를 사용하는가
 
     - path: 'src/stores/**'
       instructions: |
         ## Zustand 스토어 검토 기준
         - any 타입 사용 절대 금지
-        - 액션 네이밍: set(상태변경), toggle(토글), reset(초기화), fetch(데이터가져오기)
-          — update/change/modify/get/load/clear/init 금지
+        - Zustand는 client/UI 상태에 사용하고 서버 상태 캐싱에 사용하지 않는가
+        - 서버 데이터 조회/변경은 TanStack Query hook과 src/api를 사용하는가
+        - 액션 네이밍은 일관적인가
         - 파생 상태(derived state)는 selector로 분리하고 있는가
         - store → components 역방향 import가 없는가 (스토어가 컴포넌트를 알면 안 됨)
         - 불필요한 리렌더링을 유발할 수 있는 객체/배열 참조 변경이 있는가
+
+    - path: 'src/hooks/**'
+      instructions: |
+        ## Hook 검토 기준
+        - 서버 상태 hook은 TanStack Query를 사용하는가
+        - queryKey는 [domain, scope, params/id] 형식과 복수형 domain명을 사용하는가
+        - 하나의 hook은 하나의 파일에 있는가
+        - hook은 src/api 도메인 메서드를 호출하고 fetch URL/DTO 세부사항을 컴포넌트에 노출하지 않는가
+        - mutation 성공 후 관련 query invalidate가 적절한가
 
     - path: 'src/components/**'
       instructions: |
@@ -81,7 +138,7 @@ reviews:
       instructions: |
         ## 소비자 페이지 검토 기준
         - 퍼블릭 페이지 (/, /search, /products/[id]): 비로그인 접근 가능한가
-        - 보호 페이지 (/order/[productId], /payment, /mypage/**): 미로그인 시 /login 리다이렉트 확인
+        - 보호 페이지 (/order/[productId], /payment, /mypage/**): 미로그인 시 공개 진입점에 auth=required, next query를 붙여 리다이렉트하는가
         - 상품 목록: 마감 시간(end_time)이 지난 상품이 노출되지 않는가
         - 재고(stock) 0 이하인 상품에 예약 요청을 보낼 수 없는가
         - 결제 플로우 순서: 주문 생성 → 토스페이먼츠 위젯 → 서버 측 결제 승인 (/api/payments)
@@ -107,27 +164,45 @@ reviews:
       instructions: |
         ## API Route 검토 기준
         - any 타입 사용 절대 금지
+        - route.ts는 HTTP 입출력, validation, auth helper, response envelope 생성을 담당하는가
+        - 도메인 내부 보조 파일은 src/app/api/{resource}/_lib/{service,mapper,schemas}.ts에 두는가
+        - service.ts는 HTTP 객체를 모르고 Supabase query와 비즈니스 로직을 담당하는가
+        - mapper.ts는 Supabase row/join 결과를 contract DTO로 변환하는가
+        - schemas.ts는 Zod로 request query/body를 검증하는가
+        - 파일명 앞에 _를 붙이지 않고, Next.js private folder인 _lib/만 사용하는가
+        - 공통 response envelope을 사용하고 HTTP status와 body statusCode가 일치하는가
+        - AppError와 error code/message 정책을 사용하는가
+        - Zod 검증 실패 details가 field-level path/message로 변환되는가
         - 보안: TOSS_SECRET_KEY, SUPABASE_SERVICE_ROLE_KEY 등 환경 변수 값을 응답 body에 절대 포함하지 않는가
         - 보안: 에러 응답에 스택 트레이스, 내부 경로 등 민감 정보 포함 금지
         - 외부 API 호출 실패 시 적절한 HTTP 상태 코드로 응답하는가 (500 남발 금지)
-        - 결제 API (/api/payments):
+        - 결제 API:
+          - 주문 생성은 POST /api/orders, 결제 승인은 POST /api/payments/confirm 으로 분리되는가
           - 결제 승인은 반드시 서버에서 토스페이먼츠 API를 직접 호출하는가
           - 클라이언트가 전달한 결제 금액을 DB의 주문 금액과 대조 검증하는가 (금액 위변조 방지)
-          - 결제 완료 후 재고 차감(stock 감소)과 주문 상태 변경(reserved)이 원자적으로 처리되는가
+          - 결제 완료 후 payment 저장, 주문 확정, 재고 확정 처리가 원자적으로 처리되는가
         - 주문 API (/api/orders):
           - 재고 부족 시 예약을 거부하는가
-          - 주문 상태 전이가 올바른가: reserved → ready → completed, cancelled, no_show
+          - 주문 상태 전이가 docs/api_spec.md와 일치하는가
+        - Admin API는 /api/admin/*로 분리되고 requireAdmin()을 통과하는가
 
-    - path: 'src/middleware.ts'
+    - path: 'src/proxy.ts'
       instructions: |
-        ## 미들웨어 권한 체크 검토 기준
+        ## Proxy 권한 체크 검토 기준
+        - @supabase/ssr 기반 Supabase cookie session refresh가 올바르게 처리되는가
+        - config.matcher가 정적 asset을 제외한 앱 요청 전반에 적용되는가
+        - matcher에서 _next/static, _next/image, favicon.ico, robots.txt, sitemap.xml, 이미지 asset 확장자를 제외하는가
+        - 별도 /login, /seller/login 페이지를 전제로 구현하지 않는가
+        - fetch에 Authorization 헤더를 주입하는 레이어로 오해하고 구현하지 않았는가
+        - /order/**, /payment, /mypage/**, /seller/register, /seller/pending:
+          로그인 여부 확인
         - /seller/dashboard/**, /seller/products/**, /seller/orders/**, /seller/store/**:
           로그인 여부 확인 → 가게 승인 여부(stores.status === 'approved') 확인
         - /admin/**:
           로그인 여부 확인 → users.role === 'admin' 확인
-        - 미인증/권한 부족 요청은 적절한 경로로 리다이렉트하는가
-        - Supabase 세션 갱신(refreshSession)이 미들웨어에서 올바르게 처리되는가
-        - 미들웨어에서 DB를 직접 조회할 때 서비스 역할 키가 클라이언트에 노출되지 않는가
+        - 미인증 요청은 공개 진입점에 auth=required, next query를 붙여 리다이렉트하고 클라이언트 로그인 모달 흐름과 연결되는가
+        - 권한 부족 요청은 적절한 경로로 리다이렉트하는가
+        - proxy에서 DB를 직접 조회할 때 서비스 역할 키가 클라이언트에 노출되지 않는가
 
   finishing_touches:
     docstrings:

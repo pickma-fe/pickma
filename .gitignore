@@ -30,6 +30,7 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
 
 # vercel
 .vercel
@@ -55,4 +56,10 @@ storybook-static
 !.vscode/settings.json
 !.vscode/extensions.json
 .codex/*
+.agents/*
+AGENTS.md
+AGENTS.override.md
 .cursorrules
+
+# Temporal files and directory
+temp/*
