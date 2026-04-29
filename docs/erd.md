@@ -284,7 +284,3 @@ orders 1:1 payments
 - 만료: expires_at 기반 처리
 
 ---
-
-```
-
-```
