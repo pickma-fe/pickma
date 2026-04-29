@@ -11,6 +11,7 @@
 - 클라이언트는 Supabase DB를 직접 호출하지 않는다.
 - 서비스 데이터는 `src/api` → `/api/*` Route Handler → Supabase를 경유한다.
 - Supabase Auth는 SDK를 사용하며 `src/api/auth/authApi.ts`에서 감싼다.
+- Mock 분기 기준 환경 변수는 `API_MOCK_ENABLED`로 통일한다.
 
 ### 1.2 Naming
 
@@ -39,7 +40,7 @@ export interface ApiSuccess<T> {
 export interface ApiErrorResponse {
   statusCode: number;
   error: {
-    code: ErrorCode;
+    code: string;
     message: string;
     details?: ValidationIssue[];
   };
@@ -126,6 +127,7 @@ available otherwise
 ### 2.1 Supabase Auth SDK 래퍼
 
 서버 API가 아니라 클라이언트 API 래퍼로 제공한다.
+`authApi`는 Supabase Auth client SDK 호출을 감싸고, cookie 기반 session 관리는 `@supabase/ssr`, session refresh와 보호 라우트 redirect는 `src/proxy.ts`가 담당한다.
 
 | 기능          | 위치                         | Priority |
 | ------------- | ---------------------------- | -------- |

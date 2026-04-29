@@ -187,36 +187,36 @@
 
 ## 2.8 order_items (주문 상품)
 
-| 컬럼명           | 타입         | 제약조건         | 설명        |
-| ---------------- | ------------ | ---------------- | ----------- |
-| `id`             | uuid         | PK               | ID          |
-| `order_id`       | uuid         | FK → orders.id   | 주문        |
-| `product_id`     | uuid         | FK → products.id | 상품        |
-| `product_name`   | varchar(100) | NOT NULL         | 이름 스냅샷 |
-| `original_price` | int          | NOT NULL         | 원가        |
-| `discount_price` | int          | NOT NULL         | 할인가      |
-| `quantity`       | int          | NOT NULL         | 수량        |
-| `subtotal`       | int          | NOT NULL         | 소계        |
-| `created_at`     | timestamp    | DEFAULT now()    | 생성일      |
+| 컬럼명           | 타입         | 제약조건                   | 설명        |
+| ---------------- | ------------ | -------------------------- | ----------- |
+| `id`             | uuid         | PK                         | ID          |
+| `order_id`       | uuid         | FK → orders.id, NOT NULL   | 주문        |
+| `product_id`     | uuid         | FK → products.id, NOT NULL | 상품        |
+| `product_name`   | varchar(100) | NOT NULL                   | 이름 스냅샷 |
+| `original_price` | int          | NOT NULL                   | 원가        |
+| `discount_price` | int          | NOT NULL                   | 할인가      |
+| `quantity`       | int          | NOT NULL                   | 수량        |
+| `subtotal`       | int          | NOT NULL                   | 소계        |
+| `created_at`     | timestamp    | DEFAULT now()              | 생성일      |
 
 ---
 
 ## 2.9 payments (결제)
 
-| 컬럼명          | 타입         | 제약조건      | 설명      |
-| --------------- | ------------ | ------------- | --------- |
-| `id`            | uuid         | PK            | 결제 ID   |
-| `order_id`      | uuid         | FK, UNIQUE    | 주문      |
-| `payment_key`   | varchar(200) | UNIQUE        | PG 키     |
-| `method`        | enum         | NOT NULL      | 결제 수단 |
-| `amount`        | int          | NOT NULL      | 금액      |
-| `status`        | enum         | NOT NULL      | 상태      |
-| `paid_at`       | timestamp    |               | 결제 시간 |
-| `refunded_at`   | timestamp    |               | 환불 시간 |
-| `refund_reason` | varchar(500) |               | 사유      |
-| `pg_response`   | jsonb        |               | 응답      |
-| `created_at`    | timestamp    | DEFAULT now() | 생성      |
-| `updated_at`    | timestamp    | DEFAULT now() | 수정      |
+| 컬럼명          | 타입         | 제약조건             | 설명      |
+| --------------- | ------------ | -------------------- | --------- |
+| `id`            | uuid         | PK                   | 결제 ID   |
+| `order_id`      | uuid         | FK, UNIQUE, NOT NULL | 주문      |
+| `payment_key`   | varchar(200) | UNIQUE               | PG 키     |
+| `method`        | enum         | NOT NULL             | 결제 수단 |
+| `amount`        | int          | NOT NULL             | 금액      |
+| `status`        | enum         | NOT NULL             | 상태      |
+| `paid_at`       | timestamp    |                      | 결제 시간 |
+| `refunded_at`   | timestamp    |                      | 환불 시간 |
+| `refund_reason` | varchar(500) |                      | 사유      |
+| `pg_response`   | jsonb        |                      | 응답      |
+| `created_at`    | timestamp    | DEFAULT now()        | 생성      |
+| `updated_at`    | timestamp    | DEFAULT now()        | 수정      |
 
 ---
 
@@ -225,9 +225,11 @@
 | 컬럼명       | 타입      | 제약조건      | 설명   |
 | ------------ | --------- | ------------- | ------ |
 | `id`         | uuid      | PK            | ID     |
-| `user_id`    | uuid      | FK            | 사용자 |
-| `store_id`   | uuid      | FK            | 가게   |
+| `user_id`    | uuid      | FK, NOT NULL  | 사용자 |
+| `store_id`   | uuid      | FK, NOT NULL  | 가게   |
 | `created_at` | timestamp | DEFAULT now() | 생성   |
+
+**UNIQUE:** `(user_id, store_id)`
 
 ---
 
