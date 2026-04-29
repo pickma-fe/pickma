@@ -16,7 +16,7 @@ export function useRejectStore() {
   return useMutation<void, Error, RejectStoreVariables>({
     mutationFn: ({ id, body }) => adminStoreApi.rejectStore(id, body),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['admin', 'stores'] });
+      void queryClient.invalidateQueries({ queryKey: ['stores', 'admin'] });
     },
   });
 }

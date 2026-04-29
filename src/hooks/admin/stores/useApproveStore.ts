@@ -10,7 +10,7 @@ export function useApproveStore() {
   return useMutation<void, Error, string>({
     mutationFn: (id) => adminStoreApi.approveStore(id),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['admin', 'stores'] });
+      void queryClient.invalidateQueries({ queryKey: ['stores', 'admin'] });
     },
   });
 }
