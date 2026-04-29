@@ -68,8 +68,23 @@ export const mockProductDetail: ProductDetailResponse = {
   },
 };
 
+export const mockProductDetail2: ProductDetailResponse = {
+  ...mockProducts[1],
+  description: '신선한 채소로 만든 오늘의 샐러드 박스입니다.',
+  store: {
+    id: 'store_2',
+    name: '그린 샐러드',
+    description: '건강한 한 끼를 제공하는 샐러드 전문점입니다.',
+    phone: '02-9876-5432',
+    address: '서울시 성동구 왕십리로 20',
+    region: '서울 성동구',
+    image: '/images/mock/store-salad.jpg',
+  },
+};
+
 export const mockProductDetailsMap: Record<string, ProductDetailResponse> = {
   [mockProductDetail.id]: mockProductDetail,
+  [mockProductDetail2.id]: mockProductDetail2,
 };
 
 export const mockProductList: ProductListResponse = {
