@@ -3,7 +3,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import type { Product } from '@/types/product';
-import type { UpdateSellerProductRequest } from '@/api/seller/products/sellerProductApi';
+import type { UpdateSellerProductRequest } from '@/contracts/product';
 import { sellerProductApi } from '@/api/seller/products/sellerProductApi';
 
 interface UpdateSellerProductVariables {
