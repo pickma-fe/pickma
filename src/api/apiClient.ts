@@ -53,24 +53,24 @@ async function request<T>(url: string, init?: RequestInit): Promise<T> {
   return (body as ApiSuccess<T>).data;
 }
 
-function buildUrl(
-  path: string,
-  params?: Record<string, string | number | boolean | undefined>
-): string {
+function buildUrl(path: string, params?: object): string {
   if (!params) return path;
   const query = new URLSearchParams();
   for (const [key, value] of Object.entries(params)) {
-    if (value !== undefined) query.set(key, String(value));
+    if (
+      typeof value === 'string' ||
+      typeof value === 'number' ||
+      typeof value === 'boolean'
+    ) {
+      query.set(key, String(value));
+    }
   }
   const qs = query.toString();
   return qs ? `${path}?${qs}` : path;
 }
 
 export const apiClient = {
-  get<T>(
-    path: string,
-    params?: Record<string, string | number | boolean | undefined>
-  ): Promise<T> {
+  get<T>(path: string, params?: object): Promise<T> {
     return request<T>(buildUrl(path, params), { method: 'GET' });
   },
 

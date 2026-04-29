@@ -13,6 +13,8 @@ export type { ConfirmPaymentRequest } from './payment';
 export type {
   CreateOrderRequest,
   CreateOrderResponse,
+  OrderDetailResponse,
+  OrderItemResponse,
   OrderListItemResponse,
   OrderListParams,
   OrderListResponse,

@@ -45,3 +45,22 @@ export interface OrderListItemResponse {
 }
 
 export type OrderListResponse = PaginatedResult<OrderListItemResponse>;
+
+export interface OrderItemResponse {
+  id: string;
+  orderId: string;
+  productId: string;
+  productName: string;
+  originalPrice: number;
+  discountPrice: number;
+  quantity: number;
+  subtotal: number;
+  createdAt: string;
+}
+
+export interface OrderDetailResponse extends OrderListItemResponse {
+  cancelledAt?: string;
+  cancelReason?: string;
+  pickedUpAt?: string;
+  items: OrderItemResponse[];
+}
