@@ -42,6 +42,14 @@ export interface Order {
   updatedAt: Date;
 }
 
+export interface OrderListQuery {
+  page: number;
+  pageSize: number;
+  status?: OrderStatus;
+  sort: 'createdAt' | 'pickupAt';
+  order: 'asc' | 'desc';
+}
+
 export interface CreatedOrderPaymentInfo {
   id: string;
   orderNumber: string;
