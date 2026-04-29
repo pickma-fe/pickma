@@ -12,6 +12,7 @@
 - 서비스 데이터는 `src/api` → `/api/*` Route Handler → Supabase를 경유한다.
 - Supabase Auth는 SDK를 사용하며 `src/api/auth/authApi.ts`에서 감싼다.
 - Mock 분기 기준 환경 변수는 `API_MOCK_ENABLED`로 통일한다.
+- `API_MOCK_ENABLED=false`에서 아직 구현되지 않은 API는 HTTP 501과 `NOT_IMPLEMENTED` error code를 반환한다.
 
 ### 1.2 Naming
 
@@ -193,10 +194,12 @@ export interface ProductListParams {
   region?: string;
   categoryId?: string;
   keyword?: string;
-  sort: 'endAt' | 'discountRate' | 'createdAt';
-  order: 'asc' | 'desc';
+  sort?: 'endAt' | 'discountRate' | 'createdAt';
+  order?: 'asc' | 'desc';
 }
 ```
+
+기본 정렬은 `sort=endAt`, `order=asc`이다.
 
 Response:
 
@@ -478,9 +481,9 @@ Admin API는 `/api/admin/*`로 분리한다. 모든 Admin API는 `requireAdmin()
 | ---------- | -------------- | ------ | ------------------------------------ | -------- |
 | A-STORE-01 | 승인 요청 목록 | GET    | `/api/admin/stores/pending`          | P0       |
 | A-STORE-02 | 가게 승인      | PATCH  | `/api/admin/stores/:storeId/approve` | P0       |
-| A-STORE-02 | 가게 거절      | PATCH  | `/api/admin/stores/:storeId/reject`  | P0       |
-| A-STORE-03 | 전체 가게 조회 | GET    | `/api/admin/stores`                  | P0       |
-| A-STORE-04 | 가게 상태 변경 | PATCH  | `/api/admin/stores/:storeId/status`  | P1       |
+| A-STORE-03 | 가게 거절      | PATCH  | `/api/admin/stores/:storeId/reject`  | P0       |
+| A-STORE-04 | 전체 가게 조회 | GET    | `/api/admin/stores`                  | P0       |
+| A-STORE-05 | 가게 상태 변경 | PATCH  | `/api/admin/stores/:storeId/status`  | P1       |
 
 ### 9.2 Users
 

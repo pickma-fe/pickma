@@ -6,8 +6,8 @@ export interface ProductListParams {
   region?: string;
   categoryId?: string;
   keyword?: string;
-  sort: 'endAt' | 'discountRate' | 'createdAt';
-  order: 'asc' | 'desc';
+  sort?: 'endAt' | 'discountRate' | 'createdAt';
+  order?: 'asc' | 'desc';
 }
 
 export interface ProductListItemResponse {

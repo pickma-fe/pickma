@@ -246,7 +246,10 @@
 
 ```text
 users 1:N orders
+users 1:N social_accounts
+users 1:N wishlists
 users 1:1 stores
+stores 1:N wishlists
 stores 1:N menu_items
 menu_items 1:N products
 products 1:N order_items
