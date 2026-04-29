@@ -41,8 +41,14 @@ export const mockAdminStoreList: AdminStoreListResponse = {
   totalPages: 1,
 };
 
+const pendingStores = mockAdminStores.filter(
+  (store) => store.status === 'pending'
+);
+
 export const mockPendingAdminStoreList: AdminStoreListResponse = {
-  ...mockAdminStoreList,
-  items: mockAdminStores.filter((store) => store.status === 'pending'),
-  totalCount: 1,
+  items: pendingStores,
+  page: 1,
+  pageSize: 20,
+  totalCount: pendingStores.length,
+  totalPages: Math.ceil(pendingStores.length / 20),
 };
