@@ -3,9 +3,9 @@ import type {
   OrderDetailResponse,
   OrderListItemResponse,
 } from '@/contracts/order';
+import { apiClient } from '@/api/apiClient';
 
 import { mapSellerOrder, mapSellerOrderListItem } from './sellerOrderMapper';
-import { apiClient } from '../../apiClient';
 
 export const sellerOrderApi = {
   getOrders(): Promise<Omit<Order, 'items' | 'payment'>[]> {

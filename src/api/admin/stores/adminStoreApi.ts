@@ -4,9 +4,9 @@ import type {
   AdminStoreListResponse,
   RejectStoreRequest,
 } from '@/contracts/admin';
+import { apiClient } from '@/api/apiClient';
 
 import { mapAdminStore } from './adminStoreMapper';
-import { apiClient } from '../../apiClient';
 
 export const adminStoreApi = {
   getStores(): Promise<PaginatedResult<Store>> {
