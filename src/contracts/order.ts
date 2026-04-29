@@ -1,5 +1,14 @@
 import type { PaginatedResult } from './common';
 
+export type OrderStatusParam =
+  | 'payment_pending'
+  | 'reserved'
+  | 'ready'
+  | 'completed'
+  | 'cancelled'
+  | 'no_show'
+  | 'expired';
+
 export interface CreateOrderRequest {
   productId: string;
   quantity: number;
@@ -17,7 +26,7 @@ export interface CreateOrderResponse {
 export interface OrderListParams {
   page: number;
   pageSize: number;
-  status?: string;
+  status?: OrderStatusParam;
   sort: 'createdAt' | 'pickupAt';
   order: 'asc' | 'desc';
 }
@@ -30,14 +39,7 @@ export interface OrderListItemResponse {
   totalAmount: number;
   discountAmount: number;
   paymentAmount: number;
-  status:
-    | 'payment_pending'
-    | 'reserved'
-    | 'ready'
-    | 'completed'
-    | 'cancelled'
-    | 'no_show'
-    | 'expired';
+  status: OrderStatusParam;
   pickupAt: string;
   expiresAt?: string;
   createdAt: string;
