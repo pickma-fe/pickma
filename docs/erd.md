@@ -242,7 +242,7 @@
 
 # 4. 관계 요약
 
-```
+```text
 users 1:N orders
 users 1:1 stores
 stores 1:N menu_items
@@ -284,3 +284,7 @@ orders 1:1 payments
 - 만료: expires_at 기반 처리
 
 ---
+
+```
+
+```
