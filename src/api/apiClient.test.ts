@@ -47,10 +47,12 @@ describe('apiClient', () => {
       region: '서울',
     });
 
-    expect(fetchMock).toHaveBeenCalledWith(
-      '/api/products?page=1&pageSize=20&region=%EC%84%9C%EC%9A%B8',
-      expect.any(Object)
-    );
+    const calledUrl = fetchMock.mock.calls[0][0] as string;
+    const parsed = new URL(calledUrl, 'http://localhost');
+    expect(parsed.pathname).toBe('/api/products');
+    expect(parsed.searchParams.get('page')).toBe('1');
+    expect(parsed.searchParams.get('pageSize')).toBe('20');
+    expect(parsed.searchParams.get('region')).toBe('서울');
   });
 
   it('실패 envelope를 ApiError로 변환한다', async () => {
