@@ -2,19 +2,18 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-import type { RejectStoreRequest } from '@/contracts/admin';
 import { adminStoreApi } from '@/api/admin/stores/adminStoreApi';
 
-interface RejectStoreVariables {
+interface RejectStoreInput {
   id: string;
-  body: RejectStoreRequest;
+  reason: string;
 }
 
 export function useRejectStore() {
   const queryClient = useQueryClient();
 
-  return useMutation<void, Error, RejectStoreVariables>({
-    mutationFn: ({ id, body }) => adminStoreApi.rejectStore(id, body),
+  return useMutation<void, Error, RejectStoreInput>({
+    mutationFn: ({ id, reason }) => adminStoreApi.rejectStore(id, { reason }),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['stores', 'admin'] });
     },
