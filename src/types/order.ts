@@ -24,7 +24,7 @@ export interface OrderItem {
 export interface Order {
   id: string;
   orderNumber: string;
-  userId: string;
+  userId?: string;
   storeId: string;
   storeName: string;
   totalAmount: number;

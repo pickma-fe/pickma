@@ -33,7 +33,6 @@ export function mapOrder(dto: OrderDetailResponse): Order {
   return {
     id: dto.id,
     orderNumber: dto.orderNumber,
-    userId: '',
     storeId: dto.storeId,
     storeName: dto.storeName,
     totalAmount: dto.totalAmount,
@@ -57,7 +56,6 @@ export function mapOrderListItem(
   return {
     id: dto.id,
     orderNumber: dto.orderNumber,
-    userId: '',
     storeId: dto.storeId,
     storeName: dto.storeName,
     totalAmount: dto.totalAmount,
