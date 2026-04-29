@@ -154,7 +154,7 @@ export interface UserResponse {
   phone?: string;
   profileImage?: string;
   role: 'customer' | 'seller' | 'admin';
-  status: string;
+  status: 'active' | 'suspended' | 'deleted';
   createdAt: string;
   updatedAt: string;
 }
@@ -385,7 +385,7 @@ DB source:
 - `payments`
 - `products`
 
-### 5.2 `POST /api/payments/webhook`
+### 5.3 `POST /api/payments/webhook`
 
 - Toss가 호출하는 결제 상태 동기화 endpoint이다.
 - MVP에서는 명세만 유지하고 구현 우선순위는 P1로 둔다.
