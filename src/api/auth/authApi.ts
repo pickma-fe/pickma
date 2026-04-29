@@ -1,11 +1,17 @@
 import { createClient } from '@/lib/supabase/client';
 
 function buildRedirectTo(redirectPath?: string): string {
-  const path =
+  const rawPath =
     redirectPath ??
     new URLSearchParams(window.location.search).get('next') ??
     '/';
-  return new URL(path, window.location.origin).toString();
+  const redirectUrl = new URL(rawPath, window.location.origin);
+
+  if (redirectUrl.origin !== window.location.origin) {
+    return new URL('/', window.location.origin).toString();
+  }
+
+  return redirectUrl.toString();
 }
 
 export const authApi = {
