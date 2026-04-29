@@ -1,25 +1,12 @@
 import type { Product } from '@/types/product';
-import type { ProductListItemResponse } from '@/contracts/product';
+import type {
+  CreateSellerProductRequest,
+  ProductListItemResponse,
+  UpdateSellerProductRequest,
+} from '@/contracts/product';
+import { apiClient } from '@/api/apiClient';
 
 import { mapSellerProduct } from './sellerProductMapper';
-import { apiClient } from '../../apiClient';
-
-export interface CreateSellerProductRequest {
-  menuItemId: string;
-  discountPrice: number;
-  stock: number;
-  endAt: string;
-  pickupStartTime: string;
-  pickupEndTime: string;
-}
-
-export interface UpdateSellerProductRequest {
-  discountPrice?: number;
-  stock?: number;
-  endAt?: string;
-  pickupStartTime?: string;
-  pickupEndTime?: string;
-}
 
 export const sellerProductApi = {
   getProducts(): Promise<Product[]> {

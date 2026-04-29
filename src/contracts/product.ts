@@ -49,3 +49,20 @@ export interface ProductDetailResponse extends ProductListItemResponse {
     image?: string;
   };
 }
+
+export interface CreateSellerProductRequest {
+  menuItemId: string;
+  discountPrice: number;
+  stock: number;
+  endAt: string;
+  pickupStartTime: string;
+  pickupEndTime: string;
+}
+
+export interface UpdateSellerProductRequest {
+  discountPrice?: number;
+  stock?: number;
+  endAt?: string;
+  pickupStartTime?: string;
+  pickupEndTime?: string;
+}
