@@ -4,7 +4,7 @@ import type { ProductListItemResponse } from '@/contracts/product';
 import { mapSellerProduct } from './sellerProductMapper';
 import { apiClient } from '../../apiClient';
 
-interface CreateSellerProductRequest {
+export interface CreateSellerProductRequest {
   menuItemId: string;
   discountPrice: number;
   stock: number;
@@ -13,7 +13,7 @@ interface CreateSellerProductRequest {
   pickupEndTime: string;
 }
 
-interface UpdateSellerProductRequest {
+export interface UpdateSellerProductRequest {
   discountPrice?: number;
   stock?: number;
   endAt?: string;
