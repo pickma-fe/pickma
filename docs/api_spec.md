@@ -321,7 +321,14 @@ Query:
 export interface OrderListParams {
   page: number;
   pageSize: number;
-  status?: string;
+  status?:
+    | 'payment_pending'
+    | 'reserved'
+    | 'ready'
+    | 'completed'
+    | 'cancelled'
+    | 'no_show'
+    | 'expired';
   sort: 'createdAt' | 'pickupAt';
   order: 'asc' | 'desc';
 }
