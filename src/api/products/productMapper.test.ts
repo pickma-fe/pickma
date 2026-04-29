@@ -47,6 +47,27 @@ describe('productMapper', () => {
     );
   });
 
+  it('displayStatus 우선순위 충돌 케이스를 올바르게 처리한다 (closed > expired > soldOut > available)', () => {
+    expect(
+      mapProduct({
+        ...baseProduct,
+        status: 'closed',
+        isExpired: true,
+        isSoldOut: true,
+      }).displayStatus
+    ).toBe('closed');
+
+    expect(
+      mapProduct({ ...baseProduct, isExpired: true, isSoldOut: true })
+        .displayStatus
+    ).toBe('expired');
+
+    expect(
+      mapProduct({ ...baseProduct, isSoldOut: true, isExpired: false })
+        .displayStatus
+    ).toBe('soldOut');
+  });
+
   it('가격과 재고 파생 필드를 보존한다', () => {
     const product = mapProduct(baseProduct);
 
