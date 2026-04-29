@@ -1,21 +1,27 @@
 import { createClient } from '@/lib/supabase/client';
 
+function buildRedirectTo(redirectPath?: string): string {
+  const path =
+    redirectPath ??
+    new URLSearchParams(window.location.search).get('next') ??
+    '/';
+  return new URL(path, window.location.origin).toString();
+}
+
 export const authApi = {
   signInWithGoogle(redirectPath?: string) {
     const supabase = createClient();
-    const redirectTo = `${window.location.origin}${redirectPath ?? '/'}`;
     return supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo },
+      options: { redirectTo: buildRedirectTo(redirectPath) },
     });
   },
 
   signInWithKakao(redirectPath?: string) {
     const supabase = createClient();
-    const redirectTo = `${window.location.origin}${redirectPath ?? '/'}`;
     return supabase.auth.signInWithOAuth({
       provider: 'kakao',
-      options: { redirectTo },
+      options: { redirectTo: buildRedirectTo(redirectPath) },
     });
   },
 
