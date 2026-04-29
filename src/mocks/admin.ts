@@ -3,6 +3,8 @@ import type {
   AdminStoreResponse,
 } from '@/contracts/admin';
 
+const PAGE_SIZE = 20;
+
 export const mockAdminStores: AdminStoreResponse[] = [
   {
     id: 'store_1',
@@ -36,9 +38,9 @@ export const mockAdminStores: AdminStoreResponse[] = [
 export const mockAdminStoreList: AdminStoreListResponse = {
   items: mockAdminStores,
   page: 1,
-  pageSize: 20,
+  pageSize: PAGE_SIZE,
   totalCount: mockAdminStores.length,
-  totalPages: 1,
+  totalPages: Math.ceil(mockAdminStores.length / PAGE_SIZE),
 };
 
 const pendingStores = mockAdminStores.filter(
@@ -48,7 +50,7 @@ const pendingStores = mockAdminStores.filter(
 export const mockPendingAdminStoreList: AdminStoreListResponse = {
   items: pendingStores,
   page: 1,
-  pageSize: 20,
+  pageSize: PAGE_SIZE,
   totalCount: pendingStores.length,
-  totalPages: Math.ceil(pendingStores.length / 20),
+  totalPages: Math.ceil(pendingStores.length / PAGE_SIZE),
 };
