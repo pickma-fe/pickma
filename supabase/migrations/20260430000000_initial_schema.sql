@@ -1,7 +1,7 @@
 -- ============================================================
 -- PickMa Initial Schema
--- DO NOT EDIT generated types (src/types/supabase.ts) directly.
--- Re-run: npx supabase gen types typescript --project-id <id> > src/types/supabase.ts
+-- DO NOT EDIT generated types (src/lib/supabase/database.ts) directly.
+-- Re-run: npx supabase gen types typescript --project-id <id> > src/lib/supabase/database.ts
 -- ============================================================
 
 -- Extensions
@@ -370,6 +370,8 @@ DECLARE
   v_order_id            uuid;
   v_order_number        varchar(20);
   v_pickup_service_date date;
+  v_max_retries         int := 5;
+  v_retry               int := 0;
 BEGIN
   IF jsonb_array_length(p_items) = 0 THEN
     RAISE EXCEPTION 'EMPTY_ITEMS';
@@ -427,18 +429,28 @@ BEGIN
   END LOOP;
 
   v_discount_amount     := v_total_amount - v_payment_amount;
-  v_order_number        := generate_order_number();
   v_pickup_service_date := (p_pickup_at AT TIME ZONE 'Asia/Seoul')::date;
 
-  INSERT INTO orders (
-    order_number, user_id, store_id,
-    total_amount, discount_amount, payment_amount,
-    status, pickup_at, pickup_service_date, expires_at
-  ) VALUES (
-    v_order_number, p_user_id, v_store_id,
-    v_total_amount, v_discount_amount, v_payment_amount,
-    'payment_pending', p_pickup_at, v_pickup_service_date, p_expires_at
-  ) RETURNING id INTO v_order_id;
+  LOOP
+    v_order_number := generate_order_number();
+    BEGIN
+      INSERT INTO orders (
+        order_number, user_id, store_id,
+        total_amount, discount_amount, payment_amount,
+        status, pickup_at, pickup_service_date, expires_at
+      ) VALUES (
+        v_order_number, p_user_id, v_store_id,
+        v_total_amount, v_discount_amount, v_payment_amount,
+        'payment_pending', p_pickup_at, v_pickup_service_date, p_expires_at
+      ) RETURNING id INTO v_order_id;
+      EXIT;
+    EXCEPTION WHEN unique_violation THEN
+      v_retry := v_retry + 1;
+      IF v_retry >= v_max_retries THEN
+        RAISE EXCEPTION 'ORDER_NUMBER_EXHAUSTED';
+      END IF;
+    END;
+  END LOOP;
 
   INSERT INTO order_items (
     order_id, product_id, product_name,
@@ -461,7 +473,7 @@ END;
 $$;
 
 REVOKE EXECUTE ON FUNCTION create_order(uuid, jsonb, timestamptz, timestamptz) FROM PUBLIC;
-GRANT  EXECUTE ON FUNCTION create_order(uuid, jsonb, timestamptz, timestamptz) TO authenticated;
+GRANT  EXECUTE ON FUNCTION create_order(uuid, jsonb, timestamptz, timestamptz) TO service_role;
 
 -- ============================================================
 -- RPC 2: check_pickup_capacity
