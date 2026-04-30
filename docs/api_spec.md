@@ -556,6 +556,17 @@ Wishlist는 MVP 이후 기능으로 둔다.
 
 초기 에러 코드는 `src/lib/errors`에서 중앙 관리한다.
 
+### RPC 내부 예외 매핑 정책
+
+`create_order` RPC는 입력 검증 실패 시 아래 예외를 raise한다. Route Handler는 이를 `VALIDATION_ERROR` (400)로 변환한다. Zod 스키마 검증이 선행되므로 정상 흐름에서는 도달하지 않아야 한다.
+
+| RPC 예외                      | API 변환               |
+| ----------------------------- | ---------------------- |
+| `EMPTY_ITEMS`                 | `VALIDATION_ERROR` 400 |
+| `INVALID_ITEM_FORMAT`         | `VALIDATION_ERROR` 400 |
+| `INVALID_PICKUP_TIME`         | `VALIDATION_ERROR` 400 |
+| `MULTIPLE_STORES_NOT_ALLOWED` | `VALIDATION_ERROR` 400 |
+
 | Code                         | HTTP | 메시지                              |
 | ---------------------------- | ---- | ----------------------------------- |
 | `UNAUTHORIZED`               | 401  | 로그인이 필요합니다.                |
