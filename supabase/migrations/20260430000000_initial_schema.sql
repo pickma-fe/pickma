@@ -377,6 +377,11 @@ BEGIN
     RAISE EXCEPTION 'EMPTY_ITEMS';
   END IF;
 
+  IF (SELECT COUNT(DISTINCT elem->>'product_id') FROM jsonb_array_elements(p_items) elem)
+      != jsonb_array_length(p_items) THEN
+    RAISE EXCEPTION 'DUPLICATE_PRODUCT_IN_ORDER';
+  END IF;
+
   FOR v_item IN SELECT * FROM jsonb_array_elements(p_items) LOOP
     v_product_id := (v_item->>'product_id')::uuid;
     v_quantity   := (v_item->>'quantity')::int;
