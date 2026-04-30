@@ -1,0 +1,173 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+
+import type { ProductFilterCategory } from '@/types/consumer';
+import type { ProductListItemResponse } from '@/contracts/product';
+
+export const ALL_CATEGORY_ID = 'category-all';
+
+const categoryIconMap: Record<string, string> = {
+  category_bakery: '🥖',
+  category_salad: '🥗',
+  category_lunchbox: '🍱',
+  category_cafe: '☕',
+  category_snack: '🍚',
+};
+
+const EXPIRATION_REFRESH_DELAY_MS = 100;
+
+type UseConsumerProductsParams = {
+  products: ProductListItemResponse[];
+  selectedCategoryId: string;
+  selectedSortOption: string;
+  selectedDiscountOption: string;
+  currentPage: number;
+  productsPerPage: number;
+};
+
+export function useConsumerProducts({
+  products,
+  selectedCategoryId,
+  selectedSortOption,
+  selectedDiscountOption,
+  currentPage,
+  productsPerPage,
+}: UseConsumerProductsParams) {
+  const productCategories = getProductCategories(products);
+  const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    const currentTime = Date.now();
+    const nextExpirationTime = products
+      .map((product) => new Date(product.endAt).getTime())
+      .filter((endAt) => Number.isFinite(endAt) && endAt > currentTime)
+      .sort((a, b) => a - b)[0];
+
+    if (!nextExpirationTime) {
+      return;
+    }
+
+    const timerId = window.setTimeout(
+      () => {
+        setNow(Date.now());
+      },
+      nextExpirationTime - currentTime + EXPIRATION_REFRESH_DELAY_MS
+    );
+
+    return () => {
+      window.clearTimeout(timerId);
+    };
+  }, [products, now]);
+
+  const availableProducts = products.filter(
+    (product) =>
+      !product.isExpired &&
+      !product.isSoldOut &&
+      product.availableStock > 0 &&
+      new Date(product.endAt).getTime() > now
+  );
+
+  const categoryFilteredProducts =
+    selectedCategoryId === ALL_CATEGORY_ID
+      ? availableProducts
+      : availableProducts.filter(
+          (product) => product.categoryId === selectedCategoryId
+        );
+
+  const filteredProducts = categoryFilteredProducts.filter((product) =>
+    matchesDiscountOption(product, selectedDiscountOption)
+  );
+
+  const sortedProducts = [...filteredProducts].sort((a, b) =>
+    compareProducts(a, b, selectedSortOption)
+  );
+
+  const totalPages = Math.ceil(sortedProducts.length / productsPerPage);
+  const paginatedProducts = sortedProducts.slice(
+    (currentPage - 1) * productsPerPage,
+    currentPage * productsPerPage
+  );
+
+  return {
+    productCategories,
+    sortedProducts,
+    paginatedProducts,
+    totalPages,
+  };
+}
+
+function getProductCategories(
+  products: ProductListItemResponse[]
+): ProductFilterCategory[] {
+  return [
+    { id: ALL_CATEGORY_ID, name: '전체', icon: '🔲' },
+    ...Array.from(
+      new Map(
+        products.flatMap((product) => {
+          if (!product.categoryId || !product.categoryName) {
+            return [];
+          }
+
+          return [
+            [
+              product.categoryId,
+              {
+                id: product.categoryId,
+                name: product.categoryName,
+                icon: categoryIconMap[product.categoryId] ?? '🍽️',
+              },
+            ] as const,
+          ];
+        })
+      ).values()
+    ),
+  ];
+}
+
+function matchesDiscountOption(
+  product: ProductListItemResponse,
+  discountOption: string
+) {
+  if (discountOption === '전체') {
+    return true;
+  }
+
+  if (discountOption === '40% 이상') {
+    return product.discountRate >= 40;
+  }
+
+  if (discountOption === '30% ~ 40%') {
+    return product.discountRate >= 30 && product.discountRate < 40;
+  }
+
+  if (discountOption === '20% ~ 30%') {
+    return product.discountRate >= 20 && product.discountRate < 30;
+  }
+
+  if (discountOption === '20% 미만') {
+    return product.discountRate < 20;
+  }
+
+  return true;
+}
+
+function compareProducts(
+  a: ProductListItemResponse,
+  b: ProductListItemResponse,
+  sortOption: string
+) {
+  if (sortOption === '마감 임박순') {
+    return new Date(a.endAt).getTime() - new Date(b.endAt).getTime();
+  }
+
+  if (sortOption === '할인율 높은순') {
+    return b.discountRate - a.discountRate;
+  }
+
+  if (sortOption === '가격 낮은순') {
+    return a.discountPrice - b.discountPrice;
+  }
+
+  return 0;
+}

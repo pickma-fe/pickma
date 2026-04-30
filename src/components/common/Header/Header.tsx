@@ -4,6 +4,7 @@ import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
 import { ChevronDownIcon, ChevronUpIcon, UserIcon } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import React from 'react';
 
 import type { User } from '@/types/user';
 
@@ -15,12 +16,14 @@ type HeaderMenuItem =
       label: string;
       type: 'link';
       href: string;
+      icon?: React.ReactNode;
       className?: string;
     }
   | {
       label: string;
       type: 'action';
       onClick: () => void;
+      icon?: React.ReactNode;
       className?: string;
     };
 
@@ -66,18 +69,20 @@ function GuestMenu({ menuItems }: { menuItems: HeaderMenuItem[] }) {
           <Button
             key={item.label}
             variant="ghost"
-            className={`rounded ${item.className || ''}`}
+            className={`gap-2 rounded ${item.className || ''}`}
             onClick={item.onClick}
           >
-            {item.label}
+            {item.icon}
+            <span>{item.label}</span>
           </Button>
         ) : (
           <Link
             key={item.label}
             href={item.href}
-            className={`text-primary-500 hover:bg-primary-50 rounded px-4 py-2 transition ${item.className || ''}`}
+            className={`inline-flex items-center gap-2 rounded px-4 py-2 font-bold text-gray-500 transition ${item.className || ''}`}
           >
-            {item.label}
+            {item.icon}
+            <span>{item.label}</span>
           </Link>
         )
       )}
