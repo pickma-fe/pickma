@@ -380,15 +380,15 @@ src/
 
 ## 10. 환경 변수
 
-| 변수명                          | 용도                          | 공개 여부 |
-| ------------------------------- | ----------------------------- | --------- |
-| `NEXT_PUBLIC_SUPABASE_URL`      | Supabase URL                  | Public    |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon key             | Public    |
-| `SUPABASE_SERVICE_ROLE_KEY`     | 관리자/서버 전용 Supabase key | Secret    |
-| `NEXT_PUBLIC_TOSS_CLIENT_KEY`   | Toss 클라이언트 키            | Public    |
-| `TOSS_SECRET_KEY`               | Toss Secret key               | Secret    |
-| `NEXT_PUBLIC_APP_URL`           | 앱 URL                        | Public    |
-| `API_MOCK_ENABLED`              | Route Handler mock 응답 여부  | Secret    |
+| 변수명                                 | 용도                          | 공개 여부 |
+| -------------------------------------- | ----------------------------- | --------- |
+| `NEXT_PUBLIC_SUPABASE_URL`             | Supabase URL                  | Public    |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Supabase Publishable key      | Public    |
+| `SUPABASE_SECRET_KEY`                  | 관리자/서버 전용 Supabase key | Secret    |
+| `NEXT_PUBLIC_TOSS_CLIENT_KEY`          | Toss 클라이언트 키            | Public    |
+| `TOSS_SECRET_KEY`                      | Toss Secret key               | Secret    |
+| `NEXT_PUBLIC_APP_URL`                  | 앱 URL                        | Public    |
+| `API_MOCK_ENABLED`                     | Route Handler mock 응답 여부  | Secret    |
 
 ---
 
