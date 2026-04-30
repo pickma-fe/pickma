@@ -21,7 +21,6 @@ reviews:
     - '!package-lock.json'
     - '!design/**'
     - '!.vscode/**'
-    - '!.cursorrules'
 
   path_instructions:
     - path: 'docs/**'
@@ -34,27 +33,6 @@ reviews:
         - Supabase DB 접근은 src/api -> /api/* Route Handler -> Supabase 경유로 설명되는가.
         - Auth는 Supabase SDK 래퍼, 세션은 @supabase/ssr 기반 cookie session, proxy는 세션 refresh/보호 라우트 역할로 설명되는가.
         - Mock 환경 변수는 API_MOCK_ENABLED를 사용하는가.
-
-    - path: 'AGENTS.md'
-      instructions: |
-        ## 에이전트 지침 검토 기준
-        - docs/system_architecture.md, docs/type_architecture.md, docs/domain.md, docs/api_spec.md의 최신 설계와 일치하는가.
-        - 레이어 방향이 types/contracts -> lib -> api -> stores -> hooks -> components -> app 으로 되어 있는가.
-        - src/contracts, src/api, TanStack Query, Zod, proxy 기준이 누락되지 않았는가.
-
-    - path: '.claude/**'
-      instructions: |
-        ## Claude 지침/스킬 검토 기준
-        - 최신 설계 문서와 충돌하는 오래된 레이어/DTO/Auth/proxy 표현이 없는가.
-        - create-plan skill은 temp/ 아래 계획 markdown 문서를 생성하도록 안내하는가.
-        - code-review/create-test skill이 src/contracts, src/api, TanStack Query, Zod 기준을 반영하는가.
-
-    - path: '.codex/**'
-      instructions: |
-        ## Codex 지침 검토 기준
-        - 최신 설계 문서와 충돌하는 오래된 레이어/DTO/Auth/proxy 표현이 없는가.
-        - API request/response DTO는 src/contracts, Domain type은 src/types로 안내하는가.
-        - lint/import layer 규칙과 문서가 일치하는가.
 
     - path: 'src/types/**'
       instructions: |
