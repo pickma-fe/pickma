@@ -7,7 +7,7 @@ import type {
 
 export const mockCreatedOrder: CreateOrderResponse = {
   id: 'order_1',
-  orderNumber: 'PM202604290001',
+  orderNumber: 'PM20260429A1B2C3D4E5',
   orderName: '마감 할인 크루아상 세트 1개',
   paymentAmount: 7200,
   expiresAt: '2026-04-29T10:10:00.000Z',
@@ -30,7 +30,7 @@ export const mockOrderItems = [
 export const mockOrders: OrderListItemResponse[] = [
   {
     id: 'order_1',
-    orderNumber: 'PM202604290001',
+    orderNumber: 'PM20260429A1B2C3D4E5',
     storeId: 'store_1',
     storeName: '픽마 베이커리',
     totalAmount: 12000,
@@ -38,13 +38,16 @@ export const mockOrders: OrderListItemResponse[] = [
     paymentAmount: 7200,
     status: 'reserved',
     pickupAt: '2026-04-29T11:30:00.000Z',
+    pickupServiceDate: '2026-04-29',
+    storeOrderNumber: '20260429-0000001',
+    pickupNumber: 'A-01',
     expiresAt: '2026-04-29T10:10:00.000Z',
     createdAt: '2026-04-29T10:00:00.000Z',
     updatedAt: '2026-04-29T10:01:00.000Z',
   },
   {
     id: 'order_2',
-    orderNumber: 'PM202604290002',
+    orderNumber: 'PM20260429F6G7H8I9J0',
     storeId: 'store_2',
     storeName: '그린 샐러드',
     totalAmount: 9800,
@@ -52,6 +55,7 @@ export const mockOrders: OrderListItemResponse[] = [
     paymentAmount: 5900,
     status: 'payment_pending',
     pickupAt: '2026-04-29T12:00:00.000Z',
+    pickupServiceDate: '2026-04-29',
     expiresAt: '2026-04-29T10:20:00.000Z',
     createdAt: '2026-04-29T10:10:00.000Z',
     updatedAt: '2026-04-29T10:10:00.000Z',

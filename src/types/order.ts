@@ -32,6 +32,9 @@ export interface Order {
   paymentAmount: number;
   status: OrderStatus;
   pickupAt: Date;
+  pickupServiceDate: Date;
+  storeOrderNumber?: string;
+  pickupNumber?: string;
   expiresAt?: Date;
   pickedUpAt?: Date;
   cancelledAt?: Date;

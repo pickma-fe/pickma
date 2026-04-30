@@ -41,6 +41,9 @@ export interface OrderListItemResponse {
   paymentAmount: number;
   status: OrderStatusParam;
   pickupAt: string;
+  pickupServiceDate: string;
+  storeOrderNumber?: string;
+  pickupNumber?: string;
   expiresAt?: string;
   createdAt: string;
   updatedAt: string;
