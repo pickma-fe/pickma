@@ -348,7 +348,6 @@ src/
     admin.ts
 
   types/
-    supabase.ts
     product.ts
     order.ts
     payment.ts
@@ -373,6 +372,10 @@ src/
   lib/
     errors/
     supabase/
+      client.ts
+      server.ts
+      proxy.ts
+      database.ts    # CLI generated, 직접 수정 금지
   mocks/
 ```
 

@@ -26,7 +26,7 @@ Domain Type
 
 | 계층          | 위치                                     | 역할                                            |
 | ------------- | ---------------------------------------- | ----------------------------------------------- |
-| Supabase Row  | `src/types/supabase.ts`                  | Supabase 자동 생성 타입                         |
+| Supabase Row  | `src/lib/supabase/database.ts`           | Supabase 자동 생성 타입                         |
 | Contract DTO  | `src/contracts/*`                        | 서버와 클라이언트가 공유하는 JSON-safe API 계약 |
 | Domain Type   | `src/types/*`                            | 앱 내부에서 사용하는 해석된 모델                |
 | Server Mapper | `src/app/api/{resource}/_lib/mapper.ts`  | Supabase 결과를 Contract DTO로 변환             |
@@ -48,7 +48,6 @@ src/contracts/
   index.ts
 
 src/types/
-  supabase.ts
   product.ts
   order.ts
   payment.ts
@@ -88,9 +87,8 @@ src/app/api/products/
 - UI와 비즈니스 로직이 바로 쓰기 좋은 형태로 정의한다.
 - 날짜는 `Date`를 사용할 수 있다.
 - 계산된 값과 파생 상태를 포함할 수 있다.
-- `src/types/supabase.ts`는 예외적으로 Supabase CLI가 생성한 DB schema 타입을 둔다.
-- `src/types/supabase.ts`는 직접 수정하지 않는 generated file로 취급한다.
-- Supabase DB 타입 생성 명령과 실제 생성 시점은 DB/migration 작업 phase에서 다시 확정한다.
+- Supabase CLI 생성 타입(`Database`)은 `src/lib/supabase/database.ts`에 둔다.
+- `src/lib/supabase/database.ts`는 직접 수정하지 않는 generated file로 취급한다.
 - Supabase DB 타입은 `src/app/api/**`, `src/lib/supabase/**` 같은 서버/DB 경계에서만 참조하고, hook/component/client API로 노출하지 않는다.
 - 공통 export 정리를 위해 `src/types/index.ts` barrel은 허용한다.
 
