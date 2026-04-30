@@ -308,6 +308,10 @@ Behavior:
 - 상품 판매 가능 상태, 재고, 마감 시간을 검증한다.
 - Postgres RPC/transaction으로 `reserved_stock` 증가와 주문 생성을 atomic하게 처리한다.
 - 주문 상태는 `payment_pending`으로 생성한다.
+- `orderNumber`는 전역 고유 주문번호로 생성하며 PG 결제 요청의 주문 ID 필드에 그대로 매핑한다.
+- `orderNumber` 형식은 `PM` + 주문 생성일 `YYYYMMDD` + 10자리 대문자 HEX token이다. 예: `PM20260430A1B2C3D4E5`.
+- `pickupServiceDate`는 `pickupAt`의 날짜 부분으로 저장한다.
+- `storeOrderNumber`와 `pickupNumber`는 결제 완료 전에는 생성하지 않는다.
 - `expiresAt`은 주문 생성 시점 기준 결제 가능 만료 시간으로 설정한다. 초기 기준값은 생성 후 10분으로 둔다.
 - Toss 결제 위젯에 필요한 `orderNumber`, `orderName`, `paymentAmount`를 반환한다.
 
@@ -342,6 +346,31 @@ export interface OrderListParams {
 Response:
 
 ```ts
+export interface OrderListItemResponse {
+  id: string;
+  orderNumber: string;
+  storeOrderNumber?: string;
+  pickupNumber?: string;
+  storeId: string;
+  storeName: string;
+  totalAmount: number;
+  discountAmount: number;
+  paymentAmount: number;
+  status:
+    | 'payment_pending'
+    | 'reserved'
+    | 'ready'
+    | 'completed'
+    | 'cancelled'
+    | 'no_show'
+    | 'expired';
+  pickupAt: string;
+  pickupServiceDate: string;
+  expiresAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export type OrderListResponse = PaginatedResult<OrderListItemResponse>;
 ```
 
@@ -380,7 +409,10 @@ Behavior:
 - DB의 주문 금액과 `amount`가 일치하는지 검증한다.
 - Toss `POST /v1/payments/confirm`을 서버에서 호출한다.
 - 성공 시 `payments`를 저장하고 `orders` 상태를 확정한다.
-- 결제 확정 시 Postgres RPC/transaction으로 `orders.status = reserved`, `stock` 감소, `reserved_stock` 감소를 atomic하게 처리한다.
+- 결제 확정 시 Postgres RPC/transaction으로 `orders.status = reserved`, `stock` 감소, `reserved_stock` 감소, 매장 운영 번호 발급을 atomic하게 처리한다.
+- `storeOrderNumber`는 `pickupServiceDate(YYYYMMDD)` + `-` + 7자리 매장별/픽업일별 결제완료 sequence로 생성한다. 예: `20260501-0000001`.
+- `pickupNumber`는 같은 sequence에서 `A-01`부터 `Z-99`까지 생성한다. 매장+픽업일 기준 2,574건을 초과하면 주문 확정 실패로 처리한다.
+- 취소/환불/노쇼가 발생해도 이미 발급된 `storeOrderNumber`와 `pickupNumber`는 회수하거나 재사용하지 않는다.
 - 결제 Secret key는 서버에서만 사용한다.
 
 ### 5.2 결제 만료 처리
