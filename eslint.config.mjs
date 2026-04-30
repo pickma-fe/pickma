@@ -65,7 +65,13 @@ const eslintConfig = defineConfig([
           ],
           pathGroups: [
             { pattern: '@/types/**', group: 'internal', position: 'before' },
+            {
+              pattern: '@/contracts/**',
+              group: 'internal',
+              position: 'before',
+            },
             { pattern: '@/lib/**', group: 'internal', position: 'before' },
+            { pattern: '@/api/**', group: 'internal', position: 'before' },
             { pattern: '@/stores/**', group: 'internal', position: 'before' },
             { pattern: '@/hooks/**', group: 'internal', position: 'before' },
             {
@@ -90,10 +96,33 @@ const eslintConfig = defineConfig([
           zones: [
             {
               target: './types',
-              from: ['./lib', './stores', './hooks', './components', './app'],
+              from: [
+                './contracts',
+                './lib',
+                './api',
+                './stores',
+                './hooks',
+                './components',
+                './app',
+              ],
+            },
+            {
+              target: './contracts',
+              from: [
+                './lib',
+                './api',
+                './stores',
+                './hooks',
+                './components',
+                './app',
+              ],
             },
             {
               target: './lib',
+              from: ['./api', './stores', './hooks', './components', './app'],
+            },
+            {
+              target: './api',
               from: ['./stores', './hooks', './components', './app'],
             },
             { target: './stores', from: ['./hooks', './components', './app'] },
@@ -104,6 +133,13 @@ const eslintConfig = defineConfig([
       ],
 
       // Export
+      'sort-exports/sort-exports': 'off',
+    },
+  },
+  // index.ts barrel 파일만 export 순서 강제
+  {
+    files: ['**/index.ts', '**/index.tsx'],
+    rules: {
       'sort-exports/sort-exports': [
         'warn',
         { sortDir: 'asc', ignoreCase: true },

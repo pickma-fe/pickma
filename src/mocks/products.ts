@@ -1,0 +1,96 @@
+import type {
+  ProductDetailResponse,
+  ProductListItemResponse,
+  ProductListResponse,
+} from '@/contracts/product';
+
+export const mockProducts: ProductListItemResponse[] = [
+  {
+    id: 'product_1',
+    storeId: 'store_1',
+    storeName: '픽마 베이커리',
+    categoryId: 'category_bakery',
+    categoryName: '베이커리',
+    menuItemId: 'menu_1',
+    name: '마감 할인 크루아상 세트',
+    image: '/images/mock/croissant-set.jpg',
+    originalPrice: 12000,
+    discountPrice: 7200,
+    discountRate: 40,
+    stock: 8,
+    reservedStock: 2,
+    availableStock: 6,
+    isSoldOut: false,
+    isExpired: false,
+    displayStatus: 'available',
+    endAt: '2026-04-29T13:30:00.000Z',
+    pickupStartTime: '2026-04-29T10:00:00.000Z',
+    pickupEndTime: '2026-04-29T13:30:00.000Z',
+    status: 'active',
+  },
+  {
+    id: 'product_2',
+    storeId: 'store_2',
+    storeName: '그린 샐러드',
+    categoryId: 'category_salad',
+    categoryName: '샐러드',
+    menuItemId: 'menu_2',
+    name: '오늘의 샐러드 박스',
+    image: '/images/mock/salad-box.jpg',
+    originalPrice: 9800,
+    discountPrice: 5900,
+    discountRate: 40,
+    stock: 5,
+    reservedStock: 5,
+    availableStock: 0,
+    isSoldOut: true,
+    isExpired: false,
+    displayStatus: 'soldOut',
+    endAt: '2026-04-29T12:30:00.000Z',
+    pickupStartTime: '2026-04-29T09:30:00.000Z',
+    pickupEndTime: '2026-04-29T12:30:00.000Z',
+    status: 'active',
+  },
+];
+
+export const mockProductDetail: ProductDetailResponse = {
+  ...mockProducts[0],
+  description: '당일 생산 후 남은 크루아상과 페이스트리를 담은 세트입니다.',
+  store: {
+    id: 'store_1',
+    name: '픽마 베이커리',
+    description: '매일 아침 굽는 동네 베이커리입니다.',
+    phone: '02-1234-5678',
+    address: '서울시 마포구 월드컵북로 12',
+    addressDetail: '1층',
+    region: '서울 마포구',
+    image: '/images/mock/store-bakery.jpg',
+  },
+};
+
+export const mockProductDetail2: ProductDetailResponse = {
+  ...mockProducts[1],
+  description: '신선한 채소로 만든 오늘의 샐러드 박스입니다.',
+  store: {
+    id: 'store_2',
+    name: '그린 샐러드',
+    description: '건강한 한 끼를 제공하는 샐러드 전문점입니다.',
+    phone: '02-9876-5432',
+    address: '서울시 성동구 왕십리로 20',
+    region: '서울 성동구',
+    image: '/images/mock/store-salad.jpg',
+  },
+};
+
+export const mockProductDetailsMap: Record<string, ProductDetailResponse> = {
+  [mockProductDetail.id]: mockProductDetail,
+  [mockProductDetail2.id]: mockProductDetail2,
+};
+
+export const mockProductList: ProductListResponse = {
+  items: mockProducts,
+  page: 1,
+  pageSize: 20,
+  totalCount: mockProducts.length,
+  totalPages: 1,
+};

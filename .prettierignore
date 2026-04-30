@@ -6,3 +6,5 @@ dist
 *.lock
 coverage
 storybook-static
+debug-storybook.log
+tsconfig.tsbuildinfo
