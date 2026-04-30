@@ -525,7 +525,7 @@ END;
 $$;
 
 REVOKE EXECUTE ON FUNCTION check_pickup_capacity(varchar) FROM PUBLIC;
-GRANT  EXECUTE ON FUNCTION check_pickup_capacity(varchar) TO authenticated;
+GRANT  EXECUTE ON FUNCTION check_pickup_capacity(varchar) TO service_role;
 
 -- ============================================================
 -- RPC 3: confirm_payment
@@ -690,4 +690,4 @@ END;
 $$;
 
 REVOKE EXECUTE ON FUNCTION cancel_order(uuid, varchar) FROM PUBLIC;
-GRANT  EXECUTE ON FUNCTION cancel_order(uuid, varchar) TO authenticated;
+GRANT  EXECUTE ON FUNCTION cancel_order(uuid, varchar) TO service_role;
