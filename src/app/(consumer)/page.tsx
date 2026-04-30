@@ -73,15 +73,20 @@ export default function ConsumerPage() {
     router.push(`/search?keyword=${encodeURIComponent(trimmedKeyword)}`);
   };
 
-  const { productCategories, sortedProducts, paginatedProducts, totalPages } =
-    useConsumerProducts({
-      products: mockProducts,
-      selectedCategoryId,
-      selectedSortOption,
-      selectedDiscountOption,
-      currentPage,
-      productsPerPage: PRODUCTS_PER_PAGE,
-    });
+  const {
+    productCategories,
+    sortedProducts,
+    paginatedProducts,
+    totalPages,
+    currentPage: safeCurrentPage,
+  } = useConsumerProducts({
+    products: mockProducts,
+    selectedCategoryId,
+    selectedSortOption,
+    selectedDiscountOption,
+    currentPage,
+    productsPerPage: PRODUCTS_PER_PAGE,
+  });
 
   return (
     <div className="bg-white">
@@ -153,7 +158,7 @@ export default function ConsumerPage() {
             <div className="mt-8 flex justify-center">
               <Pagination
                 totalPages={totalPages}
-                currentPage={currentPage}
+                currentPage={safeCurrentPage}
                 onPageChange={setCurrentPage}
               />
             </div>

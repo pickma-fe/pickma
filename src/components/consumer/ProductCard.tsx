@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
 import type { ProductListItemResponse } from '@/contracts/product';
+import { isProductUnavailable } from '@/lib/product';
 import { Badge, Button } from '@/components/common';
 
 type ProductCardProps = {
@@ -55,13 +56,7 @@ export function ProductCard({ product }: ProductCardProps) {
     };
   }, []);
 
-  // 품절/마감 상태
-  const isExpiredByTime = new Date(product.endAt).getTime() <= now;
-  const isUnavailable =
-    product.isSoldOut ||
-    product.isExpired ||
-    isExpiredByTime ||
-    product.availableStock === 0;
+  const isUnavailable = isProductUnavailable({ product, now });
 
   return (
     <article className="group relative w-full overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition hover:shadow-md">

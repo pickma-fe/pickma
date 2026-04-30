@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 
 import type { ProductFilterCategory } from '@/types/consumer';
 import type { ProductListItemResponse } from '@/contracts/product';
+import { isProductAvailable } from '@/lib/product';
 
 export const ALL_CATEGORY_ID = 'category-all';
 
@@ -60,12 +61,8 @@ export function useConsumerProducts({
     };
   }, [products, now]);
 
-  const availableProducts = products.filter(
-    (product) =>
-      !product.isExpired &&
-      !product.isSoldOut &&
-      product.availableStock > 0 &&
-      new Date(product.endAt).getTime() > now
+  const availableProducts = products.filter((product) =>
+    isProductAvailable({ product, now })
   );
 
   const categoryFilteredProducts =
@@ -84,9 +81,13 @@ export function useConsumerProducts({
   );
 
   const totalPages = Math.ceil(sortedProducts.length / productsPerPage);
+
+  const safeCurrentPage =
+    totalPages === 0 ? 1 : Math.min(currentPage, totalPages);
+
   const paginatedProducts = sortedProducts.slice(
-    (currentPage - 1) * productsPerPage,
-    currentPage * productsPerPage
+    (safeCurrentPage - 1) * productsPerPage,
+    safeCurrentPage * productsPerPage
   );
 
   return {
@@ -94,6 +95,7 @@ export function useConsumerProducts({
     sortedProducts,
     paginatedProducts,
     totalPages,
+    currentPage: safeCurrentPage,
   };
 }
 

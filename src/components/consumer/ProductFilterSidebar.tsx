@@ -34,6 +34,7 @@ export function ProductFilterSidebar({
               key={category.id}
               variant="ghost"
               color="gray"
+              aria-pressed={isSelected}
               className={[
                 'w-full rounded-lg px-4 py-3 text-sm font-bold',
                 isSelected
@@ -76,6 +77,7 @@ export function ProductFilterSidebar({
                 key={option}
                 variant={'ghost'}
                 color={'gray'}
+                aria-pressed={isSelected}
                 className={[
                   'w-full rounded-lg px-4 py-3 text-sm font-bold',
                   isSelected
@@ -97,9 +99,9 @@ export function ProductFilterSidebar({
           <h2 className="px-2 text-sm font-bold text-gray-900">할인율</h2>
 
           <div className="mt-4 space-y-3 px-2">
-            {discountOptions.map((option) => {
+            {discountOptions.map((option, index) => {
               const isSelected = selectedDiscountOption === option;
-              const inputId = `discount-${option}`;
+              const inputId = `discount-option-${index}`;
 
               return (
                 <div

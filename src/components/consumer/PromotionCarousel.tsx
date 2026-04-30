@@ -2,21 +2,30 @@
 
 import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
-
-import { Button } from '@/components/common';
 
 type PromotionBanner = {
   id: number;
   imageUrl: string;
   ctaLabel?: string;
+  ctaHref?: string;
 };
+
+const slideTranslateClasses = [
+  'translate-x-0',
+  '-translate-x-full',
+  '-translate-x-[200%]',
+  '-translate-x-[300%]',
+  '-translate-x-[400%]',
+];
 
 const promotionBanners: PromotionBanner[] = [
   {
     id: 1,
     imageUrl: '/images/banners/pickma-banner2.png',
     ctaLabel: '픽마 서비스 소개',
+    ctaHref: '/',
   },
   {
     id: 2,
@@ -52,8 +61,10 @@ export function PromotionCarousel() {
   return (
     <section className="relative mb-8 h-80 overflow-hidden rounded-lg bg-[#f5fbf8]">
       <div
-        className="flex h-full transition-transform duration-700 ease-in-out"
-        style={{ transform: `translateX(-${currentIndex * 100}%)` }}
+        className={[
+          'flex h-full transition-transform duration-700 ease-in-out',
+          slideTranslateClasses[currentIndex] ?? 'translate-x-0',
+        ].join(' ')}
       >
         {promotionBanners.map((banner) => (
           <div key={banner.id} className="relative h-full w-full shrink-0">
@@ -66,10 +77,13 @@ export function PromotionCarousel() {
               priority={banner.id === 1}
             />
 
-            {banner.ctaLabel && (
-              <Button className="absolute bottom-[20%] left-[20%]">
+            {banner.ctaLabel && banner.ctaHref && (
+              <Link
+                href={banner.ctaHref}
+                className="bg-primary-500 hover:bg-primary-600 absolute bottom-[20%] left-[20%] inline-flex items-center justify-center rounded-sm border border-transparent px-4 py-2 font-medium text-white transition focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+              >
                 {banner.ctaLabel}
-              </Button>
+              </Link>
             )}
           </div>
         ))}
