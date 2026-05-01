@@ -47,7 +47,7 @@ export const mockOrders: OrderListItemResponse[] = [
   },
   {
     id: 'order_2',
-    orderNumber: 'PM20260429F6G7H8I9J0',
+    orderNumber: 'PM20260429F6A7B8C9D0',
     storeId: 'store_2',
     storeName: '그린 샐러드',
     totalAmount: 9800,
