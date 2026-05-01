@@ -566,7 +566,7 @@ RPC에서 raise하는 예외는 아래 정책으로 API error code로 변환한�
 | `INVALID_ITEM_FORMAT`         | `VALIDATION_ERROR` 400      | `create_order`                    |
 | `INVALID_PICKUP_TIME`         | `VALIDATION_ERROR` 400      | `create_order`                    |
 | `MULTIPLE_STORES_NOT_ALLOWED` | `VALIDATION_ERROR` 400      | `create_order`                    |
-| `PRODUCT_NOT_AVAILABLE`       | `PRODUCT_NOT_AVAILABLE` 409 | `confirm_payment`                 |
+| `PRODUCT_NOT_AVAILABLE`       | `PRODUCT_NOT_AVAILABLE` 409 | `create_order`                    |
 | `INVALID_ORDER_STATUS`        | `VALIDATION_ERROR` 400      | `confirm_payment`, `expire_order` |
 | `ORDER_NOT_EXPIRED`           | `VALIDATION_ERROR` 400      | `expire_order`                    |
 
