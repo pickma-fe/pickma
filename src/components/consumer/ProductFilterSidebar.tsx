@@ -112,8 +112,10 @@ export function ProductFilterSidebar({
           })}
         </div>
 
-        <div className="mt-8 border-t border-gray-200 pt-6">
-          <h2 className="px-2 text-sm font-bold text-gray-900">할인율</h2>
+        <fieldset className="mt-8 border-t border-gray-200 pt-6">
+          <legend className="px-2 text-sm font-bold text-gray-900">
+            할인율
+          </legend>
 
           <div className="mt-4 space-y-3 px-2">
             {discountOptions.map((option, index) => {
@@ -159,7 +161,7 @@ export function ProductFilterSidebar({
               );
             })}
           </div>
-        </div>
+        </fieldset>
       </div>
     </aside>
   );
