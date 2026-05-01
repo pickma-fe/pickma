@@ -1,6 +1,12 @@
 'use client';
 
-import type { ProductFilterCategory } from '@/types/consumer';
+import {
+  normalizeDiscountOptionId,
+  normalizeSortOptionId,
+  type ProductDiscountOptionId,
+  type ProductFilterCategory,
+  type ProductSortOptionId,
+} from '@/types/consumer';
 import type { ProductListItemResponse } from '@/contracts/product';
 import { isProductAvailable } from '@/lib/product';
 
@@ -34,6 +40,10 @@ export function useConsumerProducts({
   now,
 }: UseConsumerProductsParams) {
   const productCategories = getProductCategories(products);
+  const normalizedSortOption = normalizeSortOptionId(selectedSortOption);
+  const normalizedDiscountOption = normalizeDiscountOptionId(
+    selectedDiscountOption
+  );
 
   const availableProducts = products.filter((product) =>
     isProductAvailable({ product, now })
@@ -47,11 +57,11 @@ export function useConsumerProducts({
         );
 
   const filteredProducts = categoryFilteredProducts.filter((product) =>
-    matchesDiscountOption(product, selectedDiscountOption)
+    matchesDiscountOption(product, normalizedDiscountOption)
   );
 
   const sortedProducts = [...filteredProducts].sort((a, b) =>
-    compareProducts(a, b, selectedSortOption)
+    compareProducts(a, b, normalizedSortOption)
   );
 
   const safeProductsPerPage = Math.max(1, productsPerPage);
@@ -104,7 +114,7 @@ function getProductCategories(
 
 function matchesDiscountOption(
   product: ProductListItemResponse,
-  discountOption: string
+  discountOption: ProductDiscountOptionId
 ) {
   if (discountOption === 'all') {
     return true;
@@ -132,7 +142,7 @@ function matchesDiscountOption(
 function compareProducts(
   a: ProductListItemResponse,
   b: ProductListItemResponse,
-  sortOption: string
+  sortOption: ProductSortOptionId
 ) {
   if (sortOption === 'deadline') {
     return new Date(a.endAt).getTime() - new Date(b.endAt).getTime();

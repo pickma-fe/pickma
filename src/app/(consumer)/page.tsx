@@ -5,17 +5,17 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 import {
+  DEFAULT_DISCOUNT_OPTION_ID,
+  DEFAULT_SORT_OPTION_ID,
+} from '@/types/consumer';
+import {
   ALL_CATEGORY_ID,
   useConsumerProducts,
 } from '@/hooks/products/useConsumerProducts';
 import { Footer, Header, Pagination } from '@/components/common';
 import { ConsumerHeaderSearch } from '@/components/consumer/ConsumerHeaderSearch';
 import { ProductCard } from '@/components/consumer/ProductCard';
-import {
-  discountOptions,
-  ProductFilterSidebar,
-  sortOptions,
-} from '@/components/consumer/ProductFilterSidebar';
+import { ProductFilterSidebar } from '@/components/consumer/ProductFilterSidebar';
 import { PromotionCarousel } from '@/components/consumer/PromotionCarousel';
 import { mockProducts } from '@/mocks/products';
 
@@ -32,10 +32,10 @@ export default function ConsumerPage() {
   const [selectedCategoryId, setSelectedCategoryId] = useState(ALL_CATEGORY_ID);
   const [selectedRegion, setSelectedRegion] = useState(regionItems[0].value);
   const [selectedSortOption, setSelectedSortOption] = useState(
-    sortOptions[0].id
+    DEFAULT_SORT_OPTION_ID
   );
   const [selectedDiscountOption, setSelectedDiscountOption] = useState(
-    discountOptions[0].id
+    DEFAULT_DISCOUNT_OPTION_ID
   );
   const [keyword, setKeyword] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -67,8 +67,8 @@ export default function ConsumerPage() {
   };
 
   const handleResetFilters = () => {
-    setSelectedSortOption(sortOptions[0].id);
-    setSelectedDiscountOption(discountOptions[0].id);
+    setSelectedSortOption(DEFAULT_SORT_OPTION_ID);
+    setSelectedDiscountOption(DEFAULT_DISCOUNT_OPTION_ID);
     setCurrentPage(1);
   };
 
