@@ -3,7 +3,6 @@
 import { ChevronRightIcon, StoreIcon } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
 
 import type { ProductListItemResponse } from '@/contracts/product';
 import { isProductUnavailable } from '@/lib/product';
@@ -11,6 +10,7 @@ import { Badge, Button } from '@/components/common';
 
 type ProductCardProps = {
   product: ProductListItemResponse;
+  now: number;
 };
 
 // 마감 시간
@@ -43,19 +43,7 @@ function formatPickupTime(value: string) {
   }).format(new Date(value));
 }
 
-export function ProductCard({ product }: ProductCardProps) {
-  const [now, setNow] = useState(() => Date.now());
-
-  useEffect(() => {
-    const timerId = window.setInterval(() => {
-      setNow(Date.now());
-    }, 1000);
-
-    return () => {
-      window.clearInterval(timerId);
-    };
-  }, []);
-
+export function ProductCard({ product, now }: ProductCardProps) {
   const isUnavailable = isProductUnavailable({ product, now });
 
   return (

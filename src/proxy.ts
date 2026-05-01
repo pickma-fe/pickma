@@ -3,6 +3,8 @@ import type { NextRequest } from 'next/server';
 
 import { createProxyClient } from '@/lib/supabase/proxy';
 
+import { isApiMockEnabled } from './app/api/_lib/mock';
+
 const CONSUMER_PROTECTED = ['/order', '/payment', '/mypage'];
 const SELLER_PROTECTED = [
   '/seller/register',
@@ -22,8 +24,11 @@ function matchesAnyPrefix(pathname: string, prefixes: string[]): boolean {
 
 export async function proxy(request: NextRequest): Promise<NextResponse> {
   const response = NextResponse.next({ request });
-  const supabase = createProxyClient(request, response);
 
+  if (isApiMockEnabled()) {
+    return response;
+  }
+  const supabase = createProxyClient(request, response);
   const {
     data: { user },
   } = await supabase.auth.getUser();

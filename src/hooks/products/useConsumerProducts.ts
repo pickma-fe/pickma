@@ -1,7 +1,5 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-
 import type { ProductFilterCategory } from '@/types/consumer';
 import type { ProductListItemResponse } from '@/contracts/product';
 import { isProductAvailable } from '@/lib/product';
@@ -16,8 +14,6 @@ const categoryIconMap: Record<string, string> = {
   category_snack: '🍚',
 };
 
-const EXPIRATION_REFRESH_DELAY_MS = 100;
-
 type UseConsumerProductsParams = {
   products: ProductListItemResponse[];
   selectedCategoryId: string;
@@ -25,6 +21,7 @@ type UseConsumerProductsParams = {
   selectedDiscountOption: string;
   currentPage: number;
   productsPerPage: number;
+  now: number;
 };
 
 export function useConsumerProducts({
@@ -34,32 +31,9 @@ export function useConsumerProducts({
   selectedDiscountOption,
   currentPage,
   productsPerPage,
+  now,
 }: UseConsumerProductsParams) {
   const productCategories = getProductCategories(products);
-  const [now, setNow] = useState(() => Date.now());
-
-  useEffect(() => {
-    const currentTime = Date.now();
-    const nextExpirationTime = products
-      .map((product) => new Date(product.endAt).getTime())
-      .filter((endAt) => Number.isFinite(endAt) && endAt > currentTime)
-      .sort((a, b) => a - b)[0];
-
-    if (!nextExpirationTime) {
-      return;
-    }
-
-    const timerId = window.setTimeout(
-      () => {
-        setNow(Date.now());
-      },
-      nextExpirationTime - currentTime + EXPIRATION_REFRESH_DELAY_MS
-    );
-
-    return () => {
-      window.clearTimeout(timerId);
-    };
-  }, [products, now]);
 
   const availableProducts = products.filter((product) =>
     isProductAvailable({ product, now })

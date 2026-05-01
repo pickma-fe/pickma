@@ -2,7 +2,7 @@
 
 import { LogInIcon, StoreIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import {
   ALL_CATEGORY_ID,
@@ -39,6 +39,17 @@ export default function ConsumerPage() {
   );
   const [keyword, setKeyword] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    const timerId = window.setInterval(() => {
+      setNow(Date.now());
+    }, 1000);
+
+    return () => {
+      window.clearInterval(timerId);
+    };
+  }, []);
 
   const handleCategoryChange = (categoryId: string) => {
     setSelectedCategoryId(categoryId);
@@ -88,6 +99,7 @@ export default function ConsumerPage() {
     selectedDiscountOption,
     currentPage,
     productsPerPage: PRODUCTS_PER_PAGE,
+    now,
   });
 
   return (
@@ -148,7 +160,7 @@ export default function ConsumerPage() {
             {paginatedProducts.length > 0 ? (
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
                 {paginatedProducts.map((product) => (
-                  <ProductCard key={product.id} product={product} />
+                  <ProductCard key={product.id} product={product} now={now} />
                 ))}
               </div>
             ) : (
