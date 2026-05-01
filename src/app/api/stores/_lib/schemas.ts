@@ -11,6 +11,6 @@ export const createStoreSchema = z.object({
   addressDetail: z.string().trim().min(1).optional(),
   region: z.string().trim().min(1),
   image: z.string().trim().min(1).optional(),
-  openTime: z.string().datetime().optional(),
-  closeTime: z.string().datetime().optional(),
+  openTime: z.string().time().optional(),
+  closeTime: z.string().time().optional(),
 }) satisfies z.ZodType<CreateStoreRequest>;
