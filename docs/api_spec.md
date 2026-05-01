@@ -558,14 +558,19 @@ Wishlist는 MVP 이후 기능으로 둔다.
 
 ### RPC 내부 예외 매핑 정책
 
-`create_order` RPC는 입력 검증 실패 시 아래 예외를 raise한다. Route Handler는 이를 `VALIDATION_ERROR` (400)로 변환한다. Zod 스키마 검증이 선행되므로 정상 흐름에서는 도달하지 않아야 한다.
+RPC에서 raise하는 예외는 아래 정책으로 API error code로 변환한다.
 
-| RPC 예외                      | API 변환               |
-| ----------------------------- | ---------------------- |
-| `EMPTY_ITEMS`                 | `VALIDATION_ERROR` 400 |
-| `INVALID_ITEM_FORMAT`         | `VALIDATION_ERROR` 400 |
-| `INVALID_PICKUP_TIME`         | `VALIDATION_ERROR` 400 |
-| `MULTIPLE_STORES_NOT_ALLOWED` | `VALIDATION_ERROR` 400 |
+| RPC 예외                      | API 변환                    | 발생 RPC                          |
+| ----------------------------- | --------------------------- | --------------------------------- |
+| `EMPTY_ITEMS`                 | `VALIDATION_ERROR` 400      | `create_order`                    |
+| `INVALID_ITEM_FORMAT`         | `VALIDATION_ERROR` 400      | `create_order`                    |
+| `INVALID_PICKUP_TIME`         | `VALIDATION_ERROR` 400      | `create_order`                    |
+| `MULTIPLE_STORES_NOT_ALLOWED` | `VALIDATION_ERROR` 400      | `create_order`                    |
+| `PRODUCT_NOT_AVAILABLE`       | `PRODUCT_NOT_AVAILABLE` 409 | `confirm_payment`                 |
+| `INVALID_ORDER_STATUS`        | `VALIDATION_ERROR` 400      | `confirm_payment`, `expire_order` |
+| `ORDER_NOT_EXPIRED`           | `VALIDATION_ERROR` 400      | `expire_order`                    |
+
+`create_order`의 validation 예외는 Zod 스키마 검증이 선행되므로 정상 흐름에서는 도달하지 않아야 한다.
 
 | Code                         | HTTP | 메시지                              |
 | ---------------------------- | ---- | ----------------------------------- |
@@ -580,6 +585,7 @@ Wishlist는 MVP 이후 기능으로 둔다.
 | `STORE_ALREADY_EXISTS`       | 409  | 이미 등록된 가게가 있습니다.        |
 | `OUT_OF_STOCK`               | 409  | 재고가 부족합니다.                  |
 | `PRODUCT_EXPIRED`            | 409  | 판매가 마감된 상품입니다.           |
+| `PRODUCT_NOT_AVAILABLE`      | 409  | 구매할 수 없는 상품입니다.          |
 | `ORDER_EXPIRED`              | 409  | 결제 가능 시간이 만료되었습니다.    |
 | `DUPLICATE_PRODUCT_IN_ORDER` | 400  | 주문 항목에 중복된 상품이 있습니다. |
 | `PAYMENT_AMOUNT_MISMATCH`    | 400  | 결제 금액이 일치하지 않습니다.      |
