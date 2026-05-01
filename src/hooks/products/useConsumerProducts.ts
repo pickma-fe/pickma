@@ -43,7 +43,6 @@ export function useConsumerProducts({
   selectedRegion,
   productRegions,
 }: UseConsumerProductsParams) {
-  const productCategories = getConsumerProductCategories(products);
   const normalizedSortOption = normalizeSortOptionId(selectedSortOption);
   const normalizedDiscountOption = normalizeDiscountOptionId(
     selectedDiscountOption
@@ -87,7 +86,6 @@ export function useConsumerProducts({
   );
 
   return {
-    productCategories,
     sortedProducts,
     paginatedProducts,
     totalPages,

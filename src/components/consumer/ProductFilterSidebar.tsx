@@ -131,7 +131,7 @@ export function ProductFilterSidebar({
                     name="discountRate"
                     checked={isSelected}
                     onChange={() => onDiscountChange(option.id)}
-                    className="sr-only"
+                    className="peer sr-only"
                   />
 
                   <label
@@ -141,6 +141,7 @@ export function ProductFilterSidebar({
                     <span
                       className={[
                         'flex h-4 w-4 items-center justify-center rounded border',
+                        'peer-focus-visible:ring-primary-500 peer-focus-visible:ring-2 peer-focus-visible:ring-offset-2',
                         isSelected
                           ? 'border-primary-500 bg-primary-500'
                           : 'border-gray-300 bg-white',
