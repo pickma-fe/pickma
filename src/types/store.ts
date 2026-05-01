@@ -9,8 +9,8 @@ export interface CreateStoreInput {
   addressDetail?: string;
   region: string;
   image?: string;
-  openTime?: Date;
-  closeTime?: Date;
+  openTime?: string;
+  closeTime?: string;
 }
 
 export interface Store {
@@ -24,8 +24,8 @@ export interface Store {
   addressDetail?: string;
   region: string;
   image?: string;
-  openTime?: Date;
-  closeTime?: Date;
+  openTime?: string;
+  closeTime?: string;
   status: StoreStatus;
   rejectReason?: string;
   createdAt: Date;

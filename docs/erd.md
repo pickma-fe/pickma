@@ -69,8 +69,8 @@
 | `address_detail`  | varchar(255) |                                 | 상세 주소      |
 | `region`          | varchar(50)  | NOT NULL                        | 지역           |
 | `image`           | varchar(500) |                                 | 이미지         |
-| `open_time`       | timestamp    |                                 | 영업 시작      |
-| `close_time`      | timestamp    |                                 | 영업 종료      |
+| `open_time`       | time         |                                 | 영업 시작      |
+| `close_time`      | time         |                                 | 영업 종료      |
 | `status`          | enum         | NOT NULL, DEFAULT 'pending'     | 상태           |
 | `reject_reason`   | varchar(500) |                                 | 거절 사유      |
 | `created_at`      | timestamp    | NOT NULL, DEFAULT now()         | 생성일시       |
@@ -118,8 +118,8 @@
 | `stock`             | int       | NOT NULL, DEFAULT 0          | 총 재고   |
 | `reserved_stock`    | int       | NOT NULL, DEFAULT 0          | 예약 재고 |
 | `end_at`            | timestamp | NOT NULL                     | 판매 마감 |
-| `pickup_start_time` | timestamp | NOT NULL                     | 픽업 시작 |
-| `pickup_end_time`   | timestamp | NOT NULL                     | 픽업 종료 |
+| `pickup_start_time` | time      | NOT NULL                     | 픽업 시작 |
+| `pickup_end_time`   | time      | NOT NULL                     | 픽업 종료 |
 | `status`            | enum      | NOT NULL, DEFAULT 'active'   | 상태      |
 | `created_at`        | timestamp | NOT NULL, DEFAULT now()      | 생성일시  |
 | `updated_at`        | timestamp | NOT NULL, DEFAULT now()      | 수정일시  |
@@ -337,7 +337,7 @@ stores 1:N store_order_sequences
 # 7. 핵심 설계 요약
 
 - 재고: reserved_stock 기반
-- 시간: timestamp 통일
+- 시간: timestamp 통일, 단 open_time/close_time/pickup_start_time/pickup_end_time은 time, pickup_service_date는 date
 - 상품: menu + product 분리
 - 주문: 단일 가게 구조
 - 만료: expires_at 기반 처리

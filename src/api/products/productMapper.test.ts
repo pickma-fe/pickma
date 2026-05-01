@@ -21,18 +21,17 @@ describe('productMapper', () => {
     isExpired: false,
     displayStatus: 'available',
     endAt: '2026-04-29T13:30:00.000Z',
-    pickupStartTime: '2026-04-29T10:00:00.000Z',
-    pickupEndTime: '2026-04-29T13:30:00.000Z',
+    pickupStartTime: '10:00:00',
+    pickupEndTime: '13:30:00',
     status: 'active',
   };
 
-  it('ISO 날짜 문자열을 Date로 변환한다', () => {
+  it('날짜 문자열을 Date로 변환하고 시각 문자열은 그대로 유지한다', () => {
     const product = mapProduct(baseProduct);
 
     expect(product.endAt).toBeInstanceOf(Date);
-    expect(product.pickupStartTime.toISOString()).toBe(
-      '2026-04-29T10:00:00.000Z'
-    );
+    expect(product.pickupStartTime).toBe('10:00:00');
+    expect(product.pickupEndTime).toBe('13:30:00');
   });
 
   it('상태 플래그 기준으로 displayStatus를 계산한다', () => {

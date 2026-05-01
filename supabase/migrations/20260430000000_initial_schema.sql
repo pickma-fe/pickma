@@ -73,8 +73,8 @@ CREATE TABLE stores (
   address_detail   varchar(255),
   region           varchar(50)   NOT NULL,
   image            varchar(500),
-  open_time        timestamptz,
-  close_time       timestamptz,
+  open_time        time,
+  close_time       time,
   status           store_status  NOT NULL DEFAULT 'pending',
   reject_reason    varchar(500),
   created_at       timestamptz   NOT NULL DEFAULT now(),
@@ -102,8 +102,8 @@ CREATE TABLE products (
   stock             int             NOT NULL DEFAULT 0,
   reserved_stock    int             NOT NULL DEFAULT 0,
   end_at            timestamptz     NOT NULL,
-  pickup_start_time timestamptz     NOT NULL,
-  pickup_end_time   timestamptz     NOT NULL,
+  pickup_start_time time            NOT NULL,
+  pickup_end_time   time            NOT NULL,
   status            product_status  NOT NULL DEFAULT 'active',
   created_at        timestamptz     NOT NULL DEFAULT now(),
   updated_at        timestamptz     NOT NULL DEFAULT now(),
@@ -416,7 +416,8 @@ BEGIN
       RAISE EXCEPTION 'OUT_OF_STOCK';
     END IF;
 
-    IF p_pickup_at < v_product.pickup_start_time OR p_pickup_at > v_product.pickup_end_time THEN
+    IF (p_pickup_at AT TIME ZONE 'Asia/Seoul')::time < v_product.pickup_start_time OR
+       (p_pickup_at AT TIME ZONE 'Asia/Seoul')::time > v_product.pickup_end_time THEN
       RAISE EXCEPTION 'INVALID_PICKUP_TIME';
     END IF;
 
