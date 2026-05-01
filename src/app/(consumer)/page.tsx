@@ -2,19 +2,19 @@
 
 import { LogInIcon, StoreIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import {
   DEFAULT_DISCOUNT_OPTION_ID,
   DEFAULT_SORT_OPTION_ID,
-} from '@/types/consumer';
+} from '@/hooks/products/consumerProductFilters';
 import {
   ALL_CATEGORY_ID,
-  useConsumerProducts,
+  getConsumerProductCategories,
 } from '@/hooks/products/useConsumerProducts';
-import { Footer, Header, Pagination } from '@/components/common';
+import { Footer, Header } from '@/components/common';
 import { ConsumerHeaderSearch } from '@/components/consumer/ConsumerHeaderSearch';
-import { ProductCard } from '@/components/consumer/ProductCard';
+import { ConsumerProductList } from '@/components/consumer/ConsumerProductList';
 import { ProductFilterSidebar } from '@/components/consumer/ProductFilterSidebar';
 import { PromotionCarousel } from '@/components/consumer/PromotionCarousel';
 import { mockProducts } from '@/mocks/products';
@@ -26,6 +26,18 @@ const regionItems = [
 ];
 
 const PRODUCTS_PER_PAGE = 10;
+const mockProductRegions: Record<string, string> = {
+  store_1: '서울 마포구 합정동',
+  store_2: '서울 성동구 왕십리',
+  store_3: '서울 강남구 역삼동',
+  store_4: '서울 강남구 역삼동',
+  store_5: '서울 마포구 합정동',
+  store_6: '서울 강남구 역삼동',
+  store_7: '서울 성동구 왕십리',
+  store_8: '서울 성동구 왕십리',
+  store_9: '서울 마포구 합정동',
+  store_10: '서울 강남구 역삼동',
+};
 
 export default function ConsumerPage() {
   const router = useRouter();
@@ -39,20 +51,15 @@ export default function ConsumerPage() {
   );
   const [keyword, setKeyword] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [now, setNow] = useState(() => Date.now());
-
-  useEffect(() => {
-    const timerId = window.setInterval(() => {
-      setNow(Date.now());
-    }, 1000);
-
-    return () => {
-      window.clearInterval(timerId);
-    };
-  }, []);
+  const productCategories = getConsumerProductCategories(mockProducts);
 
   const handleCategoryChange = (categoryId: string) => {
     setSelectedCategoryId(categoryId);
+    setCurrentPage(1);
+  };
+
+  const handleRegionChange = (region: string) => {
+    setSelectedRegion(region);
     setCurrentPage(1);
   };
 
@@ -83,24 +90,13 @@ export default function ConsumerPage() {
       return;
     }
 
-    router.push(`/search?keyword=${encodeURIComponent(trimmedKeyword)}`);
-  };
+    const searchParams = new URLSearchParams({
+      keyword: trimmedKeyword,
+      region: selectedRegion,
+    });
 
-  const {
-    productCategories,
-    sortedProducts,
-    paginatedProducts,
-    totalPages,
-    currentPage: safeCurrentPage,
-  } = useConsumerProducts({
-    products: mockProducts,
-    selectedCategoryId,
-    selectedSortOption,
-    selectedDiscountOption,
-    currentPage,
-    productsPerPage: PRODUCTS_PER_PAGE,
-    now,
-  });
+    router.push(`/search?${searchParams.toString()}`);
+  };
 
   return (
     <div className="bg-white">
@@ -112,7 +108,7 @@ export default function ConsumerPage() {
             regionItems={regionItems}
             selectedRegion={selectedRegion}
             keyword={keyword}
-            onRegionChange={setSelectedRegion}
+            onRegionChange={handleRegionChange}
             onKeywordChange={handleKeywordChange}
             onSearch={handleSearch}
           />
@@ -151,31 +147,17 @@ export default function ConsumerPage() {
           <section className="px-5 py-6 lg:px-6">
             <PromotionCarousel />
 
-            <div className="mb-4 flex items-center justify-between">
-              <p className="text-sm font-semibold text-gray-900">
-                전체 상품 {sortedProducts.length}개
-              </p>
-            </div>
-
-            {paginatedProducts.length > 0 ? (
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-                {paginatedProducts.map((product) => (
-                  <ProductCard key={product.id} product={product} now={now} />
-                ))}
-              </div>
-            ) : (
-              <div className="flex min-h-80 items-center justify-center rounded-lg border border-dashed border-gray-200 bg-gray-50 text-sm font-medium text-gray-500">
-                조건에 맞는 상품이 없습니다.
-              </div>
-            )}
-
-            <div className="mt-8 flex justify-center">
-              <Pagination
-                totalPages={totalPages}
-                currentPage={safeCurrentPage}
-                onPageChange={setCurrentPage}
-              />
-            </div>
+            <ConsumerProductList
+              products={mockProducts}
+              selectedCategoryId={selectedCategoryId}
+              selectedSortOption={selectedSortOption}
+              selectedDiscountOption={selectedDiscountOption}
+              selectedRegion={selectedRegion}
+              productRegions={mockProductRegions}
+              currentPage={currentPage}
+              productsPerPage={PRODUCTS_PER_PAGE}
+              onPageChange={setCurrentPage}
+            />
           </section>
         </div>
       </main>

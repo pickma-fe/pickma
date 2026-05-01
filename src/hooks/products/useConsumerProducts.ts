@@ -1,14 +1,14 @@
 'use client';
 
+import type { ProductListItemResponse } from '@/contracts/product';
+import { isProductAvailable } from '@/lib/product';
 import {
   normalizeDiscountOptionId,
   normalizeSortOptionId,
   type ProductDiscountOptionId,
   type ProductFilterCategory,
   type ProductSortOptionId,
-} from '@/types/consumer';
-import type { ProductListItemResponse } from '@/contracts/product';
-import { isProductAvailable } from '@/lib/product';
+} from '@/hooks/products/consumerProductFilters';
 
 export const ALL_CATEGORY_ID = 'category-all';
 
@@ -28,6 +28,8 @@ type UseConsumerProductsParams = {
   currentPage: number;
   productsPerPage: number;
   now: number;
+  selectedRegion?: string;
+  productRegions?: Record<string, string>;
 };
 
 export function useConsumerProducts({
@@ -38,8 +40,10 @@ export function useConsumerProducts({
   currentPage,
   productsPerPage,
   now,
+  selectedRegion,
+  productRegions,
 }: UseConsumerProductsParams) {
-  const productCategories = getProductCategories(products);
+  const productCategories = getConsumerProductCategories(products);
   const normalizedSortOption = normalizeSortOptionId(selectedSortOption);
   const normalizedDiscountOption = normalizeDiscountOptionId(
     selectedDiscountOption
@@ -49,10 +53,17 @@ export function useConsumerProducts({
     isProductAvailable({ product, now })
   );
 
+  const regionFilteredProducts =
+    selectedRegion && productRegions
+      ? availableProducts.filter(
+          (product) => productRegions[product.storeId] === selectedRegion
+        )
+      : availableProducts;
+
   const categoryFilteredProducts =
     selectedCategoryId === ALL_CATEGORY_ID
-      ? availableProducts
-      : availableProducts.filter(
+      ? regionFilteredProducts
+      : regionFilteredProducts.filter(
           (product) => product.categoryId === selectedCategoryId
         );
 
@@ -84,7 +95,7 @@ export function useConsumerProducts({
   };
 }
 
-function getProductCategories(
+export function getConsumerProductCategories(
   products: ProductListItemResponse[]
 ): ProductFilterCategory[] {
   return [
