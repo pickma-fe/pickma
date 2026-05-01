@@ -12,7 +12,7 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto;
 -- ============================================================
 
 CREATE TYPE user_role AS ENUM ('customer', 'seller', 'admin');
-CREATE TYPE user_status AS ENUM ('active', 'inactive', 'suspended');
+CREATE TYPE user_status AS ENUM ('active', 'suspended', 'deleted');
 CREATE TYPE store_status AS ENUM ('pending', 'approved', 'rejected', 'inactive');
 CREATE TYPE product_status AS ENUM ('active', 'closed');
 CREATE TYPE order_status AS ENUM (
