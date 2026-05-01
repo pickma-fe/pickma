@@ -686,7 +686,7 @@ SECURITY DEFINER
 SET search_path = public
 AS $$
 BEGIN
-  RAISE EXCEPTION 'NOT_IMPLEMENTED: cancel_order SQL is scheduled for Phase 6';
+  RAISE EXCEPTION 'NOT_IMPLEMENTED';
 END;
 $$;
 
