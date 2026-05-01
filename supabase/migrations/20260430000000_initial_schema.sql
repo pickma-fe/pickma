@@ -221,6 +221,7 @@ CREATE UNIQUE INDEX idx_orders_unique_store_pickup_number
 CREATE OR REPLACE FUNCTION set_updated_at()
 RETURNS trigger
 LANGUAGE plpgsql
+SET search_path = public
 AS $$
 BEGIN
   NEW.updated_at = now();
