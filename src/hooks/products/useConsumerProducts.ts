@@ -54,14 +54,15 @@ export function useConsumerProducts({
     compareProducts(a, b, selectedSortOption)
   );
 
-  const totalPages = Math.ceil(sortedProducts.length / productsPerPage);
+  const safeProductsPerPage = Math.max(1, productsPerPage);
+  const totalPages = Math.ceil(sortedProducts.length / safeProductsPerPage);
 
   const safeCurrentPage =
     totalPages === 0 ? 1 : Math.min(Math.max(currentPage, 1), totalPages);
 
   const paginatedProducts = sortedProducts.slice(
-    (safeCurrentPage - 1) * productsPerPage,
-    safeCurrentPage * productsPerPage
+    (safeCurrentPage - 1) * safeProductsPerPage,
+    safeCurrentPage * safeProductsPerPage
   );
 
   return {
