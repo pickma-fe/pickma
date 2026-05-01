@@ -31,9 +31,11 @@ export default function ConsumerPage() {
   const router = useRouter();
   const [selectedCategoryId, setSelectedCategoryId] = useState(ALL_CATEGORY_ID);
   const [selectedRegion, setSelectedRegion] = useState(regionItems[0].value);
-  const [selectedSortOption, setSelectedSortOption] = useState(sortOptions[0]);
+  const [selectedSortOption, setSelectedSortOption] = useState(
+    sortOptions[0].id
+  );
   const [selectedDiscountOption, setSelectedDiscountOption] = useState(
-    discountOptions[0]
+    discountOptions[0].id
   );
   const [keyword, setKeyword] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -54,8 +56,8 @@ export default function ConsumerPage() {
   };
 
   const handleResetFilters = () => {
-    setSelectedSortOption(sortOptions[0]);
-    setSelectedDiscountOption(discountOptions[0]);
+    setSelectedSortOption(sortOptions[0].id);
+    setSelectedDiscountOption(discountOptions[0].id);
     setCurrentPage(1);
   };
 

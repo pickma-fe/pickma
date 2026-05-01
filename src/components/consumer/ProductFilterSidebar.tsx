@@ -6,12 +6,29 @@ import type { ProductFilterCategory } from '@/types/consumer';
 import { Button } from '@/components/common';
 
 export const discountOptions = [
-  '전체',
-  '40% 이상',
-  '30% ~ 40%',
-  '20% ~ 30%',
-  '20% 미만',
+  { id: 'all', label: '전체' },
+  { id: 'over-40', label: '40% 이상' },
+  { id: '30-to-40', label: '30% ~ 40%' },
+  { id: '20-to-30', label: '20% ~ 30%' },
+  { id: 'under-20', label: '20% 미만' },
 ];
+
+export const sortOptions = [
+  { id: 'deadline', label: '마감 임박순' },
+  { id: 'discount-rate', label: '할인율 높은순' },
+  { id: 'price-low', label: '가격 낮은순' },
+];
+
+interface ProductFilterSidebarProps {
+  categories: ProductFilterCategory[];
+  selectedCategoryId: string;
+  selectedSortOption: string;
+  selectedDiscountOption: string;
+  onCategoryChange: (categoryId: string) => void;
+  onSortChange: (sortOption: string) => void;
+  onDiscountChange: (discountOption: string) => void;
+  onResetFilters: () => void;
+}
 
 export function ProductFilterSidebar({
   categories,
@@ -70,11 +87,11 @@ export function ProductFilterSidebar({
 
         <div className="mt-4 space-y-2">
           {sortOptions.map((option) => {
-            const isSelected = selectedSortOption === option;
+            const isSelected = selectedSortOption === option.id;
 
             return (
               <Button
-                key={option}
+                key={option.id}
                 variant={'ghost'}
                 color={'gray'}
                 aria-pressed={isSelected}
@@ -84,10 +101,10 @@ export function ProductFilterSidebar({
                     ? 'border-primary-200 bg-primary-50 text-primary-500'
                     : 'border-transparent',
                 ].join(' ')}
-                onClick={() => onSortChange(option)}
+                onClick={() => onSortChange(option.id)}
               >
                 <span className="flex w-full items-center justify-between">
-                  <span>{option}</span>
+                  <span>{option.label}</span>
                   <ChevronRightIcon className="h-4 w-4" aria-hidden="true" />
                 </span>
               </Button>
@@ -100,12 +117,12 @@ export function ProductFilterSidebar({
 
           <div className="mt-4 space-y-3 px-2">
             {discountOptions.map((option, index) => {
-              const isSelected = selectedDiscountOption === option;
+              const isSelected = selectedDiscountOption === option.id;
               const inputId = `discount-option-${index}`;
 
               return (
                 <div
-                  key={option}
+                  key={option.id}
                   className="flex items-center gap-3 text-sm text-gray-500"
                 >
                   <input
@@ -113,7 +130,7 @@ export function ProductFilterSidebar({
                     type="radio"
                     name="discountRate"
                     checked={isSelected}
-                    onChange={() => onDiscountChange(option)}
+                    onChange={() => onDiscountChange(option.id)}
                     className="sr-only"
                   />
 
@@ -135,7 +152,7 @@ export function ProductFilterSidebar({
                       )}
                     </span>
 
-                    <span>{option}</span>
+                    <span>{option.label}</span>
                   </label>
                 </div>
               );
@@ -146,16 +163,3 @@ export function ProductFilterSidebar({
     </aside>
   );
 }
-
-type ProductFilterSidebarProps = {
-  categories: ProductFilterCategory[];
-  selectedCategoryId: string;
-  selectedSortOption: string;
-  selectedDiscountOption: string;
-  onCategoryChange: (categoryId: string) => void;
-  onSortChange: (sortOption: string) => void;
-  onDiscountChange: (discountOption: string) => void;
-  onResetFilters: () => void;
-};
-
-export const sortOptions = ['마감 임박순', '할인율 높은순', '가격 낮은순'];

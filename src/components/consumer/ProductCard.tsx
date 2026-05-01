@@ -146,7 +146,7 @@ export function ProductCard({ product }: ProductCardProps) {
               </Button>
             ) : (
               <Link
-                href={`/products/${product.id}/checkout`}
+                href={`/order/${product.id}`}
                 className="text-primary-500 hover:bg-primary-50 relative z-20 inline-flex h-7 shrink-0 items-center justify-center rounded border border-transparent px-4 py-1 text-xs font-semibold transition focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
               >
                 예약하기

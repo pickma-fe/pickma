@@ -33,6 +33,12 @@ const promotionBanners: PromotionBanner[] = [
   },
 ];
 
+if (promotionBanners.length > slideTranslateClasses.length) {
+  throw new Error(
+    'slideTranslateClasses length must cover all promotionBanners.'
+  );
+}
+
 export function PromotionCarousel() {
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -63,7 +69,7 @@ export function PromotionCarousel() {
       <div
         className={[
           'flex h-full transition-transform duration-700 ease-in-out',
-          slideTranslateClasses[currentIndex] ?? 'translate-x-0',
+          slideTranslateClasses[currentIndex],
         ].join(' ')}
       >
         {promotionBanners.map((banner) => (

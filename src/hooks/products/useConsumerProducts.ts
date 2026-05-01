@@ -83,7 +83,7 @@ export function useConsumerProducts({
   const totalPages = Math.ceil(sortedProducts.length / productsPerPage);
 
   const safeCurrentPage =
-    totalPages === 0 ? 1 : Math.min(currentPage, totalPages);
+    totalPages === 0 ? 1 : Math.min(Math.max(currentPage, 1), totalPages);
 
   const paginatedProducts = sortedProducts.slice(
     (safeCurrentPage - 1) * productsPerPage,
@@ -131,23 +131,23 @@ function matchesDiscountOption(
   product: ProductListItemResponse,
   discountOption: string
 ) {
-  if (discountOption === '전체') {
+  if (discountOption === 'all') {
     return true;
   }
 
-  if (discountOption === '40% 이상') {
+  if (discountOption === 'over-40') {
     return product.discountRate >= 40;
   }
 
-  if (discountOption === '30% ~ 40%') {
+  if (discountOption === '30-to-40') {
     return product.discountRate >= 30 && product.discountRate < 40;
   }
 
-  if (discountOption === '20% ~ 30%') {
+  if (discountOption === '20-to-30') {
     return product.discountRate >= 20 && product.discountRate < 30;
   }
 
-  if (discountOption === '20% 미만') {
+  if (discountOption === 'under-20') {
     return product.discountRate < 20;
   }
 
@@ -159,15 +159,15 @@ function compareProducts(
   b: ProductListItemResponse,
   sortOption: string
 ) {
-  if (sortOption === '마감 임박순') {
+  if (sortOption === 'deadline') {
     return new Date(a.endAt).getTime() - new Date(b.endAt).getTime();
   }
 
-  if (sortOption === '할인율 높은순') {
+  if (sortOption === 'discount-rate') {
     return b.discountRate - a.discountRate;
   }
 
-  if (sortOption === '가격 낮은순') {
+  if (sortOption === 'price-low') {
     return a.discountPrice - b.discountPrice;
   }
 
