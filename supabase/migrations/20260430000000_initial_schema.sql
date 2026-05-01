@@ -281,6 +281,10 @@ CREATE POLICY "products: owner all"
   ON products USING (
     auth.uid() = (SELECT user_id FROM stores WHERE id = store_id)
   );
+CREATE POLICY "products: owner insert"
+  ON products FOR INSERT WITH CHECK (
+    EXISTS (SELECT 1 FROM stores WHERE id = store_id AND user_id = auth.uid())
+  );
 
 ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "orders: buyer read"
@@ -293,6 +297,8 @@ CREATE POLICY "orders: seller read"
 ALTER TABLE wishlists ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "wishlists: owner all"
   ON wishlists USING (auth.uid() = user_id);
+CREATE POLICY "wishlists: owner insert"
+  ON wishlists FOR INSERT WITH CHECK (auth.uid() = user_id);
 
 -- ============================================================
 -- RPC helpers
