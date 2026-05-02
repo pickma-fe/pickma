@@ -1,3 +1,5 @@
+import { redirect } from 'next/navigation';
+
 export default function SellerPage() {
-  return <div>Seller Page</div>;
+  redirect('/seller/register');
 }
