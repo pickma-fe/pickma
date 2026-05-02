@@ -100,8 +100,11 @@ export function StoreInfoStep({ onSubmit }: StoreInfoStepProps) {
         />
 
         <div className="flex flex-col gap-1">
-          <label className="text-sm text-gray-500">가게 소개</label>
+          <label htmlFor="description" className="text-sm text-gray-500">
+            가게 소개
+          </label>
           <textarea
+            id="description"
             value={info.description}
             onChange={handleChange('description')}
             placeholder="가게를 소개해주세요"

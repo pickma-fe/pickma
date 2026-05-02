@@ -1,6 +1,6 @@
 'use client';
 
-import { FileIcon, UploadIcon, XIcon } from 'lucide-react';
+import { FileIcon, UploadIcon, X } from 'lucide-react';
 import { useState } from 'react';
 
 import { cn } from '@/lib/utils';
@@ -174,9 +174,10 @@ export function DocumentStep({ onSubmit }: DocumentStepProps) {
                   <button
                     type="button"
                     onClick={handleRemoveFile(doc.id)}
+                    aria-label={`${doc.title} 파일 삭제`}
                     className="rounded-full p-1 text-gray-400 hover:bg-gray-200 hover:text-gray-600"
                   >
-                    <XIcon className="h-4 w-4" />
+                    <X className="h-4 w-4" />
                   </button>
                 </div>
               ) : (
