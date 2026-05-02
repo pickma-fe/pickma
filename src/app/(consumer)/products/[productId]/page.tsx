@@ -43,6 +43,7 @@ export default async function ProductDetailPage({
                   <button
                     key={thumbnail}
                     type="button"
+                    aria-label={`${index + 1}번째 상품 이미지 보기`}
                     className="aspect-square rounded-md border border-gray-200 bg-gray-50 text-xs text-gray-400"
                   >
                     {index + 1}
