@@ -203,17 +203,17 @@ export function DocumentStep({ onSubmit }: DocumentStepProps) {
                       className="text-primary-500 hover:text-primary-600 cursor-pointer font-medium"
                     >
                       직접 선택
-                      <input
-                        type="file"
-                        id={doc.id}
-                        accept=".pdf,.jpg,.jpeg,.png"
-                        className="hidden"
-                        onChange={handleInputChange(doc.id)}
-                      />
                     </label>
                     하세요
                   </p>
                   <p className="text-xs text-gray-400">{doc.description}</p>
+                  <input
+                    type="file"
+                    id={doc.id}
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    className="sr-only"
+                    onChange={handleInputChange(doc.id)}
+                  />
                 </div>
               )}
 
