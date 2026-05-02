@@ -84,14 +84,18 @@ export function DocumentStep({ onSubmit }: DocumentStepProps) {
   };
 
   const handleFileChange = (id: string, file: File | null) => {
-    if (file) {
-      const error = validateFile(file);
-      if (error) {
-        setErrors((prev) => ({ ...prev, [id]: error }));
-        setFiles((prev) => ({ ...prev, [id]: null }));
-        return;
-      }
+    // 파일 선택 취소 시 무시
+    if (!file) {
+      return;
     }
+
+    const error = validateFile(file);
+    if (error) {
+      setErrors((prev) => ({ ...prev, [id]: error }));
+      setFiles((prev) => ({ ...prev, [id]: null }));
+      return;
+    }
+
     setFiles((prev) => ({ ...prev, [id]: file }));
     setErrors((prev) => ({ ...prev, [id]: '' }));
   };
@@ -120,6 +124,7 @@ export function DocumentStep({ onSubmit }: DocumentStepProps) {
 
   const handleRemoveFile = (id: string) => () => {
     setFiles((prev) => ({ ...prev, [id]: null }));
+    setErrors((prev) => ({ ...prev, [id]: '' }));
   };
 
   const validate = () => {
