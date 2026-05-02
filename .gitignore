@@ -63,3 +63,6 @@ AGENTS.override.md
 
 # Temporal files and directory
 temp/*
+
+# Supabase CLI local state
+supabase/.temp/

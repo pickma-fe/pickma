@@ -1,15 +1,17 @@
 import { createServerClient as createSupabaseServerClient } from '@supabase/ssr';
 import type { NextRequest, NextResponse } from 'next/server';
 
+import type { Database } from '@/lib/supabase/database';
+
 export function createProxyClient(
   request: NextRequest,
   response: NextResponse
 ) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
   if (!url || !key) throw new Error('Missing Supabase env vars');
 
-  return createSupabaseServerClient(url, key, {
+  return createSupabaseServerClient<Database>(url, key, {
     cookies: {
       getAll() {
         return request.cookies.getAll();

@@ -115,6 +115,7 @@ export const config = {
 src/lib/supabase/client.ts   # 브라우저용 Supabase client
 src/lib/supabase/server.ts   # Route Handler / Server Component용 Supabase client
 src/lib/supabase/proxy.ts    # proxy 세션 refresh용 helper
+src/lib/supabase/service.ts  # service_role 서버 전용 client (RPC 호출용)
 ```
 
 - Supabase browser/server/proxy client는 `@supabase/ssr` 기준으로 구현한다.
@@ -348,7 +349,6 @@ src/
     admin.ts
 
   types/
-    supabase.ts
     product.ts
     order.ts
     payment.ts
@@ -373,6 +373,11 @@ src/
   lib/
     errors/
     supabase/
+      client.ts
+      server.ts
+      proxy.ts
+      service.ts     # service_role 서버 전용 client
+      database.ts    # CLI generated, 직접 수정 금지
   mocks/
 ```
 
@@ -380,15 +385,15 @@ src/
 
 ## 10. 환경 변수
 
-| 변수명                          | 용도                          | 공개 여부 |
-| ------------------------------- | ----------------------------- | --------- |
-| `NEXT_PUBLIC_SUPABASE_URL`      | Supabase URL                  | Public    |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon key             | Public    |
-| `SUPABASE_SERVICE_ROLE_KEY`     | 관리자/서버 전용 Supabase key | Secret    |
-| `NEXT_PUBLIC_TOSS_CLIENT_KEY`   | Toss 클라이언트 키            | Public    |
-| `TOSS_SECRET_KEY`               | Toss Secret key               | Secret    |
-| `NEXT_PUBLIC_APP_URL`           | 앱 URL                        | Public    |
-| `API_MOCK_ENABLED`              | Route Handler mock 응답 여부  | Secret    |
+| 변수명                                 | 용도                          | 공개 여부 |
+| -------------------------------------- | ----------------------------- | --------- |
+| `NEXT_PUBLIC_SUPABASE_URL`             | Supabase URL                  | Public    |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Supabase Publishable key      | Public    |
+| `SUPABASE_SECRET_KEY`                  | 관리자/서버 전용 Supabase key | Secret    |
+| `NEXT_PUBLIC_TOSS_CLIENT_KEY`          | Toss 클라이언트 키            | Public    |
+| `TOSS_SECRET_KEY`                      | Toss Secret key               | Secret    |
+| `NEXT_PUBLIC_APP_URL`                  | 앱 URL                        | Public    |
+| `API_MOCK_ENABLED`                     | Route Handler mock 응답 여부  | Secret    |
 
 ---
 

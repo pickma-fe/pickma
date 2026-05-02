@@ -7,11 +7,7 @@ import type { CreateStoreRequest } from '@/contracts/store';
 import { storeApi } from '@/api/stores/storeApi';
 
 function toCreateStoreRequest(input: CreateStoreInput): CreateStoreRequest {
-  return {
-    ...input,
-    openTime: input.openTime?.toISOString(),
-    closeTime: input.closeTime?.toISOString(),
-  };
+  return { ...input };
 }
 
 export function useCreateStore() {

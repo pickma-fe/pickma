@@ -214,6 +214,8 @@ export interface OrderItem {
 export interface Order {
   id: string;
   orderNumber: string;
+  storeOrderNumber?: string;
+  pickupNumber?: string;
   userId: string;
   storeId: string;
   storeName: string;
@@ -222,6 +224,7 @@ export interface Order {
   paymentAmount: number;
   status: OrderStatus;
   pickupAt: Date;
+  pickupServiceDate: Date;
   expiresAt?: Date;
   pickedUpAt?: Date;
   cancelledAt?: Date;
@@ -232,6 +235,13 @@ export interface Order {
   updatedAt: Date;
 }
 ```
+
+주문번호 정책:
+
+- `orderNumber`는 PG 결제와 전체 주문 추적에 사용하는 전역 고유 번호다. 주문 생성 시 생성하고 결제 결과와 무관하게 변경하지 않는다.
+- `storeOrderNumber`와 `pickupNumber`는 결제 완료 후 판매자 운영/현장 픽업 확인을 위해 부여한다. 결제 대기 또는 만료 주문에는 없을 수 있다.
+- `pickupServiceDate`는 `pickupAt`의 날짜 부분이며, 매장별 일별 순번 기준이다.
+- 취소/환불/노쇼가 발생해도 이미 부여된 `storeOrderNumber`와 `pickupNumber`는 회수하거나 재사용하지 않는다.
 
 주문 생성 후 결제 위젯에 전달할 정보는 별도 Domain 결과로 둔다.
 

@@ -25,8 +25,8 @@ export interface Product {
   reservedStock: number;
   availableStock: number;
   endAt: Date;
-  pickupStartTime: Date;
-  pickupEndTime: Date;
+  pickupStartTime: string;
+  pickupEndTime: string;
   status: ProductStatus;
   isSoldOut: boolean;
   isExpired: boolean;

@@ -6,18 +6,19 @@
 
 # 1. 테이블 목록
 
-| 테이블명          | 설명             | 비고                        |
-| ----------------- | ---------------- | --------------------------- |
-| `users`           | 사용자           | 소비자, 판매자, 관리자 통합 |
-| `social_accounts` | 소셜 로그인 계정 | Google, Kakao               |
-| `stores`          | 가게             | 판매자 1:1                  |
-| `categories`      | 카테고리         | 상품 분류                   |
-| `menu_items`      | 메뉴             | 판매자가 등록하는 기본 메뉴 |
-| `products`        | 상품             | 실제 판매 상품              |
-| `orders`          | 주문             | 예약 정보                   |
-| `order_items`     | 주문 상품        | 주문-상품 연결              |
-| `payments`        | 결제             | PG 결제 정보                |
-| `wishlists`       | 찜               | 관심 가게                   |
+| 테이블명                | 설명             | 비고                        |
+| ----------------------- | ---------------- | --------------------------- |
+| `users`                 | 사용자           | 소비자, 판매자, 관리자 통합 |
+| `social_accounts`       | 소셜 로그인 계정 | Google, Kakao               |
+| `stores`                | 가게             | 판매자 1:1                  |
+| `categories`            | 카테고리         | 상품 분류                   |
+| `menu_items`            | 메뉴             | 판매자가 등록하는 기본 메뉴 |
+| `products`              | 상품             | 실제 판매 상품              |
+| `orders`                | 주문             | 예약 정보                   |
+| `order_items`           | 주문 상품        | 주문-상품 연결              |
+| `payments`              | 결제             | PG 결제 정보                |
+| `wishlists`             | 찜               | 관심 가게                   |
+| `store_order_sequences` | 매장 주문 순번   | 매장+픽업일 기준 순번 관리  |
 
 ---
 
@@ -69,8 +70,8 @@
 | `address_detail`  | varchar(255) |                                 | 상세 주소      |
 | `region`          | varchar(50)  | NOT NULL                        | 지역           |
 | `image`           | varchar(500) |                                 | 이미지         |
-| `open_time`       | timestamp    |                                 | 영업 시작      |
-| `close_time`      | timestamp    |                                 | 영업 종료      |
+| `open_time`       | time         |                                 | 영업 시작      |
+| `close_time`      | time         |                                 | 영업 종료      |
 | `status`          | enum         | NOT NULL, DEFAULT 'pending'     | 상태           |
 | `reject_reason`   | varchar(500) |                                 | 거절 사유      |
 | `created_at`      | timestamp    | NOT NULL, DEFAULT now()         | 생성일시       |
@@ -118,8 +119,8 @@
 | `stock`             | int       | NOT NULL, DEFAULT 0          | 총 재고   |
 | `reserved_stock`    | int       | NOT NULL, DEFAULT 0          | 예약 재고 |
 | `end_at`            | timestamp | NOT NULL                     | 판매 마감 |
-| `pickup_start_time` | timestamp | NOT NULL                     | 픽업 시작 |
-| `pickup_end_time`   | timestamp | NOT NULL                     | 픽업 종료 |
+| `pickup_start_time` | time      | NOT NULL                     | 픽업 시작 |
+| `pickup_end_time`   | time      | NOT NULL                     | 픽업 종료 |
 | `status`            | enum      | NOT NULL, DEFAULT 'active'   | 상태      |
 | `created_at`        | timestamp | NOT NULL, DEFAULT now()      | 생성일시  |
 | `updated_at`        | timestamp | NOT NULL, DEFAULT now()      | 수정일시  |
@@ -148,23 +149,27 @@
 
 ## 2.7 orders (주문)
 
-| 컬럼명            | 타입         | 제약조건                            | 설명      |
-| ----------------- | ------------ | ----------------------------------- | --------- |
-| `id`              | uuid         | PK                                  | 주문 ID   |
-| `order_number`    | varchar(20)  | UNIQUE, NOT NULL                    | 주문번호  |
-| `user_id`         | uuid         | FK → users.id, NOT NULL             | 사용자    |
-| `store_id`        | uuid         | FK → stores.id, NOT NULL            | 가게      |
-| `total_amount`    | int          | NOT NULL                            | 총 금액   |
-| `discount_amount` | int          | NOT NULL                            | 할인 금액 |
-| `payment_amount`  | int          | NOT NULL                            | 결제 금액 |
-| `status`          | enum         | NOT NULL, DEFAULT 'payment_pending' | 상태      |
-| `pickup_at`       | timestamp    | NOT NULL                            | 픽업 시간 |
-| `expires_at`      | timestamp    |                                     | 결제 만료 |
-| `picked_up_at`    | timestamp    |                                     | 픽업 완료 |
-| `cancelled_at`    | timestamp    |                                     | 취소 시간 |
-| `cancel_reason`   | varchar(500) |                                     | 사유      |
-| `created_at`      | timestamp    | NOT NULL, DEFAULT now()             | 생성일시  |
-| `updated_at`      | timestamp    | NOT NULL, DEFAULT now()             | 수정일시  |
+| 컬럼명                 | 타입         | 제약조건                            | 설명                           |
+| ---------------------- | ------------ | ----------------------------------- | ------------------------------ |
+| `id`                   | uuid         | PK                                  | 주문 ID                        |
+| `order_number`         | varchar(20)  | UNIQUE, NOT NULL                    | 전역 주문번호, PG 주문 ID 매핑 |
+| `user_id`              | uuid         | FK → users.id, NOT NULL             | 사용자                         |
+| `store_id`             | uuid         | FK → stores.id, NOT NULL            | 가게                           |
+| `total_amount`         | int          | NOT NULL                            | 총 금액                        |
+| `discount_amount`      | int          | NOT NULL                            | 할인 금액                      |
+| `payment_amount`       | int          | NOT NULL                            | 결제 금액                      |
+| `status`               | enum         | NOT NULL, DEFAULT 'payment_pending' | 상태                           |
+| `pickup_at`            | timestamp    | NOT NULL                            | 사용자가 선택한 픽업 시간      |
+| `pickup_service_date`  | date         | NOT NULL                            | 픽업 운영 기준일               |
+| `store_order_sequence` | int          |                                     | 매장+픽업일 기준 결제완료 순번 |
+| `store_order_number`   | varchar(16)  |                                     | 판매자 운영용 주문번호         |
+| `pickup_number`        | varchar(4)   |                                     | 매장 현장 픽업번호             |
+| `expires_at`           | timestamp    |                                     | 결제 만료                      |
+| `picked_up_at`         | timestamp    |                                     | 픽업 완료                      |
+| `cancelled_at`         | timestamp    |                                     | 취소 시간                      |
+| `cancel_reason`        | varchar(500) |                                     | 사유                           |
+| `created_at`           | timestamp    | NOT NULL, DEFAULT now()             | 생성일시                       |
+| `updated_at`           | timestamp    | NOT NULL, DEFAULT now()             | 수정일시                       |
 
 ### 주문 정책
 
@@ -183,6 +188,33 @@
 - 초기 구현은 API 진입 시 lazy cleanup과 결제 confirm 시점 검사를 함께 사용한다.
 - scheduled job/cron 기반 정리는 MVP 이후 안정화 단계에서 추가한다.
 
+### 주문번호 정책
+
+- `order_number`는 PickMa의 전역 고유 주문번호이며 PG 결제 요청의 주문 ID 필드에 그대로 매핑한다.
+  - Toss Payments: `orderId = order_number`
+  - 다른 PG 사용 시에도 해당 PG의 주문번호 필드(`merchant_uid`, `oid`, `orderNo` 등)에 매핑한다.
+- `order_number`는 주문 생성(`payment_pending`) 시점에 생성하고, 결제 성공/실패/만료와 무관하게 변경하지 않는다.
+- 형식은 `PM` + 주문 생성일 `YYYYMMDD` + 10자리 대문자 HEX token을 사용한다.
+  - 예: `PM20260430A1B2C3D4E5`
+  - 길이: 20자 (`varchar(20)`)
+  - 10자리 HEX 조합 수: `16^10 = 1,099,511,627,776`
+  - 날짜 prefix로 조합 공간이 생성일별로 분리된다.
+  - 하루 100,000건 생성 시 단순 birthday approximation 충돌 확률은 약 0.45%이며, DB `UNIQUE` 충돌 시 RPC에서 재시도한다.
+- `store_order_number`와 `pickup_number`는 결제 완료(`reserved`) 시점에 생성한다. 결제 대기 또는 만료 주문에는 부여하지 않는다.
+- `pickup_service_date`는 `pickup_at`의 날짜 부분이며, 매장 운영 번호의 sequence bucket 기준이다.
+- `store_order_sequence`는 `(store_id, pickup_service_date)` 기준 결제 완료 순서이다. 취소/환불/노쇼가 발생해도 회수하거나 재사용하지 않는다.
+- `store_order_number` 형식은 `pickup_service_date(YYYYMMDD)` + `-` + 7자리 sequence이다.
+  - 예: `20260501-0000001`
+- `pickup_number`는 같은 `store_order_sequence`에서 파생한다.
+  - `1` → `A-01`, `99` → `A-99`, `100` → `B-01`, `2574` → `Z-99`
+  - 매장+픽업일 기준 최대 `26 * 99 = 2,574`건이며, 초과 시 주문 확정을 실패 처리한다.
+
+**UNIQUE:**
+
+- `(store_id, pickup_service_date, store_order_sequence)` where `store_order_sequence IS NOT NULL`
+- `(store_id, pickup_service_date, store_order_number)` where `store_order_number IS NOT NULL`
+- `(store_id, pickup_service_date, pickup_number)` where `pickup_number IS NOT NULL`
+
 ---
 
 ## 2.8 order_items (주문 상품)
@@ -197,7 +229,7 @@
 | `discount_price` | int          | NOT NULL                   | 할인가      |
 | `quantity`       | int          | NOT NULL                   | 수량        |
 | `subtotal`       | int          | NOT NULL                   | 소계        |
-| `created_at`     | timestamp    | DEFAULT now()              | 생성일      |
+| `created_at`     | timestamp    | NOT NULL, DEFAULT now()    | 생성일      |
 
 ---
 
@@ -233,12 +265,34 @@
 
 ---
 
+## 2.11 store_order_sequences (매장 주문 순번)
+
+| 컬럼명                | 타입      | 제약조건                 | 설명                            |
+| --------------------- | --------- | ------------------------ | ------------------------------- |
+| `store_id`            | uuid      | FK → stores.id, NOT NULL | 가게                            |
+| `pickup_service_date` | date      | NOT NULL                 | 픽업 운영 기준일                |
+| `last_sequence`       | int       | NOT NULL, DEFAULT 0      | 마지막으로 발급한 결제완료 순번 |
+| `created_at`          | timestamp | NOT NULL, DEFAULT now()  | 생성일시                        |
+| `updated_at`          | timestamp | NOT NULL, DEFAULT now()  | 수정일시                        |
+
+**PK 또는 UNIQUE:** `(store_id, pickup_service_date)`
+
+### 순번 발급 정책
+
+- `confirm_payment` RPC에서 결제 승인 후 `store_order_sequences`를 증가시키고 발급된 값을 `orders.store_order_sequence`에 저장한다.
+- 동시 결제에서도 중복 순번이 생기지 않도록 `INSERT ... ON CONFLICT ... DO UPDATE SET last_sequence = last_sequence + 1 RETURNING last_sequence` 형태로 row lock을 사용한다.
+- `last_sequence > 2574`이면 `pickup_number`를 만들 수 없으므로 주문 확정을 실패 처리한다. Phase 7 결제 구현에서는 PG 승인 전 capacity 선검사 또는 승인 후 자동 취소/환불 정책을 함께 확정한다.
+
+---
+
 # 3. 인덱스 설계
 
 - users(email)
 - stores(region, status)
 - products(store_id, status, end_at)
 - orders(user_id, store_id, created_at)
+- orders(store_id, pickup_service_date, store_order_sequence)
+- store_order_sequences(store_id, pickup_service_date)
 
 ---
 
@@ -255,6 +309,7 @@ menu_items 1:N products
 products 1:N order_items
 orders 1:N order_items
 orders 1:1 payments
+stores 1:N store_order_sequences
 ```
 
 ---
@@ -283,7 +338,7 @@ orders 1:1 payments
 # 7. 핵심 설계 요약
 
 - 재고: reserved_stock 기반
-- 시간: timestamp 통일
+- 시간: timestamp 통일, 단 open_time/close_time/pickup_start_time/pickup_end_time은 time, pickup_service_date는 date
 - 상품: menu + product 분리
 - 주문: 단일 가게 구조
 - 만료: expires_at 기반 처리

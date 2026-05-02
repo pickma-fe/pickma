@@ -308,6 +308,10 @@ Behavior:
 - 상품 판매 가능 상태, 재고, 마감 시간을 검증한다.
 - Postgres RPC/transaction으로 `reserved_stock` 증가와 주문 생성을 atomic하게 처리한다.
 - 주문 상태는 `payment_pending`으로 생성한다.
+- `orderNumber`는 전역 고유 주문번호로 생성하며 PG 결제 요청의 주문 ID 필드에 그대로 매핑한다.
+- `orderNumber` 형식은 `PM` + 주문 생성일 `YYYYMMDD` + 10자리 대문자 HEX token이다. 예: `PM20260430A1B2C3D4E5`.
+- `pickupServiceDate`는 `pickupAt`의 날짜 부분으로 저장한다.
+- `storeOrderNumber`와 `pickupNumber`는 결제 완료 전에는 생성하지 않는다.
 - `expiresAt`은 주문 생성 시점 기준 결제 가능 만료 시간으로 설정한다. 초기 기준값은 생성 후 10분으로 둔다.
 - Toss 결제 위젯에 필요한 `orderNumber`, `orderName`, `paymentAmount`를 반환한다.
 
@@ -342,6 +346,31 @@ export interface OrderListParams {
 Response:
 
 ```ts
+export interface OrderListItemResponse {
+  id: string;
+  orderNumber: string;
+  storeOrderNumber?: string;
+  pickupNumber?: string;
+  storeId: string;
+  storeName: string;
+  totalAmount: number;
+  discountAmount: number;
+  paymentAmount: number;
+  status:
+    | 'payment_pending'
+    | 'reserved'
+    | 'ready'
+    | 'completed'
+    | 'cancelled'
+    | 'no_show'
+    | 'expired';
+  pickupAt: string;
+  pickupServiceDate: string;
+  expiresAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export type OrderListResponse = PaginatedResult<OrderListItemResponse>;
 ```
 
@@ -380,7 +409,10 @@ Behavior:
 - DB의 주문 금액과 `amount`가 일치하는지 검증한다.
 - Toss `POST /v1/payments/confirm`을 서버에서 호출한다.
 - 성공 시 `payments`를 저장하고 `orders` 상태를 확정한다.
-- 결제 확정 시 Postgres RPC/transaction으로 `orders.status = reserved`, `stock` 감소, `reserved_stock` 감소를 atomic하게 처리한다.
+- 결제 확정 시 Postgres RPC/transaction으로 `orders.status = reserved`, `stock` 감소, `reserved_stock` 감소, 매장 운영 번호 발급을 atomic하게 처리한다.
+- `storeOrderNumber`는 `pickupServiceDate(YYYYMMDD)` + `-` + 7자리 매장별/픽업일별 결제완료 sequence로 생성한다. 예: `20260501-0000001`.
+- `pickupNumber`는 같은 sequence에서 `A-01`부터 `Z-99`까지 생성한다. 매장+픽업일 기준 2,574건을 초과하면 주문 확정 실패로 처리한다.
+- 취소/환불/노쇼가 발생해도 이미 발급된 `storeOrderNumber`와 `pickupNumber`는 회수하거나 재사용하지 않는다.
 - 결제 Secret key는 서버에서만 사용한다.
 
 ### 5.2 결제 만료 처리
@@ -524,21 +556,51 @@ Wishlist는 MVP 이후 기능으로 둔다.
 
 초기 에러 코드는 `src/lib/errors`에서 중앙 관리한다.
 
-| Code                      | HTTP | 메시지                            |
-| ------------------------- | ---- | --------------------------------- |
-| `UNAUTHORIZED`            | 401  | 로그인이 필요합니다.              |
-| `FORBIDDEN`               | 403  | 접근 권한이 없습니다.             |
-| `VALIDATION_ERROR`        | 400  | 요청 값이 올바르지 않습니다.      |
-| `NOT_FOUND`               | 404  | 요청한 리소스를 찾을 수 없습니다. |
-| `PRODUCT_NOT_FOUND`       | 404  | 상품을 찾을 수 없습니다.          |
-| `ORDER_NOT_FOUND`         | 404  | 주문을 찾을 수 없습니다.          |
-| `STORE_NOT_FOUND`         | 404  | 가게를 찾을 수 없습니다.          |
-| `STORE_NOT_APPROVED`      | 403  | 승인된 가게만 사용할 수 있습니다. |
-| `STORE_ALREADY_EXISTS`    | 409  | 이미 등록된 가게가 있습니다.      |
-| `OUT_OF_STOCK`            | 409  | 재고가 부족합니다.                |
-| `PRODUCT_EXPIRED`         | 409  | 판매가 마감된 상품입니다.         |
-| `ORDER_EXPIRED`           | 409  | 결제 가능 시간이 만료되었습니다.  |
-| `PAYMENT_AMOUNT_MISMATCH` | 400  | 결제 금액이 일치하지 않습니다.    |
-| `PAYMENT_CONFIRM_FAILED`  | 502  | 결제 승인에 실패했습니다.         |
-| `NOT_IMPLEMENTED`         | 501  | 아직 구현되지 않은 API입니다.     |
-| `INTERNAL_SERVER_ERROR`   | 500  | 서버 오류가 발생했습니다.         |
+### RPC 내부 예외 매핑 정책
+
+RPC에서 raise하는 예외는 아래 정책으로 API error code로 변환한다.
+
+| RPC 예외                      | API 변환                         | 발생 RPC                                                   |
+| ----------------------------- | -------------------------------- | ---------------------------------------------------------- |
+| `EMPTY_ITEMS`                 | `VALIDATION_ERROR` 400           | `create_order`                                             |
+| `INVALID_ITEM_FORMAT`         | `VALIDATION_ERROR` 400           | `create_order`                                             |
+| `INVALID_PICKUP_TIME`         | `VALIDATION_ERROR` 400           | `create_order`                                             |
+| `MULTIPLE_STORES_NOT_ALLOWED` | `VALIDATION_ERROR` 400           | `create_order`                                             |
+| `PRODUCT_NOT_FOUND`           | `PRODUCT_NOT_FOUND` 404          | `create_order`                                             |
+| `PRODUCT_EXPIRED`             | `PRODUCT_EXPIRED` 409            | `create_order`                                             |
+| `PRODUCT_NOT_AVAILABLE`       | `PRODUCT_NOT_AVAILABLE` 409      | `create_order`                                             |
+| `OUT_OF_STOCK`                | `OUT_OF_STOCK` 409               | `create_order`                                             |
+| `DUPLICATE_PRODUCT_IN_ORDER`  | `DUPLICATE_PRODUCT_IN_ORDER` 400 | `create_order`                                             |
+| `ORDER_NUMBER_EXHAUSTED`      | `ORDER_NUMBER_EXHAUSTED` 503     | `create_order`                                             |
+| `ORDER_NOT_FOUND`             | `ORDER_NOT_FOUND` 404            | `check_pickup_capacity`, `confirm_payment`, `expire_order` |
+| `ORDER_EXPIRED`               | `ORDER_EXPIRED` 409              | `confirm_payment`                                          |
+| `PAYMENT_AMOUNT_MISMATCH`     | `PAYMENT_AMOUNT_MISMATCH` 400    | `confirm_payment`                                          |
+| `PICKUP_NUMBER_EXHAUSTED`     | `PICKUP_NUMBER_EXHAUSTED` 409    | `confirm_payment`                                          |
+| `INVALID_ORDER_STATUS`        | `VALIDATION_ERROR` 400           | `confirm_payment`, `expire_order`                          |
+| `ORDER_NOT_EXPIRED`           | `VALIDATION_ERROR` 400           | `expire_order`                                             |
+| `NOT_IMPLEMENTED`             | `NOT_IMPLEMENTED` 501            | `cancel_order`                                             |
+
+`create_order`의 validation 예외는 Zod 스키마 검증이 선행되므로 정상 흐름에서는 도달하지 않아야 한다.
+
+| Code                         | HTTP | 메시지                              |
+| ---------------------------- | ---- | ----------------------------------- |
+| `UNAUTHORIZED`               | 401  | 로그인이 필요합니다.                |
+| `FORBIDDEN`                  | 403  | 접근 권한이 없습니다.               |
+| `VALIDATION_ERROR`           | 400  | 요청 값이 올바르지 않습니다.        |
+| `NOT_FOUND`                  | 404  | 요청한 리소스를 찾을 수 없습니다.   |
+| `PRODUCT_NOT_FOUND`          | 404  | 상품을 찾을 수 없습니다.            |
+| `ORDER_NOT_FOUND`            | 404  | 주문을 찾을 수 없습니다.            |
+| `STORE_NOT_FOUND`            | 404  | 가게를 찾을 수 없습니다.            |
+| `STORE_NOT_APPROVED`         | 403  | 승인된 가게만 사용할 수 있습니다.   |
+| `STORE_ALREADY_EXISTS`       | 409  | 이미 등록된 가게가 있습니다.        |
+| `OUT_OF_STOCK`               | 409  | 재고가 부족합니다.                  |
+| `PRODUCT_EXPIRED`            | 409  | 판매가 마감된 상품입니다.           |
+| `PRODUCT_NOT_AVAILABLE`      | 409  | 구매할 수 없는 상품입니다.          |
+| `ORDER_EXPIRED`              | 409  | 결제 가능 시간이 만료되었습니다.    |
+| `DUPLICATE_PRODUCT_IN_ORDER` | 400  | 주문 항목에 중복된 상품이 있습니다. |
+| `PAYMENT_AMOUNT_MISMATCH`    | 400  | 결제 금액이 일치하지 않습니다.      |
+| `PAYMENT_CONFIRM_FAILED`     | 502  | 결제 승인에 실패했습니다.           |
+| `ORDER_NUMBER_EXHAUSTED`     | 503  | 주문번호가 모두 소진되었습니다.     |
+| `PICKUP_NUMBER_EXHAUSTED`    | 409  | 픽업 번호가 모두 소진되었습니다.    |
+| `NOT_IMPLEMENTED`            | 501  | 아직 구현되지 않은 API입니다.       |
+| `INTERNAL_SERVER_ERROR`      | 500  | 서버 오류가 발생했습니다.           |
