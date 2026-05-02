@@ -108,21 +108,31 @@ export default async function ProductDetailPage({
 
         <section className="mx-auto max-w-450 px-6 pb-16">
           <div className="border-b border-gray-200">
-            <nav className="flex gap-10">
+            <nav
+              className="flex gap-10"
+              role="tablist"
+              aria-label="상품 상세 정보"
+            >
               <button
                 type="button"
+                role="tab"
+                aria-selected="true"
                 className="border-primary-500 text-primary-500 border-b-2 px-2 py-4 text-sm font-semibold"
               >
                 상세정보
               </button>
               <button
                 type="button"
+                role="tab"
+                aria-selected="false"
                 className="px-2 py-4 text-sm font-semibold text-gray-600"
               >
                 리뷰
               </button>
               <button
                 type="button"
+                role="tab"
+                aria-selected="false"
                 className="px-2 py-4 text-sm font-semibold text-gray-600"
               >
                 매장 정보

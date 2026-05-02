@@ -20,11 +20,19 @@ export function ProductReservationPanel({
       <div className="mb-6">
         <p className="mb-3 text-sm font-semibold text-gray-900">수량 선택</p>
         <div className="flex w-fit items-center rounded-md border border-gray-200">
-          <button type="button" className="px-4 py-2 text-gray-600">
+          <button
+            type="button"
+            aria-label="수량 감소"
+            className="px-4 py-2 text-gray-600"
+          >
             -
           </button>
           <span className="px-4 py-2 text-sm font-medium">1</span>
-          <button type="button" className="px-4 py-2 text-gray-600">
+          <button
+            type="button"
+            aria-label="수량 증가"
+            className="px-4 py-2 text-gray-600"
+          >
             +
           </button>
         </div>
