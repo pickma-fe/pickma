@@ -88,6 +88,7 @@ export function DocumentStep({ onSubmit }: DocumentStepProps) {
       const error = validateFile(file);
       if (error) {
         setErrors((prev) => ({ ...prev, [id]: error }));
+        setFiles((prev) => ({ ...prev, [id]: null }));
         return;
       }
     }

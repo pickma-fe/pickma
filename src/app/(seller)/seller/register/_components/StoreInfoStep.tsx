@@ -38,19 +38,19 @@ export function StoreInfoStep({ onSubmit }: StoreInfoStepProps) {
   const validate = () => {
     const newErrors: Partial<StoreInfo> = {};
 
-    if (!info.storeName) {
+    if (!info.storeName.trim()) {
       newErrors.storeName = '가게명을 입력해주세요.';
     }
 
-    if (!info.category) {
+    if (!info.category.trim()) {
       newErrors.category = '카테고리를 선택해주세요.';
     }
 
-    if (!info.phone) {
+    if (!info.phone.trim()) {
       newErrors.phone = '전화번호를 입력해주세요.';
     }
 
-    if (!info.address) {
+    if (!info.address.trim()) {
       newErrors.address = '주소를 입력해주세요.';
     }
 

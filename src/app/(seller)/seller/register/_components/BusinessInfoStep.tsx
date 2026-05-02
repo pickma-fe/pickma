@@ -39,21 +39,21 @@ export function BusinessInfoStep({ onNext }: BusinessInfoStepProps) {
   const validate = () => {
     const newErrors: Partial<BusinessInfo> = {};
 
-    if (!info.businessNumber) {
+    if (!info.businessNumber.trim()) {
       newErrors.businessNumber = '사업자등록번호를 입력해주세요.';
     } else if (!/^\d{10}$/.test(info.businessNumber.replace(/-/g, ''))) {
       newErrors.businessNumber = '올바른 사업자등록번호를 입력해주세요.';
     }
 
-    if (!info.companyName) {
+    if (!info.companyName.trim()) {
       newErrors.companyName = '상호명을 입력해주세요.';
     }
 
-    if (!info.representativeName) {
+    if (!info.representativeName.trim()) {
       newErrors.representativeName = '대표자명을 입력해주세요.';
     }
 
-    if (!info.businessAddress) {
+    if (!info.businessAddress.trim()) {
       newErrors.businessAddress = '사업장 주소를 입력해주세요.';
     }
 

@@ -29,13 +29,12 @@ export function StepModal({
             <button
               type="button"
               onClick={onClose}
+              aria-label="닫기"
               className="text-gray-400 hover:text-gray-500"
             >
               <XIcon className="h-5 w-5" />
             </button>
           </div>
-
-          {/* 컨텐츠 - 스크롤 가능 */}
           <div className="flex-1 overflow-y-auto p-6">{children}</div>
         </DialogPanel>
       </div>
