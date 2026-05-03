@@ -84,7 +84,6 @@ export function DocumentStep({ onSubmit }: DocumentStepProps) {
   };
 
   const handleFileChange = (id: string, file: File | null) => {
-    // 파일 선택 취소 시 무시
     if (!file) {
       return;
     }
@@ -104,6 +103,7 @@ export function DocumentStep({ onSubmit }: DocumentStepProps) {
     (id: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0] ?? null;
       handleFileChange(id, file);
+      e.target.value = '';
     };
 
   const handleDrop = (id: string) => (e: React.DragEvent) => {
