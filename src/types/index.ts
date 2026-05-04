@@ -1,10 +1,4 @@
-export type {
-  AuthProvider,
-  AuthUser,
-  User,
-  UserRole,
-  UserStatus,
-} from './user';
+export type { AuthProvider, AuthResult, AuthSession, AuthUser } from './auth';
 export type {
   CreatedOrderPaymentInfo,
   Order,
@@ -20,3 +14,4 @@ export type {
   ProductDisplayStatus,
   ProductStatus,
 } from './product';
+export type { User, UserRole, UserStatus } from './user';
