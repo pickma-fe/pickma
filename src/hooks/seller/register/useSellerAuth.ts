@@ -25,7 +25,7 @@ const INITIAL_AUTH_STATE: AuthStepState = {
 
 export function useSellerAuth() {
   const [authState, setAuthState] = useState<AuthStepState>(INITIAL_AUTH_STATE);
-  const timersRef = useRef<NodeJS.Timeout[]>([]);
+  const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   useEffect(() => {
     return () => {

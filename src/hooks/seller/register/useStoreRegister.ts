@@ -20,7 +20,7 @@ const INITIAL_STORE_STATE: StoreStepState = {
 export function useStoreRegister() {
   const [storeState, setStoreState] =
     useState<StoreStepState>(INITIAL_STORE_STATE);
-  const timersRef = useRef<NodeJS.Timeout[]>([]);
+  const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   useEffect(() => {
     return () => {
