@@ -136,17 +136,18 @@ function LoginForm({ next, onClose, onChangeView }: LoginFormProps) {
     }
   }
 
-  function handleOAuthLogin(provider: OAuthProvider) {
+  async function handleOAuthLogin(provider: OAuthProvider) {
     setPendingProvider(provider);
-    const request =
-      provider === 'google'
-        ? authApi.signInWithGoogle(next)
-        : authApi.signInWithKakao(next);
-
-    request.catch((err: unknown) => {
+    try {
+      if (provider === 'google') {
+        await authApi.signInWithGoogle(next);
+      } else {
+        await authApi.signInWithKakao(next);
+      }
+    } catch (err) {
       setPendingProvider(null);
       setError('root', { message: mapAuthError(err) });
-    });
+    }
   }
 
   return (
