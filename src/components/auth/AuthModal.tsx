@@ -51,16 +51,21 @@ function mapAuthError(error: unknown): string {
   return '요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.';
 }
 
+const trimmedEmail = z
+  .string()
+  .trim()
+  .pipe(z.email('올바른 이메일을 입력해 주세요.'));
+
 const loginSchema = z.object({
-  email: z.email('올바른 이메일을 입력해 주세요.'),
+  email: trimmedEmail,
   password: z.string().min(1, '비밀번호를 입력해 주세요.'),
 });
 type LoginFields = z.infer<typeof loginSchema>;
 
 const signupSchema = z
   .object({
-    name: z.string().min(1, '이름을 입력해 주세요.'),
-    email: z.email('올바른 이메일을 입력해 주세요.'),
+    name: z.string().trim().min(1, '이름을 입력해 주세요.'),
+    email: trimmedEmail,
     password: z.string().min(8, '비밀번호는 8자 이상으로 입력해 주세요.'),
     passwordConfirm: z.string(),
   })
@@ -71,7 +76,7 @@ const signupSchema = z
 type SignupFields = z.infer<typeof signupSchema>;
 
 const resetSchema = z.object({
-  email: z.email('올바른 이메일을 입력해 주세요.'),
+  email: trimmedEmail,
 });
 type ResetFields = z.infer<typeof resetSchema>;
 
