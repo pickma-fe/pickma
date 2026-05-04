@@ -4,14 +4,14 @@ import type { NextRequest } from 'next/server';
 import { createProxyClient } from '@/lib/supabase/proxy';
 
 const CONSUMER_PROTECTED = ['/order', '/payment', '/mypage'];
-const SELLER_PROTECTED = [
-  '/seller/register',
-  '/seller/pending',
-  '/seller/dashboard',
-  '/seller/products',
-  '/seller/orders',
-  '/seller/store',
-];
+// const SELLER_PROTECTED = [
+//   '/seller/register',
+//   '/seller/pending',
+//   '/seller/dashboard',
+//   '/seller/products',
+//   '/seller/orders',
+//   '/seller/store',
+// ];
 const ADMIN_PROTECTED = ['/admin'];
 
 function matchesAnyPrefix(pathname: string, prefixes: string[]): boolean {
@@ -40,14 +40,14 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
     // Phase 3: DB role check for admin
   }
 
-  if (matchesAnyPrefix(pathname, SELLER_PROTECTED)) {
-    if (!user) {
-      return NextResponse.redirect(
-        new URL(`/seller?auth=required&next=${next}`, request.url)
-      );
-    }
-    // Phase 3: store approval check for seller dashboard routes
-  }
+  // if (matchesAnyPrefix(pathname, SELLER_PROTECTED)) {
+  //   if (!user) {
+  //     return NextResponse.redirect(
+  //       new URL(`/seller?auth=required&next=${next}`, request.url)
+  //     );
+  //   }
+  //   // Phase 3: store approval check for seller dashboard routes
+  // }
 
   if (matchesAnyPrefix(pathname, CONSUMER_PROTECTED)) {
     if (!user) {

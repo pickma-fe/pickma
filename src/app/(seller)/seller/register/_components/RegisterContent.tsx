@@ -2,13 +2,10 @@
 
 import { useState } from 'react';
 
+import { useSellerAuth } from '@/hooks/seller/register/useSellerAuth';
+import { useStoreRegister } from '@/hooks/seller/register/useStoreRegister';
 import { Button } from '@/components/common/Button/Button';
 import { Section } from '@/components/common/Section/Section';
-import {
-  mockSellerAuthState,
-  mockStoreRegisterState,
-  type MockStoreStepState,
-} from '@/mocks/seller';
 
 import { AuthStepList } from './AuthStepList';
 import { BusinessInfoStep } from './BusinessInfoStep';
@@ -18,73 +15,42 @@ import { StepModal } from './StepModal';
 import { StoreInfoStep } from './StoreInfoStep';
 import { StoreStepList } from './StoreStepList';
 import { TermsStep } from './TermsStep';
-import type { AuthStepState, ModalType } from './types';
+import type { ModalType } from './types';
 
 export function RegisterContent() {
   const [activeModal, setActiveModal] = useState<ModalType>(null);
-  const [authState, setAuthState] =
-    useState<AuthStepState>(mockSellerAuthState);
-  const [storeState, setStoreState] = useState<MockStoreStepState>(
-    mockStoreRegisterState
-  );
+
+  const {
+    authState,
+    isAuthCompleted,
+    handleTermsComplete,
+    handleBusinessInfoComplete,
+    handleDocumentComplete,
+  } = useSellerAuth();
+
+  const { storeState, handleStoreInfoComplete } = useStoreRegister();
 
   const handleCloseModal = () => setActiveModal(null);
 
-  const handleTermsComplete = () => {
-    setAuthState((prev) => ({ ...prev, termsAgreed: true }));
+  const onTermsComplete = () => {
+    handleTermsComplete();
     handleCloseModal();
   };
 
-  const handleBusinessInfoComplete = () => {
-    setAuthState((prev) => ({ ...prev, businessInfoSubmitted: true }));
+  const onBusinessInfoComplete = () => {
+    handleBusinessInfoComplete();
     handleCloseModal();
   };
 
-  const handleDocumentComplete = () => {
-    setAuthState((prev) => ({
-      ...prev,
-      documentsSubmitted: true,
-      reviewStatus: 'pending',
-    }));
+  const onDocumentComplete = () => {
+    handleDocumentComplete();
     handleCloseModal();
-
-    // Test (API 연동 시 삭제)
-    setTimeout(() => {
-      setAuthState((prev) => ({ ...prev, reviewStatus: 'reviewing' }));
-    }, 3000);
-
-    setTimeout(() => {
-      setAuthState((prev) => ({ ...prev, reviewStatus: 'completed' }));
-    }, 6000);
-
-    setTimeout(() => {
-      setAuthState((prev) => ({ ...prev, certificationStatus: 'approved' }));
-    }, 9000);
   };
 
-  const handleStoreInfoComplete = () => {
-    setStoreState((prev) => ({
-      ...prev,
-      storeInfoSubmitted: true,
-      reviewStatus: 'pending',
-    }));
+  const onStoreInfoComplete = () => {
+    handleStoreInfoComplete();
     handleCloseModal();
-
-    // Test (API 연동 시 삭제)
-    setTimeout(() => {
-      setStoreState((prev) => ({ ...prev, reviewStatus: 'reviewing' }));
-    }, 3000);
-
-    setTimeout(() => {
-      setStoreState((prev) => ({ ...prev, reviewStatus: 'completed' }));
-    }, 6000);
-
-    setTimeout(() => {
-      setStoreState((prev) => ({ ...prev, storeStatus: 'approved' }));
-    }, 9000);
   };
-
-  const isAuthCompleted = authState.certificationStatus === 'approved';
 
   return (
     <div className="flex flex-col gap-6">
@@ -97,7 +63,6 @@ export function RegisterContent() {
         </p>
       </div>
 
-      {/* 그리드 반응형: 기본 1열, xl 이상 2열 */}
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
         <Section variant="card" className="flex flex-col gap-4 bg-white">
           <h2 className="text-base font-semibold text-gray-900">
@@ -133,7 +98,6 @@ export function RegisterContent() {
         </Section>
       </div>
 
-      {/* 도움말 섹션 반응형 */}
       <Section
         variant="card"
         className="flex flex-col items-start justify-between gap-4 bg-white sm:flex-row sm:items-center"
@@ -154,13 +118,12 @@ export function RegisterContent() {
         </div>
       </Section>
 
-      {/* 모달들 */}
       <StepModal
         isOpen={activeModal === 'terms'}
         onClose={handleCloseModal}
         title="약관 동의"
       >
-        <TermsStep onNext={handleTermsComplete} />
+        <TermsStep onNext={onTermsComplete} />
       </StepModal>
 
       <StepModal
@@ -168,7 +131,7 @@ export function RegisterContent() {
         onClose={handleCloseModal}
         title="사업자 정보 입력"
       >
-        <BusinessInfoStep onNext={handleBusinessInfoComplete} />
+        <BusinessInfoStep onNext={onBusinessInfoComplete} />
       </StepModal>
 
       <StepModal
@@ -176,7 +139,7 @@ export function RegisterContent() {
         onClose={handleCloseModal}
         title="서류 제출"
       >
-        <DocumentStep onSubmit={handleDocumentComplete} />
+        <DocumentStep onSubmit={onDocumentComplete} />
       </StepModal>
 
       <StepModal
@@ -184,7 +147,7 @@ export function RegisterContent() {
         onClose={handleCloseModal}
         title="기본 정보 입력"
       >
-        <StoreInfoStep onSubmit={handleStoreInfoComplete} />
+        <StoreInfoStep onSubmit={onStoreInfoComplete} />
       </StepModal>
     </div>
   );

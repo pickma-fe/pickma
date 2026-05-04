@@ -18,6 +18,13 @@ interface BusinessInfo {
   businessCategory: string;
 }
 
+const formatBusinessNumber = (value: string) => {
+  const numbers = value.replace(/[^0-9]/g, '');
+  if (numbers.length <= 3) return numbers;
+  if (numbers.length <= 5) return `${numbers.slice(0, 3)}-${numbers.slice(3)}`;
+  return `${numbers.slice(0, 3)}-${numbers.slice(3, 5)}-${numbers.slice(5, 10)}`;
+};
+
 export function BusinessInfoStep({ onNext }: BusinessInfoStepProps) {
   const [info, setInfo] = useState<BusinessInfo>({
     businessNumber: '',
@@ -32,7 +39,13 @@ export function BusinessInfoStep({ onNext }: BusinessInfoStepProps) {
 
   const handleChange =
     (field: keyof BusinessInfo) => (e: React.ChangeEvent<HTMLInputElement>) => {
-      setInfo((prev) => ({ ...prev, [field]: e.target.value }));
+      let value = e.target.value;
+
+      if (field === 'businessNumber') {
+        value = formatBusinessNumber(value);
+      }
+
+      setInfo((prev) => ({ ...prev, [field]: value }));
       setErrors((prev) => ({ ...prev, [field]: '' }));
     };
 

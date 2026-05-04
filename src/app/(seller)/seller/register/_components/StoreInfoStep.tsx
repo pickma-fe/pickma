@@ -17,6 +17,26 @@ interface StoreInfo {
   description: string;
 }
 
+// 전화번호 자동 하이픈
+const formatPhoneNumber = (value: string) => {
+  const numbers = value.replace(/[^0-9]/g, '');
+
+  // 02 (서울)
+  if (numbers.startsWith('02')) {
+    if (numbers.length <= 2) return numbers;
+    if (numbers.length <= 5)
+      return `${numbers.slice(0, 2)}-${numbers.slice(2)}`;
+    if (numbers.length <= 9)
+      return `${numbers.slice(0, 2)}-${numbers.slice(2, 5)}-${numbers.slice(5)}`;
+    return `${numbers.slice(0, 2)}-${numbers.slice(2, 6)}-${numbers.slice(6, 10)}`;
+  }
+
+  // 010, 031, 032 등 (3자리 지역번호 or 휴대폰)
+  if (numbers.length <= 3) return numbers;
+  if (numbers.length <= 7) return `${numbers.slice(0, 3)}-${numbers.slice(3)}`;
+  return `${numbers.slice(0, 3)}-${numbers.slice(3, 7)}-${numbers.slice(7, 11)}`;
+};
+
 export function StoreInfoStep({ onSubmit }: StoreInfoStepProps) {
   const [info, setInfo] = useState<StoreInfo>({
     storeName: '',
@@ -31,7 +51,13 @@ export function StoreInfoStep({ onSubmit }: StoreInfoStepProps) {
   const handleChange =
     (field: keyof StoreInfo) =>
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      setInfo((prev) => ({ ...prev, [field]: e.target.value }));
+      let value = e.target.value;
+
+      if (field === 'phone') {
+        value = formatPhoneNumber(value);
+      }
+
+      setInfo((prev) => ({ ...prev, [field]: value }));
       setErrors((prev) => ({ ...prev, [field]: '' }));
     };
 
@@ -48,6 +74,11 @@ export function StoreInfoStep({ onSubmit }: StoreInfoStepProps) {
 
     if (!info.phone.trim()) {
       newErrors.phone = '전화번호를 입력해주세요.';
+    } else {
+      const phoneNumbers = info.phone.replace(/-/g, '');
+      if (phoneNumbers.length < 9 || phoneNumbers.length > 11) {
+        newErrors.phone = '올바른 전화번호를 입력해주세요.';
+      }
     }
 
     if (!info.address.trim()) {
@@ -87,7 +118,7 @@ export function StoreInfoStep({ onSubmit }: StoreInfoStepProps) {
           label="가게 전화번호 *"
           value={info.phone}
           onChange={handleChange('phone')}
-          placeholder="02-1234-5678"
+          placeholder="02-1234-5678 또는 010-1234-5678"
           error={errors.phone}
         />
 
