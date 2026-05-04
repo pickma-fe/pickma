@@ -43,10 +43,12 @@ export function useSellerAuth() {
   };
 
   const handleBusinessInfoComplete = () => {
+    if (!authState.termsAgreed) return;
     setAuthState((prev) => ({ ...prev, businessInfoSubmitted: true }));
   };
 
   const handleDocumentComplete = () => {
+    if (!authState.termsAgreed || !authState.businessInfoSubmitted) return;
     setAuthState((prev) => ({
       ...prev,
       documentsSubmitted: true,
