@@ -119,12 +119,12 @@ function LoginForm({ next, onClose, onChangeView }: LoginFormProps) {
   );
   const {
     register,
-    handleSubmit,
+    handleSubmit: handleSubmitRH,
     setError,
     formState: { errors, isSubmitting },
   } = useForm<LoginFields>({ resolver: zodResolver(loginSchema) });
 
-  async function onSubmit(data: LoginFields) {
+  async function handleSubmit(data: LoginFields) {
     try {
       const result = await authApi.signInWithEmail(data);
       if (result.session) {
@@ -152,7 +152,7 @@ function LoginForm({ next, onClose, onChangeView }: LoginFormProps) {
   return (
     <div className="space-y-4">
       <DialogTitle className="text-lg font-semibold">로그인</DialogTitle>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
+      <form onSubmit={handleSubmitRH(handleSubmit)} className="space-y-3">
         <Input
           label="이메일"
           type="email"
@@ -235,12 +235,12 @@ function SignupForm({ next, onClose, onChangeView }: SignupFormProps) {
   const [sentEmail, setSentEmail] = useState('');
   const {
     register,
-    handleSubmit,
+    handleSubmit: handleSubmitRH,
     setError,
     formState: { errors, isSubmitting },
   } = useForm<SignupFields>({ resolver: zodResolver(signupSchema) });
 
-  async function onSubmit(data: SignupFields) {
+  async function handleSubmit(data: SignupFields) {
     try {
       const result = await authApi.signUpWithEmail({
         email: data.email,
@@ -275,7 +275,7 @@ function SignupForm({ next, onClose, onChangeView }: SignupFormProps) {
   return (
     <div className="space-y-4">
       <DialogTitle className="text-lg font-semibold">회원가입</DialogTitle>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
+      <form onSubmit={handleSubmitRH(handleSubmit)} className="space-y-3">
         <Input
           label="이름"
           type="text"
@@ -338,12 +338,12 @@ function ResetForm({ onChangeView }: ResetFormProps) {
   const [sentEmail, setSentEmail] = useState('');
   const {
     register,
-    handleSubmit,
+    handleSubmit: handleSubmitRH,
     setError,
     formState: { errors, isSubmitting },
   } = useForm<ResetFields>({ resolver: zodResolver(resetSchema) });
 
-  async function onSubmit(data: ResetFields) {
+  async function handleSubmit(data: ResetFields) {
     try {
       await authApi.resetPasswordForEmail({ email: data.email });
       setSentEmail(data.email);
@@ -371,7 +371,7 @@ function ResetForm({ onChangeView }: ResetFormProps) {
       <DialogTitle className="text-lg font-semibold">
         비밀번호 재설정
       </DialogTitle>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
+      <form onSubmit={handleSubmitRH(handleSubmit)} className="space-y-3">
         <Input
           label="이메일"
           type="email"
