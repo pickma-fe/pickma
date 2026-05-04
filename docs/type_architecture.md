@@ -39,6 +39,7 @@ Domain Type
 ```text
 src/contracts/
   common.ts
+  auth.ts
   product.ts
   order.ts
   payment.ts
@@ -48,6 +49,7 @@ src/contracts/
   index.ts
 
 src/types/
+  auth.ts
   product.ts
   order.ts
   payment.ts
@@ -197,7 +199,9 @@ export interface Product {
 
 - Auth는 로그인 상태와 Supabase Auth user 식별을 담당한다.
 - User는 PickMa 서비스 내부 사용자 정보를 담당한다.
-- OAuth 로그인/로그아웃은 Supabase Auth SDK 래퍼에서 처리한다.
+- OAuth 로그인, email/password 회원가입/로그인, 비밀번호 재설정, 로그아웃은 Supabase Auth SDK 래퍼에서 처리한다.
+- Auth Domain Type은 `src/types/auth.ts`에 두고, `AuthProvider`, `AuthUser`, `AuthSession`, `AuthResult`만 앱에 노출한다. Supabase `Session`, `User`, `access_token`은 hook/component로 직접 노출하지 않는다.
+- Email/password auth wrapper 입력 DTO는 `src/contracts/auth.ts`에 둔다. 이는 `/api/*` Route Handler contract가 아니라 `authApi` 입력 contract이다.
 - 서비스 사용자 조회/수정/탈퇴는 `/api/users/me`에서 처리한다.
 
 ### Catalog
