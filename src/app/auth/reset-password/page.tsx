@@ -2,6 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
@@ -23,6 +24,7 @@ type ResetPasswordFields = z.infer<typeof resetPasswordSchema>;
 // TODO: 디자인 확정 후 reset password 화면 스타일 교체
 export default function ResetPasswordPage() {
   const router = useRouter();
+  const [isSessionReady, setIsSessionReady] = useState(false);
   const {
     register,
     handleSubmit,
@@ -31,6 +33,27 @@ export default function ResetPasswordPage() {
   } = useForm<ResetPasswordFields>({
     resolver: zodResolver(resetPasswordSchema),
   });
+
+  useEffect(() => {
+    const code = new URLSearchParams(window.location.search).get('code');
+
+    authApi
+      .getSession()
+      .then((session) => {
+        if (!session) {
+          throw new Error('Missing password recovery session');
+        }
+        if (code) {
+          window.history.replaceState(null, '', '/auth/reset-password');
+        }
+        setIsSessionReady(true);
+      })
+      .catch(() => {
+        setError('root', {
+          message: '비밀번호를 변경하지 못했습니다. 다시 시도해 주세요.',
+        });
+      });
+  }, [setError]);
 
   async function onSubmit(data: ResetPasswordFields): Promise<void> {
     try {
@@ -71,11 +94,11 @@ export default function ResetPasswordPage() {
           )}
           <Button
             type="submit"
-            disabled={isSubmitting}
+            disabled={isSubmitting || !isSessionReady}
             color="primary"
             className="w-full text-sm"
           >
-            {isSubmitting ? '저장 중...' : '저장'}
+            {isSubmitting || !isSessionReady ? '준비 중...' : '저장'}
           </Button>
         </form>
       </section>
