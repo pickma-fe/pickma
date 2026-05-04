@@ -51,6 +51,8 @@ export function useSellerAuth() {
       ...prev,
       documentsSubmitted: true,
       reviewStatus: 'pending',
+      certificationStatus: 'waiting',
+      rejectionReason: undefined,
     }));
 
     // TODO: API 연동 시 아래 테스트 코드 삭제

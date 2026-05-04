@@ -38,9 +38,9 @@ export function useStoreRegister() {
       ...prev,
       storeInfoSubmitted: true,
       reviewStatus: 'pending',
+      storeStatus: 'waiting',
     }));
 
-    // TODO: API 연동 시 아래 테스트 코드 삭제
     clearTimers();
 
     const timer1 = setTimeout(() => {
