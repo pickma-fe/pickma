@@ -13,6 +13,17 @@ import { Button, Input } from '@/components/common';
 
 import { type AuthModalView, useAuthModal } from './useAuthModal';
 
+function getSafeNextPath(next?: string): string {
+  if (!next) return '/';
+  try {
+    const url = new URL(next, window.location.origin);
+    if (url.origin !== window.location.origin) return '/';
+    return `${url.pathname}${url.search}${url.hash}`;
+  } catch {
+    return '/';
+  }
+}
+
 function mapAuthError(error: unknown): string {
   const msg = error instanceof Error ? error.message.toLowerCase() : '';
 
@@ -129,7 +140,7 @@ function LoginForm({ next, onClose, onChangeView }: LoginFormProps) {
       const result = await authApi.signInWithEmail(data);
       if (result.session) {
         onClose();
-        if (next) router.push(next);
+        router.push(getSafeNextPath(next));
       }
     } catch (err) {
       setError('root', { message: mapAuthError(err) });
@@ -251,7 +262,7 @@ function SignupForm({ next, onClose, onChangeView }: SignupFormProps) {
       });
       if (result.session) {
         onClose();
-        if (next) router.push(next);
+        router.push(getSafeNextPath(next));
       } else {
         setSentEmail(data.email);
         setIsEmailSent(true);
