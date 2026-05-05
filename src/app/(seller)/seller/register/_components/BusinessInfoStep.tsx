@@ -19,22 +19,22 @@ const formatBusinessNumber = (value: string) => {
   return `${numbers.slice(0, 3)}-${numbers.slice(3, 5)}-${numbers.slice(5, 10)}`;
 };
 
+const DEFAULT_INFO: BusinessInfoData = {
+  businessNumber: '',
+  companyName: '',
+  representativeName: '',
+  businessAddress: '',
+  businessType: '',
+  businessCategory: '',
+};
+
 export function BusinessInfoStep({
   onNext,
   savedData,
   isViewMode = false,
 }: BusinessInfoStepProps) {
   const [isEditing, setIsEditing] = useState(false);
-  const [info, setInfo] = useState<BusinessInfoData>(
-    savedData ?? {
-      businessNumber: '',
-      companyName: '',
-      representativeName: '',
-      businessAddress: '',
-      businessType: '',
-      businessCategory: '',
-    }
-  );
+  const [info, setInfo] = useState<BusinessInfoData>(savedData ?? DEFAULT_INFO);
   const [errors, setErrors] = useState<Partial<BusinessInfoData>>({});
 
   const handleChange =
@@ -47,6 +47,12 @@ export function BusinessInfoStep({
       setInfo((prev) => ({ ...prev, [field]: value }));
       setErrors((prev) => ({ ...prev, [field]: '' }));
     };
+
+  const handleCancel = () => {
+    setInfo(savedData ?? DEFAULT_INFO);
+    setErrors({});
+    setIsEditing(false);
+  };
 
   const validate = () => {
     const newErrors: Partial<BusinessInfoData> = {};
@@ -125,11 +131,7 @@ export function BusinessInfoStep({
       </div>
       <div className="flex justify-end gap-2">
         {isEditing && (
-          <Button
-            variant="outline"
-            color="gray"
-            onClick={() => setIsEditing(false)}
-          >
+          <Button variant="outline" color="gray" onClick={handleCancel}>
             취소
           </Button>
         )}

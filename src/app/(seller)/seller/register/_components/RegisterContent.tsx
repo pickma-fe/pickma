@@ -40,6 +40,10 @@ export function RegisterContent() {
   };
 
   const handleOpenModal = (modal: ModalType) => {
+    if (modal === 'business' && !authState.termsAgreed) return;
+    if (modal === 'document' && !authState.businessInfoSubmitted) return;
+    if (modal === 'storeInfo' && !authState.documentsSubmitted) return;
+
     const isView =
       (modal === 'terms' && authState.termsAgreed) ||
       (modal === 'business' && authState.businessInfoSubmitted) ||
