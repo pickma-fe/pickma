@@ -1,6 +1,8 @@
 'use client';
 
-import { Header, Sidebar } from '@/components/common';
+import { useMe } from '@/hooks/users/useMe';
+import { Header } from '@/components/common/Header/Header';
+import { Sidebar } from '@/components/common/Sidebar/Sidebar';
 
 import { sellerSidebarSections } from './_components/sellerSidebarSections';
 
@@ -9,12 +11,16 @@ export default function SellerLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const { data: user } = useMe();
+
   return (
     <div className="flex min-h-screen flex-col">
       <Header
-        user={null}
+        user={user ?? null}
         logoHref="/seller"
-        menuItems={[{ label: '로그인', type: 'link', href: '/login' }]}
+        menuItems={
+          user ? [] : [{ label: '로그인', type: 'link', href: '/login' }]
+        }
       />
       <div className="flex flex-1">
         <div className="hidden pt-4 lg:block">

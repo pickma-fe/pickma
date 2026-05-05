@@ -2,14 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 
-type StoreReviewStatus = 'pending' | 'reviewing' | 'completed';
-type StoreStatus = 'waiting' | 'approved' | 'rejected';
-
-export interface StoreStepState {
-  storeInfoSubmitted: boolean;
-  reviewStatus: StoreReviewStatus;
-  storeStatus: StoreStatus;
-}
+import type { StoreStepState, StoreInfoData } from '@/types/store';
 
 const INITIAL_STORE_STATE: StoreStepState = {
   storeInfoSubmitted: false,
@@ -20,6 +13,7 @@ const INITIAL_STORE_STATE: StoreStepState = {
 export function useStoreRegister() {
   const [storeState, setStoreState] =
     useState<StoreStepState>(INITIAL_STORE_STATE);
+  const [storeInfo, setStoreInfo] = useState<StoreInfoData | null>(null);
   const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   useEffect(() => {
@@ -33,7 +27,10 @@ export function useStoreRegister() {
     timersRef.current = [];
   };
 
-  const handleStoreInfoComplete = () => {
+  const handleStoreInfoComplete = (data?: StoreInfoData) => {
+    if (data) {
+      setStoreInfo(data);
+    }
     setStoreState((prev) => ({
       ...prev,
       storeInfoSubmitted: true,
@@ -60,6 +57,7 @@ export function useStoreRegister() {
 
   return {
     storeState,
+    storeInfo,
     handleStoreInfoComplete,
   };
 }

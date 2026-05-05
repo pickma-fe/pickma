@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 
+import type { BusinessInfoData, StoreInfoData } from '@/types/store';
 import { useSellerAuth } from '@/hooks/seller/register/useSellerAuth';
 import { useStoreRegister } from '@/hooks/seller/register/useStoreRegister';
 import { Button } from '@/components/common/Button/Button';
@@ -19,36 +20,52 @@ import type { ModalType } from './types';
 
 export function RegisterContent() {
   const [activeModal, setActiveModal] = useState<ModalType>(null);
+  const [isViewMode, setIsViewMode] = useState(false);
 
   const {
     authState,
+    businessInfo,
+    documentFiles,
     isAuthCompleted,
     handleTermsComplete,
     handleBusinessInfoComplete,
     handleDocumentComplete,
   } = useSellerAuth();
 
-  const { storeState, handleStoreInfoComplete } = useStoreRegister();
+  const { storeState, storeInfo, handleStoreInfoComplete } = useStoreRegister();
 
-  const handleCloseModal = () => setActiveModal(null);
+  const handleCloseModal = () => {
+    setActiveModal(null);
+    setIsViewMode(false);
+  };
+
+  const handleOpenModal = (modal: ModalType) => {
+    const isView =
+      (modal === 'terms' && authState.termsAgreed) ||
+      (modal === 'business' && authState.businessInfoSubmitted) ||
+      (modal === 'document' && authState.documentsSubmitted) ||
+      (modal === 'storeInfo' && storeState.storeInfoSubmitted);
+    setIsViewMode(isView);
+    setActiveModal(modal);
+  };
 
   const onTermsComplete = () => {
     handleTermsComplete();
     handleCloseModal();
   };
 
-  const onBusinessInfoComplete = () => {
-    handleBusinessInfoComplete();
+  const onBusinessInfoComplete = (data: BusinessInfoData) => {
+    handleBusinessInfoComplete(data);
     handleCloseModal();
   };
 
-  const onDocumentComplete = () => {
-    handleDocumentComplete();
+  const onDocumentComplete = (files: Record<string, File | null>) => {
+    handleDocumentComplete(files);
     handleCloseModal();
   };
 
-  const onStoreInfoComplete = () => {
-    handleStoreInfoComplete();
+  const onStoreInfoComplete = (data: StoreInfoData) => {
+    handleStoreInfoComplete(data);
     handleCloseModal();
   };
 
@@ -71,7 +88,7 @@ export function RegisterContent() {
           <p className="text-xs text-gray-400">
             인증은 가게를 열기 전에 판매자 인증 진행해주세요.
           </p>
-          <AuthStepList state={authState} onActionClick={setActiveModal} />
+          <AuthStepList state={authState} onActionClick={handleOpenModal} />
           <div className="bg-primary-50 text-primary-700 rounded-md p-3 text-xs">
             정확한 정보 제출 시 빠른 심사가 진행됩니다! 보통 영업일 기준 1~2일
             내 심사가 완료됩니다.
@@ -89,7 +106,7 @@ export function RegisterContent() {
             steps={STORE_STEPS}
             storeState={storeState}
             isAuthCompleted={isAuthCompleted}
-            onActionClick={setActiveModal}
+            onActionClick={handleOpenModal}
           />
           <div className="bg-primary-50 text-primary-700 rounded-md p-3 text-xs">
             모든 정보 입력 및 심사 완료 시 가게가 오픈됩니다! 정확한 정보 입력이
@@ -121,33 +138,45 @@ export function RegisterContent() {
       <StepModal
         isOpen={activeModal === 'terms'}
         onClose={handleCloseModal}
-        title="약관 동의"
+        title={isViewMode ? '약관 동의 확인' : '약관 동의'}
       >
-        <TermsStep onNext={onTermsComplete} />
+        <TermsStep onNext={onTermsComplete} isViewMode={isViewMode} />
       </StepModal>
 
       <StepModal
         isOpen={activeModal === 'business'}
         onClose={handleCloseModal}
-        title="사업자 정보 입력"
+        title={isViewMode ? '사업자 정보 확인' : '사업자 정보 입력'}
       >
-        <BusinessInfoStep onNext={onBusinessInfoComplete} />
+        <BusinessInfoStep
+          onNext={onBusinessInfoComplete}
+          savedData={businessInfo}
+          isViewMode={isViewMode}
+        />
       </StepModal>
 
       <StepModal
         isOpen={activeModal === 'document'}
         onClose={handleCloseModal}
-        title="서류 제출"
+        title={isViewMode ? '서류 제출 확인' : '서류 제출'}
       >
-        <DocumentStep onSubmit={onDocumentComplete} />
+        <DocumentStep
+          onSubmit={onDocumentComplete}
+          savedFiles={documentFiles}
+          isViewMode={isViewMode}
+        />
       </StepModal>
 
       <StepModal
         isOpen={activeModal === 'storeInfo'}
         onClose={handleCloseModal}
-        title="기본 정보 입력"
+        title={isViewMode ? '가게 정보 확인' : '기본 정보 입력'}
       >
-        <StoreInfoStep onSubmit={onStoreInfoComplete} />
+        <StoreInfoStep
+          onSubmit={onStoreInfoComplete}
+          savedData={storeInfo}
+          isViewMode={isViewMode}
+        />
       </StepModal>
     </div>
   );

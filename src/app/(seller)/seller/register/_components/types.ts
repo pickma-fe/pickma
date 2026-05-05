@@ -1,17 +1,13 @@
 export type ModalType = 'terms' | 'business' | 'document' | 'storeInfo' | null;
 
-export type ReviewStatus = 'pending' | 'reviewing' | 'completed';
-
-export type CertificationStatus = 'waiting' | 'approved' | 'rejected';
-
-export interface AuthStepState {
-  termsAgreed: boolean;
-  businessInfoSubmitted: boolean;
-  documentsSubmitted: boolean;
-  reviewStatus: ReviewStatus;
-  certificationStatus: CertificationStatus;
-  rejectionReason?: string;
-}
+export type {
+  AuthStepState,
+  ReviewStatus,
+  CertificationStatus,
+  StoreStepState,
+  StoreRegisterReviewStatus,
+  StoreRegisterApprovalStatus,
+} from '@/types/store';
 
 export interface StoreStep {
   id: number;

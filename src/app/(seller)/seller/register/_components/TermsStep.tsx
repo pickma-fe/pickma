@@ -6,6 +6,7 @@ import { Button } from '@/components/common/Button/Button';
 
 interface TermsStepProps {
   onNext: () => void;
+  isViewMode?: boolean;
 }
 
 const TERMS = [
@@ -37,7 +38,7 @@ const TERMS = [
   },
 ];
 
-export function TermsStep({ onNext }: TermsStepProps) {
+export function TermsStep({ onNext, isViewMode = false }: TermsStepProps) {
   const [agreed, setAgreed] = useState<Record<string, boolean>>({
     service: false,
     privacy: false,
@@ -61,6 +62,32 @@ export function TermsStep({ onNext }: TermsStepProps) {
     setAgreed((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
+  // 보기 모드
+  if (isViewMode) {
+    return (
+      <div className="flex flex-col gap-4">
+        <div className="rounded-md bg-green-50 p-4">
+          <p className="text-sm font-medium text-green-700">
+            ✓ 모든 약관에 동의하셨습니다.
+          </p>
+        </div>
+        <div className="flex flex-col gap-4">
+          {TERMS.map((term) => (
+            <div key={term.id} className="flex flex-col gap-2">
+              <p className="text-sm font-medium text-gray-700">
+                ✓ {term.title}
+              </p>
+              <div className="h-24 overflow-y-auto rounded-md border border-gray-200 bg-gray-50 p-3 text-xs whitespace-pre-line text-gray-500">
+                {term.content}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // 입력 모드
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center gap-3 rounded-md border border-gray-200 p-4">

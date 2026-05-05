@@ -2,20 +2,14 @@
 
 import { useState } from 'react';
 
+import type { BusinessInfoData } from '@/types/store';
 import { Button } from '@/components/common/Button/Button';
 import { Input } from '@/components/common/Input/Input';
 
 interface BusinessInfoStepProps {
-  onNext: () => void;
-}
-
-interface BusinessInfo {
-  businessNumber: string;
-  companyName: string;
-  representativeName: string;
-  businessAddress: string;
-  businessType: string;
-  businessCategory: string;
+  onNext: (data: BusinessInfoData) => void;
+  savedData?: BusinessInfoData | null;
+  isViewMode?: boolean;
 }
 
 const formatBusinessNumber = (value: string) => {
@@ -25,99 +19,95 @@ const formatBusinessNumber = (value: string) => {
   return `${numbers.slice(0, 3)}-${numbers.slice(3, 5)}-${numbers.slice(5, 10)}`;
 };
 
-export function BusinessInfoStep({ onNext }: BusinessInfoStepProps) {
-  const [info, setInfo] = useState<BusinessInfo>({
-    businessNumber: '',
-    companyName: '',
-    representativeName: '',
-    businessAddress: '',
-    businessType: '',
-    businessCategory: '',
-  });
-
-  const [errors, setErrors] = useState<Partial<BusinessInfo>>({});
+export function BusinessInfoStep({
+  onNext,
+  savedData,
+  isViewMode = false,
+}: BusinessInfoStepProps) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [info, setInfo] = useState<BusinessInfoData>(
+    savedData ?? {
+      businessNumber: '',
+      companyName: '',
+      representativeName: '',
+      businessAddress: '',
+      businessType: '',
+      businessCategory: '',
+    }
+  );
+  const [errors, setErrors] = useState<Partial<BusinessInfoData>>({});
 
   const handleChange =
-    (field: keyof BusinessInfo) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    (field: keyof BusinessInfoData) =>
+    (e: React.ChangeEvent<HTMLInputElement>) => {
       let value = e.target.value;
-
       if (field === 'businessNumber') {
         value = formatBusinessNumber(value);
       }
-
       setInfo((prev) => ({ ...prev, [field]: value }));
       setErrors((prev) => ({ ...prev, [field]: '' }));
     };
 
   const validate = () => {
-    const newErrors: Partial<BusinessInfo> = {};
-
+    const newErrors: Partial<BusinessInfoData> = {};
     if (!info.businessNumber.trim()) {
       newErrors.businessNumber = '사업자등록번호를 입력해주세요.';
     } else if (!/^\d{10}$/.test(info.businessNumber.replace(/-/g, ''))) {
       newErrors.businessNumber = '올바른 사업자등록번호를 입력해주세요.';
     }
-
-    if (!info.companyName.trim()) {
+    if (!info.companyName.trim())
       newErrors.companyName = '상호명을 입력해주세요.';
-    }
-
-    if (!info.representativeName.trim()) {
+    if (!info.representativeName.trim())
       newErrors.representativeName = '대표자명을 입력해주세요.';
-    }
-
-    if (!info.businessAddress.trim()) {
+    if (!info.businessAddress.trim())
       newErrors.businessAddress = '사업장 주소를 입력해주세요.';
-    }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = () => {
     if (validate()) {
-      onNext();
+      onNext(info);
+      setIsEditing(false);
     }
   };
 
   const fields = [
-    {
-      key: 'businessNumber' as const,
-      label: '사업자등록번호',
-      placeholder: '000-00-00000',
-      required: true,
-    },
-    {
-      key: 'companyName' as const,
-      label: '상호명',
-      placeholder: '상호명을 입력해주세요',
-      required: true,
-    },
-    {
-      key: 'representativeName' as const,
-      label: '대표자명',
-      placeholder: '대표자명을 입력해주세요',
-      required: true,
-    },
-    {
-      key: 'businessAddress' as const,
-      label: '사업장 주소',
-      placeholder: '사업장 주소를 입력해주세요',
-      required: true,
-    },
-    {
-      key: 'businessType' as const,
-      label: '업태',
-      placeholder: '업태를 입력해주세요',
-      required: false,
-    },
-    {
-      key: 'businessCategory' as const,
-      label: '종목',
-      placeholder: '종목을 입력해주세요',
-      required: false,
-    },
+    { key: 'businessNumber' as const, label: '사업자등록번호', required: true },
+    { key: 'companyName' as const, label: '상호명', required: true },
+    { key: 'representativeName' as const, label: '대표자명', required: true },
+    { key: 'businessAddress' as const, label: '사업장 주소', required: true },
+    { key: 'businessType' as const, label: '업태', required: false },
+    { key: 'businessCategory' as const, label: '종목', required: false },
   ];
+
+  if (isViewMode && !isEditing) {
+    return (
+      <div className="flex flex-col gap-4">
+        <dl className="flex flex-col gap-3">
+          {fields.map((field) => (
+            <div key={field.key} className="flex flex-col gap-1">
+              <dt className="text-sm font-medium text-gray-500">
+                {field.label}
+              </dt>
+              <dd className="text-sm text-gray-900">
+                {info[field.key] || '-'}
+              </dd>
+            </div>
+          ))}
+        </dl>
+        <div className="flex justify-end">
+          <Button
+            variant="outline"
+            color="gray"
+            onClick={() => setIsEditing(true)}
+          >
+            수정하기
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -128,13 +118,21 @@ export function BusinessInfoStep({ onNext }: BusinessInfoStepProps) {
             label={`${field.label}${field.required ? ' *' : ''}`}
             value={info[field.key]}
             onChange={handleChange(field.key)}
-            placeholder={field.placeholder}
+            placeholder={`${field.label}을 입력해주세요`}
             error={errors[field.key]}
           />
         ))}
       </div>
-
-      <div className="flex justify-end">
+      <div className="flex justify-end gap-2">
+        {isEditing && (
+          <Button
+            variant="outline"
+            color="gray"
+            onClick={() => setIsEditing(false)}
+          >
+            취소
+          </Button>
+        )}
         <Button onClick={handleSubmit}>확인</Button>
       </div>
     </div>

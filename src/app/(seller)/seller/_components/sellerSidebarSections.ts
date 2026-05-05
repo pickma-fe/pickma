@@ -1,26 +1,14 @@
 import {
-  LayoutDashboard,
   Store,
-  UtensilsCrossed,
   Package,
   ClipboardList,
   Megaphone,
+  UtensilsCrossed,
 } from 'lucide-react';
 
 import type { SidebarSection } from '@/components/common/Sidebar/Sidebar.types';
 
 export const sellerSidebarSections: SidebarSection[] = [
-  {
-    id: 'main',
-    items: [
-      {
-        id: 'dashboard',
-        label: '대시보드',
-        href: '/seller/dashboard',
-        icon: LayoutDashboard,
-      },
-    ],
-  },
   {
     id: 'store',
     items: [

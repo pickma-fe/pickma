@@ -7,7 +7,9 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/common/Button/Button';
 
 interface DocumentStepProps {
-  onSubmit: () => void;
+  onSubmit: (files: Record<string, File | null>) => void;
+  savedFiles?: Record<string, File | null> | null;
+  isViewMode?: boolean;
 }
 
 const DOCUMENTS = [
@@ -43,7 +45,6 @@ const ACCEPTED_TYPES = [
   'image/jpeg',
   'application/pdf',
 ];
-
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
 function formatFileSize(bytes: number): string {
@@ -53,48 +54,43 @@ function formatFileSize(bytes: number): string {
 }
 
 function getDropzoneClass(isDragging: boolean, hasError: boolean): string {
-  if (isDragging) {
-    return 'border-primary-500 bg-primary-50';
-  }
-  if (hasError) {
-    return 'border-red-300 bg-red-50';
-  }
+  if (isDragging) return 'border-primary-500 bg-primary-50';
+  if (hasError) return 'border-red-300 bg-red-50';
   return 'border-gray-300 bg-gray-50 hover:border-gray-400';
 }
 
-export function DocumentStep({ onSubmit }: DocumentStepProps) {
-  const [files, setFiles] = useState<Record<string, File | null>>({
-    businessLicense: null,
-    idCard: null,
-    bankbook: null,
-    businessReport: null,
-  });
-
+export function DocumentStep({
+  onSubmit,
+  savedFiles,
+  isViewMode = false,
+}: DocumentStepProps) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [files, setFiles] = useState<Record<string, File | null>>(
+    savedFiles ?? {
+      businessLicense: null,
+      idCard: null,
+      bankbook: null,
+      businessReport: null,
+    }
+  );
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isDragging, setIsDragging] = useState<Record<string, boolean>>({});
 
   const validateFile = (file: File): string | null => {
-    if (!ACCEPTED_TYPES.includes(file.type)) {
+    if (!ACCEPTED_TYPES.includes(file.type))
       return 'PNG, JPG, JPEG, PDF 파일만 업로드 가능합니다.';
-    }
-    if (file.size > MAX_FILE_SIZE) {
-      return '파일 크기는 10MB 이하여야 합니다.';
-    }
+    if (file.size > MAX_FILE_SIZE) return '파일 크기는 10MB 이하여야 합니다.';
     return null;
   };
 
   const handleFileChange = (id: string, file: File | null) => {
-    if (!file) {
-      return;
-    }
-
+    if (!file) return;
     const error = validateFile(file);
     if (error) {
       setErrors((prev) => ({ ...prev, [id]: error }));
       setFiles((prev) => ({ ...prev, [id]: null }));
       return;
     }
-
     setFiles((prev) => ({ ...prev, [id]: file }));
     setErrors((prev) => ({ ...prev, [id]: '' }));
   };
@@ -109,8 +105,7 @@ export function DocumentStep({ onSubmit }: DocumentStepProps) {
   const handleDrop = (id: string) => (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging((prev) => ({ ...prev, [id]: false }));
-    const file = e.dataTransfer.files?.[0] ?? null;
-    handleFileChange(id, file);
+    handleFileChange(id, e.dataTransfer.files?.[0] ?? null);
   };
 
   const handleDragOver = (id: string) => (e: React.DragEvent) => {
@@ -130,9 +125,8 @@ export function DocumentStep({ onSubmit }: DocumentStepProps) {
   const validate = () => {
     const newErrors: Record<string, string> = {};
     DOCUMENTS.filter((d) => d.required).forEach((doc) => {
-      if (!files[doc.id]) {
+      if (!files[doc.id])
         newErrors[doc.id] = '필수 서류입니다. 파일을 첨부해주세요.';
-      }
     });
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -140,13 +134,59 @@ export function DocumentStep({ onSubmit }: DocumentStepProps) {
 
   const handleSubmit = () => {
     if (validate()) {
-      onSubmit();
+      onSubmit(files);
+      setIsEditing(false);
     }
   };
 
   const isAllUploaded = DOCUMENTS.filter((d) => d.required).every(
     (doc) => files[doc.id]
   );
+
+  if (isViewMode && !isEditing) {
+    return (
+      <div className="flex flex-col gap-4">
+        <div className="rounded-md bg-green-50 p-4">
+          <p className="text-sm font-medium text-green-700">
+            ✓ 모든 서류가 제출되었습니다.
+          </p>
+        </div>
+        <div className="flex flex-col gap-3">
+          {DOCUMENTS.map((doc) => {
+            const uploadedFile = files[doc.id];
+            return (
+              <div
+                key={doc.id}
+                className="flex items-center justify-between rounded-lg border border-gray-200 bg-white px-4 py-3"
+              >
+                <div className="flex items-center gap-3">
+                  <FileIcon className="h-5 w-5 text-green-600" />
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">
+                      {doc.title}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {uploadedFile ? uploadedFile.name : '파일 없음'}
+                    </p>
+                  </div>
+                </div>
+                <span className="text-xs text-green-600">제출 완료</span>
+              </div>
+            );
+          })}
+        </div>
+        <div className="flex justify-end">
+          <Button
+            variant="outline"
+            color="gray"
+            onClick={() => setIsEditing(true)}
+          >
+            수정하기
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -239,7 +279,16 @@ export function DocumentStep({ onSubmit }: DocumentStepProps) {
         </ul>
       </div>
 
-      <div className="flex justify-end">
+      <div className="flex justify-end gap-2">
+        {isEditing && (
+          <Button
+            variant="outline"
+            color="gray"
+            onClick={() => setIsEditing(false)}
+          >
+            취소
+          </Button>
+        )}
         <Button onClick={handleSubmit} disabled={!isAllUploaded}>
           서류 제출하기
         </Button>

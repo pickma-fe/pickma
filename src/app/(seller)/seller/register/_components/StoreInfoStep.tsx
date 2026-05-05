@@ -2,26 +2,18 @@
 
 import { useState } from 'react';
 
+import type { StoreInfoData } from '@/types/store';
 import { Button } from '@/components/common/Button/Button';
 import { Input } from '@/components/common/Input/Input';
 
 interface StoreInfoStepProps {
-  onSubmit: () => void;
+  onSubmit: (data: StoreInfoData) => void;
+  savedData?: StoreInfoData | null;
+  isViewMode?: boolean;
 }
 
-interface StoreInfo {
-  storeName: string;
-  category: string;
-  phone: string;
-  address: string;
-  description: string;
-}
-
-// 전화번호 자동 하이픈
 const formatPhoneNumber = (value: string) => {
   const numbers = value.replace(/[^0-9]/g, '');
-
-  // 02 (서울)
   if (numbers.startsWith('02')) {
     if (numbers.length <= 2) return numbers;
     if (numbers.length <= 5)
@@ -30,106 +22,106 @@ const formatPhoneNumber = (value: string) => {
       return `${numbers.slice(0, 2)}-${numbers.slice(2, 5)}-${numbers.slice(5)}`;
     return `${numbers.slice(0, 2)}-${numbers.slice(2, 6)}-${numbers.slice(6, 10)}`;
   }
-
-  // 010, 031, 032 등 (3자리 지역번호 or 휴대폰)
   if (numbers.length <= 3) return numbers;
   if (numbers.length <= 7) return `${numbers.slice(0, 3)}-${numbers.slice(3)}`;
   return `${numbers.slice(0, 3)}-${numbers.slice(3, 7)}-${numbers.slice(7, 11)}`;
 };
 
-export function StoreInfoStep({ onSubmit }: StoreInfoStepProps) {
-  const [info, setInfo] = useState<StoreInfo>({
-    storeName: '',
-    category: '',
-    phone: '',
-    address: '',
-    description: '',
-  });
-
-  const [errors, setErrors] = useState<Partial<StoreInfo>>({});
+export function StoreInfoStep({
+  onSubmit,
+  savedData,
+  isViewMode = false,
+}: StoreInfoStepProps) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [info, setInfo] = useState<StoreInfoData>(
+    savedData ?? {
+      storeName: '',
+      category: '',
+      phone: '',
+      address: '',
+      description: '',
+    }
+  );
+  const [errors, setErrors] = useState<Partial<StoreInfoData>>({});
 
   const handleChange =
-    (field: keyof StoreInfo) =>
+    (field: keyof StoreInfoData) =>
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       let value = e.target.value;
-
-      if (field === 'phone') {
-        value = formatPhoneNumber(value);
-      }
-
+      if (field === 'phone') value = formatPhoneNumber(value);
       setInfo((prev) => ({ ...prev, [field]: value }));
       setErrors((prev) => ({ ...prev, [field]: '' }));
     };
 
   const validate = () => {
-    const newErrors: Partial<StoreInfo> = {};
-
-    if (!info.storeName.trim()) {
-      newErrors.storeName = '가게명을 입력해주세요.';
-    }
-
-    if (!info.category.trim()) {
-      newErrors.category = '카테고리를 선택해주세요.';
-    }
-
-    if (!info.phone.trim()) {
-      newErrors.phone = '전화번호를 입력해주세요.';
-    } else {
-      const phoneNumbers = info.phone.replace(/-/g, '');
-      if (phoneNumbers.length < 9 || phoneNumbers.length > 11) {
-        newErrors.phone = '올바른 전화번호를 입력해주세요.';
-      }
-    }
-
-    if (!info.address.trim()) {
-      newErrors.address = '주소를 입력해주세요.';
-    }
-
+    const newErrors: Partial<StoreInfoData> = {};
+    if (!info.storeName.trim()) newErrors.storeName = '가게명을 입력해주세요.';
+    if (!info.category.trim()) newErrors.category = '카테고리를 선택해주세요.';
+    if (!info.phone.trim()) newErrors.phone = '전화번호를 입력해주세요.';
+    if (!info.address.trim()) newErrors.address = '주소를 입력해주세요.';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = () => {
     if (validate()) {
-      onSubmit();
+      onSubmit(info);
+      setIsEditing(false);
     }
   };
+
+  const fields = [
+    { key: 'storeName' as const, label: '가게명', required: true },
+    { key: 'category' as const, label: '카테고리', required: true },
+    { key: 'phone' as const, label: '가게 전화번호', required: true },
+    { key: 'address' as const, label: '가게 주소', required: true },
+  ];
+
+  if (isViewMode && !isEditing) {
+    return (
+      <div className="flex flex-col gap-4">
+        <dl className="flex flex-col gap-3">
+          {fields.map((field) => (
+            <div key={field.key} className="flex flex-col gap-1">
+              <dt className="text-sm font-medium text-gray-500">
+                {field.label}
+              </dt>
+              <dd className="text-sm text-gray-900">
+                {info[field.key] || '-'}
+              </dd>
+            </div>
+          ))}
+          <div className="flex flex-col gap-1">
+            <dt className="text-sm font-medium text-gray-500">가게 소개</dt>
+            <dd className="text-sm text-gray-900">{info.description || '-'}</dd>
+          </div>
+        </dl>
+        <div className="flex justify-end">
+          <Button
+            variant="outline"
+            color="gray"
+            onClick={() => setIsEditing(true)}
+          >
+            수정하기
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-4">
-        <Input
-          label="가게명 *"
-          value={info.storeName}
-          onChange={handleChange('storeName')}
-          placeholder="가게명을 입력해주세요"
-          error={errors.storeName}
-        />
-
-        <Input
-          label="카테고리 *"
-          value={info.category}
-          onChange={handleChange('category')}
-          placeholder="예: 카페, 베이커리, 음식점"
-          error={errors.category}
-        />
-
-        <Input
-          label="가게 전화번호 *"
-          value={info.phone}
-          onChange={handleChange('phone')}
-          placeholder="02-1234-5678 또는 010-1234-5678"
-          error={errors.phone}
-        />
-
-        <Input
-          label="가게 주소 *"
-          value={info.address}
-          onChange={handleChange('address')}
-          placeholder="가게 주소를 입력해주세요"
-          error={errors.address}
-        />
-
+        {fields.map((field) => (
+          <Input
+            key={field.key}
+            label={`${field.label}${field.required ? ' *' : ''}`}
+            value={info[field.key]}
+            onChange={handleChange(field.key)}
+            placeholder={`${field.label}을 입력해주세요`}
+            error={errors[field.key]}
+          />
+        ))}
         <div className="flex flex-col gap-1">
           <label htmlFor="description" className="text-sm text-gray-500">
             가게 소개
@@ -144,8 +136,16 @@ export function StoreInfoStep({ onSubmit }: StoreInfoStepProps) {
           />
         </div>
       </div>
-
-      <div className="flex justify-end">
+      <div className="flex justify-end gap-2">
+        {isEditing && (
+          <Button
+            variant="outline"
+            color="gray"
+            onClick={() => setIsEditing(false)}
+          >
+            취소
+          </Button>
+        )}
         <Button onClick={handleSubmit}>확인</Button>
       </div>
     </div>

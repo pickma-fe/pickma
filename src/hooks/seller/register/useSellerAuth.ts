@@ -2,17 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 
-type ReviewStatus = 'pending' | 'reviewing' | 'completed';
-type CertificationStatus = 'waiting' | 'approved' | 'rejected';
-
-export interface AuthStepState {
-  termsAgreed: boolean;
-  businessInfoSubmitted: boolean;
-  documentsSubmitted: boolean;
-  reviewStatus: ReviewStatus;
-  certificationStatus: CertificationStatus;
-  rejectionReason?: string;
-}
+import type { AuthStepState, BusinessInfoData } from '@/types/store';
 
 const INITIAL_AUTH_STATE: AuthStepState = {
   termsAgreed: false,
@@ -25,6 +15,13 @@ const INITIAL_AUTH_STATE: AuthStepState = {
 
 export function useSellerAuth() {
   const [authState, setAuthState] = useState<AuthStepState>(INITIAL_AUTH_STATE);
+  const [businessInfo, setBusinessInfo] = useState<BusinessInfoData | null>(
+    null
+  );
+  const [documentFiles, setDocumentFiles] = useState<Record<
+    string,
+    File | null
+  > | null>(null);
   const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   useEffect(() => {
@@ -42,13 +39,19 @@ export function useSellerAuth() {
     setAuthState((prev) => ({ ...prev, termsAgreed: true }));
   };
 
-  const handleBusinessInfoComplete = () => {
+  const handleBusinessInfoComplete = (data?: BusinessInfoData) => {
     if (!authState.termsAgreed) return;
+    if (data) {
+      setBusinessInfo(data);
+    }
     setAuthState((prev) => ({ ...prev, businessInfoSubmitted: true }));
   };
 
-  const handleDocumentComplete = () => {
+  const handleDocumentComplete = (files?: Record<string, File | null>) => {
     if (!authState.termsAgreed || !authState.businessInfoSubmitted) return;
+    if (files) {
+      setDocumentFiles(files);
+    }
     setAuthState((prev) => ({
       ...prev,
       documentsSubmitted: true,
@@ -57,7 +60,6 @@ export function useSellerAuth() {
       rejectionReason: undefined,
     }));
 
-    // TODO: API 연동 시 아래 테스트 코드 삭제
     clearTimers();
 
     const timer1 = setTimeout(() => {
@@ -79,6 +81,8 @@ export function useSellerAuth() {
 
   return {
     authState,
+    businessInfo,
+    documentFiles,
     isAuthCompleted,
     handleTermsComplete,
     handleBusinessInfoComplete,

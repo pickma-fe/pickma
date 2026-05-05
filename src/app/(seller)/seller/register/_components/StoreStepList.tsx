@@ -10,22 +10,13 @@ import {
   CERTIFICATION_STATUS_TEXT,
 } from './constants';
 import { StatusBadge } from './StatusBadge';
-import type { StoreStep, ModalType } from './types';
+import type { StoreStep, ModalType, StoreStepState } from './types';
 import {
   getStepCircleClass,
   getStepLabel,
   getButtonVariant,
   getButtonColor,
 } from './utils';
-
-type StoreReviewStatus = 'pending' | 'reviewing' | 'completed';
-type StoreStatus = 'waiting' | 'approved' | 'rejected';
-
-interface StoreStepState {
-  storeInfoSubmitted: boolean;
-  reviewStatus: StoreReviewStatus;
-  storeStatus: StoreStatus;
-}
 
 interface StoreStepListProps {
   steps: StoreStep[];

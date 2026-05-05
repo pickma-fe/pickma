@@ -35,3 +35,41 @@ export interface Store {
 export interface MyStore extends Store {
   canSell: boolean;
 }
+
+export type ReviewStatus = 'pending' | 'reviewing' | 'completed';
+export type CertificationStatus = 'waiting' | 'approved' | 'rejected';
+
+export interface AuthStepState {
+  termsAgreed: boolean;
+  businessInfoSubmitted: boolean;
+  documentsSubmitted: boolean;
+  reviewStatus: ReviewStatus;
+  certificationStatus: CertificationStatus;
+  rejectionReason?: string;
+}
+
+export type StoreRegisterReviewStatus = 'pending' | 'reviewing' | 'completed';
+export type StoreRegisterApprovalStatus = 'waiting' | 'approved' | 'rejected';
+
+export interface StoreStepState {
+  storeInfoSubmitted: boolean;
+  reviewStatus: StoreRegisterReviewStatus;
+  storeStatus: StoreRegisterApprovalStatus;
+}
+
+export interface BusinessInfoData {
+  businessNumber: string;
+  companyName: string;
+  representativeName: string;
+  businessAddress: string;
+  businessType: string;
+  businessCategory: string;
+}
+
+export interface StoreInfoData {
+  storeName: string;
+  category: string;
+  phone: string;
+  address: string;
+  description: string;
+}
