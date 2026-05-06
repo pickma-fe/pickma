@@ -266,7 +266,7 @@ CREATE TRIGGER set_store_order_sequences_updated_at
 GRANT ALL ON ALL TABLES IN SCHEMA public TO service_role;
 
 -- authenticated: RLS policy와 쌍을 이루는 최소 권한
-GRANT SELECT, UPDATE ON public.users TO authenticated;
+GRANT SELECT ON public.users TO authenticated;
 GRANT SELECT, INSERT, UPDATE ON public.stores TO authenticated;
 GRANT SELECT, INSERT, UPDATE ON public.products TO authenticated;
 GRANT SELECT ON public.orders TO authenticated;
