@@ -67,6 +67,10 @@ export function BusinessInfoStep({
       newErrors.representativeName = '대표자명을 입력해주세요.';
     if (!info.businessAddress.trim())
       newErrors.businessAddress = '사업장 주소를 입력해주세요.';
+    if (!info.businessType.trim())
+      newErrors.businessType = '업태를 입력해주세요.';
+    if (!info.businessCategory.trim())
+      newErrors.businessCategory = '종목을 입력해주세요.';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -83,8 +87,8 @@ export function BusinessInfoStep({
     { key: 'companyName' as const, label: '상호명', required: true },
     { key: 'representativeName' as const, label: '대표자명', required: true },
     { key: 'businessAddress' as const, label: '사업장 주소', required: true },
-    { key: 'businessType' as const, label: '업태', required: false },
-    { key: 'businessCategory' as const, label: '종목', required: false },
+    { key: 'businessType' as const, label: '업태', required: true },
+    { key: 'businessCategory' as const, label: '종목', required: true },
   ];
 
   if (isViewMode && !isEditing) {

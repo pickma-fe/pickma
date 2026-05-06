@@ -46,12 +46,7 @@ const INITIAL_FILES: Record<string, File | null> = {
   businessReport: null,
 };
 
-const ACCEPTED_TYPES = [
-  'image/png',
-  'image/jpg',
-  'image/jpeg',
-  'application/pdf',
-];
+const ACCEPTED_TYPES = ['image/png', 'image/jpeg', 'application/pdf'];
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
 function formatFileSize(bytes: number): string {
@@ -143,7 +138,7 @@ export function DocumentStep({
     if (validate()) {
       onSubmit(files);
       setIsEditing(false);
-      setOriginalFiles(null); // ✅ 제출 성공 시 백업 클리어
+      setOriginalFiles(null);
     }
   };
 
