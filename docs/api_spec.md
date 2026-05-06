@@ -10,7 +10,7 @@
 
 - 클라이언트는 Supabase DB를 직접 호출하지 않는다.
 - 서비스 데이터는 `src/api` → `/api/*` Route Handler → Supabase를 경유한다.
-- Supabase Auth는 SDK를 사용하며 `src/api/auth/authApi.ts`에서 감싼다.
+- Supabase Auth는 SDK를 사용하며 `src/api/auth/authApi.ts`에서 감싼다. OAuth와 email/password 모두 자체 세션 구현 없이 Supabase Auth provider를 사용한다.
 - Mock 분기 기준 환경 변수는 `API_MOCK_ENABLED`로 통일한다.
 - `API_MOCK_ENABLED=false`에서 아직 구현되지 않은 API는 HTTP 501과 `NOT_IMPLEMENTED` error code를 반환한다.
 
@@ -130,12 +130,41 @@ available otherwise
 서버 API가 아니라 클라이언트 API 래퍼로 제공한다.
 `authApi`는 Supabase Auth client SDK 호출을 감싸고, cookie 기반 session 관리는 `@supabase/ssr`, session refresh와 보호 라우트 redirect는 `src/proxy.ts`가 담당한다.
 
-| 기능          | 위치                         | Priority |
-| ------------- | ---------------------------- | -------- |
-| Google 로그인 | `authApi.signInWithGoogle()` | P0       |
-| Kakao 로그인  | `authApi.signInWithKakao()`  | P0       |
-| 로그아웃      | `authApi.signOut()`          | P0       |
-| 세션 조회     | `authApi.getSession()`       | P0       |
+| 기능                 | 위치                              | Priority |
+| -------------------- | --------------------------------- | -------- |
+| Google 로그인        | `authApi.signInWithGoogle()`      | P0       |
+| Kakao 로그인         | `authApi.signInWithKakao()`       | P0       |
+| Email 회원가입       | `authApi.signUpWithEmail()`       | P0       |
+| Email 로그인         | `authApi.signInWithEmail()`       | P0       |
+| 비밀번호 재설정 요청 | `authApi.resetPasswordForEmail()` | P1       |
+| 비밀번호 변경        | `authApi.updatePassword()`        | P1       |
+| 로그아웃             | `authApi.signOut()`               | P0       |
+| 세션 조회            | `authApi.getSession()`            | P0       |
+
+Email/password auth request DTO는 클라이언트 auth wrapper 입력 contract로 `src/contracts/auth.ts`에 둔다. `/api/*` Route Handler request contract가 아니므로 Phase 2.5에서는 서버 validation schema를 만들지 않는다.
+
+```ts
+export interface SignUpWithEmailRequest {
+  email: string;
+  password: string;
+  name: string;
+  redirectPath?: string;
+}
+
+export interface SignInWithEmailRequest {
+  email: string;
+  password: string;
+}
+
+export interface ResetPasswordRequest {
+  email: string;
+  redirectPath?: string;
+}
+
+export interface UpdatePasswordRequest {
+  password: string;
+}
+```
 
 ### 2.2 사용자 API
 
