@@ -28,6 +28,7 @@ function subscribe(listener: () => void) {
     if (listeners.size === 0 && timerId) {
       window.clearInterval(timerId);
       timerId = null;
+      currentNow = null;
     }
   };
 }
