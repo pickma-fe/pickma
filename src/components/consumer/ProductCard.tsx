@@ -3,10 +3,10 @@
 import { ChevronRightIcon, StoreIcon } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
 
 import type { ProductListItemResponse } from '@/contracts/product';
 import { isProductUnavailable } from '@/lib/product';
+import { useNow } from '@/hooks/useNow';
 import { Badge, Button } from '@/components/common';
 
 type ProductCardProps = {
@@ -44,18 +44,7 @@ function formatPickupTime(value: string) {
 }
 
 export function ProductCard({ product }: ProductCardProps) {
-  const [now, setNow] = useState(() => Date.now());
-
-  useEffect(() => {
-    const timerId = window.setInterval(() => {
-      setNow(Date.now());
-    }, 1000);
-
-    return () => {
-      window.clearInterval(timerId);
-    };
-  }, []);
-
+  const now = useNow();
   const isUnavailable = isProductUnavailable({ product, now });
 
   return (

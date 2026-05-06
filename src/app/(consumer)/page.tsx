@@ -2,7 +2,7 @@
 
 import { LogInIcon, StoreIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import {
   DEFAULT_DISCOUNT_OPTION_ID,
@@ -53,6 +53,29 @@ export default function ConsumerPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [filterNow, setFilterNow] = useState(() => Date.now());
   const productCategories = getConsumerProductCategories(mockProducts);
+
+  useEffect(() => {
+    const currentTime = Date.now();
+    const nextEndAt = mockProducts
+      .map((product) => new Date(product.endAt).getTime())
+      .filter((endAt) => endAt > currentTime)
+      .sort((a, b) => a - b)[0];
+
+    if (!nextEndAt) {
+      return;
+    }
+
+    const timerId = window.setTimeout(
+      () => {
+        setFilterNow(Date.now());
+      },
+      nextEndAt - currentTime + 1000
+    );
+
+    return () => {
+      window.clearTimeout(timerId);
+    };
+  }, [filterNow]);
 
   const handleCategoryChange = (categoryId: string) => {
     setFilterNow(Date.now());

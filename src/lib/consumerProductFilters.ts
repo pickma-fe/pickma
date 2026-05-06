@@ -7,23 +7,22 @@ export type ProductFilterCategory = {
 export const DEFAULT_SORT_OPTION_ID = 'deadline';
 export const DEFAULT_DISCOUNT_OPTION_ID = 'all';
 
-export type ProductSortOptionId = 'deadline' | 'discount-rate' | 'price-low';
+const SORT_OPTION_IDS = ['deadline', 'discount-rate', 'price-low'] as const;
+const DISCOUNT_OPTION_IDS = [
+  'all',
+  'over-40',
+  '30-to-40',
+  '20-to-30',
+  'under-20',
+] as const;
 
-export type ProductDiscountOptionId =
-  | 'all'
-  | 'over-40'
-  | '30-to-40'
-  | '20-to-30'
-  | 'under-20';
+export type ProductSortOptionId = (typeof SORT_OPTION_IDS)[number];
+export type ProductDiscountOptionId = (typeof DISCOUNT_OPTION_IDS)[number];
 
 export function normalizeSortOptionId(
   sortOptionId: string
 ): ProductSortOptionId {
-  if (
-    sortOptionId === 'deadline' ||
-    sortOptionId === 'discount-rate' ||
-    sortOptionId === 'price-low'
-  ) {
+  if (isProductSortOptionId(sortOptionId)) {
     return sortOptionId;
   }
 
@@ -33,15 +32,23 @@ export function normalizeSortOptionId(
 export function normalizeDiscountOptionId(
   discountOptionId: string
 ): ProductDiscountOptionId {
-  if (
-    discountOptionId === 'all' ||
-    discountOptionId === 'over-40' ||
-    discountOptionId === '30-to-40' ||
-    discountOptionId === '20-to-30' ||
-    discountOptionId === 'under-20'
-  ) {
+  if (isProductDiscountOptionId(discountOptionId)) {
     return discountOptionId;
   }
 
   return DEFAULT_DISCOUNT_OPTION_ID;
+}
+
+function isProductSortOptionId(
+  sortOptionId: string
+): sortOptionId is ProductSortOptionId {
+  return SORT_OPTION_IDS.includes(sortOptionId as ProductSortOptionId);
+}
+
+function isProductDiscountOptionId(
+  discountOptionId: string
+): discountOptionId is ProductDiscountOptionId {
+  return DISCOUNT_OPTION_IDS.includes(
+    discountOptionId as ProductDiscountOptionId
+  );
 }
