@@ -267,8 +267,8 @@ GRANT ALL ON ALL TABLES IN SCHEMA public TO service_role;
 
 -- authenticated: RLS policy와 쌍을 이루는 최소 권한
 GRANT SELECT ON public.users TO authenticated;
-GRANT SELECT, INSERT, UPDATE ON public.stores TO authenticated;
-GRANT SELECT, INSERT, UPDATE ON public.products TO authenticated;
+GRANT SELECT ON public.stores TO authenticated;
+GRANT SELECT ON public.products TO authenticated;
 GRANT SELECT ON public.orders TO authenticated;
 GRANT SELECT ON public.order_items TO authenticated;
 GRANT SELECT, INSERT, DELETE ON public.wishlists TO authenticated;
