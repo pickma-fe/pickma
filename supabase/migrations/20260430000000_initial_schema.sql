@@ -258,6 +258,21 @@ CREATE TRIGGER set_store_order_sequences_updated_at
 -- categories and menu_items: RLS NOT enabled (always accessed via service_role through Route Handler)
 -- ============================================================
 
+-- GRANT: 테이블 자체 접근 권한 (레이어 1)
+-- RLS Policy는 레이어 2(row 단위 필터)로 별도 동작하며 둘 다 충족해야 접근 가능.
+-- SQL 마이그레이션으로 생성한 테이블은 Supabase가 자동 GRANT를 추가하지 않으므로 명시 필요.
+
+-- service_role: RLS를 우회하므로 전체 접근 허용
+GRANT ALL ON ALL TABLES IN SCHEMA public TO service_role;
+
+-- authenticated: RLS policy와 쌍을 이루는 최소 권한
+GRANT SELECT, UPDATE ON public.users TO authenticated;
+GRANT SELECT, INSERT, UPDATE ON public.stores TO authenticated;
+GRANT SELECT, INSERT, UPDATE ON public.products TO authenticated;
+GRANT SELECT ON public.orders TO authenticated;
+GRANT SELECT ON public.order_items TO authenticated;
+GRANT SELECT, INSERT, DELETE ON public.wishlists TO authenticated;
+
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "users: self select"
   ON users FOR SELECT USING (auth.uid() = id);
