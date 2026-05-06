@@ -19,6 +19,7 @@ export const ERROR_MESSAGES: Record<ErrorCode, string> = {
   DUPLICATE_PRODUCT_IN_ORDER: '주문 항목에 중복된 상품이 있습니다.',
   ORDER_NUMBER_EXHAUSTED: '주문번호가 모두 소진되었습니다.',
   PICKUP_NUMBER_EXHAUSTED: '픽업 번호가 모두 소진되었습니다.',
+  AUTH_IDENTITY_CONFLICT: '이미 다른 로그인 방식으로 가입된 이메일입니다.',
   NOT_IMPLEMENTED: '아직 구현되지 않은 API입니다.',
   INTERNAL_SERVER_ERROR: '서버 오류가 발생했습니다.',
 };
