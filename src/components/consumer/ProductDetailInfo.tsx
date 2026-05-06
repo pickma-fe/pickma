@@ -44,12 +44,12 @@ export function ProductDetailInfo({ product }: ProductDetailInfoProps) {
         </Badge>
       </div>
 
-      <p className="mb-2 text-base font-semibold text-gray-700">
+      <p className="mb-2 text-2xl font-semibold text-gray-700">
         {product.store.name}
       </p>
       <h1
         id="product-detail-title"
-        className="text-3xl leading-tight font-bold text-gray-900"
+        className="text-4xl leading-tight font-bold text-gray-900"
       >
         {product.name}
       </h1>
@@ -61,13 +61,13 @@ export function ProductDetailInfo({ product }: ProductDetailInfoProps) {
       )}
 
       <div className="mt-6 flex flex-wrap items-end gap-x-3 gap-y-1">
-        <strong className="text-primary-500 text-3xl font-bold">
+        <strong className="text-primary-500 text-4xl font-bold">
           {product.discountPrice.toLocaleString()}원
         </strong>
-        <span className="text-sm text-gray-400 line-through">
+        <span className="text-lg text-gray-400 line-through">
           {product.originalPrice.toLocaleString()}원
         </span>
-        <span className="text-primary-500 text-sm font-bold">
+        <span className="text-primary-500 text-lg font-bold">
           {product.discountRate}%
         </span>
       </div>
@@ -76,11 +76,11 @@ export function ProductDetailInfo({ product }: ProductDetailInfoProps) {
         픽마가
       </Badge>
 
-      <p className="mt-3 text-xs text-gray-500">
+      <p className="mt-3 text-sm text-gray-500">
         픽업 상품은 지정한 시간에 매장에서 수령해 주세요.
       </p>
 
-      <dl className="mt-8 space-y-5 border-t border-gray-200 pt-6 text-sm">
+      <dl className="mt-8 space-y-5 border-t border-gray-200 pt-6 text-lg">
         <ProductInfoRow label="판매처">{product.store.name}</ProductInfoRow>
         <ProductInfoRow label="픽업 가능">
           <span className="block">
