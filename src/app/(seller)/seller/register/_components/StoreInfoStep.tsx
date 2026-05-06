@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { z } from 'zod';
 
 import type { StoreInfoData } from '@/types/store';
 import { Button } from '@/components/common/Button/Button';
@@ -11,6 +12,27 @@ interface StoreInfoStepProps {
   savedData?: StoreInfoData | null;
   isViewMode?: boolean;
 }
+
+const storeInfoSchema = z.object({
+  storeName: z.string().min(1, '가게명을 입력해주세요.'),
+  category: z.string().min(1, '카테고리를 선택해주세요.'),
+  phone: z
+    .string()
+    .min(1, '전화번호를 입력해주세요.')
+    .regex(/^[\d-]+$/, '올바른 전화번호 형식이 아닙니다.'),
+  address: z.string().min(1, '주소를 입력해주세요.'),
+  description: z.string().optional(),
+});
+
+type StoreInfoErrors = Partial<Record<keyof StoreInfoData, string>>;
+
+const INITIAL_DATA: StoreInfoData = {
+  storeName: '',
+  category: '',
+  phone: '',
+  address: '',
+  description: '',
+};
 
 const formatPhoneNumber = (value: string) => {
   const numbers = value.replace(/[^0-9]/g, '');
@@ -34,15 +56,11 @@ export function StoreInfoStep({
 }: StoreInfoStepProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [info, setInfo] = useState<StoreInfoData>(
-    savedData ?? {
-      storeName: '',
-      category: '',
-      phone: '',
-      address: '',
-      description: '',
-    }
+    () => savedData ?? INITIAL_DATA
   );
-  const [errors, setErrors] = useState<Partial<StoreInfoData>>({});
+  const [errors, setErrors] = useState<StoreInfoErrors>({});
+
+  const [originalInfo, setOriginalInfo] = useState<StoreInfoData | null>(null);
 
   const handleChange =
     (field: keyof StoreInfoData) =>
@@ -50,24 +68,48 @@ export function StoreInfoStep({
       let value = e.target.value;
       if (field === 'phone') value = formatPhoneNumber(value);
       setInfo((prev) => ({ ...prev, [field]: value }));
-      setErrors((prev) => ({ ...prev, [field]: '' }));
+      if (errors[field]) {
+        setErrors((prev) => ({ ...prev, [field]: undefined }));
+      }
     };
 
-  const validate = () => {
-    const newErrors: Partial<StoreInfoData> = {};
-    if (!info.storeName.trim()) newErrors.storeName = '가게명을 입력해주세요.';
-    if (!info.category.trim()) newErrors.category = '카테고리를 선택해주세요.';
-    if (!info.phone.trim()) newErrors.phone = '전화번호를 입력해주세요.';
-    if (!info.address.trim()) newErrors.address = '주소를 입력해주세요.';
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+  const validate = (): boolean => {
+    const result = storeInfoSchema.safeParse(info);
+
+    if (!result.success) {
+      const newErrors: StoreInfoErrors = {};
+      result.error.issues.forEach((issue) => {
+        const field = issue.path[0] as keyof StoreInfoData;
+        newErrors[field] = issue.message;
+      });
+      setErrors(newErrors);
+      return false;
+    }
+
+    setErrors({});
+    return true;
   };
 
   const handleSubmit = () => {
     if (validate()) {
       onSubmit(info);
       setIsEditing(false);
+      setOriginalInfo(null);
     }
+  };
+
+  const handleStartEdit = () => {
+    setOriginalInfo({ ...info });
+    setIsEditing(true);
+  };
+
+  const handleCancel = () => {
+    if (originalInfo) {
+      setInfo(originalInfo);
+    }
+    setErrors({});
+    setOriginalInfo(null);
+    setIsEditing(false);
   };
 
   const fields = [
@@ -97,11 +139,7 @@ export function StoreInfoStep({
           </div>
         </dl>
         <div className="flex justify-end">
-          <Button
-            variant="outline"
-            color="gray"
-            onClick={() => setIsEditing(true)}
-          >
+          <Button variant="outline" color="gray" onClick={handleStartEdit}>
             수정하기
           </Button>
         </div>
@@ -138,11 +176,7 @@ export function StoreInfoStep({
       </div>
       <div className="flex justify-end gap-2">
         {isEditing && (
-          <Button
-            variant="outline"
-            color="gray"
-            onClick={() => setIsEditing(false)}
-          >
+          <Button variant="outline" color="gray" onClick={handleCancel}>
             취소
           </Button>
         )}

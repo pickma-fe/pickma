@@ -5,7 +5,8 @@ import { useState } from 'react';
 import { Button } from '@/components/common/Button/Button';
 
 interface TermsStepProps {
-  onNext: () => void;
+  onNext: (agreedTerms: Record<string, boolean>) => void;
+  savedAgreed?: Record<string, boolean> | null;
   isViewMode?: boolean;
 }
 
@@ -38,12 +39,20 @@ const TERMS = [
   },
 ];
 
-export function TermsStep({ onNext, isViewMode = false }: TermsStepProps) {
-  const [agreed, setAgreed] = useState<Record<string, boolean>>({
-    service: false,
-    privacy: false,
-    marketing: false,
-  });
+const INITIAL_AGREED: Record<string, boolean> = {
+  service: false,
+  privacy: false,
+  marketing: false,
+};
+
+export function TermsStep({
+  onNext,
+  savedAgreed,
+  isViewMode = false,
+}: TermsStepProps) {
+  const [agreed, setAgreed] = useState<Record<string, boolean>>(
+    () => savedAgreed ?? INITIAL_AGREED
+  );
 
   const allRequired = TERMS.filter((t) => t.required).every(
     (t) => agreed[t.id]
@@ -62,32 +71,41 @@ export function TermsStep({ onNext, isViewMode = false }: TermsStepProps) {
     setAgreed((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
-  // 보기 모드
+  const handleSubmit = () => {
+    onNext(agreed);
+  };
+
   if (isViewMode) {
     return (
       <div className="flex flex-col gap-4">
         <div className="rounded-md bg-green-50 p-4">
           <p className="text-sm font-medium text-green-700">
-            ✓ 모든 약관에 동의하셨습니다.
+            ✓ 필수 약관에 동의하셨습니다.
           </p>
         </div>
         <div className="flex flex-col gap-4">
-          {TERMS.map((term) => (
-            <div key={term.id} className="flex flex-col gap-2">
-              <p className="text-sm font-medium text-gray-700">
-                ✓ {term.title}
-              </p>
-              <div className="h-24 overflow-y-auto rounded-md border border-gray-200 bg-gray-50 p-3 text-xs whitespace-pre-line text-gray-500">
-                {term.content}
+          {TERMS.map((term) => {
+            const isAgreed = agreed[term.id];
+            return (
+              <div key={term.id} className="flex flex-col gap-2">
+                <p
+                  className={`text-sm font-medium ${
+                    isAgreed ? 'text-green-700' : 'text-gray-400'
+                  }`}
+                >
+                  {isAgreed ? '✓' : '✗'} {term.title}
+                </p>
+                <div className="h-24 overflow-y-auto rounded-md border border-gray-200 bg-gray-50 p-3 text-xs whitespace-pre-line text-gray-500">
+                  {term.content}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     );
   }
 
-  // 입력 모드
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center gap-3 rounded-md border border-gray-200 p-4">
@@ -126,7 +144,7 @@ export function TermsStep({ onNext, isViewMode = false }: TermsStepProps) {
       </div>
 
       <div className="flex justify-end">
-        <Button onClick={onNext} disabled={!allRequired}>
+        <Button onClick={handleSubmit} disabled={!allRequired}>
           확인
         </Button>
       </div>

@@ -39,6 +39,13 @@ const DOCUMENTS = [
   },
 ];
 
+const INITIAL_FILES: Record<string, File | null> = {
+  businessLicense: null,
+  idCard: null,
+  bankbook: null,
+  businessReport: null,
+};
+
 const ACCEPTED_TYPES = [
   'image/png',
   'image/jpg',
@@ -66,15 +73,15 @@ export function DocumentStep({
 }: DocumentStepProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [files, setFiles] = useState<Record<string, File | null>>(
-    savedFiles ?? {
-      businessLicense: null,
-      idCard: null,
-      bankbook: null,
-      businessReport: null,
-    }
+    () => savedFiles ?? INITIAL_FILES
   );
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isDragging, setIsDragging] = useState<Record<string, boolean>>({});
+
+  const [originalFiles, setOriginalFiles] = useState<Record<
+    string,
+    File | null
+  > | null>(null);
 
   const validateFile = (file: File): string | null => {
     if (!ACCEPTED_TYPES.includes(file.type))
@@ -136,7 +143,22 @@ export function DocumentStep({
     if (validate()) {
       onSubmit(files);
       setIsEditing(false);
+      setOriginalFiles(null); // ✅ 제출 성공 시 백업 클리어
     }
+  };
+
+  const handleStartEdit = () => {
+    setOriginalFiles({ ...files });
+    setIsEditing(true);
+  };
+
+  const handleCancel = () => {
+    if (originalFiles) {
+      setFiles(originalFiles);
+    }
+    setErrors({});
+    setOriginalFiles(null);
+    setIsEditing(false);
   };
 
   const isAllUploaded = DOCUMENTS.filter((d) => d.required).every(
@@ -176,11 +198,7 @@ export function DocumentStep({
           })}
         </div>
         <div className="flex justify-end">
-          <Button
-            variant="outline"
-            color="gray"
-            onClick={() => setIsEditing(true)}
-          >
+          <Button variant="outline" color="gray" onClick={handleStartEdit}>
             수정하기
           </Button>
         </div>
@@ -281,11 +299,7 @@ export function DocumentStep({
 
       <div className="flex justify-end gap-2">
         {isEditing && (
-          <Button
-            variant="outline"
-            color="gray"
-            onClick={() => setIsEditing(false)}
-          >
+          <Button variant="outline" color="gray" onClick={handleCancel}>
             취소
           </Button>
         )}

@@ -26,6 +26,7 @@ export function RegisterContent() {
     authState,
     businessInfo,
     documentFiles,
+    termsAgreed,
     isAuthCompleted,
     handleTermsComplete,
     handleBusinessInfoComplete,
@@ -53,8 +54,8 @@ export function RegisterContent() {
     setActiveModal(modal);
   };
 
-  const onTermsComplete = () => {
-    handleTermsComplete();
+  const onTermsComplete = (agreed: Record<string, boolean>) => {
+    handleTermsComplete(agreed);
     handleCloseModal();
   };
 
@@ -144,7 +145,11 @@ export function RegisterContent() {
         onClose={handleCloseModal}
         title={isViewMode ? '약관 동의 확인' : '약관 동의'}
       >
-        <TermsStep onNext={onTermsComplete} isViewMode={isViewMode} />
+        <TermsStep
+          onNext={onTermsComplete}
+          savedAgreed={termsAgreed}
+          isViewMode={isViewMode}
+        />
       </StepModal>
 
       <StepModal

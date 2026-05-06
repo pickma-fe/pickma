@@ -22,6 +22,10 @@ export function useSellerAuth() {
     string,
     File | null
   > | null>(null);
+  const [termsAgreed, setTermsAgreed] = useState<Record<
+    string,
+    boolean
+  > | null>(null);
   const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   useEffect(() => {
@@ -35,7 +39,8 @@ export function useSellerAuth() {
     timersRef.current = [];
   };
 
-  const handleTermsComplete = () => {
+  const handleTermsComplete = (agreed: Record<string, boolean>) => {
+    setTermsAgreed(agreed);
     setAuthState((prev) => ({ ...prev, termsAgreed: true }));
   };
 
@@ -83,6 +88,7 @@ export function useSellerAuth() {
     authState,
     businessInfo,
     documentFiles,
+    termsAgreed,
     isAuthCompleted,
     handleTermsComplete,
     handleBusinessInfoComplete,
