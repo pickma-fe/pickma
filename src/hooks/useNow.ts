@@ -6,7 +6,7 @@ const TICK_INTERVAL_MS = 1000;
 
 const listeners = new Set<() => void>();
 
-let currentNow = Date.now();
+let currentNow: number | null = null;
 let timerId: number | null = null;
 
 function tick() {
@@ -18,6 +18,7 @@ function subscribe(listener: () => void) {
   listeners.add(listener);
 
   if (!timerId) {
+    tick();
     timerId = window.setInterval(tick, TICK_INTERVAL_MS);
   }
 
@@ -35,6 +36,10 @@ function getSnapshot() {
   return currentNow;
 }
 
+function getServerSnapshot() {
+  return null;
+}
+
 export function useNow() {
-  return useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
+  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 }

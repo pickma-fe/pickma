@@ -35,6 +35,10 @@ function formatRemainingTime(endAt: string, now: number) {
   return `마감 ${paddedHours}:${paddedMinutes}:${paddedSeconds}`;
 }
 
+function isProductUnavailableBeforeHydration(product: ProductListItemResponse) {
+  return product.isSoldOut || product.isExpired || product.availableStock <= 0;
+}
+
 function formatPickupTime(value: string) {
   return new Intl.DateTimeFormat('ko-KR', {
     hour: '2-digit',
@@ -45,7 +49,10 @@ function formatPickupTime(value: string) {
 
 export function ProductCard({ product }: ProductCardProps) {
   const now = useNow();
-  const isUnavailable = isProductUnavailable({ product, now });
+  const isUnavailable =
+    now === null
+      ? isProductUnavailableBeforeHydration(product)
+      : isProductUnavailable({ product, now });
 
   return (
     <article className="group relative w-full overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition hover:shadow-md">
@@ -75,7 +82,9 @@ export function ProductCard({ product }: ProductCardProps) {
           variant="solid"
           color="dark"
         >
-          {formatRemainingTime(product.endAt, now)}
+          {now === null
+            ? '마감 --:--:--'
+            : formatRemainingTime(product.endAt, now)}
         </Badge>
       </div>
 
