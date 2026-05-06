@@ -2,7 +2,7 @@
 
 import { CheckIcon, ChevronRightIcon } from 'lucide-react';
 
-import type { ProductFilterCategory } from '@/hooks/products/consumerProductFilters';
+import type { ProductFilterCategory } from '@/lib/consumerProductFilters';
 import { Button } from '@/components/common';
 
 export const discountOptions = [

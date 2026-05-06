@@ -7,7 +7,7 @@ import { useState } from 'react';
 import {
   DEFAULT_DISCOUNT_OPTION_ID,
   DEFAULT_SORT_OPTION_ID,
-} from '@/hooks/products/consumerProductFilters';
+} from '@/lib/consumerProductFilters';
 import {
   ALL_CATEGORY_ID,
   getConsumerProductCategories,
@@ -51,29 +51,35 @@ export default function ConsumerPage() {
   );
   const [keyword, setKeyword] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [filterNow, setFilterNow] = useState(() => Date.now());
   const productCategories = getConsumerProductCategories(mockProducts);
 
   const handleCategoryChange = (categoryId: string) => {
+    setFilterNow(Date.now());
     setSelectedCategoryId(categoryId);
     setCurrentPage(1);
   };
 
   const handleRegionChange = (region: string) => {
+    setFilterNow(Date.now());
     setSelectedRegion(region);
     setCurrentPage(1);
   };
 
   const handleSortChange = (sortOption: string) => {
+    setFilterNow(Date.now());
     setSelectedSortOption(sortOption);
     setCurrentPage(1);
   };
 
   const handleDiscountChange = (discountOption: string) => {
+    setFilterNow(Date.now());
     setSelectedDiscountOption(discountOption);
     setCurrentPage(1);
   };
 
   const handleResetFilters = () => {
+    setFilterNow(Date.now());
     setSelectedSortOption(DEFAULT_SORT_OPTION_ID);
     setSelectedDiscountOption(DEFAULT_DISCOUNT_OPTION_ID);
     setCurrentPage(1);
@@ -156,6 +162,7 @@ export default function ConsumerPage() {
               productRegions={mockProductRegions}
               currentPage={currentPage}
               productsPerPage={PRODUCTS_PER_PAGE}
+              now={filterNow}
               onPageChange={setCurrentPage}
             />
           </section>

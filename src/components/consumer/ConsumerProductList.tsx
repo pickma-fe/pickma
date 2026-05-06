@@ -1,7 +1,5 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-
 import type { ProductListItemResponse } from '@/contracts/product';
 import { useConsumerProducts } from '@/hooks/products/useConsumerProducts';
 import { Pagination } from '@/components/common';
@@ -17,6 +15,7 @@ interface ConsumerProductListProps {
   productRegions: Record<string, string>;
   currentPage: number;
   productsPerPage: number;
+  now: number;
   onPageChange: (page: number) => void;
 }
 
@@ -29,20 +28,9 @@ export function ConsumerProductList({
   productRegions,
   currentPage,
   productsPerPage,
+  now,
   onPageChange,
 }: ConsumerProductListProps) {
-  const [now, setNow] = useState(() => Date.now());
-
-  useEffect(() => {
-    const timerId = window.setInterval(() => {
-      setNow(Date.now());
-    }, 1000);
-
-    return () => {
-      window.clearInterval(timerId);
-    };
-  }, []);
-
   const {
     sortedProducts,
     paginatedProducts,
@@ -71,7 +59,7 @@ export function ConsumerProductList({
       {paginatedProducts.length > 0 ? (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
           {paginatedProducts.map((product) => (
-            <ProductCard key={product.id} product={product} now={now} />
+            <ProductCard key={product.id} product={product} />
           ))}
         </div>
       ) : (

@@ -1,14 +1,14 @@
 'use client';
 
 import type { ProductListItemResponse } from '@/contracts/product';
-import { isProductAvailable } from '@/lib/product';
 import {
   normalizeDiscountOptionId,
   normalizeSortOptionId,
   type ProductDiscountOptionId,
   type ProductFilterCategory,
   type ProductSortOptionId,
-} from '@/hooks/products/consumerProductFilters';
+} from '@/lib/consumerProductFilters';
+import { isProductAvailable } from '@/lib/product';
 
 export const ALL_CATEGORY_ID = 'category-all';
 

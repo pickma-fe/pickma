@@ -34,10 +34,10 @@ export function ConsumerHeaderSearch({
 
   return (
     <form
-      className="flex w-full max-w-220 min-w-0 items-center gap-4"
+      className="flex w-full max-w-120 min-w-0 items-center gap-2 lg:max-w-160 xl:max-w-220 xl:gap-4"
       onSubmit={handleSubmit}
     >
-      <div className="shrink-0">
+      <div className="hidden shrink-0 xl:block">
         <Dropdown
           type="select"
           value={selectedRegion}
