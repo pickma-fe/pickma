@@ -309,6 +309,16 @@ CREATE POLICY "orders: seller read"
     auth.uid() = (SELECT user_id FROM stores WHERE id = store_id)
   );
 
+ALTER TABLE order_items ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "order_items: buyer read"
+  ON order_items FOR SELECT USING (
+    auth.uid() = (SELECT user_id FROM orders WHERE id = order_id)
+  );
+CREATE POLICY "order_items: seller read"
+  ON order_items FOR SELECT USING (
+    auth.uid() = (SELECT s.user_id FROM orders o JOIN stores s ON s.id = o.store_id WHERE o.id = order_id)
+  );
+
 ALTER TABLE wishlists ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "wishlists: owner all"
   ON wishlists USING (auth.uid() = user_id);
