@@ -32,12 +32,22 @@ export interface PaginatedResult<T> {
 Auth는 Supabase Auth user 식별과 세션 상태를 의미한다. User는 PickMa 서비스 내부 사용자 정보를 의미한다.
 
 ```ts
-export type AuthProvider = 'google' | 'kakao';
+export type AuthProvider = 'google' | 'kakao' | 'email';
 
 export interface AuthUser {
   id: string;
-  email: string;
+  email?: string;
   provider?: AuthProvider;
+}
+
+export interface AuthSession {
+  user: AuthUser;
+  expiresAt?: number;
+}
+
+export interface AuthResult {
+  user?: AuthUser;
+  session?: AuthSession;
 }
 
 export type UserRole = 'customer' | 'seller' | 'admin';

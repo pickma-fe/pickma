@@ -57,17 +57,19 @@ src/app/api/{resource}/_lib/mapper.ts
 
 ## 4. 인증과 세션
 
-### 4.1 OAuth 로그인
+### 4.1 Supabase Auth 로그인
 
 ```text
 Client authApi
-  -> Supabase Auth SDK signInWithOAuth()
-  -> Google/Kakao OAuth
+  -> Supabase Auth SDK
+  -> Google/Kakao OAuth 또는 email/password
   -> Supabase callback/session
   -> cookie 기반 세션 저장
 ```
 
-OAuth 로그인 시작과 로그아웃은 서버 Route Handler가 아니라 Supabase Auth SDK 래퍼에서 처리한다.
+OAuth 로그인 시작, email/password 회원가입/로그인, 비밀번호 재설정, 로그아웃은 서버 Route Handler가 아니라 Supabase Auth SDK 래퍼에서 처리한다. 컴포넌트는 Supabase SDK를 직접 호출하지 않고 `src/api/auth/authApi.ts`만 사용한다.
+
+회원가입 시 입력한 이름은 Phase 2.5에서 Supabase Auth metadata에만 전달한다. PickMa 서비스 내부 `users` row 보장과 role/status 검증은 Phase 3의 `/api/users/me`와 서버 인증 helper에서 OAuth/email 로그인 모두 동일한 흐름으로 처리한다.
 
 ### 4.2 Proxy 역할
 
@@ -93,7 +95,11 @@ export const config = {
 };
 ```
 
-로그인은 별도 페이지를 두지 않고, 전역 로그인 모달에서 Supabase OAuth를 시작한다. 따라서 proxy는 미인증 페이지 접근 시 `/login`으로 보내지 않고 공개 진입점에 `auth=required`와 `next` query를 붙여 redirect한다. 클라이언트는 해당 query를 보고 로그인 모달을 연다.
+로그인은 별도 페이지를 두지 않고, 전역 로그인 모달에서 Supabase OAuth 또는 email/password 로그인을 시작한다. 따라서 proxy는 미인증 페이지 접근 시 `/login`으로 보내지 않고 공개 진입점에 `auth=required`와 `next` query를 붙여 redirect한다. 클라이언트는 해당 query를 보고 로그인 모달을 연다.
+
+전역 AuthModal은 `src/app/layout.tsx`에 mount하고, 모달 open/뷰 전환/next 경로는 `src/components/auth/useAuthModal.ts`의 Zustand UI state로 관리한다. Headless UI `Dialog`를 사용하므로 별도 AuthModalProvider는 두지 않는다.
+
+비밀번호 재설정 요청은 Supabase Auth reset flow를 사용한다. reset link 진입점은 `/auth/reset-password`이며, 해당 페이지는 새 비밀번호 저장 시 `authApi.updatePassword()`를 호출한다.
 
 보호 라우트 권장안:
 
@@ -306,6 +312,8 @@ src/
     (consumer)/
     (seller)/seller/
     (admin)/admin/
+    auth/
+      reset-password/
     api/
       _lib/
       products/
@@ -349,6 +357,7 @@ src/
     admin.ts
 
   types/
+    auth.ts
     product.ts
     order.ts
     payment.ts
