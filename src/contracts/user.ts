@@ -5,7 +5,7 @@ export interface UserResponse {
   phone?: string;
   profileImage?: string;
   role: 'customer' | 'seller' | 'admin';
-  status: 'active' | 'suspended' | 'deleted';
+  status: 'active' | 'inactive' | 'suspended';
   createdAt: string;
   updatedAt: string;
 }
