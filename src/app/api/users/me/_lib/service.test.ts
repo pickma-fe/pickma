@@ -1,5 +1,7 @@
+import type { SupabaseClient } from '@supabase/supabase-js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import type { Database } from '@/lib/supabase/database';
 import { mapUserRow } from '@/app/api/users/_lib/mapper';
 
 import { updateUser } from './service';
@@ -42,7 +44,7 @@ function makeClient(result: {
         }),
       }),
     }),
-  };
+  } as unknown as SupabaseClient<Database>;
 }
 
 describe('updateUser', () => {

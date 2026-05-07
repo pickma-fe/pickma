@@ -1,3 +1,5 @@
+import type { SupabaseClient } from '@supabase/supabase-js';
+
 import type { UserResponse } from '@/contracts/user';
 import { AppError } from '@/lib/errors/appError';
 import { ERROR_CODE } from '@/lib/errors/errorCodes';
@@ -6,29 +8,8 @@ import { mapUserRow } from '@/app/api/users/_lib/mapper';
 
 import type { UpdateMeBody } from './schemas';
 
-type UsersRow = Database['public']['Tables']['users']['Row'];
-type UpdatePayload = Partial<Database['public']['Tables']['users']['Update']>;
-
-interface MinimalClient {
-  from(table: 'users'): {
-    update(values: UpdatePayload): {
-      eq(
-        column: string,
-        value: string
-      ): {
-        select(columns: string): {
-          single(): Promise<{
-            data: UsersRow | null;
-            error: { code: string } | null;
-          }>;
-        };
-      };
-    };
-  };
-}
-
 export async function updateUser(
-  supabase: MinimalClient,
+  supabase: SupabaseClient<Database>,
   userId: string,
   data: UpdateMeBody
 ): Promise<UserResponse> {
