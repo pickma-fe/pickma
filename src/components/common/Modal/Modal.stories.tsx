@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { useState } from 'react';
 
+import type { ModalSize } from './Modal';
 import { Modal } from './Modal';
 import { Button } from '../Button/Button';
 
@@ -30,7 +31,7 @@ function ModalWithButton({
   title,
   children,
 }: {
-  size?: 'sm' | 'md' | 'lg' | 'xl';
+  size?: ModalSize;
   title: string;
   children: React.ReactNode;
 }) {
@@ -96,21 +97,29 @@ export const WithForm: Story = {
     <ModalWithButton title="정보 수정">
       <form className="flex flex-col gap-4">
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">
+          <label
+            htmlFor="name"
+            className="mb-1 block text-sm font-medium text-gray-700"
+          >
             이름
           </label>
           <input
             type="text"
+            id="name"
             className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
             placeholder="이름을 입력하세요"
           />
         </div>
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">
+          <label
+            htmlFor="email"
+            className="mb-1 block text-sm font-medium text-gray-700"
+          >
             이메일
           </label>
           <input
             type="email"
+            id="email"
             className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
             placeholder="이메일을 입력하세요"
           />
@@ -119,7 +128,7 @@ export const WithForm: Story = {
           <Button variant="outline" color="gray">
             취소
           </Button>
-          <Button>저장</Button>
+          <Button type="submit">저장</Button>
         </div>
       </form>
     </ModalWithButton>

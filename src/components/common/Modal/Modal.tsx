@@ -1,9 +1,15 @@
 'use client';
 
-import { Dialog, DialogPanel, DialogTitle } from '@headlessui/react';
+import {
+  Dialog,
+  DialogBackdrop,
+  DialogPanel,
+  DialogTitle,
+} from '@headlessui/react';
 import { X } from 'lucide-react';
+import type { ReactNode } from 'react';
 
-type ModalSize = 'sm' | 'md' | 'lg' | 'xl';
+export type ModalSize = 'sm' | 'md' | 'lg' | 'xl';
 
 const SIZE_CLASSES: Record<ModalSize, string> = {
   sm: 'max-w-sm',
@@ -16,7 +22,7 @@ interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
   title: string;
-  children: React.ReactNode;
+  children: ReactNode;
   size?: ModalSize;
 }
 
@@ -29,10 +35,10 @@ export function Modal({
 }: ModalProps) {
   return (
     <Dialog open={isOpen} onClose={onClose} className="relative z-50">
-      <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
+      <DialogBackdrop className="fixed inset-0 bg-black/30" />
       <div className="fixed inset-0 flex items-center justify-center p-4">
         <DialogPanel
-          className={`flex max-h-[85vh] w-full flex-col rounded-lg bg-white shadow-xl ${SIZE_CLASSES[size]}`}
+          className={`relative flex max-h-[85vh] w-full flex-col rounded-lg bg-white shadow-xl ${SIZE_CLASSES[size]}`}
         >
           <div className="flex flex-shrink-0 items-center justify-between border-b border-gray-200 px-6 py-4">
             <DialogTitle className="text-base font-semibold text-gray-900">
