@@ -41,6 +41,10 @@ describe('GET /api/products/[productId]', () => {
         makeCtx(INVALID_ID)
       );
       expect(res.status).toBe(400);
+      const body = (await res.json()) as {
+        error: { details: { path: string }[] };
+      };
+      expect(body.error.details[0].path).toBe('productId');
     });
 
     it('UUID가 아니면 mock 모드에서도 400을 반환한다', async () => {
@@ -50,6 +54,10 @@ describe('GET /api/products/[productId]', () => {
         makeCtx(INVALID_ID)
       );
       expect(res.status).toBe(400);
+      const body = (await res.json()) as {
+        error: { details: { path: string }[] };
+      };
+      expect(body.error.details[0].path).toBe('productId');
     });
   });
 

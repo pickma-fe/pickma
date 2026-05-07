@@ -14,7 +14,16 @@ export async function GET(
   const { productId } = await params;
 
   const parsed = productIdSchema.safeParse(productId);
-  if (!parsed.success) return fail(ERROR_CODE.VALIDATION_ERROR, 400);
+  if (!parsed.success) {
+    return fail(
+      ERROR_CODE.VALIDATION_ERROR,
+      400,
+      parsed.error.issues.map((issue) => ({
+        path: issue.path.length ? issue.path.join('.') : 'productId',
+        message: issue.message,
+      }))
+    );
+  }
 
   if (isApiMockEnabled()) {
     const detail = mockProductDetailsMap[parsed.data];
