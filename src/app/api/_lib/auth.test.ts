@@ -146,6 +146,21 @@ describe('requireSeller', () => {
     });
   });
 
+  it('seller이고 store 조회에서 PGRST116 외 에러면 INTERNAL_SERVER_ERROR를 던진다', async () => {
+    vi.mocked(createServerClient).mockResolvedValue(
+      makeSupabaseClient(mockAuthUser, {
+        data: null,
+        error: { code: '42501' },
+      }) as unknown as Awaited<ReturnType<typeof createServerClient>>
+    );
+    setupUser('seller');
+
+    await expect(requireSeller()).rejects.toMatchObject({
+      code: 'INTERNAL_SERVER_ERROR',
+      statusCode: 500,
+    });
+  });
+
   it('seller이고 store가 없으면 STORE_NOT_FOUND를 던진다', async () => {
     vi.mocked(createServerClient).mockResolvedValue(
       makeSupabaseClient(mockAuthUser, {
