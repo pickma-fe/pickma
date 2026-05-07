@@ -268,6 +268,8 @@ GRANT ALL ON ALL TABLES IN SCHEMA public TO service_role;
 GRANT SELECT ON public.users TO authenticated;
 GRANT SELECT ON public.stores TO authenticated;
 GRANT SELECT ON public.products TO authenticated;
+GRANT SELECT ON public.menu_items TO authenticated;
+GRANT SELECT ON public.categories TO authenticated;
 GRANT SELECT ON public.orders TO authenticated;
 GRANT SELECT ON public.order_items TO authenticated;
 GRANT SELECT, INSERT, DELETE ON public.wishlists TO authenticated;
