@@ -256,7 +256,30 @@ export const mockProductDetail2: ProductDetailResponse = {
   },
 };
 
+function createMockProductDetail(
+  product: ProductListItemResponse
+): ProductDetailResponse {
+  return {
+    ...product,
+    description: `${product.name} 상품 상세 설명입니다.`,
+    store: {
+      id: product.storeId,
+      name: product.storeName,
+      description: `${product.storeName}에서 준비한 마감 할인 상품입니다.`,
+      phone: '02-1234-5678',
+      address: '서울시 강남구 테헤란로 123',
+      region: '서울 강남구',
+    },
+  };
+}
+
 export const mockProductDetailsMap: Record<string, ProductDetailResponse> = {
+  ...Object.fromEntries(
+    mockProducts.map((product) => [
+      product.id,
+      createMockProductDetail(product),
+    ])
+  ),
   [mockProductDetail.id]: mockProductDetail,
   [mockProductDetail2.id]: mockProductDetail2,
 };
