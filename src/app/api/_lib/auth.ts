@@ -53,7 +53,14 @@ export async function requireSeller(): Promise<RequireSellerResult> {
     .eq('user_id', serviceUser.id)
     .single();
 
-  if (error || !store) {
+  if (error) {
+    if (error.code === 'PGRST116') {
+      throw new AppError(ERROR_CODE.STORE_NOT_FOUND, 404);
+    }
+    throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
+  }
+
+  if (!store) {
     throw new AppError(ERROR_CODE.STORE_NOT_FOUND, 404);
   }
 
