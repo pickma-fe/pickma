@@ -41,6 +41,7 @@ export async function getProducts(
     .from('products')
     .select(PRODUCT_SELECT, { count: 'exact' })
     .eq('status', 'active')
+    .eq('stores.status', 'approved')
     .order('end_at', { ascending: true });
 
   if (region) {

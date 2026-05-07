@@ -87,6 +87,25 @@ describe('getProducts', () => {
     expect(result.pageSize).toBe(20);
   });
 
+  it('products.status = active 필터를 적용한다', async () => {
+    const supabase = buildSupabase({ data: [], error: null, count: 0 });
+
+    await getProducts(supabase, { page: 1, pageSize: 20 });
+
+    expect(supabase._chain.eq).toHaveBeenCalledWith('status', 'active');
+  });
+
+  it('stores.status = approved 필터를 적용한다', async () => {
+    const supabase = buildSupabase({ data: [], error: null, count: 0 });
+
+    await getProducts(supabase, { page: 1, pageSize: 20 });
+
+    expect(supabase._chain.eq).toHaveBeenCalledWith(
+      'stores.status',
+      'approved'
+    );
+  });
+
   it('region 파라미터가 있으면 stores.region 필터를 적용한다', async () => {
     const supabase = buildSupabase({ data: [], error: null, count: 0 });
 
