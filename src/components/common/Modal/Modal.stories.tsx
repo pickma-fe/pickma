@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
+import type { ComponentProps, ReactNode } from 'react';
 import { useState } from 'react';
 
 import { Modal } from './Modal';
@@ -32,9 +33,9 @@ function ModalWithButton({
   closeOnOverlayClick,
   closeOnEscape,
 }: {
-  size?: 'sm' | 'md' | 'lg' | 'xl';
+  size?: ComponentProps<typeof Modal>['size'];
   title: string;
-  children: React.ReactNode;
+  children: ReactNode;
   closeOnOverlayClick?: boolean;
   closeOnEscape?: boolean;
 }) {
