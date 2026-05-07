@@ -2,7 +2,9 @@
 
 import { useState, useEffect, useRef } from 'react';
 
-import type { StoreStepState, StoreInfoData } from '@/types/store';
+import type { StoreInfoData } from '@/types/store';
+
+import type { StoreStepState } from '../_components/types';
 
 const INITIAL_STORE_STATE: StoreStepState = {
   storeInfoSubmitted: false,

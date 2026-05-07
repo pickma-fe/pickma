@@ -1,6 +1,8 @@
 'use client';
 
 import { useMe } from '@/hooks/users/useMe';
+import { AuthModal } from '@/components/auth/AuthModal';
+import { useAuthModal } from '@/components/auth/useAuthModal';
 import { Header } from '@/components/common/Header/Header';
 import { Sidebar } from '@/components/common/Sidebar/Sidebar';
 
@@ -12,6 +14,7 @@ export default function SellerLayout({
   children: React.ReactNode;
 }) {
   const { data: user } = useMe();
+  const { openAuthModal } = useAuthModal();
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -19,7 +22,15 @@ export default function SellerLayout({
         user={user ?? null}
         logoHref="/seller"
         menuItems={
-          user ? [] : [{ label: '로그인', type: 'link', href: '/login' }]
+          user
+            ? []
+            : [
+                {
+                  label: '로그인',
+                  type: 'action',
+                  onClick: () => openAuthModal('login'),
+                },
+              ]
         }
       />
       <div className="flex flex-1">
@@ -28,6 +39,7 @@ export default function SellerLayout({
         </div>
         <main className="flex-1 bg-gray-50 p-4 lg:p-8">{children}</main>
       </div>
+      <AuthModal />
     </div>
   );
 }
