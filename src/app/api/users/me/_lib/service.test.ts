@@ -34,10 +34,13 @@ function makeServiceClient(result: {
   data: typeof mockRow | null;
   error: { code: string } | null;
 }) {
-  return {
+  const updateFn = vi.fn();
+  const eqFn = vi.fn();
+
+  const client = {
     from: () => ({
-      update: () => ({
-        eq: () => ({
+      update: updateFn.mockReturnValue({
+        eq: eqFn.mockReturnValue({
           select: () => ({
             single: () => Promise.resolve(result),
           }),
@@ -45,6 +48,8 @@ function makeServiceClient(result: {
       }),
     }),
   };
+
+  return { client, updateFn, eqFn };
 }
 
 describe('updateUser', () => {
@@ -53,24 +58,28 @@ describe('updateUser', () => {
     vi.mocked(mapUserRow).mockReturnValue(mockUserResponse);
   });
 
-  it('업데이트 성공 시 mapUserRow 결과를 반환한다', async () => {
+  it('업데이트 성공 시 올바른 인자로 update/eq를 호출하고 mapUserRow 결과를 반환한다', async () => {
+    const { client, updateFn, eqFn } = makeServiceClient({
+      data: mockRow,
+      error: null,
+    });
     vi.mocked(createServiceRoleClient).mockReturnValue(
-      makeServiceClient({
-        data: mockRow,
-        error: null,
-      }) as unknown as ReturnType<typeof createServiceRoleClient>
+      client as unknown as ReturnType<typeof createServiceRoleClient>
     );
     const result = await updateUser('user-1', { name: '홍길동' });
+    expect(updateFn).toHaveBeenCalledWith({ name: '홍길동' });
+    expect(eqFn).toHaveBeenCalledWith('id', 'user-1');
     expect(mapUserRow).toHaveBeenCalledWith(mockRow);
     expect(result).toBe(mockUserResponse);
   });
 
   it('PGRST116 에러면 NOT_FOUND를 던진다', async () => {
+    const { client } = makeServiceClient({
+      data: null,
+      error: { code: 'PGRST116' },
+    });
     vi.mocked(createServiceRoleClient).mockReturnValue(
-      makeServiceClient({
-        data: null,
-        error: { code: 'PGRST116' },
-      }) as unknown as ReturnType<typeof createServiceRoleClient>
+      client as unknown as ReturnType<typeof createServiceRoleClient>
     );
     await expect(
       updateUser('user-1', { name: '홍길동' })
@@ -81,11 +90,12 @@ describe('updateUser', () => {
   });
 
   it('기타 Supabase 에러면 INTERNAL_SERVER_ERROR를 던진다', async () => {
+    const { client } = makeServiceClient({
+      data: null,
+      error: { code: '42501' },
+    });
     vi.mocked(createServiceRoleClient).mockReturnValue(
-      makeServiceClient({
-        data: null,
-        error: { code: '42501' },
-      }) as unknown as ReturnType<typeof createServiceRoleClient>
+      client as unknown as ReturnType<typeof createServiceRoleClient>
     );
     await expect(
       updateUser('user-1', { name: '홍길동' })
