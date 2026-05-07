@@ -14,12 +14,12 @@ export function ProductImageGallery({
   return (
     <div className="relative aspect-square overflow-hidden rounded-lg bg-gray-100">
       <Image
-        src={imageUrl ?? FALLBACK_IMAGE_URL}
+        src={imageUrl || FALLBACK_IMAGE_URL}
         alt={productName}
         fill
         sizes="(min-width: 1280px) 520px, (min-width: 1024px) 60vw, 100vw"
         className="object-cover"
-        priority
+        preload
       />
     </div>
   );
