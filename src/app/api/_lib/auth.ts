@@ -33,12 +33,46 @@ export async function requireActiveUser(): Promise<{
   return { authUser, serviceUser };
 }
 
-export async function requireSeller() {
-  // Phase 4에서 DB role 조회로 보강
-  return requireAuth();
+type RequireSellerResult = {
+  authUser: User;
+  serviceUser: UserResponse;
+  store: { id: string };
+};
+
+export async function requireSeller(): Promise<RequireSellerResult> {
+  const { authUser, serviceUser } = await requireActiveUser();
+
+  if (serviceUser.role !== 'seller') {
+    throw new AppError(ERROR_CODE.FORBIDDEN, 403);
+  }
+
+  const supabase = await createServerClient();
+  const { data: store, error } = await supabase
+    .from('stores')
+    .select('id, status')
+    .eq('user_id', serviceUser.id)
+    .single();
+
+  if (error || !store) {
+    throw new AppError(ERROR_CODE.STORE_NOT_FOUND, 404);
+  }
+
+  if (store.status !== 'approved') {
+    throw new AppError(ERROR_CODE.STORE_NOT_APPROVED, 403);
+  }
+
+  return { authUser, serviceUser, store: { id: store.id } };
 }
 
-export async function requireAdmin() {
-  // Phase 4에서 DB role 조회로 보강
-  return requireAuth();
+export async function requireAdmin(): Promise<{
+  authUser: User;
+  serviceUser: UserResponse;
+}> {
+  const { authUser, serviceUser } = await requireActiveUser();
+
+  if (serviceUser.role !== 'admin') {
+    throw new AppError(ERROR_CODE.FORBIDDEN, 403);
+  }
+
+  return { authUser, serviceUser };
 }
