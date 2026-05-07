@@ -611,7 +611,7 @@ export type Database = {
       social_provider: 'google' | 'kakao';
       store_status: 'pending' | 'approved' | 'rejected' | 'inactive';
       user_role: 'customer' | 'seller' | 'admin';
-      user_status: 'active' | 'inactive' | 'suspended';
+      user_status: 'active' | 'suspended' | 'deleted';
     };
     CompositeTypes: {
       [_ in never]: never;
@@ -757,7 +757,7 @@ export const Constants = {
       social_provider: ['google', 'kakao'],
       store_status: ['pending', 'approved', 'rejected', 'inactive'],
       user_role: ['customer', 'seller', 'admin'],
-      user_status: ['active', 'inactive', 'suspended'],
+      user_status: ['active', 'suspended', 'deleted'],
     },
   },
 } as const;
