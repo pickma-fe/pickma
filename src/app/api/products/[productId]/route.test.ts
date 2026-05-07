@@ -42,8 +42,10 @@ describe('GET /api/products/[productId]', () => {
       );
       expect(res.status).toBe(400);
       const body = (await res.json()) as {
+        statusCode: number;
         error: { details: { path: string }[] };
       };
+      expect(body.statusCode).toBe(400);
       expect(body.error.details[0].path).toBe('productId');
     });
 
@@ -55,8 +57,10 @@ describe('GET /api/products/[productId]', () => {
       );
       expect(res.status).toBe(400);
       const body = (await res.json()) as {
+        statusCode: number;
         error: { details: { path: string }[] };
       };
+      expect(body.statusCode).toBe(400);
       expect(body.error.details[0].path).toBe('productId');
     });
   });
