@@ -1,18 +1,17 @@
-import type { SupabaseClient } from '@supabase/supabase-js';
-
 import type { UserResponse } from '@/contracts/user';
 import { AppError } from '@/lib/errors/appError';
 import { ERROR_CODE } from '@/lib/errors/errorCodes';
-import type { Database } from '@/lib/supabase/database';
+import { createServiceRoleClient } from '@/lib/supabase/service';
 import { mapUserRow } from '@/app/api/users/_lib/mapper';
 
 import type { UpdateMeBody } from './schemas';
 
 export async function updateUser(
-  supabase: SupabaseClient<Database>,
   userId: string,
   data: UpdateMeBody
 ): Promise<UserResponse> {
+  const supabase = createServiceRoleClient();
+
   const { data: updated, error } = await supabase
     .from('users')
     .update(data)

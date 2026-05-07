@@ -1,6 +1,5 @@
 import type { NextRequest } from 'next/server';
 
-import { createServerClient } from '@/lib/supabase/server';
 import { requireActiveUser } from '@/app/api/_lib/auth';
 import { isApiMockEnabled } from '@/app/api/_lib/mock';
 import { routeError, success } from '@/app/api/_lib/response';
@@ -36,8 +35,7 @@ export async function PATCH(req: NextRequest): Promise<Response> {
   try {
     const { serviceUser } = await requireActiveUser();
     const data = await validateBody(updateMeSchema, req);
-    const supabase = await createServerClient();
-    const updated = await updateUser(supabase, serviceUser.id, data);
+    const updated = await updateUser(serviceUser.id, data);
     return success(updated);
   } catch (e) {
     return routeError(e);

@@ -1,11 +1,11 @@
-import type { SupabaseClient } from '@supabase/supabase-js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { Database } from '@/lib/supabase/database';
+import { createServiceRoleClient } from '@/lib/supabase/service';
 import { mapUserRow } from '@/app/api/users/_lib/mapper';
 
 import { updateUser } from './service';
 
+vi.mock('@/lib/supabase/service');
 vi.mock('@/app/api/users/_lib/mapper');
 
 const mockRow = {
@@ -30,7 +30,7 @@ const mockUserResponse = {
   updatedAt: '2026-01-01T00:00:00Z',
 };
 
-function makeClient(result: {
+function makeServiceClient(result: {
   data: typeof mockRow | null;
   error: { code: string } | null;
 }) {
@@ -44,7 +44,7 @@ function makeClient(result: {
         }),
       }),
     }),
-  } as unknown as SupabaseClient<Database>;
+  };
 }
 
 describe('updateUser', () => {
@@ -54,16 +54,26 @@ describe('updateUser', () => {
   });
 
   it('업데이트 성공 시 mapUserRow 결과를 반환한다', async () => {
-    const client = makeClient({ data: mockRow, error: null });
-    const result = await updateUser(client, 'user-1', { name: '홍길동' });
+    vi.mocked(createServiceRoleClient).mockReturnValue(
+      makeServiceClient({
+        data: mockRow,
+        error: null,
+      }) as unknown as ReturnType<typeof createServiceRoleClient>
+    );
+    const result = await updateUser('user-1', { name: '홍길동' });
     expect(mapUserRow).toHaveBeenCalledWith(mockRow);
     expect(result).toBe(mockUserResponse);
   });
 
   it('PGRST116 에러면 NOT_FOUND를 던진다', async () => {
-    const client = makeClient({ data: null, error: { code: 'PGRST116' } });
+    vi.mocked(createServiceRoleClient).mockReturnValue(
+      makeServiceClient({
+        data: null,
+        error: { code: 'PGRST116' },
+      }) as unknown as ReturnType<typeof createServiceRoleClient>
+    );
     await expect(
-      updateUser(client, 'user-1', { name: '홍길동' })
+      updateUser('user-1', { name: '홍길동' })
     ).rejects.toMatchObject({
       code: 'NOT_FOUND',
       statusCode: 404,
@@ -71,9 +81,14 @@ describe('updateUser', () => {
   });
 
   it('기타 Supabase 에러면 INTERNAL_SERVER_ERROR를 던진다', async () => {
-    const client = makeClient({ data: null, error: { code: '42501' } });
+    vi.mocked(createServiceRoleClient).mockReturnValue(
+      makeServiceClient({
+        data: null,
+        error: { code: '42501' },
+      }) as unknown as ReturnType<typeof createServiceRoleClient>
+    );
     await expect(
-      updateUser(client, 'user-1', { name: '홍길동' })
+      updateUser('user-1', { name: '홍길동' })
     ).rejects.toMatchObject({
       code: 'INTERNAL_SERVER_ERROR',
       statusCode: 500,
