@@ -56,7 +56,7 @@ export function mapProductRow(row: ProductRow): ProductListItemResponse {
     (1 - row.discount_price / row.menu_items.original_price) * 100
   );
   const isSoldOut = availableStock <= 0;
-  const isExpired = new Date(row.end_at) < new Date();
+  const isExpired = new Date(row.end_at) <= new Date();
 
   return {
     id: row.id,
