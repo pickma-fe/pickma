@@ -31,6 +31,8 @@ describe('productMapper', () => {
     const product = mapProduct(baseProduct);
 
     expect(product.endAt).toBeInstanceOf(Date);
+    expect(product.updatedAt).toBeInstanceOf(Date);
+    expect(product.updatedAt?.toISOString()).toBe('2026-04-29T10:00:00.000Z');
     expect(product.pickupStartTime).toBe('10:00:00');
     expect(product.pickupEndTime).toBe('13:30:00');
   });
