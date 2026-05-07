@@ -121,7 +121,7 @@ export const config = {
 src/lib/supabase/client.ts   # 브라우저용 Supabase client
 src/lib/supabase/server.ts   # Route Handler / Server Component용 Supabase client
 src/lib/supabase/proxy.ts    # proxy 세션 refresh용 helper
-src/lib/supabase/service.ts  # service_role 서버 전용 client (RPC 호출용)
+src/lib/supabase/service.ts  # service_role 서버 전용 client (RLS bypass, 서버 전용)
 ```
 
 - Supabase browser/server/proxy client는 `@supabase/ssr` 기준으로 구현한다.
