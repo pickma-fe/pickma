@@ -73,6 +73,8 @@ export async function getProductById(
     .from('products')
     .select(PRODUCT_SELECT)
     .eq('id', productId)
+    .eq('status', 'active')
+    .eq('stores.status', 'approved')
     .single();
 
   if (error) {

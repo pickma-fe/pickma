@@ -178,6 +178,25 @@ describe('getProductById', () => {
     expect(result.description).toBe(baseRow.menu_items.description);
   });
 
+  it('products.status = active 필터를 적용한다', async () => {
+    const supabase = buildSupabase({ data: baseRow, error: null });
+
+    await getProductById(supabase, '00000000-0000-4000-8000-000000000051');
+
+    expect(supabase._chain.eq).toHaveBeenCalledWith('status', 'active');
+  });
+
+  it('stores.status = approved 필터를 적용한다', async () => {
+    const supabase = buildSupabase({ data: baseRow, error: null });
+
+    await getProductById(supabase, '00000000-0000-4000-8000-000000000051');
+
+    expect(supabase._chain.eq).toHaveBeenCalledWith(
+      'stores.status',
+      'approved'
+    );
+  });
+
   it('PGRST116 에러 시 PRODUCT_NOT_FOUND를 throw한다', async () => {
     const supabase = buildSupabase({
       data: null,
