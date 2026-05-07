@@ -9,3 +9,7 @@ export interface UserResponse {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface UpdateMeRequest {
+  name?: string;
+}
