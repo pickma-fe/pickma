@@ -13,14 +13,14 @@ export async function GET(
 ): Promise<Response> {
   const { productId } = await params;
 
+  const parsed = productIdSchema.safeParse(productId);
+  if (!parsed.success) return fail(ERROR_CODE.VALIDATION_ERROR, 400);
+
   if (isApiMockEnabled()) {
-    const detail = mockProductDetailsMap[productId];
+    const detail = mockProductDetailsMap[parsed.data];
     if (!detail) return fail(ERROR_CODE.PRODUCT_NOT_FOUND);
     return success(detail);
   }
-
-  const parsed = productIdSchema.safeParse(productId);
-  if (!parsed.success) return fail(ERROR_CODE.VALIDATION_ERROR, 400);
 
   try {
     const supabase = await createServerClient();
