@@ -9,7 +9,7 @@ import {
 import { X } from 'lucide-react';
 import type { ReactNode } from 'react';
 
-export type ModalSize = 'sm' | 'md' | 'lg' | 'xl';
+type ModalSize = 'sm' | 'md' | 'lg' | 'xl';
 
 const SIZE_CLASSES: Record<ModalSize, string> = {
   sm: 'max-w-sm',
@@ -24,6 +24,8 @@ interface ModalProps {
   title: string;
   children: ReactNode;
   size?: ModalSize;
+  closeOnOverlayClick?: boolean;
+  closeOnEscape?: boolean;
 }
 
 export function Modal({
@@ -32,15 +34,37 @@ export function Modal({
   title,
   children,
   size = 'lg',
+  closeOnOverlayClick = true,
+  closeOnEscape = true,
 }: ModalProps) {
+  const handleClose = () => {
+    if (closeOnOverlayClick || closeOnEscape) {
+      onClose();
+    }
+  };
+
   return (
-    <Dialog open={isOpen} onClose={onClose} className="relative z-50">
-      <DialogBackdrop className="fixed inset-0 bg-black/30" />
-      <div className="fixed inset-0 flex items-center justify-center p-4">
+    <Dialog
+      open={isOpen}
+      onClose={closeOnOverlayClick || closeOnEscape ? handleClose : () => {}}
+      className="relative z-50"
+    >
+      <DialogBackdrop
+        className="fixed inset-0 bg-black/30"
+        onClick={closeOnOverlayClick ? onClose : undefined}
+      />
+      <div
+        className="fixed inset-0 flex items-center justify-center p-4"
+        onKeyDown={(e) => {
+          if (e.key === 'Escape' && !closeOnEscape) {
+            e.stopPropagation();
+          }
+        }}
+      >
         <DialogPanel
           className={`relative flex max-h-[85vh] w-full flex-col rounded-lg bg-white shadow-xl ${SIZE_CLASSES[size]}`}
         >
-          <div className="flex flex-shrink-0 items-center justify-between border-b border-gray-200 px-6 py-4">
+          <div className="flex shrink-0 items-center justify-between border-b border-gray-200 px-6 py-4">
             <DialogTitle className="text-base font-semibold text-gray-900">
               {title}
             </DialogTitle>

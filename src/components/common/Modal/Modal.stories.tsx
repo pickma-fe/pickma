@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { useState } from 'react';
 
-import type { ModalSize } from './Modal';
 import { Modal } from './Modal';
 import { Button } from '../Button/Button';
 
@@ -30,10 +29,14 @@ function ModalWithButton({
   size,
   title,
   children,
+  closeOnOverlayClick,
+  closeOnEscape,
 }: {
-  size?: ModalSize;
+  size?: 'sm' | 'md' | 'lg' | 'xl';
   title: string;
   children: React.ReactNode;
+  closeOnOverlayClick?: boolean;
+  closeOnEscape?: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -45,6 +48,8 @@ function ModalWithButton({
         onClose={() => setIsOpen(false)}
         title={title}
         size={size}
+        closeOnOverlayClick={closeOnOverlayClick}
+        closeOnEscape={closeOnEscape}
       >
         {children}
       </Modal>
@@ -95,7 +100,10 @@ export const ExtraLarge: Story = {
 export const WithForm: Story = {
   render: () => (
     <ModalWithButton title="정보 수정">
-      <form className="flex flex-col gap-4">
+      <form
+        className="flex flex-col gap-4"
+        onSubmit={(e) => e.preventDefault()}
+      >
         <div>
           <label
             htmlFor="name"
@@ -135,17 +143,35 @@ export const WithForm: Story = {
   ),
 };
 
+const LONG_CONTENT_ITEMS = Array.from({ length: 20 }, (_, i) => ({
+  id: `item-${i + 1}`,
+  text: `이것은 ${i + 1}번째 문단입니다. 스크롤이 필요한 긴 내용을 테스트합니다.`,
+}));
+
 export const WithLongContent: Story = {
   render: () => (
     <ModalWithButton title="긴 내용 모달">
       <div className="flex flex-col gap-4">
-        {Array.from({ length: 20 }).map((_, i) => (
-          <p key={i} className="text-sm text-gray-600">
-            이것은 {i + 1}번째 문단입니다. 스크롤이 필요한 긴 내용을
-            테스트합니다.
+        {LONG_CONTENT_ITEMS.map((item) => (
+          <p key={item.id} className="text-sm text-gray-600">
+            {item.text}
           </p>
         ))}
       </div>
+    </ModalWithButton>
+  ),
+};
+
+export const PreventClose: Story = {
+  render: () => (
+    <ModalWithButton
+      title="닫기 방지 모달"
+      closeOnOverlayClick={false}
+      closeOnEscape={false}
+    >
+      <p className="text-sm text-gray-600">
+        외부 클릭이나 ESC 키로 닫히지 않습니다. X 버튼으로만 닫을 수 있습니다.
+      </p>
     </ModalWithButton>
   ),
 };
