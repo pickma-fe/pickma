@@ -64,5 +64,8 @@ AGENTS.override.md
 # Temporal files and directory
 temp/*
 
+# Local dev-only pages
+src/app/**/dev-test/
+
 # Supabase CLI local state
 supabase/.temp/

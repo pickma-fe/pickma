@@ -37,7 +37,7 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
         new URL(`/?auth=required&next=${next}`, request.url)
       );
     }
-    // Phase 3: DB role check for admin
+    // Phase 4: DB role check는 Route Handler의 requireAdmin()에서 처리
   }
 
   if (matchesAnyPrefix(pathname, SELLER_PROTECTED)) {
@@ -46,7 +46,7 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
         new URL(`/seller?auth=required&next=${next}`, request.url)
       );
     }
-    // Phase 3: store approval check for seller dashboard routes
+    // Phase 4: store approval check는 Route Handler의 requireSeller()에서 처리
   }
 
   if (matchesAnyPrefix(pathname, CONSUMER_PROTECTED)) {
