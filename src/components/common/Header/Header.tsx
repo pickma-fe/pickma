@@ -4,6 +4,7 @@ import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
 import { ChevronDownIcon, ChevronUpIcon, UserIcon } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import type { ReactNode } from 'react';
 
 import type { User } from '@/types/user';
 
@@ -15,12 +16,14 @@ type HeaderMenuItem =
       label: string;
       type: 'link';
       href: string;
+      icon?: ReactNode;
       className?: string;
     }
   | {
       label: string;
       type: 'action';
       onClick: () => void;
+      icon?: ReactNode;
       className?: string;
     };
 
@@ -28,20 +31,20 @@ interface HeaderProps {
   user: User | null;
   logoHref?: string;
   menuItems?: HeaderMenuItem[];
-  slot?: React.ReactNode;
+  slot?: ReactNode;
 }
 
 export function Header({ user, logoHref, menuItems, slot }: HeaderProps) {
   return (
-    <header className="grid w-full grid-cols-[auto_1fr_auto] items-center border-b border-gray-200 px-12 py-4">
+    <header className="grid w-full grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-4 border-b border-gray-200 px-4 py-4 sm:px-6 lg:px-12">
       {logoHref ? (
-        <Link href={logoHref} aria-label="홈으로 이동">
+        <Link href={logoHref} aria-label="홈으로 이동" className="shrink-0">
           <Logo />
         </Link>
       ) : (
         <Logo />
       )}
-      <div className="flex justify-center">{slot}</div>
+      <div className="flex min-w-0 justify-center">{slot}</div>
       <RightSection user={user} menuItems={menuItems} />
     </header>
   );
@@ -60,24 +63,26 @@ function RightSection({
 
 function GuestMenu({ menuItems }: { menuItems: HeaderMenuItem[] }) {
   return (
-    <div className="flex space-x-1">
+    <div className="flex shrink-0 space-x-1">
       {menuItems.map((item) =>
         item.type === 'action' ? (
           <Button
             key={item.label}
             variant="ghost"
-            className={`rounded ${item.className || ''}`}
+            className={`gap-2 rounded ${item.className || ''}`}
             onClick={item.onClick}
           >
-            {item.label}
+            {item.icon}
+            <span>{item.label}</span>
           </Button>
         ) : (
           <Link
             key={item.label}
             href={item.href}
-            className={`text-primary-500 hover:bg-primary-50 rounded px-4 py-2 transition ${item.className || ''}`}
+            className={`inline-flex items-center gap-2 rounded px-4 py-2 font-bold text-gray-500 transition ${item.className || ''}`}
           >
-            {item.label}
+            {item.icon}
+            <span>{item.label}</span>
           </Link>
         )
       )}
