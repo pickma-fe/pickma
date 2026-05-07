@@ -26,6 +26,7 @@ export const mockProducts: ProductListItemResponse[] = [
     pickupStartTime: '10:00:00',
     pickupEndTime: '13:30:00',
     status: 'active',
+    updatedAt: '2026-05-07T09:00:00.000Z',
   },
   {
     id: '00000000-0000-0000-0000-000000000002',
@@ -48,6 +49,7 @@ export const mockProducts: ProductListItemResponse[] = [
     pickupStartTime: '09:30:00',
     pickupEndTime: '12:30:00',
     status: 'active',
+    updatedAt: '2026-05-07T08:30:00.000Z',
   },
   {
     id: '00000000-0000-0000-0000-000000000003',
@@ -70,6 +72,7 @@ export const mockProducts: ProductListItemResponse[] = [
     pickupStartTime: '09:00:00',
     pickupEndTime: '11:30:00',
     status: 'active',
+    updatedAt: '2026-05-07T08:00:00.000Z',
   },
   {
     id: '00000000-0000-0000-0000-000000000004',
@@ -92,6 +95,7 @@ export const mockProducts: ProductListItemResponse[] = [
     pickupStartTime: '12:00:00',
     pickupEndTime: '14:00:00',
     status: 'active',
+    updatedAt: '2026-05-07T11:00:00.000Z',
   },
   {
     id: '00000000-0000-0000-0000-000000000005',
@@ -114,6 +118,7 @@ export const mockProducts: ProductListItemResponse[] = [
     pickupStartTime: '13:00:00',
     pickupEndTime: '15:00:00',
     status: 'active',
+    updatedAt: '2026-05-07T12:00:00.000Z',
   },
   {
     id: '00000000-0000-0000-0000-000000000006',
@@ -136,6 +141,7 @@ export const mockProducts: ProductListItemResponse[] = [
     pickupStartTime: '14:00:00',
     pickupEndTime: '16:00:00',
     status: 'active',
+    updatedAt: '2026-05-07T13:00:00.000Z',
   },
   {
     id: '00000000-0000-0000-0000-000000000007',
@@ -158,6 +164,7 @@ export const mockProducts: ProductListItemResponse[] = [
     pickupStartTime: '08:30:00',
     pickupEndTime: '10:30:00',
     status: 'active',
+    updatedAt: '2026-05-07T07:30:00.000Z',
   },
   {
     id: '00000000-0000-0000-0000-000000000008',
@@ -180,6 +187,7 @@ export const mockProducts: ProductListItemResponse[] = [
     pickupStartTime: '11:00:00',
     pickupEndTime: '13:00:00',
     status: 'active',
+    updatedAt: '2026-05-07T10:00:00.000Z',
   },
   {
     id: '00000000-0000-0000-0000-000000000009',
@@ -202,6 +210,7 @@ export const mockProducts: ProductListItemResponse[] = [
     pickupStartTime: '10:00:00',
     pickupEndTime: '12:00:00',
     status: 'active',
+    updatedAt: '2026-05-07T09:30:00.000Z',
   },
   {
     id: '00000000-0000-0000-0000-000000000010',
@@ -224,6 +233,7 @@ export const mockProducts: ProductListItemResponse[] = [
     pickupStartTime: '15:00:00',
     pickupEndTime: '17:00:00',
     status: 'active',
+    updatedAt: '2026-05-07T14:00:00.000Z',
   },
 ];
 

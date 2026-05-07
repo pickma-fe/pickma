@@ -4,10 +4,6 @@ export interface ProductListParams {
   page: number;
   pageSize: number;
   region?: string;
-  categoryId?: string;
-  keyword?: string;
-  sort?: 'endAt' | 'discountRate' | 'createdAt';
-  order?: 'asc' | 'desc';
 }
 
 export interface ProductListItemResponse {
@@ -32,6 +28,7 @@ export interface ProductListItemResponse {
   pickupStartTime: string;
   pickupEndTime: string;
   status: 'active' | 'closed';
+  updatedAt: string;
 }
 
 export type ProductListResponse = PaginatedResult<ProductListItemResponse>;
