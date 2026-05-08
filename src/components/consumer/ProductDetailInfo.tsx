@@ -36,9 +36,6 @@ export function ProductDetailInfo({ product }: ProductDetailInfoProps) {
   return (
     <section aria-labelledby="product-detail-title">
       <div className="mb-4 flex flex-wrap items-center gap-2">
-        <Badge color="primary" rounded="md">
-          픽마 추천
-        </Badge>
         <Badge color={status.color} rounded="md">
           {status.label}
         </Badge>
