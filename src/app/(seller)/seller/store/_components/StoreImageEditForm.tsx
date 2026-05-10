@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 import { Button } from '@/components/common/Button/Button';
 
@@ -19,15 +19,33 @@ export function StoreImageEditForm({
   onCancel,
 }: StoreImageEditFormProps) {
   const [previewUrl, setPreviewUrl] = useState<string | null>(
-    currentImage || null
+    currentImage ?? null
   );
+  const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    return () => {
+      if (previewUrl?.startsWith('blob:')) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      const MAX_SIZE = 5 * 1024 * 1024;
+      if (file.size > MAX_SIZE) {
+        setError('파일 크기는 5MB 이하여야 합니다.');
+        return;
+      }
+      if (previewUrl?.startsWith('blob:')) {
+        URL.revokeObjectURL(previewUrl);
+      }
       const url = URL.createObjectURL(file);
       setPreviewUrl(url);
+      setError(null);
     }
   };
 
@@ -43,6 +61,12 @@ export function StoreImageEditForm({
 
   return (
     <div className="flex flex-col gap-6">
+      {error && (
+        <div className="rounded-md bg-red-50 p-3 text-sm text-red-600">
+          {error}
+        </div>
+      )}
+
       <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-gray-100">
         {previewUrl ? (
           <Image

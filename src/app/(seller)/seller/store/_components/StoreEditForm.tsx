@@ -39,27 +39,49 @@ export function StoreEditForm({
     name: storeInfo.name,
     phone: storeInfo.phone,
     address: storeInfo.address,
-    addressDetail: storeInfo.addressDetail || '',
+    addressDetail: storeInfo.addressDetail ?? '',
     region: storeInfo.region,
-    description: storeInfo.description || '',
+    description: storeInfo.description ?? '',
     canSell: storeInfo.canSell,
-    openTime: storeInfo.openTime?.slice(11, 16) || '09:00',
-    closeTime: storeInfo.closeTime?.slice(11, 16) || '22:00',
+    openTime: storeInfo.openTime?.slice(11, 16) ?? '09:00',
+    closeTime: storeInfo.closeTime?.slice(11, 16) ?? '22:00',
   });
+  const [error, setError] = useState<string | null>(null);
 
   const handleChange = (
     field: keyof StoreEditData,
     value: string | boolean
   ) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+    setError(null);
   };
 
   const handleSubmit = () => {
+    if (
+      !formData.name.trim() ||
+      !formData.phone.trim() ||
+      !formData.address.trim()
+    ) {
+      setError('필수 항목을 모두 입력해주세요.');
+      return;
+    }
+
+    if (formData.openTime >= formData.closeTime) {
+      setError('마감 시간은 오픈 시간보다 늦어야 합니다.');
+      return;
+    }
+
     onSubmit(formData);
   };
 
   return (
     <div className="flex flex-col gap-6">
+      {error && (
+        <div className="rounded-md bg-red-50 p-3 text-sm text-red-600">
+          {error}
+        </div>
+      )}
+
       <div className="flex flex-col gap-4">
         <Input
           label="가게 이름"

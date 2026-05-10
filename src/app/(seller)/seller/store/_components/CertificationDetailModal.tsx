@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 import { Badge } from '@/components/common/Badge/Badge';
 import { Button } from '@/components/common/Button/Button';
@@ -25,9 +25,17 @@ export function CertificationDetailModal({
   canSubmitHere,
   expiresAt,
 }: CertificationDetailModalProps) {
-  const [previewUrl, setPreviewUrl] = useState<string | null>(imageUrl || null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(imageUrl ?? null);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    return () => {
+      if (previewUrl?.startsWith('blob:')) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
 
   const isExpired = expiresAt ? new Date(expiresAt) < new Date() : false;
   const needsRenewal = label === '위생교육 수료증' && isCompleted;
@@ -35,6 +43,9 @@ export function CertificationDetailModal({
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      if (previewUrl?.startsWith('blob:')) {
+        URL.revokeObjectURL(previewUrl);
+      }
       const url = URL.createObjectURL(file);
       setPreviewUrl(url);
       setIsUploading(true);
