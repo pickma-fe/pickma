@@ -28,13 +28,29 @@ INSERT INTO auth.users (
    'authenticated', 'authenticated',
    'seller2@pickma-seed.local', '',
    now(), '{"provider":"email","providers":["email"]}', '{}',
+   now(), now()),
+  -- seller3: pending 가게 등록 상태 시뮬레이션
+  ('00000000-0000-4000-8000-000000000023',
+   '00000000-0000-4000-8000-000000000000',
+   'authenticated', 'authenticated',
+   'seller3@pickma-seed.local', '',
+   now(), '{"provider":"email","providers":["email"]}', '{}',
+   now(), now()),
+  -- customer1: 가게 미등록 사용자 (POST /api/stores 테스트용)
+  ('00000000-0000-4000-8000-000000000024',
+   '00000000-0000-4000-8000-000000000000',
+   'authenticated', 'authenticated',
+   'customer1@pickma-seed.local', '',
+   now(), '{"provider":"email","providers":["email"]}', '{}',
    now(), now());
 
 INSERT INTO public.users (id, email, name, role, status) VALUES
   ('00000000-0000-4000-8000-000000000021', 'seller1@pickma-seed.local', '씨드 판매자1', 'seller', 'active'),
-  ('00000000-0000-4000-8000-000000000022', 'seller2@pickma-seed.local', '씨드 판매자2', 'seller', 'active');
+  ('00000000-0000-4000-8000-000000000022', 'seller2@pickma-seed.local', '씨드 판매자2', 'seller', 'active'),
+  ('00000000-0000-4000-8000-000000000023', 'seller3@pickma-seed.local', '씨드 판매자3', 'seller', 'active'),
+  ('00000000-0000-4000-8000-000000000024', 'customer1@pickma-seed.local', '씨드 고객1', 'customer', 'active');
 
--- Stores: 1 approved, 1 inactive (RLS 검증용)
+-- Stores: 1 approved, 1 inactive, 1 pending (RLS 및 가게 등록 흐름 검증용)
 INSERT INTO public.stores (id, user_id, name, description, business_number, phone, address, address_detail, region, status) VALUES
   ('00000000-0000-4000-8000-000000000031',
    '00000000-0000-4000-8000-000000000021',
@@ -47,7 +63,14 @@ INSERT INTO public.stores (id, user_id, name, description, business_number, phon
    '비활성 카페', '비활성 상태의 테스트 카페입니다.',
    '0987654321', '02-9876-5432',
    '서울시 서초구 강남대로 100', NULL,
-   '서울 서초구', 'inactive');
+   '서울 서초구', 'inactive'),
+  -- pending: 가게 등록 신청 직후 상태 시뮬레이션
+  ('00000000-0000-4000-8000-000000000033',
+   '00000000-0000-4000-8000-000000000023',
+   '씨드 델리', '등록 심사 중인 가게입니다.',
+   '1111111111', '02-1111-2222',
+   '서울시 강남구 테헤란로 50', NULL,
+   '서울 강남구', 'pending');
 
 -- Menu items
 INSERT INTO public.menu_items (id, store_id, category_id, name, description, original_price) VALUES
