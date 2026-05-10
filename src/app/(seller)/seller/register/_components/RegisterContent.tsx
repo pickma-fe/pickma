@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useState } from 'react';
 
 import type { BusinessInfoData, StoreInfoData } from '@/types/store';
@@ -78,14 +79,6 @@ export function RegisterContent() {
     handleCloseModal();
   };
 
-  const handleInquiryClick = () => {
-    window.open('/support/inquiry', '_blank');
-  };
-
-  const handleSupportClick = () => {
-    window.open('/support', '_blank');
-  };
-
   return (
     <div className="flex flex-col gap-6">
       <div>
@@ -145,10 +138,18 @@ export function RegisterContent() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" color="gray" onClick={handleInquiryClick}>
-            1:1 문의하기
-          </Button>
-          <Button onClick={handleSupportClick}>고객센터</Button>
+          <Link
+            href="/support/inquiry"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Button variant="outline" color="gray">
+              1:1 문의하기
+            </Button>
+          </Link>
+          <Link href="/support" target="_blank" rel="noopener noreferrer">
+            <Button>고객센터</Button>
+          </Link>
         </div>
       </Section>
 
