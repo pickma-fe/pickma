@@ -46,19 +46,15 @@ export function useSellerAuth() {
     setAuthState((prev) => ({ ...prev, termsAgreed: true }));
   };
 
-  const handleBusinessInfoComplete = (data?: BusinessInfoData) => {
+  const handleBusinessInfoComplete = (data: BusinessInfoData) => {
     if (!authState.termsAgreed) return;
-    if (data) {
-      setBusinessInfo(data);
-    }
+    setBusinessInfo(data);
     setAuthState((prev) => ({ ...prev, businessInfoSubmitted: true }));
   };
 
-  const handleDocumentComplete = (files?: Record<string, File | null>) => {
+  const handleDocumentComplete = (files: Record<string, File | null>) => {
     if (!authState.termsAgreed || !authState.businessInfoSubmitted) return;
-    if (files) {
-      setDocumentFiles(files);
-    }
+    setDocumentFiles(files);
     setAuthState((prev) => ({
       ...prev,
       documentsSubmitted: true,

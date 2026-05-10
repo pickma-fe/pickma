@@ -78,6 +78,14 @@ export function RegisterContent() {
     handleCloseModal();
   };
 
+  const handleInquiryClick = () => {
+    window.open('/support/inquiry', '_blank');
+  };
+
+  const handleSupportClick = () => {
+    window.open('/support', '_blank');
+  };
+
   return (
     <div className="flex flex-col gap-6">
       <div>
@@ -137,10 +145,10 @@ export function RegisterContent() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" color="gray">
+          <Button variant="outline" color="gray" onClick={handleInquiryClick}>
             1:1 문의하기
           </Button>
-          <Button>고객센터</Button>
+          <Button onClick={handleSupportClick}>고객센터</Button>
         </div>
       </Section>
 

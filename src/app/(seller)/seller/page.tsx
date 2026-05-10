@@ -2,10 +2,12 @@
 
 import Link from 'next/link';
 
+import { useMe } from '@/hooks/users/useMe';
 import { useAuthModal } from '@/components/auth/useAuthModal';
 import { Button } from '@/components/common/Button/Button';
 
 export default function SellerPage() {
+  const { data: user } = useMe();
   const { openAuthModal } = useAuthModal();
 
   return (
@@ -15,14 +17,17 @@ export default function SellerPage() {
         ※ 임시 페이지입니다. 추후 랜딩 페이지로 교체 예정입니다.
       </p>
       <div className="flex flex-col gap-3">
-        <Button className="w-full" onClick={() => openAuthModal('login')}>
-          로그인
-        </Button>
-        <Link href="/seller/register">
-          <Button variant="outline" color="gray" className="w-full">
-            판매자 등록
+        {!user ? (
+          <Button className="w-full" onClick={() => openAuthModal('login')}>
+            로그인
           </Button>
-        </Link>
+        ) : (
+          <Link href="/seller/register">
+            <Button variant="outline" color="gray" className="w-full">
+              판매자 등록
+            </Button>
+          </Link>
+        )}
       </div>
     </div>
   );

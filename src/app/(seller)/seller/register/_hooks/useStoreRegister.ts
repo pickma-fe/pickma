@@ -29,10 +29,8 @@ export function useStoreRegister() {
     timersRef.current = [];
   };
 
-  const handleStoreInfoComplete = (data?: StoreInfoData) => {
-    if (data) {
-      setStoreInfo(data);
-    }
+  const handleStoreInfoComplete = (data: StoreInfoData) => {
+    setStoreInfo(data);
     setStoreState((prev) => ({
       ...prev,
       storeInfoSubmitted: true,

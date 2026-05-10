@@ -34,9 +34,11 @@ export default function SellerLayout({
         }
       />
       <div className="flex flex-1">
-        <div className="hidden pt-4 lg:block">
-          <Sidebar sections={sellerSidebarSections} />
-        </div>
+        {user && (
+          <div className="hidden pt-4 lg:block">
+            <Sidebar sections={sellerSidebarSections} />
+          </div>
+        )}
         <main className="flex-1 bg-gray-50 p-4 lg:p-8">{children}</main>
       </div>
       <AuthModal />
