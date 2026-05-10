@@ -169,10 +169,24 @@ describe('createStore', () => {
     expect(insertPayload.close_time).toBe('21:30:00');
   });
 
-  it('INSERT DB 오류 시 INTERNAL_SERVER_ERROR를 던진다', async () => {
+  it('INSERT unique 충돌(23505) 시 STORE_ALREADY_EXISTS를 던진다', async () => {
     const { client } = makeServiceClient(
       { data: null, error: null },
       { data: null, error: { code: '23505' } }
+    );
+    vi.mocked(createServiceRoleClient).mockReturnValue(
+      client as unknown as ReturnType<typeof createServiceRoleClient>
+    );
+    await expect(createStore('user-1', mockBody)).rejects.toMatchObject({
+      code: 'STORE_ALREADY_EXISTS',
+      statusCode: 409,
+    });
+  });
+
+  it('INSERT 기타 DB 오류 시 INTERNAL_SERVER_ERROR를 던진다', async () => {
+    const { client } = makeServiceClient(
+      { data: null, error: null },
+      { data: null, error: { code: '42501' } }
     );
     vi.mocked(createServiceRoleClient).mockReturnValue(
       client as unknown as ReturnType<typeof createServiceRoleClient>

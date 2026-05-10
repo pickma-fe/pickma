@@ -38,8 +38,13 @@ export async function createStore(
     .select('*')
     .single();
 
-  if (insertError || !row)
+  if (insertError) {
+    if (insertError.code === '23505') {
+      throw new AppError(ERROR_CODE.STORE_ALREADY_EXISTS, 409);
+    }
     throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
+  }
+  if (!row) throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
 
   return mapStoreRow(row);
 }
