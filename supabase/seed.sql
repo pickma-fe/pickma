@@ -11,7 +11,9 @@ INSERT INTO public.categories (id, name, icon, sort_order) VALUES
   ('00000000-0000-4000-8000-000000000014', '샐러드',    'salad',  4),
   ('00000000-0000-4000-8000-000000000015', '분식',      'food',   5);
 
--- Store owner accounts
+-- Seed accounts (local/dev only)
+-- encrypted_password is intentionally empty: these accounts exist for DB state simulation,
+-- not UI login. Use a real sign-up account for manual API verification (POST /api/stores etc.).
 INSERT INTO auth.users (
   id, instance_id, aud, role, email, encrypted_password,
   email_confirmed_at, raw_app_meta_data, raw_user_meta_data,
