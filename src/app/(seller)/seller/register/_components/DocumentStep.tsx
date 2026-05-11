@@ -211,10 +211,10 @@ export function DocumentStep({
 
           return (
             <div key={doc.id} className="flex flex-col gap-2">
-              <label className="text-sm font-medium text-gray-700">
+              <span className="text-sm font-medium text-gray-700">
                 {doc.title}
                 {doc.required && <span className="ml-1 text-red-500">*</span>}
-              </label>
+              </span>
 
               {uploadedFile ? (
                 <div className="flex items-center justify-between rounded-lg border border-green-200 bg-green-50 px-4 py-3">
@@ -239,12 +239,13 @@ export function DocumentStep({
                   </button>
                 </div>
               ) : (
-                <div
+                <label
+                  htmlFor={doc.id}
                   onDrop={handleDrop(doc.id)}
                   onDragOver={handleDragOver(doc.id)}
                   onDragLeave={handleDragLeave(doc.id)}
                   className={cn(
-                    'flex flex-col items-center justify-center rounded-lg border-2 border-dashed px-4 py-6 transition-colors',
+                    'flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed px-4 py-6 transition-colors',
                     getDropzoneClass(dragging, hasError)
                   )}
                 >
@@ -255,14 +256,7 @@ export function DocumentStep({
                     )}
                   />
                   <p className="mb-1 text-sm text-gray-600">
-                    파일을 드래그하거나{' '}
-                    <label
-                      htmlFor={doc.id}
-                      className="text-primary-500 hover:text-primary-600 cursor-pointer font-medium"
-                    >
-                      직접 선택
-                    </label>
-                    하세요
+                    파일을 드래그하거나 클릭하여 선택하세요
                   </p>
                   <p className="text-xs text-gray-400">{doc.description}</p>
                   <input
@@ -272,7 +266,7 @@ export function DocumentStep({
                     className="sr-only"
                     onChange={handleInputChange(doc.id)}
                   />
-                </div>
+                </label>
               )}
 
               {errors[doc.id] && (
