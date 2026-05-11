@@ -198,5 +198,22 @@ describe('POST /api/orders', () => {
       );
       expect(requireActiveUser).not.toHaveBeenCalled();
     });
+
+    it('pickupAt이 빈 문자열 → VALIDATION_ERROR 400 (requireActiveUser 미호출)', async () => {
+      const res = await POST(makePostRequest({ ...validBody, pickupAt: '' }));
+      expect(res.status).toBe(400);
+      const body = (await res.json()) as {
+        statusCode: number;
+        error: { code: string; details?: { path: string }[] };
+      };
+      expect(body.statusCode).toBe(res.status);
+      expect(body.error.code).toBe('VALIDATION_ERROR');
+      expect(body.error.details).toContainEqual(
+        expect.objectContaining({ path: 'pickupAt' })
+      );
+      expect(requireActiveUser).not.toHaveBeenCalled();
+      expect(expireUserOrders).not.toHaveBeenCalled();
+      expect(createOrder).not.toHaveBeenCalled();
+    });
   });
 });
