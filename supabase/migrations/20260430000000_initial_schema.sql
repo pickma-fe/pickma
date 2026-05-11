@@ -366,7 +366,7 @@ CREATE POLICY "wishlists: owner insert"
 CREATE OR REPLACE FUNCTION generate_order_number()
 RETURNS varchar
 LANGUAGE plpgsql
-SET search_path = public
+SET search_path = public, extensions
 AS $$
 DECLARE
   v_order_number varchar(20);
