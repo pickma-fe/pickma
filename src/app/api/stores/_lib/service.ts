@@ -46,5 +46,5 @@ export async function createStore(
   }
   if (!row) throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
 
-  return mapStoreRow(row);
+  return mapStoreRow(row, false);
 }

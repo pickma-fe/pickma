@@ -134,7 +134,7 @@ describe('createStore', () => {
     expect(insertPayload).not.toHaveProperty('status');
     expect(insertPayload).not.toHaveProperty('created_at');
     expect(insertPayload).not.toHaveProperty('updated_at');
-    expect(mapStoreRow).toHaveBeenCalledWith(mockRow);
+    expect(mapStoreRow).toHaveBeenCalledWith(mockRow, false);
     expect(result).toBe(mockStoreResponse);
   });
 
