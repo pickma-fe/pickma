@@ -129,7 +129,11 @@ describe('POST /api/orders', () => {
       );
       const res = await POST(makePostRequest(validBody));
       expect(res.status).toBe(401);
-      const body = (await res.json()) as { error: { code: string } };
+      const body = (await res.json()) as {
+        statusCode: number;
+        error: { code: string };
+      };
+      expect(body.statusCode).toBe(res.status);
       expect(body.error.code).toBe('UNAUTHORIZED');
     });
 
@@ -139,7 +143,11 @@ describe('POST /api/orders', () => {
       );
       const res = await POST(makePostRequest(validBody));
       expect(res.status).toBe(404);
-      const body = (await res.json()) as { error: { code: string } };
+      const body = (await res.json()) as {
+        statusCode: number;
+        error: { code: string };
+      };
+      expect(body.statusCode).toBe(res.status);
       expect(body.error.code).toBe('PRODUCT_NOT_FOUND');
     });
 
@@ -149,7 +157,11 @@ describe('POST /api/orders', () => {
       );
       const res = await POST(makePostRequest(validBody));
       expect(res.status).toBe(409);
-      const body = (await res.json()) as { error: { code: string } };
+      const body = (await res.json()) as {
+        statusCode: number;
+        error: { code: string };
+      };
+      expect(body.statusCode).toBe(res.status);
       expect(body.error.code).toBe('OUT_OF_STOCK');
     });
 
@@ -158,8 +170,15 @@ describe('POST /api/orders', () => {
         makePostRequest({ ...validBody, productId: 'not-a-uuid' })
       );
       expect(res.status).toBe(400);
-      const body = (await res.json()) as { error: { code: string } };
+      const body = (await res.json()) as {
+        statusCode: number;
+        error: { code: string; details?: { path: string }[] };
+      };
+      expect(body.statusCode).toBe(res.status);
       expect(body.error.code).toBe('VALIDATION_ERROR');
+      expect(body.error.details).toContainEqual(
+        expect.objectContaining({ path: 'productId' })
+      );
       expect(requireActiveUser).not.toHaveBeenCalled();
       expect(expireUserOrders).not.toHaveBeenCalled();
       expect(createOrder).not.toHaveBeenCalled();
@@ -168,8 +187,15 @@ describe('POST /api/orders', () => {
     it('quantity가 음수 → VALIDATION_ERROR 400 (requireActiveUser 미호출)', async () => {
       const res = await POST(makePostRequest({ ...validBody, quantity: -1 }));
       expect(res.status).toBe(400);
-      const body = (await res.json()) as { error: { code: string } };
+      const body = (await res.json()) as {
+        statusCode: number;
+        error: { code: string; details?: { path: string }[] };
+      };
+      expect(body.statusCode).toBe(res.status);
       expect(body.error.code).toBe('VALIDATION_ERROR');
+      expect(body.error.details).toContainEqual(
+        expect.objectContaining({ path: 'quantity' })
+      );
       expect(requireActiveUser).not.toHaveBeenCalled();
     });
   });
