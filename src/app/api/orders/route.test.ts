@@ -69,7 +69,11 @@ describe('GET /api/orders', () => {
     vi.mocked(isApiMockEnabled).mockReturnValue(false);
     const res = await GET();
     expect(res.status).toBe(501);
-    const body = (await res.json()) as { error: { code: string } };
+    const body = (await res.json()) as {
+      statusCode: number;
+      error: { code: string };
+    };
+    expect(body.statusCode).toBe(res.status);
     expect(body.error.code).toBe('NOT_IMPLEMENTED');
   });
 });
