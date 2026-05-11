@@ -115,6 +115,12 @@ describe('POST /api/orders', () => {
       await POST(makePostRequest(validBody));
       expect(expireUserOrders).toHaveBeenCalledWith('user-1');
       expect(createOrder).toHaveBeenCalledWith('user-1', validBody);
+
+      const expireCallOrder =
+        vi.mocked(expireUserOrders).mock.invocationCallOrder[0];
+      const createCallOrder =
+        vi.mocked(createOrder).mock.invocationCallOrder[0];
+      expect(expireCallOrder).toBeLessThan(createCallOrder);
     });
 
     it('UNAUTHORIZED throw → 401', async () => {
