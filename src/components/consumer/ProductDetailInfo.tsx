@@ -9,10 +9,6 @@ interface ProductDetailInfoProps {
 }
 
 function getProductStatus(product: ProductDetailResponse) {
-  if (product.isSoldOut || product.displayStatus === 'soldOut') {
-    return { label: '품절', color: 'gray' as const };
-  }
-
   if (
     product.isExpired ||
     product.displayStatus === 'expired' ||
@@ -20,6 +16,10 @@ function getProductStatus(product: ProductDetailResponse) {
     product.status === 'closed'
   ) {
     return { label: '마감', color: 'dark' as const };
+  }
+
+  if (product.isSoldOut || product.displayStatus === 'soldOut') {
+    return { label: '품절', color: 'gray' as const };
   }
 
   if (product.availableStock <= 0) {
@@ -70,7 +70,7 @@ export function ProductDetailInfo({ product }: ProductDetailInfoProps) {
       </div>
 
       <Badge className="mt-3" color="primary" rounded="md">
-        픽마가
+        픽마 할인가
       </Badge>
 
       <p className="mt-3 text-sm text-gray-500">
