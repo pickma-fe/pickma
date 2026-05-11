@@ -43,8 +43,8 @@ export function StoreEditForm({
     region: storeInfo.region,
     description: storeInfo.description ?? '',
     canSell: storeInfo.canSell,
-    openTime: storeInfo.openTime?.slice(11, 16) ?? '09:00',
-    closeTime: storeInfo.closeTime?.slice(11, 16) ?? '22:00',
+    openTime: storeInfo.openTime?.slice(0, 5) ?? '09:00',
+    closeTime: storeInfo.closeTime?.slice(0, 5) ?? '22:00',
   });
   const [error, setError] = useState<string | null>(null);
 

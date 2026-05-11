@@ -84,6 +84,35 @@ export function CertificationDetailModal({
     return '인증 완료';
   };
 
+  const renderImage = () => {
+    if (!previewUrl) {
+      return (
+        <div className="flex aspect-[4/3] w-full items-center justify-center rounded-lg bg-gray-100 text-gray-400">
+          이미지가 없습니다
+        </div>
+      );
+    }
+
+    if (previewUrl.startsWith('blob:')) {
+      return (
+        <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg bg-gray-100">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={previewUrl}
+            alt={label}
+            className="h-full w-full object-contain"
+          />
+        </div>
+      );
+    }
+
+    return (
+      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg bg-gray-100">
+        <Image src={previewUrl} alt={label} fill className="object-contain" />
+      </div>
+    );
+  };
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
@@ -95,15 +124,7 @@ export function CertificationDetailModal({
 
       <p className="text-sm text-gray-500">{getDescription()}</p>
 
-      {previewUrl ? (
-        <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg bg-gray-100">
-          <Image src={previewUrl} alt={label} fill className="object-contain" />
-        </div>
-      ) : (
-        <div className="flex aspect-[4/3] w-full items-center justify-center rounded-lg bg-gray-100 text-gray-400">
-          이미지가 없습니다
-        </div>
-      )}
+      {renderImage()}
 
       {isCompleted && expiresAt && (
         <dl className="flex flex-col gap-2">

@@ -59,6 +59,31 @@ export function StoreImageEditForm({
     }
   };
 
+  const renderImage = () => {
+    if (!previewUrl) {
+      return (
+        <div className="flex h-full items-center justify-center text-gray-400">
+          이미지를 선택해주세요
+        </div>
+      );
+    }
+
+    if (previewUrl.startsWith('blob:')) {
+      return (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={previewUrl}
+          alt={storeName}
+          className="h-full w-full object-cover"
+        />
+      );
+    }
+
+    return (
+      <Image src={previewUrl} alt={storeName} fill className="object-cover" />
+    );
+  };
+
   return (
     <div className="flex flex-col gap-6">
       {error && (
@@ -68,18 +93,7 @@ export function StoreImageEditForm({
       )}
 
       <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-gray-100">
-        {previewUrl ? (
-          <Image
-            src={previewUrl}
-            alt={storeName}
-            fill
-            className="object-cover"
-          />
-        ) : (
-          <div className="flex h-full items-center justify-center text-gray-400">
-            이미지를 선택해주세요
-          </div>
-        )}
+        {renderImage()}
       </div>
 
       <input

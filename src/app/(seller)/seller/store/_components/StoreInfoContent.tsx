@@ -103,8 +103,8 @@ export function StoreInfoContent() {
       region: data.region,
       description: data.description,
       canSell: data.canSell,
-      openTime: `2026-01-01T${data.openTime}:00.000Z`,
-      closeTime: `2026-01-01T${data.closeTime}:00.000Z`,
+      openTime: `${data.openTime}:00`,
+      closeTime: `${data.closeTime}:00`,
     });
     handleCloseModal();
     // TODO: API 연동 시 실제 수정 API 호출
