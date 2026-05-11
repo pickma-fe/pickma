@@ -1,6 +1,5 @@
 'use client';
 
-import { LogInIcon, StoreIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
@@ -12,7 +11,8 @@ import {
   ALL_CATEGORY_ID,
   getConsumerProductCategories,
 } from '@/hooks/products/useConsumerProducts';
-import { Footer, Header } from '@/components/common';
+import { Footer } from '@/components/common';
+import { ConsumerHeader } from '@/components/consumer/ConsumerHeader';
 import { ConsumerHeaderSearch } from '@/components/consumer/ConsumerHeaderSearch';
 import { ConsumerProductList } from '@/components/consumer/ConsumerProductList';
 import { ProductFilterSidebar } from '@/components/consumer/ProductFilterSidebar';
@@ -129,9 +129,7 @@ export default function ConsumerPage() {
 
   return (
     <div className="bg-white">
-      <Header
-        user={null}
-        logoHref="/"
+      <ConsumerHeader
         slot={
           <ConsumerHeaderSearch
             regionItems={regionItems}
@@ -142,22 +140,6 @@ export default function ConsumerPage() {
             onSearch={handleSearch}
           />
         }
-        menuItems={[
-          {
-            label: '판매자센터',
-            type: 'link',
-            href: '/seller',
-            icon: <StoreIcon className="h-5 w-5" aria-hidden="true" />,
-            className: 'whitespace-nowrap',
-          },
-          {
-            label: '로그인',
-            type: 'link',
-            href: '/login',
-            icon: <LogInIcon className="h-5 w-5" aria-hidden="true" />,
-            className: 'whitespace-nowrap',
-          },
-        ]}
       />
 
       <main className="min-h-screen bg-white">
