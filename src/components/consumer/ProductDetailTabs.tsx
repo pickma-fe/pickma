@@ -4,18 +4,21 @@ import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
 
 import type { ProductDetailResponse } from '@/contracts/product';
 
+type ProductDetailTabId = 'detail' | 'review' | 'store';
+
 interface ProductDetailTabsProps {
   product: ProductDetailResponse;
 }
 
 interface ProductDetailTab {
+  id: ProductDetailTabId;
   label: string;
 }
 
 const productDetailTabs: ProductDetailTab[] = [
-  { label: '상세정보' },
-  { label: '리뷰' },
-  { label: '매장 정보' },
+  { id: 'detail', label: '상세정보' },
+  { id: 'review', label: '리뷰' },
+  { id: 'store', label: '매장 정보' },
 ];
 
 export function ProductDetailTabs({ product }: ProductDetailTabsProps) {
@@ -32,10 +35,10 @@ export function ProductDetailTabs({ product }: ProductDetailTabsProps) {
         >
           {productDetailTabs.map((tab) => (
             <Tab
-              key={tab.label}
+              key={tab.id}
               className={({ selected }) =>
                 [
-                  'border-b-2 px-2 py-4 text-base font-semibold transition focus:outline-none',
+                  'focus-visible:ring-primary-500 rounded-sm border-b-2 px-2 py-4 text-base font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
                   selected
                     ? 'border-primary-500 text-primary-500'
                     : 'border-transparent text-gray-600 hover:text-gray-900',
@@ -48,7 +51,7 @@ export function ProductDetailTabs({ product }: ProductDetailTabsProps) {
         </TabList>
 
         <TabPanels>
-          <TabPanel className="grid gap-10 py-8 focus:outline-none lg:grid-cols-[minmax(0,1fr)_minmax(280px,660px)_minmax(0,1fr)]">
+          <TabPanel className="focus-visible:ring-primary-500 grid gap-10 rounded-sm py-8 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 lg:grid-cols-[minmax(0,1fr)_minmax(280px,660px)_minmax(0,1fr)]">
             <div className="space-y-8">
               <section>
                 <h2 className="mb-4 text-lg font-bold text-gray-900">
@@ -79,7 +82,7 @@ export function ProductDetailTabs({ product }: ProductDetailTabsProps) {
             </section>
           </TabPanel>
 
-          <TabPanel className="py-8 focus:outline-none">
+          <TabPanel className="focus-visible:ring-primary-500 rounded-sm py-8 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2">
             <div className="rounded-md border border-gray-200 bg-gray-50 p-8 text-center">
               <h2 className="text-lg font-bold text-gray-900">리뷰</h2>
               <p className="mt-2 text-sm text-gray-500">
@@ -88,7 +91,7 @@ export function ProductDetailTabs({ product }: ProductDetailTabsProps) {
             </div>
           </TabPanel>
 
-          <TabPanel className="py-8 focus:outline-none">
+          <TabPanel className="focus-visible:ring-primary-500 rounded-sm py-8 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2">
             <section>
               <dl className="grid gap-5 md:grid-cols-2">
                 <div>
