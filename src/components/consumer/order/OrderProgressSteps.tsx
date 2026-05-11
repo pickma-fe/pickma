@@ -1,41 +1,81 @@
 import { Check, CreditCard, MapPin, ShoppingCart } from 'lucide-react';
 
 const ORDER_STEPS = [
-  { label: '장바구니', icon: ShoppingCart, active: true },
-  { label: '주문 정보', icon: MapPin, active: false },
-  { label: '결제 수단', icon: CreditCard, active: false },
-  { label: '결제 완료', icon: Check, active: false },
-];
+  { id: 'cart', label: '장바구니', icon: ShoppingCart },
+  { id: 'order', label: '주문 정보', icon: MapPin },
+  { id: 'payment', label: '결제 수단', icon: CreditCard },
+  { id: 'complete', label: '결제 완료', icon: Check },
+] as const;
 
-export function OrderProgressSteps() {
+const PROGRESS_WIDTH_CLASS_NAMES = {
+  cart: 'w-[12.5%]',
+  order: 'w-[37.5%]',
+  payment: 'w-[62.5%]',
+  complete: 'w-[87.5%]',
+} satisfies Record<OrderStepId, string>;
+
+export type OrderStepId = (typeof ORDER_STEPS)[number]['id'];
+
+interface OrderProgressStepsProps {
+  currentStep?: OrderStepId;
+}
+
+export function OrderProgressSteps({
+  currentStep = 'cart',
+}: OrderProgressStepsProps) {
+  const currentStepIndex = ORDER_STEPS.findIndex(
+    (step) => step.id === currentStep
+  );
+
   return (
-    <ol className="grid grid-cols-4 items-start gap-3">
+    <ol aria-label="주문 진행 단계" className="relative grid grid-cols-4">
+      <span
+        className="absolute top-5 right-[12.5%] left-0 h-px bg-gray-200"
+        aria-hidden="true"
+      />
+      <span
+        className={[
+          'bg-primary-500 absolute top-5 left-0 h-px',
+          PROGRESS_WIDTH_CLASS_NAMES[currentStep],
+        ].join(' ')}
+        aria-hidden="true"
+      />
       {ORDER_STEPS.map((step, index) => {
         const Icon = step.icon;
+        const isActive = index === currentStepIndex;
+        const isCompleted = index < currentStepIndex;
+        let iconStateClassName = 'border-gray-200 bg-white text-gray-600';
+        let labelStateClassName = 'text-gray-600';
+
+        if (isActive) {
+          iconStateClassName = 'border-primary-500 bg-primary-500 text-white';
+          labelStateClassName = 'text-primary-500';
+        } else if (isCompleted) {
+          iconStateClassName = 'border-primary-500 bg-white text-primary-500';
+          labelStateClassName = 'text-gray-900';
+        }
 
         return (
-          <li key={step.label} className="relative flex flex-col items-center">
-            <span className="absolute top-5 right-1/2 left-0 h-px bg-gray-200" />
-            {index < ORDER_STEPS.length - 1 ? (
-              <span className="absolute top-5 right-0 left-1/2 h-px bg-gray-200" />
-            ) : null}
+          <li
+            key={step.label}
+            aria-current={isActive ? 'step' : undefined}
+            className="relative flex min-w-0 flex-col items-center"
+          >
             <span
               className={[
-                'relative z-10 flex size-11 items-center justify-center rounded-full border bg-white',
-                step.active
-                  ? 'border-primary-500 bg-primary-500 text-white'
-                  : 'border-gray-200 text-gray-600',
+                'relative z-10 flex size-10 items-center justify-center rounded-full border sm:size-11',
+                iconStateClassName,
               ].join(' ')}
             >
               <Icon className="size-5" aria-hidden="true" />
             </span>
             <span
               className={[
-                'mt-3 text-sm font-semibold',
-                step.active ? 'text-primary-500' : 'text-gray-600',
+                'mt-3 text-center text-xs leading-4 font-semibold break-keep sm:text-sm',
+                labelStateClassName,
               ].join(' ')}
             >
-              {index + 1}. {step.label}
+              {step.label}
             </span>
           </li>
         );

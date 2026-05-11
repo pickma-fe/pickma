@@ -38,7 +38,7 @@ export default async function OrderPage({ params }: OrderPageProps) {
 
           <div className="mt-10 grid gap-10 lg:grid-cols-[minmax(0,1fr)_440px]">
             <div className="space-y-8">
-              <OrderProgressSteps />
+              <OrderProgressSteps currentStep="cart" />
 
               <OrderProductSummary
                 product={product}
