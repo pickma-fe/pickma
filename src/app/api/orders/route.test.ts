@@ -146,6 +146,8 @@ describe('POST /api/orders', () => {
       };
       expect(body.statusCode).toBe(res.status);
       expect(body.error.code).toBe('UNAUTHORIZED');
+      expect(expireUserOrders).not.toHaveBeenCalled();
+      expect(createOrder).not.toHaveBeenCalled();
     });
 
     it('PRODUCT_NOT_FOUND throw → 404', async () => {
