@@ -109,6 +109,13 @@ describe('POST /api/orders', () => {
     it('성공 → 201 반환', async () => {
       const res = await POST(makePostRequest(validBody));
       expect(res.status).toBe(201);
+      const body = (await res.json()) as {
+        statusCode: number;
+        data: CreateOrderResponse;
+      };
+      expect(body.statusCode).toBe(201);
+      expect(body.data.orderNumber).toBeDefined();
+      expect(body.data.paymentAmount).toBeGreaterThan(0);
     });
 
     it('성공 시 expireUserOrders(serviceUser.id) 후 createOrder(serviceUser.id, body) 호출', async () => {
