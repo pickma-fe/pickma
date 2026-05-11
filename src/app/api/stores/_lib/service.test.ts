@@ -80,6 +80,7 @@ function makeServiceClient(
           }),
         };
       }
+      throw new Error(`Unexpected table in test stub: ${table}`);
     }),
   };
 
