@@ -461,6 +461,7 @@ BEGIN
       INTO v_product
       FROM products p
       JOIN menu_items mi ON mi.id = p.menu_item_id
+      JOIN stores s ON s.id = p.store_id AND s.status = 'approved'
      WHERE p.id = v_product_id
        FOR UPDATE OF p, mi;
 

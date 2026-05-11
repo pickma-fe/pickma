@@ -127,6 +127,26 @@ describe('createOrder', () => {
     ).rejects.toMatchObject({ code: 'PRODUCT_NOT_FOUND', statusCode: 404 });
   });
 
+  // create_order RPC는 SECURITY DEFINER + service_role로 RLS를 우회하므로,
+  // RPC 내부에서 stores.status = 'approved' JOIN으로 직접 검증한다.
+  // 미승인 매장 상품은 RPC가 NOT FOUND로 처리 → PRODUCT_NOT_FOUND 404.
+  it('미승인 매장 소속 상품 → AppError PRODUCT_NOT_FOUND 404', async () => {
+    const { client } = makeClient({
+      rpcResult: null as never,
+      rpcError: { message: 'PRODUCT_NOT_FOUND' },
+    });
+    vi.mocked(createServiceRoleClient).mockReturnValue(
+      client as unknown as ReturnType<typeof createServiceRoleClient>
+    );
+    await expect(
+      createOrder('user-1', {
+        productId: 'unapproved-store-product-uuid',
+        quantity: 1,
+        pickupAt: '2026-05-11T11:00:00.000Z',
+      })
+    ).rejects.toMatchObject({ code: 'PRODUCT_NOT_FOUND', statusCode: 404 });
+  });
+
   it('RPC PRODUCT_EXPIRED → AppError PRODUCT_EXPIRED 409', async () => {
     const { client } = makeClient({
       rpcResult: null as never,
