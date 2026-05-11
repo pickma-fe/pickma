@@ -1,20 +1,13 @@
 import { notFound } from 'next/navigation';
 
 import { Footer, Header } from '@/components/common';
+import { ProductImageGallery } from '@/components/consumer/ProductImageGallery';
 import { ProductReservationPanel } from '@/components/consumer/ProductReservationPanel';
 import { mockProductDetailsMap } from '@/mocks/products';
 
 interface ProductDetailPageProps {
   params: Promise<{ productId: string }>;
 }
-
-const thumbnailPlaceholders = [
-  'thumbnail-1',
-  'thumbnail-2',
-  'thumbnail-3',
-  'thumbnail-4',
-  'thumbnail-5',
-];
 
 export default async function ProductDetailPage({
   params,
@@ -33,25 +26,10 @@ export default async function ProductDetailPage({
       <main className="min-h-screen bg-white">
         <section className="mx-auto grid max-w-450 gap-8 px-6 py-10 lg:grid-cols-[minmax(0,1fr)_400px] xl:grid-cols-[minmax(0,1fr)_460px]">
           <div className="grid gap-8 xl:grid-cols-[560px_minmax(0,1fr)]">
-            <div>
-              <div className="flex aspect-square items-center justify-center rounded-lg bg-gray-100 text-sm font-medium text-gray-500">
-                이미지 영역
-              </div>
-
-              <div className="mt-4 grid grid-cols-5 gap-3">
-                {thumbnailPlaceholders.map((thumbnail, index) => (
-                  <button
-                    key={thumbnail}
-                    type="button"
-                    aria-label={`${index + 1}번째 상품 이미지 보기`}
-                    className="aspect-square rounded-md border border-gray-200 bg-gray-50 text-xs text-gray-400"
-                  >
-                    {index + 1}
-                  </button>
-                ))}
-              </div>
-            </div>
-
+            <ProductImageGallery
+              productName={product.name}
+              imageUrl={product.image}
+            />
             <div>
               <span className="bg-primary-50 text-primary-500 mb-4 inline-flex rounded-sm px-3 py-1 text-xs font-semibold">
                 픽마 추천
