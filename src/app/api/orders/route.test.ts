@@ -1,3 +1,4 @@
+import type { NextRequest } from 'next/server';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { CreateOrderResponse } from '@/contracts/order';
@@ -45,7 +46,7 @@ function makePostRequest(body: object) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
-  }) as unknown as import('next/server').NextRequest;
+  }) as unknown as NextRequest;
 }
 
 const validBody = {
