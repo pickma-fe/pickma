@@ -255,7 +255,6 @@ CREATE TRIGGER set_store_order_sequences_updated_at
 
 -- ============================================================
 -- Row Level Security
--- categories and menu_items: RLS NOT enabled (always accessed via service_role through Route Handler)
 -- ============================================================
 
 -- GRANT: 테이블 자체 접근 권한 (레이어 1)
@@ -269,9 +268,17 @@ GRANT ALL ON ALL TABLES IN SCHEMA public TO service_role;
 GRANT SELECT ON public.users TO authenticated;
 GRANT SELECT ON public.stores TO authenticated;
 GRANT SELECT ON public.products TO authenticated;
+GRANT SELECT ON public.menu_items TO authenticated;
+GRANT SELECT ON public.categories TO authenticated;
 GRANT SELECT ON public.orders TO authenticated;
 GRANT SELECT ON public.order_items TO authenticated;
 GRANT SELECT, INSERT, DELETE ON public.wishlists TO authenticated;
+
+-- anon: 공개 상품 조회에 필요한 테이블 SELECT 권한
+GRANT SELECT ON public.stores TO anon;
+GRANT SELECT ON public.products TO anon;
+GRANT SELECT ON public.menu_items TO anon;
+GRANT SELECT ON public.categories TO anon;
 
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "users: self select"
@@ -289,9 +296,35 @@ CREATE POLICY "stores: owner insert"
 CREATE POLICY "stores: owner update"
   ON stores FOR UPDATE USING (auth.uid() = user_id);
 
+ALTER TABLE categories ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "categories: public read"
+  ON categories FOR SELECT
+  USING (true);
+
+ALTER TABLE menu_items ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "menu_items: public read approved store"
+  ON menu_items FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1
+      FROM public.stores
+      WHERE stores.id = menu_items.store_id
+        AND stores.status = 'approved'
+    )
+  );
+
 ALTER TABLE products ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "products: public read active"
-  ON products FOR SELECT USING (status = 'active');
+CREATE POLICY "products: public read active approved store"
+  ON products FOR SELECT
+  USING (
+    status = 'active'
+    AND EXISTS (
+      SELECT 1
+      FROM public.stores
+      WHERE stores.id = products.store_id
+        AND stores.status = 'approved'
+    )
+  );
 CREATE POLICY "products: owner all"
   ON products USING (
     auth.uid() = (SELECT user_id FROM stores WHERE id = store_id)

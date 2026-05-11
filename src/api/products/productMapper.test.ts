@@ -24,12 +24,15 @@ describe('productMapper', () => {
     pickupStartTime: '10:00:00',
     pickupEndTime: '13:30:00',
     status: 'active',
+    updatedAt: '2026-04-29T10:00:00.000Z',
   };
 
   it('날짜 문자열을 Date로 변환하고 시각 문자열은 그대로 유지한다', () => {
     const product = mapProduct(baseProduct);
 
     expect(product.endAt).toBeInstanceOf(Date);
+    expect(product.updatedAt).toBeInstanceOf(Date);
+    expect(product.updatedAt?.toISOString()).toBe('2026-04-29T10:00:00.000Z');
     expect(product.pickupStartTime).toBe('10:00:00');
     expect(product.pickupEndTime).toBe('13:30:00');
   });
