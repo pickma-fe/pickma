@@ -12,7 +12,6 @@ import { useMemo, useState } from 'react';
 import { Button } from '@/components/common';
 
 interface ProductReservationPanelProps {
-  productId: string;
   price: number;
   availableStock: number;
   pickupStartTime: string;
@@ -146,10 +145,10 @@ export function ProductReservationPanel({
 
   const [quantity, setQuantity] = useState(() => (availableStock > 0 ? 1 : 0));
 
-  const decreaseQuantity = () => {
+  const handleDecreaseQuantity = () => {
     setQuantity((current) => Math.max(1, current - 1));
   };
-  const increaseQuantity = () => {
+  const handleIncreaseQuantity = () => {
     setQuantity((current) => Math.min(availableStock, current + 1));
   };
   const isDecreaseDisabled = quantity <= 1;
@@ -226,7 +225,7 @@ export function ProductReservationPanel({
             aria-label="수량 감소"
             disabled={isDecreaseDisabled}
             className="px-4 py-2 text-gray-600 disabled:text-gray-300"
-            onClick={decreaseQuantity}
+            onClick={handleDecreaseQuantity}
           >
             <Minus className="size-4" aria-hidden="true" />
           </button>
@@ -238,7 +237,7 @@ export function ProductReservationPanel({
             aria-label="수량 증가"
             disabled={isIncreaseDisabled}
             className="px-4 py-2 text-gray-600 disabled:text-gray-300"
-            onClick={increaseQuantity}
+            onClick={handleIncreaseQuantity}
           >
             <Plus className="size-4" aria-hidden="true" />
           </button>

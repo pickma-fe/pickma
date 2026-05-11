@@ -82,7 +82,6 @@ export default async function ProductDetailPage({
 
           <aside className="lg:sticky lg:top-24 lg:self-start">
             <ProductReservationPanel
-              productId={product.id}
               price={product.discountPrice}
               availableStock={product.availableStock}
               pickupStartTime={product.pickupStartTime}
