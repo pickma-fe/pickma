@@ -52,7 +52,7 @@ export function ProductDetailInfo({ product }: ProductDetailInfoProps) {
       </h1>
 
       {product.description && (
-        <p className="mt-5 text-sm leading-6 text-gray-700">
+        <p className="mt-5 text-lg leading-6 text-gray-700">
           {product.description}
         </p>
       )}
@@ -89,9 +89,7 @@ export function ProductDetailInfo({ product }: ProductDetailInfoProps) {
           {product.store.address}
           {product.store.addressDetail ? ` ${product.store.addressDetail}` : ''}
         </ProductInfoRow>
-        <ProductInfoRow label="남은 수량">
-          {availableStock}개
-        </ProductInfoRow>
+        <ProductInfoRow label="남은 수량">{availableStock}개</ProductInfoRow>
       </dl>
     </section>
   );
