@@ -197,6 +197,8 @@ describe('POST /api/orders', () => {
         expect.objectContaining({ path: 'quantity' })
       );
       expect(requireActiveUser).not.toHaveBeenCalled();
+      expect(expireUserOrders).not.toHaveBeenCalled();
+      expect(createOrder).not.toHaveBeenCalled();
     });
 
     it('pickupAt이 빈 문자열 → VALIDATION_ERROR 400 (requireActiveUser 미호출)', async () => {
