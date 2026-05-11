@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 import type { ProductListItemResponse } from '@/contracts/product';
+import { formatPickupTime } from '@/lib/formatPickupTime';
 import { isProductUnavailable } from '@/lib/product';
 import { useNow } from '@/hooks/useNow';
 import { Badge, Button } from '@/components/common';
@@ -37,14 +38,6 @@ function formatRemainingTime(endAt: string, now: number) {
 
 function isProductUnavailableBeforeHydration(product: ProductListItemResponse) {
   return product.isSoldOut || product.isExpired || product.availableStock <= 0;
-}
-
-function formatPickupTime(value: string) {
-  return new Intl.DateTimeFormat('ko-KR', {
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false,
-  }).format(new Date(value));
 }
 
 export function ProductCard({ product }: ProductCardProps) {
