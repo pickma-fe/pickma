@@ -512,6 +512,7 @@ Behavior:
 
 - 로그인 사용자가 이미 가게를 가지고 있으면 실패한다.
 - 생성된 가게 status는 승인 대기 상태이다.
+- DB unique 충돌(`user_id` 중복, `business_number` 중복 모두 포함)은 `STORE_ALREADY_EXISTS (409)`로 반환한다.
 
 DB source:
 
