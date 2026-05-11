@@ -4,7 +4,6 @@ import { useState } from 'react';
 
 import type { MyStore } from '@/types/store';
 import { Button } from '@/components/common/Button/Button';
-import { Dropdown } from '@/components/common/Dropdown/Dropdown';
 import { Input } from '@/components/common/Input/Input';
 
 interface StoreEditFormProps {
@@ -20,15 +19,9 @@ export interface StoreEditData {
   addressDetail: string;
   region: string;
   description: string;
-  canSell: boolean;
   openTime: string;
   closeTime: string;
 }
-
-const STATUS_OPTIONS = [
-  { label: '판매중', value: 'true' },
-  { label: '판매중지', value: 'false' },
-];
 
 export function StoreEditForm({
   storeInfo,
@@ -42,16 +35,12 @@ export function StoreEditForm({
     addressDetail: storeInfo.addressDetail ?? '',
     region: storeInfo.region,
     description: storeInfo.description ?? '',
-    canSell: storeInfo.canSell,
     openTime: storeInfo.openTime?.slice(0, 5) ?? '09:00',
     closeTime: storeInfo.closeTime?.slice(0, 5) ?? '22:00',
   });
   const [error, setError] = useState<string | null>(null);
 
-  const handleChange = (
-    field: keyof StoreEditData,
-    value: string | boolean
-  ) => {
+  const handleChange = (field: keyof StoreEditData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     setError(null);
   };
@@ -130,17 +119,6 @@ export function StoreEditForm({
           onChange={(e) => handleChange('description', e.target.value)}
           placeholder="가게 소개를 입력해주세요"
         />
-
-        <div className="flex flex-col gap-1">
-          <label className="text-sm text-gray-500">가게 상태</label>
-          <Dropdown
-            type="select"
-            items={STATUS_OPTIONS}
-            value={String(formData.canSell)}
-            onChange={(value) => handleChange('canSell', value === 'true')}
-            placeholder="상태 선택"
-          />
-        </div>
 
         <div className="grid grid-cols-2 gap-4">
           <Input

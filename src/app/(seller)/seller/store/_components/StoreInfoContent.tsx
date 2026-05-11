@@ -30,13 +30,13 @@ const INITIAL_CERTIFICATIONS: Record<string, CertificationData> = {
   // 판매자 인증 서류 (register에서 제출 - store 접근 시 항상 완료 상태)
   businessLicense: {
     status: true,
-    imageUrl: '/images/mock/business-license.jpg',
+    imageUrl: '/images/mock/business-license.jpeg',
   },
-  idCard: { status: true, imageUrl: '/images/mock/id-card.jpg' },
-  bankbook: { status: true, imageUrl: '/images/mock/bankbook.jpg' },
+  idCard: { status: true, imageUrl: '/images/mock/id-card.jpeg' },
+  bankbook: { status: true, imageUrl: '/images/mock/bankbook.jpeg' },
   businessReport: {
     status: true,
-    imageUrl: '/images/mock/business-report.jpg',
+    imageUrl: '/images/mock/business-report.jpeg',
   },
   salesLicense: { status: false, imageUrl: undefined },
   hygieneLicense: { status: false, imageUrl: undefined, expiresAt: undefined },
@@ -102,7 +102,6 @@ export function StoreInfoContent() {
       addressDetail: data.addressDetail,
       region: data.region,
       description: data.description,
-      canSell: data.canSell,
       openTime: `${data.openTime}:00`,
       closeTime: `${data.closeTime}:00`,
     });

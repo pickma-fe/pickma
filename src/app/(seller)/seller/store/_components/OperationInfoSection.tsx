@@ -9,11 +9,12 @@ interface OperationInfoSectionProps {
 export function OperationInfoSection({ storeInfo }: OperationInfoSectionProps) {
   const formatTime = (timeString?: string) => {
     if (!timeString) return '-';
-    const date = new Date(timeString);
-    return date.toLocaleTimeString('ko-KR', {
-      hour: '2-digit',
-      minute: '2-digit',
-    });
+
+    // HH:mm:ss 형태의 문자열을 직접 파싱
+    const [hours, minutes] = timeString.split(':');
+    if (!hours || !minutes) return '-';
+
+    return `${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}`;
   };
 
   const formatDate = (date: Date) => {
