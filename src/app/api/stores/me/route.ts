@@ -4,7 +4,7 @@ import { isApiMockEnabled } from '@/app/api/_lib/mock';
 import { fail, routeError, success } from '@/app/api/_lib/response';
 import { mockMyStore } from '@/mocks/stores';
 
-import { getMyStore } from './../_lib/service';
+import { getMyStore } from '../_lib/service';
 
 export async function GET(): Promise<Response> {
   try {
