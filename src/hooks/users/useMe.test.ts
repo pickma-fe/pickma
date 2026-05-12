@@ -85,6 +85,8 @@ describe('useMe', () => {
       timeout: 5000,
     });
 
-    expect(vi.mocked(userApi.getMe).mock.calls.length).toBeGreaterThan(1);
+    expect(vi.mocked(userApi.getMe).mock.calls.length).toBeGreaterThanOrEqual(
+      4
+    );
   });
 });
