@@ -36,7 +36,12 @@ export default async function ProductDetailPage({
           </div>
 
           <aside className="lg:sticky lg:top-24 lg:self-start">
-            <ProductReservationPanel price={product.discountPrice} />
+            <ProductReservationPanel
+              price={product.discountPrice}
+              availableStock={product.availableStock}
+              pickupStartTime={product.pickupStartTime}
+              pickupEndTime={product.pickupEndTime}
+            />
           </aside>
         </section>
 
