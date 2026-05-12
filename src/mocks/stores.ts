@@ -10,7 +10,7 @@ export const mockMyStore: StoreResponse = {
   address: '서울시 마포구 월드컵북로 12',
   addressDetail: '1층',
   region: '서울 마포구',
-  image: '/images/mock/store-bakery.jpg',
+  image: '/images/mock/stores/bakery.png',
   openTime: '09:00:00',
   closeTime: '22:00:00',
   status: 'approved',

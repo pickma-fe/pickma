@@ -26,20 +26,33 @@ interface CertificationData {
   expiresAt?: string;
 }
 
+// TODO: API 연동 시 실제 데이터로 교체
 const INITIAL_CERTIFICATIONS: Record<string, CertificationData> = {
-  // 판매자 인증 서류 (register에서 제출 - store 접근 시 항상 완료 상태)
   businessLicense: {
     status: true,
-    imageUrl: '/images/mock/business-license.jpeg',
+    imageUrl: '/images/mock/documents/business-license.jpeg',
   },
-  idCard: { status: true, imageUrl: '/images/mock/id-card.jpeg' },
-  bankbook: { status: true, imageUrl: '/images/mock/bankbook.jpeg' },
+  idCard: {
+    status: true,
+    imageUrl: '/images/mock/documents/id-card.jpeg',
+  },
+  bankbook: {
+    status: true,
+    imageUrl: '/images/mock/documents/bankbook.jpeg',
+  },
   businessReport: {
     status: true,
-    imageUrl: '/images/mock/business-report.jpeg',
+    imageUrl: '/images/mock/documents/business-report.jpeg',
   },
-  salesLicense: { status: false, imageUrl: undefined },
-  hygieneLicense: { status: false, imageUrl: undefined, expiresAt: undefined },
+  salesLicense: {
+    status: false,
+    imageUrl: undefined,
+  },
+  hygieneLicense: {
+    status: false,
+    imageUrl: undefined,
+    expiresAt: undefined,
+  },
 };
 
 const CERT_KEY_MAP: Record<string, string> = {
@@ -50,6 +63,7 @@ const CERT_KEY_MAP: Record<string, string> = {
   '통신판매업 신고증': 'salesLicense',
   '위생교육 수료증': 'hygieneLicense',
 };
+
 const REGISTER_CERTS = [
   '사업자 등록증',
   '대표자 신분증',
@@ -106,7 +120,6 @@ export function StoreInfoContent() {
       closeTime: `${data.closeTime}:00`,
     });
     handleCloseModal();
-    // TODO: API 연동 시 실제 수정 API 호출
   };
 
   const handleImageEdit = (imageUrl: string) => {
@@ -115,7 +128,6 @@ export function StoreInfoContent() {
       image: imageUrl,
     });
     handleCloseModal();
-    // TODO: API 연동 시 실제 이미지 업로드 API 호출
   };
 
   const handleCertificationSubmit = (certLabel: string, imageUrl: string) => {
@@ -138,7 +150,6 @@ export function StoreInfoContent() {
       }));
     }
     handleCloseModal();
-    // TODO: API 연동 시 실제 인증서 제출 API 호출
   };
 
   const getSelectedCertData = () => {
