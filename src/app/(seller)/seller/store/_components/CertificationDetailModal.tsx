@@ -38,7 +38,8 @@ export function CertificationDetailModal({
   }, [previewUrl]);
 
   const isExpired = expiresAt ? new Date(expiresAt) < new Date() : false;
-  const needsRenewal = label === '위생교육 수료증' && isCompleted;
+  // 만료된 경우에만 갱신 버튼 표시
+  const needsRenewal = label === '위생교육 수료증' && isCompleted && isExpired;
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

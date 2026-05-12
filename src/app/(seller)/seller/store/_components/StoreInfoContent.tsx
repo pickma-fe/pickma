@@ -58,7 +58,7 @@ const REGISTER_CERTS = [
 ];
 
 export function StoreInfoContent() {
-  const { data: initialStoreInfo, isLoading } = useMyStore();
+  const { data: initialStoreInfo, isLoading, isError } = useMyStore();
   const [editedStore, setEditedStore] = useState<Partial<MyStore> | null>(null);
   const [activeModal, setActiveModal] = useState<ModalType>(null);
   const [selectedCertification, setSelectedCertification] = useState<
@@ -149,6 +149,14 @@ export function StoreInfoContent() {
 
   if (isLoading) {
     return <div className="p-8 text-center text-gray-500">로딩 중...</div>;
+  }
+
+  if (isError) {
+    return (
+      <div className="p-8 text-center text-red-500">
+        가게 정보를 불러오는데 실패했습니다.
+      </div>
+    );
   }
 
   if (!storeInfo) {
