@@ -4,6 +4,10 @@ import { Clock, CreditCard, MapPin } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
 
 import type { ProductDetailResponse } from '@/contracts/product';
+import {
+  formatPickupDateLabel,
+  formatPickupTime,
+} from '@/lib/formatPickupTime';
 import { Button } from '@/components/common';
 
 import { PickupTimeChangeModal } from './PickupTimeChangeModal';
@@ -13,24 +17,21 @@ interface OrderCheckoutPanelProps {
   finalPaymentPrice: number;
 }
 
-interface OrderInfoBlockProps {
-  icon: ReactNode;
-  title: string;
-  actionLabel?: string;
-  onAction?: () => void;
-  children: ReactNode;
-}
-
-function formatPickupTime(value: string) {
-  const time = value.includes('T') ? value.split('T')[1] : value;
-  const [hour, minute] = time.split(':');
-
-  if (!hour || !minute) {
-    return value;
-  }
-
-  return `${hour.padStart(2, '0')}:${minute.padStart(2, '0')}`;
-}
+type OrderInfoBlockProps =
+  | {
+      icon: ReactNode;
+      title: string;
+      actionLabel: string;
+      onAction: () => void;
+      children: ReactNode;
+    }
+  | {
+      icon: ReactNode;
+      title: string;
+      actionLabel?: undefined;
+      onAction?: undefined;
+      children: ReactNode;
+    };
 
 function getPickupPlace(product: ProductDetailResponse) {
   return product.store.addressDetail
@@ -46,6 +47,7 @@ export function OrderCheckoutPanel({
   const defaultPickupTime = `${formatPickupTime(product.pickupStartTime)}~${formatPickupTime(
     product.pickupEndTime
   )}`;
+  const pickupDateLabel = formatPickupDateLabel(product.pickupStartTime);
   const [pickupTime, setPickupTime] = useState(defaultPickupTime);
   const [isPickupTimeModalOpen, setIsPickupTimeModalOpen] = useState(false);
 
@@ -68,7 +70,9 @@ export function OrderCheckoutPanel({
           actionLabel="변경"
           onAction={() => setIsPickupTimeModalOpen(true)}
         >
-          <p className="font-medium text-gray-900">오늘 {pickupTime}</p>
+          <p className="font-medium text-gray-900">
+            {pickupDateLabel} {pickupTime}
+          </p>
         </OrderInfoBlock>
 
         <OrderInfoBlock
