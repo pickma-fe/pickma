@@ -27,7 +27,10 @@ export async function PATCH(req: NextRequest): Promise<Response> {
   if (isApiMockEnabled()) {
     try {
       const data = await validateBody(updateMeSchema, req);
-      return success({ ...mockUser, ...data });
+      const mockUserCookie = req.cookies.get('mock_user')?.value;
+      const currentMockUser =
+        mockUserCookie === 'admin' ? mockAdminUser : mockUser;
+      return success({ ...currentMockUser, ...data });
     } catch (e) {
       return routeError(e);
     }
