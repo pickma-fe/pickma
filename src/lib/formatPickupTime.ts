@@ -1,5 +1,11 @@
 const TIME_ONLY_PATTERN = /^(\d{2}):(\d{2})(?::\d{2})?$/;
 
+export interface PickupTimeOption {
+  label: string;
+  startAt: string;
+  endAt: string;
+}
+
 function getPickupDate(value: string, now: Date) {
   if (!value.includes('T')) {
     return new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -110,7 +116,7 @@ export function formatPickupTime(value: string) {
 export function createPickupTimeOptions(startTime: string, endTime: string) {
   const start = parsePickupTimeToMinutes(startTime);
   const end = parsePickupTimeToMinutes(endTime);
-  const options: string[] = [];
+  const options: PickupTimeOption[] = [];
 
   if (start === null || end === null || start >= end) {
     return options;
@@ -118,21 +124,25 @@ export function createPickupTimeOptions(startTime: string, endTime: string) {
 
   for (let current = start; current + 30 <= end; current += 30) {
     const next = current + 30;
-    options.push(
-      `${formatMinutesToTime(current)}~${formatMinutesToTime(next)}`
-    );
+    const optionStartTime = formatMinutesToTime(current);
+    const optionEndTime = formatMinutesToTime(next);
+
+    options.push({
+      label: `${optionStartTime}~${optionEndTime}`,
+      startAt: optionStartTime,
+      endAt: optionEndTime,
+    });
   }
 
   return options;
 }
 
 export function isPastPickupTimeSlot(
-  slotValue: string,
+  pickupStartTime: string,
   pickupDateTime: string,
   now: Date
 ) {
-  const [startTime] = slotValue.split('~');
-  const slotStartMinutes = parsePickupTimeToMinutes(startTime);
+  const slotStartMinutes = parsePickupTimeToMinutes(pickupStartTime);
 
   if (slotStartMinutes === null) {
     return true;

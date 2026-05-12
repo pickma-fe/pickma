@@ -7,6 +7,7 @@ import type { ProductDetailResponse } from '@/contracts/product';
 import {
   formatPickupDateLabel,
   formatPickupTime,
+  type PickupTimeOption,
 } from '@/lib/formatPickupTime';
 import { Button } from '@/components/common';
 
@@ -39,16 +40,36 @@ function getPickupPlace(product: ProductDetailResponse) {
     : product.store.address;
 }
 
+function createDefaultPickupTimeOption(
+  pickupStartTime: string,
+  pickupEndTime: string
+): PickupTimeOption {
+  const startAt = formatPickupTime(pickupStartTime);
+  const endAt = formatPickupTime(pickupEndTime);
+
+  return {
+    label: `${startAt}~${endAt}`,
+    startAt,
+    endAt,
+  };
+}
+
 export function OrderCheckoutPanel({
   product,
   finalPaymentPrice,
 }: OrderCheckoutPanelProps) {
   const pickupPlace = getPickupPlace(product);
-  const defaultPickupTime = `${formatPickupTime(product.pickupStartTime)}~${formatPickupTime(
-    product.pickupEndTime
-  )}`;
-  const pickupDateLabel = formatPickupDateLabel(product.pickupStartTime);
-  const [pickupTime, setPickupTime] = useState(defaultPickupTime);
+  const [referenceNow] = useState(() => new Date());
+  const pickupDateLabel = formatPickupDateLabel(
+    product.pickupStartTime,
+    referenceNow
+  );
+  const [pickupTime, setPickupTime] = useState(() =>
+    createDefaultPickupTimeOption(
+      product.pickupStartTime,
+      product.pickupEndTime
+    )
+  );
   const [isPickupTimeModalOpen, setIsPickupTimeModalOpen] = useState(false);
 
   return (
@@ -71,7 +92,7 @@ export function OrderCheckoutPanel({
           onAction={() => setIsPickupTimeModalOpen(true)}
         >
           <p className="font-medium text-gray-900">
-            {pickupDateLabel} {pickupTime}
+            {pickupDateLabel} {pickupTime.label}
           </p>
         </OrderInfoBlock>
 
@@ -111,6 +132,7 @@ export function OrderCheckoutPanel({
           selectedPickupTime={pickupTime}
           pickupStartTime={product.pickupStartTime}
           pickupEndTime={product.pickupEndTime}
+          referenceNow={referenceNow}
           onChangePickupTime={setPickupTime}
           onClose={() => setIsPickupTimeModalOpen(false)}
         />
