@@ -85,10 +85,11 @@ describe('GET /api/orders', () => {
       expect(body.data).toBeDefined();
     });
 
-    it('requireActiveUser, getOrders 미호출', async () => {
+    it('requireActiveUser, expireUserOrders, getOrders 미호출', async () => {
       vi.mocked(isApiMockEnabled).mockReturnValue(true);
       await GET(makeGetRequest());
       expect(requireActiveUser).not.toHaveBeenCalled();
+      expect(expireUserOrders).not.toHaveBeenCalled();
       expect(getOrders).not.toHaveBeenCalled();
     });
   });
@@ -102,18 +103,23 @@ describe('GET /api/orders', () => {
         >['authUser'],
         serviceUser: mockServiceUser,
       });
+      vi.mocked(expireUserOrders).mockResolvedValue(undefined);
       vi.mocked(getOrders).mockResolvedValue(mockOrderListResponse);
     });
 
-    it('성공 → 200 반환, getOrders 호출', async () => {
+    it('성공 → 200 반환, expireUserOrders 후 getOrders 호출', async () => {
       const res = await GET(makeGetRequest());
       expect(res.status).toBe(200);
       const body = (await res.json()) as { statusCode: number; data: object };
       expect(body.statusCode).toBe(200);
+      expect(expireUserOrders).toHaveBeenCalledWith('user-1');
       expect(getOrders).toHaveBeenCalledWith(
         'user-1',
         expect.objectContaining({ page: 1, pageSize: 20 })
       );
+      expect(
+        vi.mocked(expireUserOrders).mock.invocationCallOrder[0]
+      ).toBeLessThan(vi.mocked(getOrders).mock.invocationCallOrder[0]);
     });
 
     it('query 기본값 적용 (page=1, pageSize=20, sort=createdAt, order=desc)', async () => {

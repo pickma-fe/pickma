@@ -5,7 +5,7 @@ import { fail, routeError, success } from '@/app/api/_lib/response';
 import { mockOrderDetail } from '@/mocks/orders';
 
 import { orderIdSchema } from '../_lib/schemas';
-import { getOrder } from '../_lib/service';
+import { expireUserOrders, getOrder } from '../_lib/service';
 
 export async function GET(
   _request: Request,
@@ -24,6 +24,7 @@ export async function GET(
 
   try {
     const { serviceUser } = await requireActiveUser();
+    await expireUserOrders(serviceUser.id);
     const data = await getOrder(serviceUser.id, parsed.data);
     return success(data);
   } catch (error) {

@@ -7,7 +7,7 @@ import { requireActiveUser } from '@/app/api/_lib/auth';
 import { isApiMockEnabled } from '@/app/api/_lib/mock';
 
 import { GET } from './route';
-import { getOrder } from '../_lib/service';
+import { expireUserOrders, getOrder } from '../_lib/service';
 
 vi.mock('@/app/api/_lib/mock', () => ({
   isApiMockEnabled: vi.fn(),
@@ -18,6 +18,7 @@ vi.mock('@/app/api/_lib/auth', () => ({
 }));
 
 vi.mock('../_lib/service', () => ({
+  expireUserOrders: vi.fn(),
   getOrder: vi.fn(),
 }));
 
@@ -89,10 +90,11 @@ describe('GET /api/orders/:orderId', () => {
       );
     });
 
-    it('requireActiveUser, getOrder 미호출', async () => {
+    it('requireActiveUser, expireUserOrders, getOrder 미호출', async () => {
       vi.mocked(isApiMockEnabled).mockReturnValue(true);
       await GET(new Request('http://localhost'), makeParams(VALID_UUID));
       expect(requireActiveUser).not.toHaveBeenCalled();
+      expect(expireUserOrders).not.toHaveBeenCalled();
       expect(getOrder).not.toHaveBeenCalled();
     });
   });
@@ -106,16 +108,21 @@ describe('GET /api/orders/:orderId', () => {
         >['authUser'],
         serviceUser: mockServiceUser,
       });
+      vi.mocked(expireUserOrders).mockResolvedValue(undefined);
       vi.mocked(getOrder).mockResolvedValue(mockOrderDetailResponse);
     });
 
-    it('성공 → 200 반환, getOrder(serviceUser.id, orderId) 호출', async () => {
+    it('성공 → 200 반환, expireUserOrders 후 getOrder(serviceUser.id, orderId) 호출', async () => {
       const res = await GET(
         new Request('http://localhost'),
         makeParams(VALID_UUID)
       );
       expect(res.status).toBe(200);
+      expect(expireUserOrders).toHaveBeenCalledWith('user-1');
       expect(getOrder).toHaveBeenCalledWith('user-1', VALID_UUID);
+      expect(
+        vi.mocked(expireUserOrders).mock.invocationCallOrder[0]
+      ).toBeLessThan(vi.mocked(getOrder).mock.invocationCallOrder[0]);
     });
 
     it('UNAUTHORIZED → 401', async () => {

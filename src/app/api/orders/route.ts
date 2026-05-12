@@ -17,6 +17,7 @@ export async function GET(request: NextRequest): Promise<Response> {
       request.nextUrl.searchParams
     );
     const { serviceUser } = await requireActiveUser();
+    await expireUserOrders(serviceUser.id);
     const data = await getOrders(serviceUser.id, params);
     return success(data);
   } catch (error) {
