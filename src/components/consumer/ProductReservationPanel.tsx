@@ -128,20 +128,15 @@ export function ProductReservationPanel({
     () => createPickupTimeSlots(pickupStartTime, pickupEndTime),
     [pickupStartTime, pickupEndTime]
   );
-  const [selectedTimeSlot, setSelectedTimeSlot] = useState(
-    timeSlots[0]?.value ?? ''
-  );
+  const [selectedTimeSlot, setSelectedTimeSlot] = useState('');
 
-  const firstAvailableTimeSlot = timeSlots.find(
-    (slot) => !isPastTimeSlot(slot.value, pickupStartTime, now)
-  );
   const selectedSlot = timeSlots.find(
     (slot) => slot.value === selectedTimeSlot
   );
   const activeTimeSlot =
     selectedSlot && !isPastTimeSlot(selectedSlot.value, pickupStartTime, now)
       ? selectedSlot.value
-      : (firstAvailableTimeSlot?.value ?? '');
+      : '';
 
   const [quantity, setQuantity] = useState(() => (availableStock > 0 ? 1 : 0));
 
@@ -150,6 +145,19 @@ export function ProductReservationPanel({
   };
   const handleIncreaseQuantity = () => {
     setQuantity((current) => Math.min(availableStock, current + 1));
+  };
+  const handleAddButtonClick = () => {
+    if (
+      activeTimeSlot === '' ||
+      availableStock <= 0 ||
+      quantity <= 0 ||
+      isPastTimeSlot(activeTimeSlot, pickupStartTime, new Date())
+    ) {
+      setSelectedTimeSlot('');
+      return;
+    }
+
+    // TODO: 주문/결제 플로우 연동 시 선택한 픽업 시간과 수량을 전달합니다.
   };
   const isDecreaseDisabled = quantity <= 1;
   const isIncreaseDisabled = quantity >= availableStock;
@@ -247,6 +255,7 @@ export function ProductReservationPanel({
       <Button
         disabled={isAddButtonDisabled}
         className="w-full py-3 text-xl font-extrabold"
+        onClick={handleAddButtonClick}
       >
         {availableStock <= 0
           ? '예약 불가'
