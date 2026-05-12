@@ -9,10 +9,15 @@ import { mockAdminUser, mockUser } from '@/mocks/users';
 import { updateMeSchema } from './_lib/schemas';
 import { updateUser } from './_lib/service';
 
+function getMockUser(req: NextRequest) {
+  const cookie = req.cookies.get('mock_user')?.value;
+  if (cookie === 'admin') return mockAdminUser;
+  return mockUser;
+}
+
 export async function GET(request: NextRequest): Promise<Response> {
   if (isApiMockEnabled()) {
-    const mockUserCookie = request.cookies.get('mock_user')?.value;
-    return success(mockUserCookie === 'admin' ? mockAdminUser : mockUser);
+    return success(getMockUser(request));
   }
 
   try {
@@ -27,10 +32,7 @@ export async function PATCH(req: NextRequest): Promise<Response> {
   if (isApiMockEnabled()) {
     try {
       const data = await validateBody(updateMeSchema, req);
-      const mockUserCookie = req.cookies.get('mock_user')?.value;
-      const currentMockUser =
-        mockUserCookie === 'admin' ? mockAdminUser : mockUser;
-      return success({ ...currentMockUser, ...data });
+      return success({ ...getMockUser(req), ...data });
     } catch (e) {
       return routeError(e);
     }
