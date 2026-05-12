@@ -1,17 +1,39 @@
 'use client';
 
 import { Package, ShoppingBag, PackageX } from 'lucide-react';
+import { useState, useMemo } from 'react';
 
 import { useSellerMenus } from '@/hooks/seller/menus/useSellerMenus';
 import { Button } from '@/components/common/Button/Button';
 import { Section } from '@/components/common/Section/Section';
 
+import { MenuFilter } from './MenuFilter';
 import { MenuTable } from './MenuTable';
 
 export function MenuManageContent() {
   const { data, isLoading } = useSellerMenus();
+  const [selectedCategory, setSelectedCategory] = useState('전체');
+  const [searchKeyword, setSearchKeyword] = useState('');
 
-  const menus = data?.items ?? [];
+  const menus = useMemo(() => data?.items ?? [], [data?.items]);
+  const categories = useMemo(() => {
+    const uniqueCategories = [...new Set(menus.map((menu) => menu.category))];
+    return ['전체', ...uniqueCategories];
+  }, [menus]);
+
+  const filteredMenus = useMemo(() => {
+    return menus.filter((menu) => {
+      const matchCategory =
+        selectedCategory === '전체' || menu.category === selectedCategory;
+
+      const matchSearch =
+        searchKeyword === '' ||
+        menu.name.toLowerCase().includes(searchKeyword.toLowerCase());
+
+      return matchCategory && matchSearch;
+    });
+  }, [menus, selectedCategory, searchKeyword]);
+
   const totalCount = menus.length;
   const activeCount = totalCount;
   const inactiveCount = 0;
@@ -26,7 +48,6 @@ export function MenuManageContent() {
 
   return (
     <div className="flex flex-col gap-6">
-      {/* 페이지 타이틀 */}
       <div>
         <h1 className="text-xl font-bold text-gray-900 lg:text-2xl">
           메뉴 관리
@@ -36,7 +57,6 @@ export function MenuManageContent() {
         </p>
       </div>
 
-      {/* 통계 카드 */}
       <Section variant="card" className="bg-white">
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
           <div className="flex items-center gap-4">
@@ -80,13 +100,18 @@ export function MenuManageContent() {
         </div>
       </Section>
 
-      {/* 메뉴 등록 버튼 */}
-      <div className="flex justify-end">
+      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+        <MenuFilter
+          categories={categories}
+          selectedCategory={selectedCategory}
+          searchKeyword={searchKeyword}
+          onCategoryChange={setSelectedCategory}
+          onSearchChange={setSearchKeyword}
+        />
         <Button onClick={handleAddMenu}>+ 메뉴 등록</Button>
       </div>
 
-      {/* 메뉴 테이블 */}
-      <MenuTable menus={menus} />
+      <MenuTable menus={filteredMenus} />
     </div>
   );
 }
