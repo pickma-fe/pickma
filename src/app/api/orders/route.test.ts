@@ -178,6 +178,81 @@ describe('POST /api/orders', () => {
       expect(body.error.code).toBe('OUT_OF_STOCK');
     });
 
+    it('PRODUCT_EXPIRED throw → 409', async () => {
+      vi.mocked(createOrder).mockRejectedValue(
+        new AppError(ERROR_CODE.PRODUCT_EXPIRED, 409)
+      );
+      const res = await POST(makePostRequest(validBody));
+      expect(res.status).toBe(409);
+      const body = (await res.json()) as {
+        statusCode: number;
+        error: { code: string };
+      };
+      expect(body.statusCode).toBe(res.status);
+      expect(body.error.code).toBe('PRODUCT_EXPIRED');
+    });
+
+    it('PRODUCT_NOT_AVAILABLE throw → 409', async () => {
+      vi.mocked(createOrder).mockRejectedValue(
+        new AppError(ERROR_CODE.PRODUCT_NOT_AVAILABLE, 409)
+      );
+      const res = await POST(makePostRequest(validBody));
+      expect(res.status).toBe(409);
+      const body = (await res.json()) as {
+        statusCode: number;
+        error: { code: string };
+      };
+      expect(body.statusCode).toBe(res.status);
+      expect(body.error.code).toBe('PRODUCT_NOT_AVAILABLE');
+    });
+
+    it('DUPLICATE_PRODUCT_IN_ORDER throw → 400', async () => {
+      vi.mocked(createOrder).mockRejectedValue(
+        new AppError(ERROR_CODE.DUPLICATE_PRODUCT_IN_ORDER, 400)
+      );
+      const res = await POST(makePostRequest(validBody));
+      expect(res.status).toBe(400);
+      const body = (await res.json()) as {
+        statusCode: number;
+        error: { code: string };
+      };
+      expect(body.statusCode).toBe(res.status);
+      expect(body.error.code).toBe('DUPLICATE_PRODUCT_IN_ORDER');
+    });
+
+    it('ORDER_NUMBER_EXHAUSTED throw → 503', async () => {
+      vi.mocked(createOrder).mockRejectedValue(
+        new AppError(ERROR_CODE.ORDER_NUMBER_EXHAUSTED, 503)
+      );
+      const res = await POST(makePostRequest(validBody));
+      expect(res.status).toBe(503);
+      const body = (await res.json()) as {
+        statusCode: number;
+        error: { code: string };
+      };
+      expect(body.statusCode).toBe(res.status);
+      expect(body.error.code).toBe('ORDER_NUMBER_EXHAUSTED');
+    });
+
+    it('INVALID_PICKUP_TIME → VALIDATION_ERROR 400 (details.path=pickupAt)', async () => {
+      vi.mocked(createOrder).mockRejectedValue(
+        new AppError(ERROR_CODE.VALIDATION_ERROR, 400, undefined, [
+          { path: 'pickupAt', message: 'INVALID_PICKUP_TIME' },
+        ])
+      );
+      const res = await POST(makePostRequest(validBody));
+      expect(res.status).toBe(400);
+      const body = (await res.json()) as {
+        statusCode: number;
+        error: { code: string; details?: { path: string }[] };
+      };
+      expect(body.statusCode).toBe(res.status);
+      expect(body.error.code).toBe('VALIDATION_ERROR');
+      expect(body.error.details).toContainEqual(
+        expect.objectContaining({ path: 'pickupAt' })
+      );
+    });
+
     it('productId가 UUID 아님 → VALIDATION_ERROR 400 (requireActiveUser 미호출)', async () => {
       const res = await POST(
         makePostRequest({ ...validBody, productId: 'not-a-uuid' })
