@@ -1,21 +1,27 @@
 import type { NextRequest } from 'next/server';
 
-import { ERROR_CODE } from '@/lib/errors/errorCodes';
 import { requireActiveUser } from '@/app/api/_lib/auth';
 import { isApiMockEnabled } from '@/app/api/_lib/mock';
-import { fail, routeError, success } from '@/app/api/_lib/response';
-import { validateBody } from '@/app/api/_lib/validation';
+import { routeError, success } from '@/app/api/_lib/response';
+import { validateBody, validateQuery } from '@/app/api/_lib/validation';
 import { mockCreatedOrder, mockOrderList } from '@/mocks/orders';
 
-import { createOrderSchema } from './_lib/schemas';
-import { createOrder, expireUserOrders } from './_lib/service';
+import { createOrderSchema, orderListQuerySchema } from './_lib/schemas';
+import { createOrder, expireUserOrders, getOrders } from './_lib/service';
 
-export async function GET(): Promise<Response> {
-  if (!isApiMockEnabled()) {
-    return fail(ERROR_CODE.NOT_IMPLEMENTED);
+export async function GET(request: NextRequest): Promise<Response> {
+  if (isApiMockEnabled()) return success(mockOrderList);
+  try {
+    const params = validateQuery(
+      orderListQuerySchema,
+      request.nextUrl.searchParams
+    );
+    const { serviceUser } = await requireActiveUser();
+    const data = await getOrders(serviceUser.id, params);
+    return success(data);
+  } catch (error) {
+    return routeError(error);
   }
-
-  return success(mockOrderList);
 }
 
 export async function POST(request: NextRequest): Promise<Response> {

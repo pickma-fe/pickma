@@ -1,13 +1,13 @@
-import type { NextRequest } from 'next/server';
+import { NextRequest } from 'next/server';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { CreateOrderResponse } from '@/contracts/order';
+import type { CreateOrderResponse, OrderListResponse } from '@/contracts/order';
 import { AppError } from '@/lib/errors/appError';
 import { ERROR_CODE } from '@/lib/errors/errorCodes';
 import { requireActiveUser } from '@/app/api/_lib/auth';
 import { isApiMockEnabled } from '@/app/api/_lib/mock';
 
-import { createOrder, expireUserOrders } from './_lib/service';
+import { createOrder, expireUserOrders, getOrders } from './_lib/service';
 import { GET, POST } from './route';
 
 vi.mock('@/app/api/_lib/mock', () => ({
@@ -21,6 +21,7 @@ vi.mock('@/app/api/_lib/auth', () => ({
 vi.mock('./_lib/service', () => ({
   createOrder: vi.fn(),
   expireUserOrders: vi.fn(),
+  getOrders: vi.fn(),
 }));
 
 const mockServiceUser = {
@@ -41,6 +42,20 @@ const mockOrderResponse: CreateOrderResponse = {
   expiresAt: '2026-05-11T10:10:00.000Z',
 };
 
+const mockOrderListResponse: OrderListResponse = {
+  items: [],
+  page: 1,
+  pageSize: 20,
+  totalCount: 0,
+  totalPages: 0,
+};
+
+function makeGetRequest(search = '') {
+  return new NextRequest(
+    `http://localhost/api/orders${search ? `?${search}` : ''}`
+  );
+}
+
 function makePostRequest(body: object) {
   return new Request('http://localhost/api/orders', {
     method: 'POST',
@@ -56,25 +71,102 @@ const validBody = {
 };
 
 describe('GET /api/orders', () => {
-  it('mock 모드 → mockOrderList 200 반환', async () => {
-    vi.mocked(isApiMockEnabled).mockReturnValue(true);
-    const res = await GET();
-    expect(res.status).toBe(200);
-    const body = (await res.json()) as { statusCode: number; data: object };
-    expect(body.statusCode).toBe(200);
-    expect(body.data).toBeDefined();
+  beforeEach(() => {
+    vi.clearAllMocks();
   });
 
-  it('real 모드 → NOT_IMPLEMENTED 501', async () => {
-    vi.mocked(isApiMockEnabled).mockReturnValue(false);
-    const res = await GET();
-    expect(res.status).toBe(501);
-    const body = (await res.json()) as {
-      statusCode: number;
-      error: { code: string };
-    };
-    expect(body.statusCode).toBe(res.status);
-    expect(body.error.code).toBe('NOT_IMPLEMENTED');
+  describe('mock 모드', () => {
+    it('mockOrderList 200 반환', async () => {
+      vi.mocked(isApiMockEnabled).mockReturnValue(true);
+      const res = await GET(makeGetRequest());
+      expect(res.status).toBe(200);
+      const body = (await res.json()) as { statusCode: number; data: object };
+      expect(body.statusCode).toBe(200);
+      expect(body.data).toBeDefined();
+    });
+
+    it('requireActiveUser, getOrders 미호출', async () => {
+      vi.mocked(isApiMockEnabled).mockReturnValue(true);
+      await GET(makeGetRequest());
+      expect(requireActiveUser).not.toHaveBeenCalled();
+      expect(getOrders).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('real 모드', () => {
+    beforeEach(() => {
+      vi.mocked(isApiMockEnabled).mockReturnValue(false);
+      vi.mocked(requireActiveUser).mockResolvedValue({
+        authUser: {} as Awaited<
+          ReturnType<typeof requireActiveUser>
+        >['authUser'],
+        serviceUser: mockServiceUser,
+      });
+      vi.mocked(getOrders).mockResolvedValue(mockOrderListResponse);
+    });
+
+    it('성공 → 200 반환, getOrders 호출', async () => {
+      const res = await GET(makeGetRequest());
+      expect(res.status).toBe(200);
+      const body = (await res.json()) as { statusCode: number; data: object };
+      expect(body.statusCode).toBe(200);
+      expect(getOrders).toHaveBeenCalledWith(
+        'user-1',
+        expect.objectContaining({ page: 1, pageSize: 20 })
+      );
+    });
+
+    it('query 기본값 적용 (page=1, pageSize=20, sort=createdAt, order=desc)', async () => {
+      await GET(makeGetRequest());
+      expect(getOrders).toHaveBeenCalledWith(
+        'user-1',
+        expect.objectContaining({
+          page: 1,
+          pageSize: 20,
+          sort: 'createdAt',
+          order: 'desc',
+        })
+      );
+    });
+
+    it('status 파라미터 전달 → getOrders에 그대로 전달', async () => {
+      await GET(makeGetRequest('status=reserved'));
+      expect(getOrders).toHaveBeenCalledWith(
+        'user-1',
+        expect.objectContaining({ status: 'reserved' })
+      );
+    });
+
+    it('UNAUTHORIZED → 401', async () => {
+      vi.mocked(requireActiveUser).mockRejectedValue(
+        new AppError(ERROR_CODE.UNAUTHORIZED, 401)
+      );
+      const res = await GET(makeGetRequest());
+      expect(res.status).toBe(401);
+      const body = (await res.json()) as {
+        statusCode: number;
+        error: { code: string };
+      };
+      expect(body.error.code).toBe('UNAUTHORIZED');
+    });
+
+    it('getOrders Supabase 오류 → 500', async () => {
+      vi.mocked(getOrders).mockRejectedValue(
+        new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500)
+      );
+      const res = await GET(makeGetRequest());
+      expect(res.status).toBe(500);
+    });
+
+    it('유효하지 않은 sort 값 → VALIDATION_ERROR 400', async () => {
+      const res = await GET(makeGetRequest('sort=invalid'));
+      expect(res.status).toBe(400);
+      const body = (await res.json()) as {
+        statusCode: number;
+        error: { code: string };
+      };
+      expect(body.error.code).toBe('VALIDATION_ERROR');
+    });
   });
 });
 

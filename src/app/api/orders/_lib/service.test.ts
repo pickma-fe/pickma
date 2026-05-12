@@ -430,7 +430,7 @@ function makeListClient({
 function makeDetailClient({
   data = {},
   error = null as { message: string } | null,
-} = {}) {
+}: { data?: object | null; error?: { message: string } | null } = {}) {
   const maybeSingleFn = vi.fn().mockResolvedValue({ data, error });
   const userEqFn = vi.fn().mockReturnValue({ maybeSingle: maybeSingleFn });
   const orderEqFn = vi.fn().mockReturnValue({ eq: userEqFn });
