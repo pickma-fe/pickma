@@ -4,14 +4,15 @@ import { requireActiveUser } from '@/app/api/_lib/auth';
 import { isApiMockEnabled } from '@/app/api/_lib/mock';
 import { routeError, success } from '@/app/api/_lib/response';
 import { validateBody } from '@/app/api/_lib/validation';
-import { mockUser } from '@/mocks/users';
+import { mockAdminUser, mockUser } from '@/mocks/users';
 
 import { updateMeSchema } from './_lib/schemas';
 import { updateUser } from './_lib/service';
 
-export async function GET(): Promise<Response> {
+export async function GET(request: NextRequest): Promise<Response> {
   if (isApiMockEnabled()) {
-    return success(mockUser);
+    const mockUserCookie = request.cookies.get('mock_user')?.value;
+    return success(mockUserCookie === 'admin' ? mockAdminUser : mockUser);
   }
 
   try {
