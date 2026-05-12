@@ -3,9 +3,9 @@ import { z } from 'zod';
 import type { CreateOrderRequest, OrderListParams } from '@/contracts/order';
 
 export const createOrderSchema = z.object({
-  productId: z.string().uuid(),
+  productId: z.uuid(),
   quantity: z.number().int().positive(),
-  pickupAt: z.string().datetime(),
+  pickupAt: z.iso.datetime(),
 }) satisfies z.ZodType<CreateOrderRequest>;
 
 export const orderListQuerySchema = z
@@ -28,4 +28,4 @@ export const orderListQuerySchema = z
   })
   .strict() satisfies z.ZodType<OrderListParams>;
 
-export const orderIdSchema = z.string().uuid();
+export const orderIdSchema = z.uuid();
