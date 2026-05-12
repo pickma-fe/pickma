@@ -28,6 +28,14 @@ const baseDetailDto: OrderDetailResponse = {
 };
 
 describe('mapOrderListItem', () => {
+  it('ISO string 날짜 필드를 Date 객체로 변환한다', () => {
+    const result = mapOrderListItem(baseListDto);
+    expect(result.pickupAt).toBeInstanceOf(Date);
+    expect(result.pickupServiceDate).toBeInstanceOf(Date);
+    expect(result.createdAt).toBeInstanceOf(Date);
+    expect(result.updatedAt).toBeInstanceOf(Date);
+  });
+
   it('status = "payment_pending" → status: "paymentPending"', () => {
     const result = mapOrderListItem({
       ...baseListDto,
@@ -43,6 +51,31 @@ describe('mapOrderListItem', () => {
 });
 
 describe('mapOrder', () => {
+  it('ISO string 날짜 필드를 Date 객체로 변환한다', () => {
+    const result = mapOrder(baseDetailDto);
+    expect(result.pickupAt).toBeInstanceOf(Date);
+    expect(result.pickupServiceDate).toBeInstanceOf(Date);
+    expect(result.createdAt).toBeInstanceOf(Date);
+    expect(result.updatedAt).toBeInstanceOf(Date);
+  });
+
+  it('선택적 날짜 필드: ISO string → Date, 없으면 undefined', () => {
+    const withDates = mapOrder({
+      ...baseDetailDto,
+      expiresAt: '2026-05-12T09:00:00.000Z',
+      pickedUpAt: '2026-05-12T10:30:00.000Z',
+      cancelledAt: '2026-05-12T11:00:00.000Z',
+    });
+    expect(withDates.expiresAt).toBeInstanceOf(Date);
+    expect(withDates.pickedUpAt).toBeInstanceOf(Date);
+    expect(withDates.cancelledAt).toBeInstanceOf(Date);
+
+    const withoutDates = mapOrder(baseDetailDto);
+    expect(withoutDates.expiresAt).toBeUndefined();
+    expect(withoutDates.pickedUpAt).toBeUndefined();
+    expect(withoutDates.cancelledAt).toBeUndefined();
+  });
+
   it('상세 DTO의 status = "no_show" → status: "noShow"', () => {
     const result = mapOrder({ ...baseDetailDto, status: 'no_show' });
     expect(result.status).toBe('noShow');
