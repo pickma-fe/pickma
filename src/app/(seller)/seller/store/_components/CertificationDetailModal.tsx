@@ -27,18 +27,19 @@ export function CertificationDetailModal({
 }: CertificationDetailModalProps) {
   const [previewUrl, setPreviewUrl] = useState<string | null>(imageUrl ?? null);
   const [isUploading, setIsUploading] = useState(false);
+  const isSubmittedRef = useRef(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    const currentUrl = previewUrl;
     return () => {
-      if (previewUrl?.startsWith('blob:')) {
-        URL.revokeObjectURL(previewUrl);
+      if (currentUrl?.startsWith('blob:') && !isSubmittedRef.current) {
+        URL.revokeObjectURL(currentUrl);
       }
     };
   }, [previewUrl]);
 
   const isExpired = expiresAt ? new Date(expiresAt) < new Date() : false;
-  // 만료된 경우에만 갱신 버튼 표시
   const needsRenewal = label === '위생교육 수료증' && isCompleted && isExpired;
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -51,6 +52,7 @@ export function CertificationDetailModal({
       setPreviewUrl(url);
       setIsUploading(true);
     }
+    e.currentTarget.value = '';
   };
 
   const handleSelectClick = () => {
@@ -59,8 +61,16 @@ export function CertificationDetailModal({
 
   const handleSubmit = () => {
     if (previewUrl) {
+      isSubmittedRef.current = true;
       onSubmit(label, previewUrl);
     }
+  };
+
+  const handleClose = () => {
+    if (previewUrl?.startsWith('blob:') && !isSubmittedRef.current) {
+      URL.revokeObjectURL(previewUrl);
+    }
+    onClose();
   };
 
   const getDescription = () => {
@@ -109,7 +119,13 @@ export function CertificationDetailModal({
 
     return (
       <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg bg-gray-100">
-        <Image src={previewUrl} alt={label} fill className="object-contain" />
+        <Image
+          src={previewUrl}
+          alt={label}
+          fill
+          sizes="(max-width: 768px) 100vw, 500px"
+          className="object-contain"
+        />
       </div>
     );
   };
@@ -160,7 +176,7 @@ export function CertificationDetailModal({
           </Button>
         )}
         {isUploading && <Button onClick={handleSubmit}>제출 완료</Button>}
-        <Button variant="outline" color="gray" onClick={onClose}>
+        <Button variant="outline" color="gray" onClick={handleClose}>
           닫기
         </Button>
       </div>

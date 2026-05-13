@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 import { Button } from '@/components/common/Button/Button';
 
@@ -22,17 +22,17 @@ export function StoreImageEditForm({
     currentImage ?? null
   );
   const [error, setError] = useState<string | null>(null);
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const isSubmittedRef = useRef(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const currentUrl = previewUrl;
     return () => {
-      if (currentUrl?.startsWith('blob:') && !isSubmitted) {
+      if (currentUrl?.startsWith('blob:') && !isSubmittedRef.current) {
         URL.revokeObjectURL(currentUrl);
       }
     };
-  }, [previewUrl, isSubmitted]);
+  }, [previewUrl]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -52,23 +52,24 @@ export function StoreImageEditForm({
     }
     e.currentTarget.value = '';
   };
+
   const handleSelectClick = () => {
     fileInputRef.current?.click();
   };
 
   const handleSubmit = () => {
     if (previewUrl) {
-      setIsSubmitted(true);
+      isSubmittedRef.current = true;
       onSubmit(previewUrl);
     }
   };
 
-  const handleCancel = useCallback(() => {
-    if (previewUrl?.startsWith('blob:') && previewUrl !== currentImage) {
+  const handleCancel = () => {
+    if (previewUrl?.startsWith('blob:')) {
       URL.revokeObjectURL(previewUrl);
     }
     onCancel();
-  }, [previewUrl, currentImage, onCancel]);
+  };
 
   const renderImage = () => {
     if (!previewUrl) {
