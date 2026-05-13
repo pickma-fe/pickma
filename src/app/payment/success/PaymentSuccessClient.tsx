@@ -13,12 +13,18 @@ export function PaymentSuccessClient() {
   useEffect(() => {
     const orderNumber = searchParams.get('orderNumber');
     const rawProvider = searchParams.get('provider');
-    const amount = searchParams.get('amount');
+    const rawAmount = searchParams.get('amount');
+    const parsedAmount = rawAmount === null ? Number.NaN : Number(rawAmount);
     const isValidProvider =
       rawProvider !== null &&
       (PAYMENT_PROVIDERS as readonly string[]).includes(rawProvider);
 
-    if (!orderNumber || !isValidProvider || !amount) {
+    if (
+      !orderNumber ||
+      !isValidProvider ||
+      !Number.isFinite(parsedAmount) ||
+      parsedAmount <= 0
+    ) {
       window.opener?.postMessage({ success: false }, window.location.origin);
       window.close();
       return;
@@ -27,7 +33,7 @@ export function PaymentSuccessClient() {
     const provider = rawProvider as PaymentProvider;
 
     paymentApi
-      .confirmPayment({ provider, orderNumber, amount: Number(amount) })
+      .confirmPayment({ provider, orderNumber, amount: parsedAmount })
       .then(() => {
         window.opener?.postMessage(
           { success: true, orderNumber },
