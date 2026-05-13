@@ -15,8 +15,6 @@ export interface Payment {
   orderId: string;
   orderNumber: string;
   provider: PaymentProvider;
-  providerPaymentKey?: string;
-  providerOrderId?: string;
   method: PaymentMethod;
   methodDetail?: string;
   amount: number;
