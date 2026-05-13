@@ -202,8 +202,63 @@ describe('confirmPayment', () => {
     ).rejects.toMatchObject({ code: ERROR_CODE.ORDER_NOT_FOUND });
   });
 
-  it('RPC 오류 → PAYMENT_CONFIRM_FAILED', async () => {
-    const client = makeClient({ rpcError: { message: 'rpc error' } });
+  it('RPC INVALID_ORDER_STATUS → 409', async () => {
+    const client = makeClient({
+      rpcError: { message: 'INVALID_ORDER_STATUS' },
+    });
+    vi.mocked(createServiceRoleClient).mockReturnValue(
+      client as unknown as ReturnType<typeof createServiceRoleClient>
+    );
+    await expect(
+      confirmPayment(mockUserId, {
+        provider: 'toss',
+        orderNumber: 'PM2026TEST',
+        amount: 5000,
+      })
+    ).rejects.toMatchObject({
+      code: ERROR_CODE.INVALID_ORDER_STATUS,
+      statusCode: 409,
+    });
+  });
+
+  it('RPC ORDER_EXPIRED → 409', async () => {
+    const client = makeClient({ rpcError: { message: 'ORDER_EXPIRED' } });
+    vi.mocked(createServiceRoleClient).mockReturnValue(
+      client as unknown as ReturnType<typeof createServiceRoleClient>
+    );
+    await expect(
+      confirmPayment(mockUserId, {
+        provider: 'toss',
+        orderNumber: 'PM2026TEST',
+        amount: 5000,
+      })
+    ).rejects.toMatchObject({
+      code: ERROR_CODE.ORDER_EXPIRED,
+      statusCode: 409,
+    });
+  });
+
+  it('RPC PICKUP_NUMBER_EXHAUSTED → 409', async () => {
+    const client = makeClient({
+      rpcError: { message: 'PICKUP_NUMBER_EXHAUSTED' },
+    });
+    vi.mocked(createServiceRoleClient).mockReturnValue(
+      client as unknown as ReturnType<typeof createServiceRoleClient>
+    );
+    await expect(
+      confirmPayment(mockUserId, {
+        provider: 'toss',
+        orderNumber: 'PM2026TEST',
+        amount: 5000,
+      })
+    ).rejects.toMatchObject({
+      code: ERROR_CODE.PICKUP_NUMBER_EXHAUSTED,
+      statusCode: 409,
+    });
+  });
+
+  it('RPC 알 수 없는 오류 → PAYMENT_CONFIRM_FAILED 500', async () => {
+    const client = makeClient({ rpcError: { message: 'unknown error' } });
     vi.mocked(createServiceRoleClient).mockReturnValue(
       client as unknown as ReturnType<typeof createServiceRoleClient>
     );

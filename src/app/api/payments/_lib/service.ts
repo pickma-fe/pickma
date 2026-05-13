@@ -9,6 +9,23 @@ import { createServiceRoleClient } from '@/lib/supabase/service';
 
 import { getPaymentProviderAdapter } from './providers';
 
+const CONFIRM_RPC_ERROR_MAP: Record<string, () => AppError> = {
+  INVALID_ORDER_STATUS: () =>
+    new AppError(ERROR_CODE.INVALID_ORDER_STATUS, 409),
+  ORDER_EXPIRED: () => new AppError(ERROR_CODE.ORDER_EXPIRED, 409),
+  PAYMENT_AMOUNT_MISMATCH: () =>
+    new AppError(ERROR_CODE.PAYMENT_AMOUNT_MISMATCH, 400),
+  PICKUP_NUMBER_EXHAUSTED: () =>
+    new AppError(ERROR_CODE.PICKUP_NUMBER_EXHAUSTED, 409),
+};
+
+function mapConfirmRpcError(message: string): AppError {
+  return (
+    CONFIRM_RPC_ERROR_MAP[message]?.() ??
+    new AppError(ERROR_CODE.PAYMENT_CONFIRM_FAILED, 500)
+  );
+}
+
 export async function preparePayment(
   userId: string,
   body: PreparePaymentRequest
@@ -87,5 +104,5 @@ export async function confirmPayment(
     p_amount: body.amount,
   });
 
-  if (rpcError) throw new AppError(ERROR_CODE.PAYMENT_CONFIRM_FAILED, 500);
+  if (rpcError) throw mapConfirmRpcError(rpcError.message);
 }
