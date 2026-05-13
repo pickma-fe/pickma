@@ -14,20 +14,30 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { data: user, isLoading } = useMe();
+  const { data: user, isLoading, isError } = useMe();
   const router = useRouter();
 
   useEffect(() => {
-    if (isLoading) return;
+    if (isLoading || isError) return;
     if (user?.role !== 'admin') {
       router.push('/');
     }
-  }, [isLoading, user, router]);
+  }, [isLoading, isError, user, router]);
 
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <span className="text-sm text-gray-500">로딩 중...</span>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <span className="text-sm text-gray-500">
+          오류가 발생했습니다. 잠시 후 다시 시도해주세요.
+        </span>
       </div>
     );
   }
