@@ -53,8 +53,7 @@ export async function getProducts(
     .from('products')
     .select(PRODUCT_SELECT, { count: 'exact' })
     .eq('status', 'active')
-    .eq('stores.status', 'approved')
-    .order('end_at', { ascending: true });
+    .eq('stores.status', 'approved');
 
   if (region) {
     query = query.eq('stores.region', region);
@@ -62,6 +61,16 @@ export async function getProducts(
 
   if (categoryId) {
     query = query.eq('category_id', categoryId);
+  }
+
+  if (params.availableOnly) {
+    query = query.gt('end_at', new Date().toISOString());
+  }
+
+  if (params.sortOption === 'price-low') {
+    query = query.order('discount_price', { ascending: true });
+  } else {
+    query = query.order('end_at', { ascending: true });
   }
 
   if (!shouldUseExtendedList) {
@@ -89,7 +98,7 @@ export async function getProducts(
   }
   return buildProductListResponse(
     ((data ?? []) as unknown as ProductRow[]).map(mapProductRow),
-    params
+    { ...params, region: undefined }
   );
 }
 
