@@ -49,6 +49,7 @@ function buildChain(result: {
   const chain = {
     select: vi.fn(),
     eq: vi.fn(),
+    gt: vi.fn(),
     order: vi.fn(),
     range: vi.fn().mockResolvedValue(result),
     single: vi.fn().mockResolvedValue(result),
@@ -61,6 +62,7 @@ function buildChain(result: {
   };
   chain.select.mockReturnValue(chain);
   chain.eq.mockReturnValue(chain);
+  chain.gt.mockReturnValue(chain);
   chain.order.mockReturnValue(chain);
   return chain;
 }

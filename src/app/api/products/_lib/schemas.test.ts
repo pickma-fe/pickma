@@ -45,6 +45,12 @@ describe('productListSchema', () => {
     expect(result.data?.availableOnly).toBe(true);
   });
 
+  it('availableOnly=false 문자열을 false로 변환한다', () => {
+    const result = productListSchema.safeParse({ availableOnly: 'false' });
+    expect(result.success).toBe(true);
+    expect(result.data?.availableOnly).toBe(false);
+  });
+
   it('지원하지 않는 P2 파라미터 전달 시 validation error를 반환한다', () => {
     expect(productListSchema.safeParse({ sort: 'endAt' }).success).toBe(false);
     expect(productListSchema.safeParse({ order: 'asc' }).success).toBe(false);
