@@ -357,7 +357,7 @@ Behavior:
 - `pickupServiceDate`는 `pickupAt`의 날짜 부분으로 저장한다.
 - `storeOrderNumber`와 `pickupNumber`는 결제 완료 전에는 생성하지 않는다.
 - `expiresAt`은 주문 생성 시점 기준 결제 가능 만료 시간으로 설정한다. 초기 기준값은 생성 후 10분으로 둔다.
-- Toss 결제 위젯에 필요한 `orderNumber`, `orderName`, `paymentAmount`를 반환한다.
+- `orderNumber`, `orderName`, `paymentAmount`, `expiresAt`을 반환한다. 프론트는 이 값으로 `POST /api/payments/prepare`를 호출해 결제를 시작한다.
 
 DB source:
 
@@ -420,30 +420,96 @@ export type OrderListResponse = PaginatedResult<OrderListItemResponse>;
 
 ### 4.3 `GET /api/orders/:orderId`
 
+Response:
+
+```ts
+export interface OrderDetailResponse extends OrderListItemResponse {
+  cancelledAt?: string;
+  cancelReason?: string;
+  pickedUpAt?: string;
+  items: OrderItemResponse[];
+  payment?: PaymentResponse;
+}
+```
+
 - 주문자 본인만 조회할 수 있다.
 - 판매자/관리자 조회는 별도 API를 사용한다.
+- `payment` 필드는 결제가 완료된 주문에만 포함된다.
 
 ---
 
 ## 5. Payments
 
-| PRD ID     | 기능         | Method | API                               | Auth       | Priority |
-| ---------- | ------------ | ------ | --------------------------------- | ---------- | -------- |
-| C-ORDER-03 | 결제 승인    | POST   | `/api/payments/confirm`           | user       | P0       |
-| -          | 결제 Webhook | POST   | `/api/payments/webhook`           | external   | P1       |
-| C-ORDER-04 | 결제 취소    | POST   | `/api/payments/:paymentId/cancel` | user/admin | P1       |
+| PRD ID     | 기능          | Method | API                               | Auth       | Priority    |
+| ---------- | ------------- | ------ | --------------------------------- | ---------- | ----------- |
+| C-ORDER-03 | 결제 준비     | POST   | `/api/payments/prepare`           | user       | P0          |
+| C-ORDER-03 | 결제 승인     | POST   | `/api/payments/confirm`           | user       | P0          |
+| -          | Mock Checkout | GET    | `/api/payments/mock/checkout`     | -          | P0 (개발용) |
+| -          | 결제 Webhook  | POST   | `/api/payments/webhook`           | external   | P1          |
+| C-ORDER-04 | 결제 취소     | POST   | `/api/payments/:paymentId/cancel` | user/admin | P1          |
 
-### 5.1 `POST /api/payments/confirm`
+### 5.0 Provider 구조
+
+- PickMa 내부 주문 식별자는 `orderNumber`(`orders.order_number`)를 사용한다.
+- provider: 결제 승인 주체 (`mock | toss | kakao_pay | naver_pay`)
+- method: 사용자가 선택한 결제 수단 (`card | virtual_account | mobile | easy_pay`)
+- Toss의 `orderId`, KakaoPay의 `partner_order_id` 등 외부 필드명은 adapter 내부에서만 다룬다.
+- P0에서는 mock provider만 실제 동작하고, 미구현 provider는 `NOT_IMPLEMENTED` 501을 반환한다.
+- 실제 provider Secret key는 서버 adapter 내부에서만 사용한다.
+- Toss/KakaoPay/NaverPay 실제 연결, webhook, cancel/refund는 후속 phase 범위이다.
+
+### 5.1 `POST /api/payments/prepare`
 
 Request:
 
 ```ts
-export interface ConfirmPaymentRequest {
-  paymentKey: string;
-  orderId: string;
-  amount: number;
+export interface PreparePaymentRequest {
+  provider: PaymentProvider;
+  orderNumber: string;
 }
 ```
+
+Response:
+
+```ts
+export interface PreparePaymentResponse {
+  provider: PaymentProvider;
+  flow: PaymentFlow;
+  redirectUrl: string;
+  orderNumber: string;
+  amount: number;
+  expiresAt?: string;
+}
+```
+
+Behavior:
+
+- 요청 사용자가 해당 주문의 주문자인지 `orderNumber + userId` 기준으로 확인한다.
+- 주문 상태가 `payment_pending`인지, 만료되지 않았는지 검증한다.
+- provider별 adapter를 통해 결제 시작 정보를 만들고, 공통 `flow: 'redirect'`, `redirectUrl`로 응답한다.
+- mock provider는 `GET /api/payments/mock/checkout?orderNumber=...` URL을 반환한다.
+
+### 5.2 `GET /api/payments/mock/checkout`
+
+- `API_MOCK_ENABLED=true`일 때만 동작한다.
+- mock 비활성 상태에서는 404를 반환한다.
+- `orderNumber` query 파라미터를 검증하고 mock checkout 응답을 제공한다.
+- 실제 결제 UI가 아니라 redirect/confirm 흐름을 수동으로 검증하기 위한 endpoint이다.
+
+### 5.3 `POST /api/payments/confirm`
+
+Request:
+
+```ts
+export type ConfirmPaymentRequest = {
+  provider: 'mock';
+  orderNumber: string;
+  amount: number;
+};
+// 후속 phase에서 toss | kakao_pay | naver_pay union member 추가
+```
+
+Response: `200 { data: undefined }`
 
 Behavior:
 
@@ -451,15 +517,42 @@ Behavior:
 - 주문 상태가 `payment_pending`인지 확인한다.
 - `expiresAt`이 지난 주문은 Postgres RPC/transaction으로 `orders.status = expired` 처리와 `reserved_stock` 복구를 atomic하게 수행한 뒤 `ORDER_EXPIRED`를 반환한다.
 - DB의 주문 금액과 `amount`가 일치하는지 검증한다.
-- Toss `POST /v1/payments/confirm`을 서버에서 호출한다.
-- 성공 시 `payments`를 저장하고 `orders` 상태를 확정한다.
+- provider adapter를 통해 승인 처리 후 DB RPC를 호출해 결제 확정한다.
 - 결제 확정 시 Postgres RPC/transaction으로 `orders.status = reserved`, `stock` 감소, `reserved_stock` 감소, 매장 운영 번호 발급을 atomic하게 처리한다.
 - `storeOrderNumber`는 `pickupServiceDate(YYYYMMDD)` + `-` + 7자리 매장별/픽업일별 결제완료 sequence로 생성한다. 예: `20260501-0000001`.
 - `pickupNumber`는 같은 sequence에서 `A-01`부터 `Z-99`까지 생성한다. 매장+픽업일 기준 2,574건을 초과하면 주문 확정 실패로 처리한다.
 - 취소/환불/노쇼가 발생해도 이미 발급된 `storeOrderNumber`와 `pickupNumber`는 회수하거나 재사용하지 않는다.
-- 결제 Secret key는 서버에서만 사용한다.
+- provider Secret key는 서버 adapter 내부에서만 사용한다.
+- `payments` DB schema는 provider 결제 기록과 주문 확정에 집중한다. 수수료/정산 필드는 후속 Settlement/Fee Policy phase 범위이다.
 
-### 5.2 결제 만료 처리
+### 5.4 `PaymentResponse`
+
+```ts
+export interface PaymentResponse {
+  id: string;
+  orderId: string;
+  orderNumber: string;
+  provider: PaymentProvider;
+  providerPaymentKey?: string;
+  providerOrderId?: string;
+  method: PaymentMethodParam;
+  methodDetail?: string;
+  amount: number;
+  status: PaymentStatusParam;
+  paidAt?: string;
+  refundedAt?: string;
+  refundReason?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+```
+
+- `orderId`: 내부 주문 UUID (`orders.id`)
+- `orderNumber`: PickMa 전역 주문번호 (`orders.order_number`)
+- `providerOrderId`: provider에 전달한 주문 식별자 (`payments.provider_order_id`)
+- `providerPaymentKey`: provider 결제 키 (`payments.provider_payment_key`)
+
+### 5.5 결제 만료 처리
 
 - 만료 대상은 `payment_pending` 주문만 해당한다.
 - 초기 구현은 API 진입 시 lazy cleanup과 결제 confirm 시점 검사를 함께 사용한다.
@@ -473,7 +566,7 @@ DB source:
 - `payments`
 - `products`
 
-### 5.3 `POST /api/payments/webhook`
+### 5.6 `POST /api/payments/webhook`
 
 - Toss가 호출하는 결제 상태 동기화 endpoint이다.
 - MVP에서는 명세만 유지하고 구현 우선순위는 P1로 둔다.

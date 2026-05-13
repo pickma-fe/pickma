@@ -2,15 +2,15 @@
 
 ## 1. 기술 스택
 
-| 계층            | 기술                                        | 비고                               |
-| --------------- | ------------------------------------------- | ---------------------------------- |
-| Frontend        | Next.js 16 App Router, React 19, TypeScript | SSR/CSR 혼합                       |
-| Styling         | Tailwind CSS, Headless UI                   | UI 구현                            |
-| Client State    | Zustand                                     | UI/클라이언트 상태                 |
-| Server State    | TanStack Query                              | API 데이터 캐싱, refetch, mutation |
-| Auth/DB/Storage | Supabase, `@supabase/ssr`                   | Auth, PostgreSQL, Storage          |
-| Payment         | Toss Payments                               | 결제 위젯, 서버 승인 API           |
-| Deployment      | Vercel                                      | Next.js 배포                       |
+| 계층            | 기술                                        | 비고                                     |
+| --------------- | ------------------------------------------- | ---------------------------------------- |
+| Frontend        | Next.js 16 App Router, React 19, TypeScript | SSR/CSR 혼합                             |
+| Styling         | Tailwind CSS, Headless UI                   | UI 구현                                  |
+| Client State    | Zustand                                     | UI/클라이언트 상태                       |
+| Server State    | TanStack Query                              | API 데이터 캐싱, refetch, mutation       |
+| Auth/DB/Storage | Supabase, `@supabase/ssr`                   | Auth, PostgreSQL, Storage                |
+| Payment         | Provider adapter 구조 (mock P0, Toss P1)    | prepare/confirm 분리, provider별 adapter |
+| Deployment      | Vercel                                      | Next.js 배포                             |
 
 ---
 
@@ -248,25 +248,31 @@ sequenceDiagram
     participant U as 사용자
     participant C as Client
     participant A as PickMa API
-    participant T as Toss Payments
+    participant P as Payment Provider
     participant D as Supabase DB
 
     U->>C: 상품/수량/픽업시간 선택
     C->>A: POST /api/orders
     A->>D: 주문 생성, 재고 임시 예약
-    A->>C: orderId, orderName, amount 반환
-    C->>T: 결제 위젯 호출
-    T->>C: successUrl redirect(paymentKey, orderId, amount)
-    C->>A: POST /api/payments/confirm
-    A->>T: 결제 승인 API 호출
-    T->>A: 승인 결과
-    A->>D: payment 저장, order 확정, 재고 확정
-    A->>C: 예약 완료 응답
+    A->>C: orderNumber, orderName, amount, expiresAt 반환
+    C->>A: POST /api/payments/prepare (provider, orderNumber)
+    A->>P: provider adapter prepare
+    A->>C: flow: 'redirect', redirectUrl 반환
+    C-->>P: redirectUrl로 이동 (새 창 또는 현재 탭, UI phase에서 결정)
+    P->>C: confirm 페이지로 redirect
+    C->>A: POST /api/payments/confirm (provider, orderNumber, amount)
+    A->>P: provider adapter confirm
+    P->>A: 승인 결과
+    A->>D: confirm_payment RPC (payment 저장, order 확정, 재고 확정)
+    A->>C: 예약 완료 응답 (200)
 ```
 
-- `POST /api/orders`: 주문 생성과 재고 임시 예약
-- `POST /api/payments/confirm`: Toss 결제 승인과 주문 확정
-- `POST /api/payments/webhook`: 결제 상태 동기화용 endpoint, MVP 이후 우선순위
+- `POST /api/orders`: 주문 생성과 재고 임시 예약. `orderNumber`(PickMa 내부 식별자)를 반환한다.
+- `POST /api/payments/prepare`: provider adapter를 통해 결제 시작 정보를 만들고, `flow: 'redirect'`, `redirectUrl`을 반환한다. `redirectUrl` 소비 방식은 프론트 UI phase에서 결정한다.
+- `POST /api/payments/confirm`: provider adapter를 통해 승인 후, `confirm_payment` DB RPC로 주문을 atomic하게 확정한다.
+- provider: 결제 승인 주체 (`mock | toss | kakao_pay | naver_pay`). P0에서는 mock provider만 실제 동작한다.
+- `orderNumber`는 PickMa 내부 주문 식별자이며, provider별 외부 주문 필드명은 adapter 내부에서만 다룬다.
+- `POST /api/payments/webhook`: 결제 상태 동기화용 endpoint, MVP 이후 우선순위 (P1).
 - 주문 생성, 결제 확정, 예약 해제에 따른 재고 변경은 Postgres RPC/transaction으로 atomic하게 처리한다.
 - `payment_pending` 주문은 `expiresAt` 이후 `expired`로 전환하고 `reserved_stock`을 복구한다.
 - 초기 구현은 API 진입 시 lazy cleanup과 결제 confirm 시점 검사를 사용하고, scheduled job/cron은 MVP 이후 보강한다.
@@ -408,14 +414,14 @@ src/
 
 ## 11. 보안 고려사항
 
-| 항목        | 대응 방안                                                |
-| ----------- | -------------------------------------------------------- |
-| 인증        | Supabase Auth, cookie session, proxy refresh             |
-| 페이지 접근 | proxy에서 보호 라우트 1차 제어                           |
-| API 권한    | Route Handler/helper/service에서 최종 검증               |
-| 데이터 접근 | 클라이언트 DB 직접 접근 금지, RLS 병행                   |
-| 결제        | Toss Secret key는 서버에서만 사용, confirm API 서버 호출 |
-| 환경 변수   | 민감 정보는 서버 전용 변수로 관리                        |
+| 항목        | 대응 방안                                                                 |
+| ----------- | ------------------------------------------------------------------------- |
+| 인증        | Supabase Auth, cookie session, proxy refresh                              |
+| 페이지 접근 | proxy에서 보호 라우트 1차 제어                                            |
+| API 권한    | Route Handler/helper/service에서 최종 검증                                |
+| 데이터 접근 | 클라이언트 DB 직접 접근 금지, RLS 병행                                    |
+| 결제        | provider Secret key는 서버 adapter 내부에서만 사용, confirm API 서버 호출 |
+| 환경 변수   | 민감 정보는 서버 전용 변수로 관리                                         |
 
 ---
 
