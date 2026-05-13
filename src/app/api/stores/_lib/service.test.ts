@@ -1,10 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { createServerClient } from '@/lib/supabase/server';
 import { createServiceRoleClient } from '@/lib/supabase/service';
 import { mapStoreRow } from '@/app/api/stores/_lib/mapper';
 
-import { createStore } from './service';
+import { createStore, getMyStore } from './service';
 
+vi.mock('@/lib/supabase/server');
 vi.mock('@/lib/supabase/service');
 vi.mock('@/app/api/stores/_lib/mapper');
 
@@ -134,7 +136,7 @@ describe('createStore', () => {
     expect(insertPayload).not.toHaveProperty('status');
     expect(insertPayload).not.toHaveProperty('created_at');
     expect(insertPayload).not.toHaveProperty('updated_at');
-    expect(mapStoreRow).toHaveBeenCalledWith(mockRow);
+    expect(mapStoreRow).toHaveBeenCalledWith(mockRow, false);
     expect(result).toBe(mockStoreResponse);
   });
 
@@ -196,5 +198,103 @@ describe('createStore', () => {
       code: 'INTERNAL_SERVER_ERROR',
       statusCode: 500,
     });
+  });
+});
+
+type ServerClientRow = Omit<typeof mockRow, 'status'> & {
+  status: 'pending' | 'approved' | 'rejected' | 'inactive';
+};
+
+function makeServerClient(result: {
+  data: ServerClientRow | null;
+  error: { code: string } | null;
+}) {
+  return {
+    from: vi.fn().mockImplementation((table: string) => {
+      if (table === 'stores') {
+        return {
+          select: () => ({
+            eq: () => ({
+              maybeSingle: () => Promise.resolve(result),
+            }),
+          }),
+        };
+      }
+      throw new Error(`Unexpected table in test stub: ${table}`);
+    }),
+  };
+}
+
+describe('getMyStore', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(mapStoreRow).mockReturnValue(mockStoreResponse);
+  });
+
+  it('가게가 없으면 STORE_NOT_FOUND를 던진다', async () => {
+    vi.mocked(createServerClient).mockResolvedValue(
+      makeServerClient({ data: null, error: null }) as unknown as Awaited<
+        ReturnType<typeof createServerClient>
+      >
+    );
+    await expect(getMyStore('user-1', 'customer')).rejects.toMatchObject({
+      code: 'STORE_NOT_FOUND',
+      statusCode: 404,
+    });
+  });
+
+  it('DB 오류 시 INTERNAL_SERVER_ERROR를 던진다', async () => {
+    vi.mocked(createServerClient).mockResolvedValue(
+      makeServerClient({
+        data: null,
+        error: { code: '42501' },
+      }) as unknown as Awaited<ReturnType<typeof createServerClient>>
+    );
+    await expect(getMyStore('user-1', 'customer')).rejects.toMatchObject({
+      code: 'INTERNAL_SERVER_ERROR',
+      statusCode: 500,
+    });
+  });
+
+  it('role=seller, status=approved이면 mapStoreRow(row, true)를 호출한다', async () => {
+    vi.mocked(createServerClient).mockResolvedValue(
+      makeServerClient({
+        data: { ...mockRow, status: 'approved' as const },
+        error: null,
+      }) as unknown as Awaited<ReturnType<typeof createServerClient>>
+    );
+    await getMyStore('user-1', 'seller');
+    expect(mapStoreRow).toHaveBeenCalledWith(
+      expect.objectContaining({ status: 'approved' }),
+      true
+    );
+  });
+
+  it('role=customer이면 mapStoreRow(row, false)를 호출한다', async () => {
+    vi.mocked(createServerClient).mockResolvedValue(
+      makeServerClient({
+        data: { ...mockRow, status: 'approved' as const },
+        error: null,
+      }) as unknown as Awaited<ReturnType<typeof createServerClient>>
+    );
+    await getMyStore('user-1', 'customer');
+    expect(mapStoreRow).toHaveBeenCalledWith(
+      expect.objectContaining({ status: 'approved' }),
+      false
+    );
+  });
+
+  it('role=seller, status=pending이면 mapStoreRow(row, false)를 호출한다', async () => {
+    vi.mocked(createServerClient).mockResolvedValue(
+      makeServerClient({
+        data: { ...mockRow, status: 'pending' as const },
+        error: null,
+      }) as unknown as Awaited<ReturnType<typeof createServerClient>>
+    );
+    await getMyStore('user-1', 'seller');
+    expect(mapStoreRow).toHaveBeenCalledWith(
+      expect.objectContaining({ status: 'pending' }),
+      false
+    );
   });
 });

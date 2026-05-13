@@ -27,7 +27,7 @@ const baseRow: StoresRow = {
 
 describe('mapStoreRow', () => {
   it('DB row를 StoreResponse DTO로 변환한다', () => {
-    expect(mapStoreRow(baseRow)).toEqual({
+    expect(mapStoreRow(baseRow, false)).toEqual({
       id: 'store-1',
       userId: 'user-1',
       name: '픽마 베이커리',
@@ -49,7 +49,7 @@ describe('mapStoreRow', () => {
   });
 
   it('null 필드를 undefined로 변환한다', () => {
-    const result = mapStoreRow(baseRow);
+    const result = mapStoreRow(baseRow, false);
     expect(result.description).toBeUndefined();
     expect(result.addressDetail).toBeUndefined();
     expect(result.image).toBeUndefined();
@@ -59,15 +59,18 @@ describe('mapStoreRow', () => {
   });
 
   it('null이 아닌 선택 필드는 그대로 반환한다', () => {
-    const result = mapStoreRow({
-      ...baseRow,
-      description: '매일 아침 굽는 동네 베이커리입니다.',
-      address_detail: '1층',
-      image: 'https://example.com/store.jpg',
-      open_time: '09:00:00',
-      close_time: '21:00:00',
-      reject_reason: '서류 미비',
-    });
+    const result = mapStoreRow(
+      {
+        ...baseRow,
+        description: '매일 아침 굽는 동네 베이커리입니다.',
+        address_detail: '1층',
+        image: 'https://example.com/store.jpg',
+        open_time: '09:00:00',
+        close_time: '21:00:00',
+        reject_reason: '서류 미비',
+      },
+      false
+    );
     expect(result.description).toBe('매일 아침 굽는 동네 베이커리입니다.');
     expect(result.addressDetail).toBe('1층');
     expect(result.image).toBe('https://example.com/store.jpg');
@@ -76,8 +79,11 @@ describe('mapStoreRow', () => {
     expect(result.rejectReason).toBe('서류 미비');
   });
 
-  it('canSell은 항상 false다', () => {
-    expect(mapStoreRow(baseRow).canSell).toBe(false);
-    expect(mapStoreRow({ ...baseRow, status: 'approved' }).canSell).toBe(false);
+  it('canSell 파라미터를 DTO에 그대로 반영한다', () => {
+    expect(mapStoreRow(baseRow, false).canSell).toBe(false);
+    expect(mapStoreRow(baseRow, true).canSell).toBe(true);
+    expect(mapStoreRow({ ...baseRow, status: 'approved' }, true).canSell).toBe(
+      true
+    );
   });
 });

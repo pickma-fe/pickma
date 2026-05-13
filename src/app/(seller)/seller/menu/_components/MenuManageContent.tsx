@@ -26,7 +26,6 @@ export function MenuManageContent() {
 
   return (
     <div className="flex flex-col gap-6">
-      {/* 페이지 타이틀 */}
       <div>
         <h1 className="text-xl font-bold text-gray-900 lg:text-2xl">
           메뉴 관리
@@ -36,9 +35,8 @@ export function MenuManageContent() {
         </p>
       </div>
 
-      {/* 통계 카드 */}
-      <Section variant="card" className="bg-white">
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <Section variant="card" className="bg-white">
           <div className="flex items-center gap-4">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100">
               <Package className="h-6 w-6 text-gray-600" />
@@ -51,7 +49,9 @@ export function MenuManageContent() {
               </p>
             </div>
           </div>
+        </Section>
 
+        <Section variant="card" className="bg-white">
           <div className="flex items-center gap-4">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
               <ShoppingBag className="h-6 w-6 text-green-600" />
@@ -64,7 +64,9 @@ export function MenuManageContent() {
               </p>
             </div>
           </div>
+        </Section>
 
+        <Section variant="card" className="bg-white">
           <div className="flex items-center gap-4">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
               <PackageX className="h-6 w-6 text-red-600" />
@@ -77,15 +79,13 @@ export function MenuManageContent() {
               </p>
             </div>
           </div>
-        </div>
-      </Section>
+        </Section>
+      </div>
 
-      {/* 메뉴 등록 버튼 */}
       <div className="flex justify-end">
         <Button onClick={handleAddMenu}>+ 메뉴 등록</Button>
       </div>
 
-      {/* 메뉴 테이블 */}
       <MenuTable menus={menus} />
     </div>
   );
