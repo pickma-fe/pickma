@@ -8,9 +8,7 @@ import type {
 } from '@/contracts/product';
 import {
   normalizeDiscountOptionId,
-  normalizeSortOptionId,
   type ProductDiscountOptionId,
-  type ProductSortOptionId,
 } from '@/lib/consumerProductFilters';
 import { AppError } from '@/lib/errors/appError';
 import { ERROR_CODE } from '@/lib/errors/errorCodes';
@@ -43,7 +41,7 @@ export async function getProducts(
   const { region, categoryId } = params;
   const shouldUseExtendedList =
     isDiscountFilterOption(params.discountOption) ||
-    params.sortOption === 'discount-rate';
+    params.sort === 'discountRate';
   const from = (params.page - 1) * params.pageSize;
   const to = from + params.pageSize - 1;
 
@@ -65,10 +63,14 @@ export async function getProducts(
     query = query.gt('end_at', new Date().toISOString());
   }
 
-  if (params.sortOption === 'price-low') {
-    query = query.order('discount_price', { ascending: true });
+  if (params.sort === 'discountPrice') {
+    query = query.order('discount_price', {
+      ascending: getSortOrder(params) === 'asc',
+    });
   } else {
-    query = query.order('end_at', { ascending: true });
+    query = query.order('end_at', {
+      ascending: getSortOrder(params) === 'asc',
+    });
   }
 
   if (!shouldUseExtendedList) {
@@ -109,7 +111,6 @@ export function buildProductListResponse(
   const discountOption = normalizeDiscountOptionId(
     params.discountOption ?? 'all'
   );
-  const sortOption = normalizeSortOptionId(params.sortOption ?? 'deadline');
   const from = (page - 1) * pageSize;
   const to = from + pageSize;
   const filteredProducts = products
@@ -118,7 +119,7 @@ export function buildProductListResponse(
     .filter((product) => !categoryId || product.categoryId === categoryId)
     .filter((product) => matchesDiscountOption(product, discountOption));
   const sortedProducts = [...filteredProducts].sort((a, b) =>
-    compareProducts(a, b, sortOption)
+    compareProducts(a, b, params)
   );
   const totalCount = sortedProducts.length;
 
@@ -134,10 +135,8 @@ export function buildProductListResponse(
 function isAvailableProduct(product: ProductListItemResponse) {
   return (
     product.status === 'active' &&
-    product.displayStatus === 'available' &&
-    !product.isSoldOut &&
     !product.isExpired &&
-    product.availableStock > 0
+    new Date(product.endAt).getTime() > Date.now()
   );
 }
 
@@ -175,21 +174,26 @@ function isDiscountFilterOption(discountOption: string | undefined) {
 function compareProducts(
   a: ProductListItemResponse,
   b: ProductListItemResponse,
-  sortOption: ProductSortOptionId
+  params: ProductListParams
 ) {
-  if (sortOption === 'deadline') {
-    return new Date(a.endAt).getTime() - new Date(b.endAt).getTime();
+  const sort = params.sort ?? 'endAt';
+  const direction = getSortOrder(params) === 'asc' ? 1 : -1;
+
+  if (sort === 'discountRate') {
+    return (a.discountRate - b.discountRate) * direction;
   }
 
-  if (sortOption === 'discount-rate') {
-    return b.discountRate - a.discountRate;
+  if (sort === 'discountPrice') {
+    return (a.discountPrice - b.discountPrice) * direction;
   }
 
-  if (sortOption === 'price-low') {
-    return a.discountPrice - b.discountPrice;
-  }
+  return (
+    (new Date(a.endAt).getTime() - new Date(b.endAt).getTime()) * direction
+  );
+}
 
-  return 0;
+function getSortOrder(params: ProductListParams) {
+  return params.order ?? 'asc';
 }
 
 export async function getProductById(

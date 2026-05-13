@@ -169,7 +169,8 @@ describe('getProducts', () => {
     await getProducts(supabase, {
       page: 1,
       pageSize: 20,
-      sortOption: 'price-low',
+      sort: 'discountPrice',
+      order: 'asc',
     });
 
     expect(supabase._chain.order).toHaveBeenCalledWith('discount_price', {
@@ -208,7 +209,8 @@ describe('getProducts', () => {
     await getProducts(supabase, {
       page: 2,
       pageSize: 5,
-      sortOption: 'discount-rate',
+      sort: 'discountRate',
+      order: 'desc',
     });
 
     expect(supabase._chain.range).not.toHaveBeenCalled();

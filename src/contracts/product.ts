@@ -6,7 +6,8 @@ export interface ProductListParams {
   region?: string;
   categoryId?: string;
   discountOption?: string;
-  sortOption?: string;
+  sort?: 'endAt' | 'discountRate' | 'discountPrice';
+  order?: 'asc' | 'desc';
   availableOnly?: boolean;
 }
 
