@@ -22,7 +22,8 @@ type MockOrderRow = typeof mockOrderRow;
 
 const mockAdapter = {
   prepare: vi.fn().mockResolvedValue({
-    redirectUrl: '/api/payments/mock/checkout?orderNumber=PM2026TEST',
+    redirectUrl:
+      '/payment/success?orderNumber=PM2026TEST&provider=toss&amount=5000',
   }),
   confirm: vi.fn().mockResolvedValue({
     providerPaymentKey: 'mock_ppk_PM2026TEST',
@@ -72,7 +73,7 @@ describe('preparePayment', () => {
     );
     expect(result.provider).toBe('toss');
     expect(result.flow).toBe('redirect');
-    expect(result.redirectUrl).toContain('mock/checkout');
+    expect(result.redirectUrl).toContain('/payment/success');
     expect(result.amount).toBe(5000);
   });
 

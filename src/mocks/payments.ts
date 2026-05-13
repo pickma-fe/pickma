@@ -6,7 +6,8 @@ import type {
 export const mockPreparePaymentResult: PreparePaymentResponse = {
   provider: 'toss',
   flow: 'redirect',
-  redirectUrl: '/api/payments/mock/checkout?orderNumber=TEST-001',
+  redirectUrl:
+    '/payment/success?orderNumber=TEST-001&provider=toss&amount=5000',
   orderNumber: 'TEST-001',
   amount: 5000,
 };

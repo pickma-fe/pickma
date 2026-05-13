@@ -35,7 +35,8 @@ const mockServiceUser = {
 const mockPrepareResult: PreparePaymentResponse = {
   provider: 'toss',
   flow: 'redirect',
-  redirectUrl: '/api/payments/mock/checkout?orderNumber=PM2026TEST',
+  redirectUrl:
+    '/payment/success?orderNumber=PM2026TEST&provider=toss&amount=5000',
   orderNumber: 'PM2026TEST',
   amount: 5000,
 };
@@ -69,7 +70,7 @@ describe('POST /api/payments/prepare', () => {
       data: PreparePaymentResponse;
     };
     expect(body.statusCode).toBe(200);
-    expect(body.data.redirectUrl).toContain('mock/checkout');
+    expect(body.data.redirectUrl).toContain('/payment/success');
     expect(body.data.amount).toBe(5000);
   });
 

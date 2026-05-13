@@ -6,9 +6,8 @@ export const mockProvider: PaymentProviderAdapter = {
       orderNumber,
       provider,
       amount: String(amount),
-      successUrl,
     });
-    return { redirectUrl: `/api/payments/mock/checkout?${params.toString()}` };
+    return { redirectUrl: `${successUrl}?${params.toString()}` };
   },
 
   async confirm({ orderNumber }) {
