@@ -58,7 +58,7 @@ export function OrderProgressSteps({
 
           return (
             <li
-              key={step.label}
+              key={step.id}
               aria-current={isActive ? 'step' : undefined}
               className="relative flex min-w-0 flex-col items-center"
             >
