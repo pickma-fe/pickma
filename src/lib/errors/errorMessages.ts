@@ -13,6 +13,7 @@ export const ERROR_MESSAGES: Record<ErrorCode, string> = {
   OUT_OF_STOCK: '재고가 부족합니다.',
   PRODUCT_EXPIRED: '판매가 마감된 상품입니다.',
   PRODUCT_NOT_AVAILABLE: '구매할 수 없는 상품입니다.',
+  INVALID_ORDER_STATUS: '현재 주문 상태에서는 진행할 수 없습니다.',
   ORDER_EXPIRED: '결제 가능 시간이 만료되었습니다.',
   PAYMENT_AMOUNT_MISMATCH: '결제 금액이 일치하지 않습니다.',
   PAYMENT_CONFIRM_FAILED: '결제 승인에 실패했습니다.',

@@ -142,6 +142,38 @@ describe('confirmPayment', () => {
     );
   });
 
+  it('status가 payment_pending 아님 → INVALID_ORDER_STATUS', async () => {
+    const client = makeClient({
+      orderData: { ...mockOrderRow, status: 'reserved' },
+    });
+    vi.mocked(createServiceRoleClient).mockReturnValue(
+      client as unknown as ReturnType<typeof createServiceRoleClient>
+    );
+    await expect(
+      confirmPayment(mockUserId, {
+        provider: 'toss',
+        orderNumber: 'PM2026TEST',
+        amount: 5000,
+      })
+    ).rejects.toMatchObject({ code: ERROR_CODE.INVALID_ORDER_STATUS });
+  });
+
+  it('만료된 주문 → ORDER_EXPIRED', async () => {
+    const client = makeClient({
+      orderData: { ...mockOrderRow, expires_at: '2020-01-01T00:00:00.000Z' },
+    });
+    vi.mocked(createServiceRoleClient).mockReturnValue(
+      client as unknown as ReturnType<typeof createServiceRoleClient>
+    );
+    await expect(
+      confirmPayment(mockUserId, {
+        provider: 'toss',
+        orderNumber: 'PM2026TEST',
+        amount: 5000,
+      })
+    ).rejects.toMatchObject({ code: ERROR_CODE.ORDER_EXPIRED });
+  });
+
   it('amount 불일치 → PAYMENT_AMOUNT_MISMATCH', async () => {
     const client = makeClient();
     vi.mocked(createServiceRoleClient).mockReturnValue(

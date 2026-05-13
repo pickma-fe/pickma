@@ -712,7 +712,7 @@ RPC에서 raise하는 예외는 아래 정책으로 API error code로 변환한�
 | `ORDER_EXPIRED`               | `ORDER_EXPIRED` 409              | `confirm_payment`                                          |
 | `PAYMENT_AMOUNT_MISMATCH`     | `PAYMENT_AMOUNT_MISMATCH` 400    | `confirm_payment`                                          |
 | `PICKUP_NUMBER_EXHAUSTED`     | `PICKUP_NUMBER_EXHAUSTED` 409    | `confirm_payment`                                          |
-| `INVALID_ORDER_STATUS`        | `VALIDATION_ERROR` 400           | `confirm_payment`, `expire_order`                          |
+| `INVALID_ORDER_STATUS`        | `INVALID_ORDER_STATUS` 409       | `confirm_payment`, `expire_order`                          |
 | `ORDER_NOT_EXPIRED`           | `VALIDATION_ERROR` 400           | `expire_order`                                             |
 | `NOT_IMPLEMENTED`             | `NOT_IMPLEMENTED` 501            | `cancel_order`                                             |
 
@@ -733,6 +733,7 @@ RPC에서 raise하는 예외는 아래 정책으로 API error code로 변환한�
 | `OUT_OF_STOCK`               | 409  | 재고가 부족합니다.                             |
 | `PRODUCT_EXPIRED`            | 409  | 판매가 마감된 상품입니다.                      |
 | `PRODUCT_NOT_AVAILABLE`      | 409  | 구매할 수 없는 상품입니다.                     |
+| `INVALID_ORDER_STATUS`       | 409  | 현재 주문 상태에서는 진행할 수 없습니다.       |
 | `ORDER_EXPIRED`              | 409  | 결제 가능 시간이 만료되었습니다.               |
 | `DUPLICATE_PRODUCT_IN_ORDER` | 400  | 주문 항목에 중복된 상품이 있습니다.            |
 | `PAYMENT_AMOUNT_MISMATCH`    | 400  | 결제 금액이 일치하지 않습니다.                 |

@@ -54,13 +54,19 @@ export async function confirmPayment(
 
   const { data: order, error } = await supabase
     .from('orders')
-    .select('payment_amount')
+    .select('payment_amount, status, expires_at')
     .eq('order_number', body.orderNumber)
     .eq('user_id', userId)
     .maybeSingle();
 
   if (error) throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
   if (!order) throw new AppError(ERROR_CODE.ORDER_NOT_FOUND, 404);
+  if (order.status !== 'payment_pending') {
+    throw new AppError(ERROR_CODE.INVALID_ORDER_STATUS, 409);
+  }
+  if (order.expires_at && new Date(order.expires_at) <= new Date()) {
+    throw new AppError(ERROR_CODE.ORDER_EXPIRED, 409);
+  }
   if (order.payment_amount !== body.amount) {
     throw new AppError(ERROR_CODE.PAYMENT_AMOUNT_MISMATCH, 400);
   }
