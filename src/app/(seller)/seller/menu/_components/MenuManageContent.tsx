@@ -12,9 +12,10 @@ import { MenuFilter } from './MenuFilter';
 import { MenuTable } from './MenuTable';
 
 export function MenuManageContent() {
-  const { menus } = useMenuStore();
+  const { menus, deleteMenu } = useMenuStore();
   const [selectedCategory, setSelectedCategory] = useState('전체');
   const [searchKeyword, setSearchKeyword] = useState('');
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   const categories = useMemo(() => {
     const uniqueCategories = [...new Set(menus.map((menu) => menu.category))];
@@ -37,6 +38,22 @@ export function MenuManageContent() {
   const totalCount = menus.length;
   const activeCount = totalCount;
   const inactiveCount = 0;
+
+  const handleRegisterProducts = () => {
+    if (selectedIds.size === 0) return;
+    // eslint-disable-next-line no-alert
+    alert(`${selectedIds.size}개 메뉴를 판매 등록했습니다.`);
+    setSelectedIds(new Set()); // 선택 해제
+  };
+
+  const handleDeleteSelected = () => {
+    if (selectedIds.size === 0) return;
+    // eslint-disable-next-line no-alert
+    if (confirm(`${selectedIds.size}개 메뉴를 삭제하시겠습니까?`)) {
+      selectedIds.forEach((id) => deleteMenu(id));
+      setSelectedIds(new Set());
+    }
+  };
 
   return (
     <div className="flex flex-col gap-6">
@@ -105,7 +122,30 @@ export function MenuManageContent() {
         </Link>
       </div>
 
-      <MenuTable menus={filteredMenus} />
+      <MenuTable
+        menus={filteredMenus}
+        selectedIds={selectedIds}
+        onSelectionChange={setSelectedIds}
+      />
+
+      {/* 선택 시 하단 액션 바 */}
+      {selectedIds.size > 0 && (
+        <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-white px-4 py-3">
+          <span className="text-sm text-gray-700">
+            {selectedIds.size}개 선택됨
+          </span>
+          <div className="flex gap-2">
+            <Button onClick={handleRegisterProducts}>판매 등록</Button>
+            <Button
+              variant="outline"
+              color="danger"
+              onClick={handleDeleteSelected}
+            >
+              삭제
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
