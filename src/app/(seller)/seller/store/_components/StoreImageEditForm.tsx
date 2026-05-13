@@ -40,6 +40,7 @@ export function StoreImageEditForm({
       const MAX_SIZE = 5 * 1024 * 1024;
       if (file.size > MAX_SIZE) {
         setError('파일 크기는 5MB 이하여야 합니다.');
+        e.currentTarget.value = '';
         return;
       }
       if (previewUrl?.startsWith('blob:')) {
@@ -49,8 +50,8 @@ export function StoreImageEditForm({
       setPreviewUrl(url);
       setError(null);
     }
+    e.currentTarget.value = '';
   };
-
   const handleSelectClick = () => {
     fileInputRef.current?.click();
   };
