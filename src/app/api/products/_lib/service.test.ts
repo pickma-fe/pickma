@@ -147,6 +147,73 @@ describe('getProducts', () => {
     expect(result.items[0].id).toBe(baseRow.id);
   });
 
+  it('availableOnly만으로는 전체 조회 경로로 전환하지 않고 range를 유지한다', async () => {
+    const supabase = buildSupabase({ data: [baseRow], error: null, count: 1 });
+
+    await getProducts(supabase, {
+      page: 1,
+      pageSize: 20,
+      availableOnly: true,
+    });
+
+    expect(supabase._chain.gt).toHaveBeenCalledWith(
+      'end_at',
+      expect.any(String)
+    );
+    expect(supabase._chain.range).toHaveBeenCalledWith(0, 19);
+  });
+
+  it('가격 낮은순 정렬은 DB range 페이지네이션을 유지한다', async () => {
+    const supabase = buildSupabase({ data: [baseRow], error: null, count: 1 });
+
+    await getProducts(supabase, {
+      page: 1,
+      pageSize: 20,
+      sortOption: 'price-low',
+    });
+
+    expect(supabase._chain.order).toHaveBeenCalledWith('discount_price', {
+      ascending: true,
+    });
+    expect(supabase._chain.range).toHaveBeenCalledWith(0, 19);
+  });
+
+  it('할인율 필터는 서버 후처리 페이지네이션 경로를 사용한다', async () => {
+    const rows = Array.from({ length: 8 }, (_, index) => ({
+      ...baseRow,
+      id: `00000000-0000-4000-8000-00000000005${index}`,
+      end_at: `2099-12-31T23:5${index}:59.000Z`,
+    }));
+    const supabase = buildSupabase({ data: rows, error: null, count: 8 });
+
+    const result = await getProducts(supabase, {
+      page: 2,
+      pageSize: 5,
+      discountOption: 'over-40',
+    });
+
+    expect(supabase._chain.range).not.toHaveBeenCalled();
+    expect(result.items).toHaveLength(3);
+    expect(result.items[0].id).toBe('00000000-0000-4000-8000-000000000055');
+  });
+
+  it('할인율 높은순 정렬은 서버 후처리 페이지네이션 경로를 사용한다', async () => {
+    const rows = Array.from({ length: 8 }, (_, index) => ({
+      ...baseRow,
+      id: `00000000-0000-4000-8000-00000000005${index}`,
+      discount_price: 7200 - index,
+    }));
+    const supabase = buildSupabase({ data: rows, error: null, count: 8 });
+
+    await getProducts(supabase, {
+      page: 2,
+      pageSize: 5,
+      sortOption: 'discount-rate',
+    });
+
+    expect(supabase._chain.range).not.toHaveBeenCalled();
+  });
+
   it('region 파라미터가 없으면 stores.region 필터를 적용하지 않는다', async () => {
     const supabase = buildSupabase({ data: [], error: null, count: 0 });
 
@@ -158,7 +225,7 @@ describe('getProducts', () => {
     ).toBe(true);
   });
 
-  it('페이지네이션: 서버에서 필터링한 결과를 올바른 인덱스로 자른다', async () => {
+  it('페이지네이션: range를 올바른 인덱스로 호출한다', async () => {
     const rows = Array.from({ length: 8 }, (_, index) => ({
       ...baseRow,
       id: `00000000-0000-4000-8000-00000000005${index}`,
@@ -166,14 +233,9 @@ describe('getProducts', () => {
     }));
     const supabase = buildSupabase({ data: rows, error: null, count: 8 });
 
-    const result = await getProducts(supabase, {
-      page: 2,
-      pageSize: 5,
-      availableOnly: true,
-    });
+    await getProducts(supabase, { page: 2, pageSize: 5 });
 
-    expect(result.items).toHaveLength(3);
-    expect(result.items[0].id).toBe('00000000-0000-4000-8000-000000000055');
+    expect(supabase._chain.range).toHaveBeenCalledWith(5, 9);
   });
 
   it('totalPages를 올바르게 계산한다', async () => {

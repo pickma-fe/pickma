@@ -42,10 +42,8 @@ export async function getProducts(
 ): Promise<ProductListResponse> {
   const { region, categoryId } = params;
   const shouldUseExtendedList =
-    params.availableOnly ||
-    categoryId ||
-    params.discountOption ||
-    params.sortOption;
+    isDiscountFilterOption(params.discountOption) ||
+    params.sortOption === 'discount-rate';
   const from = (params.page - 1) * params.pageSize;
   const to = from + params.pageSize - 1;
 
@@ -168,6 +166,10 @@ function matchesDiscountOption(
   }
 
   return true;
+}
+
+function isDiscountFilterOption(discountOption: string | undefined) {
+  return Boolean(discountOption && discountOption !== 'all');
 }
 
 function compareProducts(
