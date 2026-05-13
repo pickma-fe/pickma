@@ -4,21 +4,21 @@ import { ChevronRightIcon, StoreIcon } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
-import type { ProductListItemResponse } from '@/contracts/product';
 import { formatPickupTime } from '@/lib/formatPickupTime';
 import { isProductUnavailable } from '@/lib/product';
 import { useNow } from '@/hooks/useNow';
 import { Badge, Button } from '@/components/common';
+import type { Product } from '@/types';
 
 type ProductCardProps = {
-  product: ProductListItemResponse;
+  product: Product;
 };
 
 // 마감 시간
-function formatRemainingTime(endAt: string, now: number) {
+function formatRemainingTime(endAt: Date, now: number) {
   const remainingSeconds = Math.max(
     0,
-    Math.floor((new Date(endAt).getTime() - now) / 1000)
+    Math.floor((endAt.getTime() - now) / 1000)
   );
 
   if (remainingSeconds === 0) {
@@ -36,7 +36,7 @@ function formatRemainingTime(endAt: string, now: number) {
   return `마감 ${paddedHours}:${paddedMinutes}:${paddedSeconds}`;
 }
 
-function isProductUnavailableBeforeHydration(product: ProductListItemResponse) {
+function isProductUnavailableBeforeHydration(product: Product) {
   return product.isSoldOut || product.isExpired || product.availableStock <= 0;
 }
 

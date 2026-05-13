@@ -1,18 +1,18 @@
 'use client';
 
-import type { ProductListItemResponse } from '@/contracts/product';
 import { useConsumerProducts } from '@/hooks/products/useConsumerProducts';
 import { Pagination } from '@/components/common';
+import type { Product } from '@/types';
 
 import { ProductCard } from './ProductCard';
 
 interface ConsumerProductListProps {
-  products: ProductListItemResponse[];
+  products: Product[];
   selectedCategoryId: string;
   selectedSortOption: string;
   selectedDiscountOption: string;
-  selectedRegion: string;
-  productRegions: Record<string, string>;
+  selectedRegion?: string;
+  productRegions?: Record<string, string>;
   currentPage: number;
   productsPerPage: number;
   now: number;

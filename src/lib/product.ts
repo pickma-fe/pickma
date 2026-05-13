@@ -1,7 +1,10 @@
-import type { ProductListItemResponse } from '@/contracts/product';
-
 type ProductAvailabilityParams = {
-  product: ProductListItemResponse;
+  product: {
+    isSoldOut: boolean;
+    isExpired: boolean;
+    availableStock: number;
+    endAt: string | Date;
+  };
   now: number;
 };
 
@@ -13,7 +16,9 @@ export function isProductUnavailable({
     product.isSoldOut ||
     product.isExpired ||
     product.availableStock <= 0 ||
-    new Date(product.endAt).getTime() <= now
+    (product.endAt instanceof Date
+      ? product.endAt.getTime()
+      : new Date(product.endAt).getTime()) <= now
   );
 }
 
