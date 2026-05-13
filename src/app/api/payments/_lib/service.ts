@@ -9,6 +9,13 @@ import { createServiceRoleClient } from '@/lib/supabase/service';
 
 import { getPaymentProviderAdapter } from './providers';
 
+const BEGIN_RPC_ERROR_MAP: Record<string, () => AppError> = {
+  ORDER_NOT_FOUND: () => new AppError(ERROR_CODE.ORDER_NOT_FOUND, 404),
+  INVALID_ORDER_STATUS: () =>
+    new AppError(ERROR_CODE.INVALID_ORDER_STATUS, 409),
+  ORDER_EXPIRED: () => new AppError(ERROR_CODE.ORDER_EXPIRED, 409),
+};
+
 const CONFIRM_RPC_ERROR_MAP: Record<string, () => AppError> = {
   INVALID_ORDER_STATUS: () =>
     new AppError(ERROR_CODE.INVALID_ORDER_STATUS, 409),
@@ -18,6 +25,13 @@ const CONFIRM_RPC_ERROR_MAP: Record<string, () => AppError> = {
   PICKUP_NUMBER_EXHAUSTED: () =>
     new AppError(ERROR_CODE.PICKUP_NUMBER_EXHAUSTED, 409),
 };
+
+function mapBeginRpcError(message: string): AppError {
+  return (
+    BEGIN_RPC_ERROR_MAP[message]?.() ??
+    new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500)
+  );
+}
 
 function mapConfirmRpcError(message: string): AppError {
   return (
@@ -102,11 +116,22 @@ export async function confirmPayment(
     throw new AppError(ERROR_CODE.PAYMENT_AMOUNT_MISMATCH, 400);
   }
 
-  const adapter = getPaymentProviderAdapter(body.provider);
-  const confirmed = await adapter.confirm({
-    orderNumber: body.orderNumber,
-    amount: body.amount,
+  const { error: beginError } = await supabase.rpc('begin_payment_processing', {
+    p_order_id: order.id,
   });
+  if (beginError) throw mapBeginRpcError(beginError.message);
+
+  const adapter = getPaymentProviderAdapter(body.provider);
+  let confirmed: Awaited<ReturnType<typeof adapter.confirm>>;
+  try {
+    confirmed = await adapter.confirm({
+      orderNumber: body.orderNumber,
+      amount: body.amount,
+    });
+  } catch {
+    await supabase.rpc('revert_payment_processing', { p_order_id: order.id });
+    throw new AppError(ERROR_CODE.PAYMENT_CONFIRM_FAILED, 500);
+  }
 
   const { error: rpcError } = await supabase.rpc('confirm_payment', {
     p_order_number: body.orderNumber,

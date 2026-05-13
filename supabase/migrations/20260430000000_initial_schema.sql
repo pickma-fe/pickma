@@ -17,6 +17,7 @@ CREATE TYPE store_status AS ENUM ('pending', 'approved', 'rejected', 'inactive')
 CREATE TYPE product_status AS ENUM ('active', 'closed');
 CREATE TYPE order_status AS ENUM (
   'payment_pending',
+  'processing',
   'reserved',
   'ready',
   'completed',
@@ -645,7 +646,7 @@ BEGIN
     RAISE EXCEPTION 'ORDER_NOT_FOUND';
   END IF;
 
-  IF v_order.status != 'payment_pending' THEN
+  IF v_order.status != 'processing' THEN
     RAISE EXCEPTION 'INVALID_ORDER_STATUS';
   END IF;
 
@@ -756,7 +757,77 @@ REVOKE EXECUTE ON FUNCTION expire_order(uuid) FROM PUBLIC;
 GRANT  EXECUTE ON FUNCTION expire_order(uuid) TO service_role;
 
 -- ============================================================
--- RPC 5: cancel_order (contract only — SQL implementation in Phase 6)
+-- RPC 5: begin_payment_processing
+-- Role: atomically claims a payment_pending order for processing.
+--       Prevents duplicate adapter.confirm calls on concurrent requests.
+--       Flow: payment_pending → processing (claim) → reserved (confirm_payment)
+-- Input: p_order_id
+-- Output: success
+-- Errors: ORDER_NOT_FOUND | INVALID_ORDER_STATUS | ORDER_EXPIRED
+-- ============================================================
+CREATE OR REPLACE FUNCTION begin_payment_processing(p_order_id uuid)
+RETURNS TABLE(success boolean)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_order orders%ROWTYPE;
+BEGIN
+  SELECT * INTO v_order
+    FROM orders
+   WHERE id = p_order_id
+     FOR UPDATE;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'ORDER_NOT_FOUND';
+  END IF;
+
+  IF v_order.status != 'payment_pending' THEN
+    RAISE EXCEPTION 'INVALID_ORDER_STATUS';
+  END IF;
+
+  IF v_order.expires_at IS NOT NULL AND v_order.expires_at <= now() THEN
+    RAISE EXCEPTION 'ORDER_EXPIRED';
+  END IF;
+
+  UPDATE orders SET status = 'processing' WHERE id = p_order_id;
+
+  RETURN QUERY SELECT true;
+END;
+$$;
+
+REVOKE EXECUTE ON FUNCTION begin_payment_processing(uuid) FROM PUBLIC;
+GRANT  EXECUTE ON FUNCTION begin_payment_processing(uuid) TO service_role;
+
+-- ============================================================
+-- RPC 6: revert_payment_processing
+-- Role: rolls back processing → payment_pending when adapter.confirm fails.
+--       Allows the user to retry payment.
+-- Input: p_order_id
+-- Output: success
+-- ============================================================
+CREATE OR REPLACE FUNCTION revert_payment_processing(p_order_id uuid)
+RETURNS TABLE(success boolean)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  UPDATE orders
+     SET status = 'payment_pending'
+   WHERE id = p_order_id
+     AND status = 'processing';
+
+  RETURN QUERY SELECT true;
+END;
+$$;
+
+REVOKE EXECUTE ON FUNCTION revert_payment_processing(uuid) FROM PUBLIC;
+GRANT  EXECUTE ON FUNCTION revert_payment_processing(uuid) TO service_role;
+
+-- ============================================================
+-- RPC 7: cancel_order (contract only — SQL implementation in Phase 6)
 -- Role: user-initiated order cancellation + reserved stock restoration
 -- Input: p_order_id, p_reason
 -- Output: success

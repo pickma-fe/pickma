@@ -9,6 +9,7 @@ import type { PaymentResponse } from '@/contracts/payment';
 
 const ORDER_STATUS_MAP: Record<OrderListItemResponse['status'], OrderStatus> = {
   payment_pending: 'paymentPending',
+  processing: 'processing',
   reserved: 'reserved',
   ready: 'ready',
   completed: 'completed',

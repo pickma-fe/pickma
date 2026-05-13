@@ -3,6 +3,7 @@ import type { PaymentResponse } from './payment';
 
 export type OrderStatusParam =
   | 'payment_pending'
+  | 'processing'
   | 'reserved'
   | 'ready'
   | 'completed'

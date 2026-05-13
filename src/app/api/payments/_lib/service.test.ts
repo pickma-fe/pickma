@@ -37,11 +37,11 @@ const mockAdapter = {
 function makeClient({
   orderData = mockOrderRow,
   orderError = null as { message: string } | null,
-  rpcError = null as { message: string } | null,
+  rpcErrors = {},
 }: {
   orderData?: MockOrderRow | null;
   orderError?: { message: string } | null;
-  rpcError?: { message: string } | null;
+  rpcErrors?: Record<string, { message: string } | null>;
 } = {}) {
   const queryMock = {
     select: vi.fn().mockReturnThis(),
@@ -52,7 +52,11 @@ function makeClient({
   };
   return {
     from: vi.fn().mockReturnValue(queryMock),
-    rpc: vi.fn().mockResolvedValue({ data: null, error: rpcError }),
+    rpc: vi
+      .fn()
+      .mockImplementation((fnName: string) =>
+        Promise.resolve({ data: null, error: rpcErrors[fnName] ?? null })
+      ),
   };
 }
 
@@ -114,7 +118,7 @@ describe('preparePayment', () => {
   it('만료된 주문, expire_order RPC 실패 → INTERNAL_SERVER_ERROR', async () => {
     const client = makeClient({
       orderData: { ...mockOrderRow, expires_at: '2020-01-01T00:00:00.000Z' },
-      rpcError: { message: 'db error' },
+      rpcErrors: { expire_order: { message: 'db error' } },
     });
     vi.mocked(createServiceRoleClient).mockReturnValue(
       client as unknown as ReturnType<typeof createServiceRoleClient>
@@ -149,7 +153,7 @@ describe('confirmPayment', () => {
     vi.mocked(getPaymentProviderAdapter).mockReturnValue(mockAdapter);
   });
 
-  it('정상 → RPC 호출 후 void 반환', async () => {
+  it('정상 → begin_payment_processing 후 confirm_payment 호출, void 반환', async () => {
     const client = makeClient();
     vi.mocked(createServiceRoleClient).mockReturnValue(
       client as unknown as ReturnType<typeof createServiceRoleClient>
@@ -161,6 +165,9 @@ describe('confirmPayment', () => {
         amount: 5000,
       })
     ).resolves.toBeUndefined();
+    expect(client.rpc).toHaveBeenCalledWith('begin_payment_processing', {
+      p_order_id: 'order-uuid-1',
+    });
     expect(client.rpc).toHaveBeenCalledWith(
       'confirm_payment',
       expect.objectContaining({
@@ -225,7 +232,7 @@ describe('confirmPayment', () => {
   it('만료된 주문, expire_order RPC 실패 → INTERNAL_SERVER_ERROR', async () => {
     const client = makeClient({
       orderData: { ...mockOrderRow, expires_at: '2020-01-01T00:00:00.000Z' },
-      rpcError: { message: 'db error' },
+      rpcErrors: { expire_order: { message: 'db error' } },
     });
     vi.mocked(createServiceRoleClient).mockReturnValue(
       client as unknown as ReturnType<typeof createServiceRoleClient>
@@ -267,9 +274,11 @@ describe('confirmPayment', () => {
     ).rejects.toMatchObject({ code: ERROR_CODE.ORDER_NOT_FOUND });
   });
 
-  it('RPC INVALID_ORDER_STATUS → 409', async () => {
+  it('begin_payment_processing 실패(경쟁 요청) → INVALID_ORDER_STATUS 409', async () => {
     const client = makeClient({
-      rpcError: { message: 'INVALID_ORDER_STATUS' },
+      rpcErrors: {
+        begin_payment_processing: { message: 'INVALID_ORDER_STATUS' },
+      },
     });
     vi.mocked(createServiceRoleClient).mockReturnValue(
       client as unknown as ReturnType<typeof createServiceRoleClient>
@@ -286,8 +295,47 @@ describe('confirmPayment', () => {
     });
   });
 
-  it('RPC ORDER_EXPIRED → 409', async () => {
-    const client = makeClient({ rpcError: { message: 'ORDER_EXPIRED' } });
+  it('adapter.confirm 실패 → revert_payment_processing 호출 후 PAYMENT_CONFIRM_FAILED', async () => {
+    mockAdapter.confirm.mockRejectedValueOnce(new Error('network error'));
+    const client = makeClient();
+    vi.mocked(createServiceRoleClient).mockReturnValue(
+      client as unknown as ReturnType<typeof createServiceRoleClient>
+    );
+    await expect(
+      confirmPayment(mockUserId, {
+        provider: 'toss',
+        orderNumber: 'PM2026TEST',
+        amount: 5000,
+      })
+    ).rejects.toMatchObject({ code: ERROR_CODE.PAYMENT_CONFIRM_FAILED });
+    expect(client.rpc).toHaveBeenCalledWith('revert_payment_processing', {
+      p_order_id: 'order-uuid-1',
+    });
+  });
+
+  it('confirm_payment RPC INVALID_ORDER_STATUS → 409', async () => {
+    const client = makeClient({
+      rpcErrors: { confirm_payment: { message: 'INVALID_ORDER_STATUS' } },
+    });
+    vi.mocked(createServiceRoleClient).mockReturnValue(
+      client as unknown as ReturnType<typeof createServiceRoleClient>
+    );
+    await expect(
+      confirmPayment(mockUserId, {
+        provider: 'toss',
+        orderNumber: 'PM2026TEST',
+        amount: 5000,
+      })
+    ).rejects.toMatchObject({
+      code: ERROR_CODE.INVALID_ORDER_STATUS,
+      statusCode: 409,
+    });
+  });
+
+  it('confirm_payment RPC ORDER_EXPIRED → 409', async () => {
+    const client = makeClient({
+      rpcErrors: { confirm_payment: { message: 'ORDER_EXPIRED' } },
+    });
     vi.mocked(createServiceRoleClient).mockReturnValue(
       client as unknown as ReturnType<typeof createServiceRoleClient>
     );
@@ -303,9 +351,9 @@ describe('confirmPayment', () => {
     });
   });
 
-  it('RPC PICKUP_NUMBER_EXHAUSTED → 409', async () => {
+  it('confirm_payment RPC PICKUP_NUMBER_EXHAUSTED → 409', async () => {
     const client = makeClient({
-      rpcError: { message: 'PICKUP_NUMBER_EXHAUSTED' },
+      rpcErrors: { confirm_payment: { message: 'PICKUP_NUMBER_EXHAUSTED' } },
     });
     vi.mocked(createServiceRoleClient).mockReturnValue(
       client as unknown as ReturnType<typeof createServiceRoleClient>
@@ -322,8 +370,10 @@ describe('confirmPayment', () => {
     });
   });
 
-  it('RPC 알 수 없는 오류 → PAYMENT_CONFIRM_FAILED 500', async () => {
-    const client = makeClient({ rpcError: { message: 'unknown error' } });
+  it('confirm_payment RPC 알 수 없는 오류 → PAYMENT_CONFIRM_FAILED 500', async () => {
+    const client = makeClient({
+      rpcErrors: { confirm_payment: { message: 'unknown error' } },
+    });
     vi.mocked(createServiceRoleClient).mockReturnValue(
       client as unknown as ReturnType<typeof createServiceRoleClient>
     );

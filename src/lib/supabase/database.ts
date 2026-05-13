@@ -584,6 +584,12 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      begin_payment_processing: {
+        Args: { p_order_id: string };
+        Returns: {
+          success: boolean;
+        }[];
+      };
       cancel_order: {
         Args: { p_order_id: string; p_reason: string };
         Returns: {
@@ -631,11 +637,18 @@ export type Database = {
         }[];
       };
       generate_order_number: { Args: never; Returns: string };
+      revert_payment_processing: {
+        Args: { p_order_id: string };
+        Returns: {
+          success: boolean;
+        }[];
+      };
       sequence_to_pickup_number: { Args: { seq: number }; Returns: string };
     };
     Enums: {
       order_status:
         | 'payment_pending'
+        | 'processing'
         | 'reserved'
         | 'ready'
         | 'completed'
@@ -785,6 +798,7 @@ export const Constants = {
     Enums: {
       order_status: [
         'payment_pending',
+        'processing',
         'reserved',
         'ready',
         'completed',
