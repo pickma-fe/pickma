@@ -269,8 +269,8 @@ sequenceDiagram
 - `POST /api/orders`: 주문 생성과 재고 임시 예약. `orderNumber`(PickMa 내부 식별자)를 반환한다.
 - `POST /api/payments/prepare`: provider adapter를 통해 결제 시작 정보를 만들고, `flow: 'redirect'`, `redirectUrl`을 반환한다. mock provider는 `/payment/success?orderNumber=...&provider=...&amount=...`를 반환한다. 실제 provider는 외부 결제 창 URL을 반환한다.
 - 클라이언트는 `redirectUrl`을 팝업 창(`window.open`)으로 열어 결제 흐름을 진행한다.
-- `/payment/success` 페이지: URL 파라미터(`orderNumber`, `provider`, `amount`)를 받아 `POST /api/payments/confirm`을 호출한다. 성공 시 `window.opener.postMessage({ success: true, orderNumber })`를 보내고 팝업을 닫는다. 실패 시 `window.opener.postMessage({ success: false })`를 보내고 팝업을 닫는다.
-- 부모 창: `message` 이벤트를 수신해 `success: true`이면 주문 상세 페이지로 이동한다 (프론트 결제 연동 phase에서 구현).
+- `/payment/success` 페이지: URL 파라미터(`orderNumber`, `provider`, `amount`)를 받아 `POST /api/payments/confirm`을 호출한다. 성공 시 `window.opener.postMessage({ success: true, orderNumber }, window.location.origin)`을 보내고 팝업을 닫는다. 실패 시 `window.opener.postMessage({ success: false }, window.location.origin)`을 보내고 팝업을 닫는다. `targetOrigin`은 항상 명시하며 와일드카드(`'*'`)는 정보 유출 위험으로 사용하지 않는다.
+- 부모 창: `message` 이벤트를 수신할 때 `event.origin === window.location.origin` 으로 출처를 엄격하게 검증(`===`)한 뒤, 메시지 구조(`{ success, orderNumber }`)를 확인하고, `success: true`이면 주문 상세 페이지로 이동한다 (프론트 결제 연동 phase에서 구현).
 - `POST /api/payments/confirm`: provider adapter를 통해 승인 후, `confirm_payment` DB RPC로 주문을 atomic하게 확정한다.
 - provider: 결제 승인 주체 (`toss | kakao_pay | naver_pay`). 실 provider adapter 연결 전까지는 provider 관계없이 mock adapter가 동작한다. 실제 provider adapter는 후속 phase에서 추가한다.
 - `orderNumber`는 PickMa 내부 주문 식별자이며, provider별 외부 주문 필드명은 adapter 내부에서만 다룬다.
