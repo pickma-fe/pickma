@@ -4,7 +4,6 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
 
-import { useMenuStore } from '@/stores/menuStore';
 import { Badge } from '@/components/common/Badge/Badge';
 import { Button } from '@/components/common/Button/Button';
 import { Dropdown } from '@/components/common/Dropdown/Dropdown';
@@ -22,7 +21,6 @@ const PAGE_SIZE_OPTIONS = [
 ];
 
 export function MenuTable({ menus }: MenuTableProps) {
-  const { deleteMenu } = useMenuStore();
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
@@ -33,12 +31,6 @@ export function MenuTable({ menus }: MenuTableProps) {
   const handlePageSizeChange = (value: string) => {
     setPageSize(Number(value));
     setCurrentPage(1);
-  };
-
-  const handleDelete = (id: string, name: string) => {
-    if (confirm(`"${name}" 메뉴를 삭제하시겠습니까?`)) {
-      deleteMenu(id);
-    }
   };
 
   const formatPrice = (price: number) => {
@@ -136,20 +128,11 @@ export function MenuTable({ menus }: MenuTableProps) {
                   {formatDate(menu.updatedAt)}
                 </td>
                 <td className="px-4 py-4 whitespace-nowrap">
-                  <div className="flex gap-2">
-                    <Link href={`/seller/menu/${menu.id}/edit`}>
-                      <Button variant="outline" color="gray">
-                        수정
-                      </Button>
-                    </Link>
-                    <Button
-                      variant="outline"
-                      color="danger"
-                      onClick={() => handleDelete(menu.id, menu.name)}
-                    >
-                      삭제
+                  <Link href={`/seller/menu/${menu.id}/edit`}>
+                    <Button variant="outline" color="gray">
+                      수정
                     </Button>
-                  </div>
+                  </Link>
                 </td>
               </tr>
             ))}
