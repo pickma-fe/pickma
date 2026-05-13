@@ -36,16 +36,9 @@ function formatRemainingTime(endAt: Date, now: number) {
   return `마감 ${paddedHours}:${paddedMinutes}:${paddedSeconds}`;
 }
 
-function isProductUnavailableBeforeHydration(product: Product) {
-  return product.isSoldOut || product.isExpired || product.availableStock <= 0;
-}
-
 export function ProductCard({ product }: ProductCardProps) {
   const now = useNow();
-  const isUnavailable =
-    now === null
-      ? isProductUnavailableBeforeHydration(product)
-      : isProductUnavailable({ product, now });
+  const isUnavailable = now === null || isProductUnavailable({ product, now });
 
   return (
     <article className="group relative w-full overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition hover:shadow-md">

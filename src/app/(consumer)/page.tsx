@@ -8,6 +8,8 @@ import {
   CONSUMER_PRODUCT_CATEGORIES,
   DEFAULT_DISCOUNT_OPTION_ID,
   DEFAULT_SORT_OPTION_ID,
+  normalizeSortOptionId,
+  type ProductSortOptionId,
 } from '@/lib/consumerProductFilters';
 import { useProducts } from '@/hooks/products/useProducts';
 import { Footer } from '@/components/common';
@@ -26,19 +28,31 @@ const regionItems = [
 const PRODUCTS_PER_PAGE = 10;
 const PRODUCT_LIST_REFRESH_INTERVAL_MS = 60_000;
 
+function getProductSortQuery(sortOption: ProductSortOptionId) {
+  if (sortOption === 'discount-rate') {
+    return { sort: 'discountRate' as const, order: 'desc' as const };
+  }
+
+  if (sortOption === 'price-low') {
+    return { sort: 'discountPrice' as const, order: 'asc' as const };
+  }
+
+  return { sort: 'endAt' as const, order: 'asc' as const };
+}
+
 export default function ConsumerPage() {
   const router = useRouter();
   const [selectedCategoryId, setSelectedCategoryId] = useState(ALL_CATEGORY_ID);
   const [selectedRegion, setSelectedRegion] = useState(regionItems[0].value);
-  const [selectedSortOption, setSelectedSortOption] = useState(
-    DEFAULT_SORT_OPTION_ID
-  );
+  const [selectedSortOption, setSelectedSortOption] =
+    useState<ProductSortOptionId>(DEFAULT_SORT_OPTION_ID);
   const [selectedDiscountOption, setSelectedDiscountOption] = useState(
     DEFAULT_DISCOUNT_OPTION_ID
   );
   const [keyword, setKeyword] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [filterNow, setFilterNow] = useState(() => Date.now());
+  const productSortQuery = getProductSortQuery(selectedSortOption);
   const {
     data: productList,
     isError: isProductsError,
@@ -54,13 +68,34 @@ export default function ConsumerPage() {
       selectedDiscountOption === DEFAULT_DISCOUNT_OPTION_ID
         ? undefined
         : selectedDiscountOption,
-    sortOption:
-      selectedSortOption === DEFAULT_SORT_OPTION_ID
-        ? undefined
-        : selectedSortOption,
+    sort: productSortQuery.sort,
+    order: productSortQuery.order,
     availableOnly: true,
   });
   const products = useMemo(() => productList?.items ?? [], [productList]);
+
+  useEffect(() => {
+    if (!productList) {
+      return;
+    }
+
+    const safeCurrentPage =
+      productList.totalPages === 0
+        ? 1
+        : Math.min(Math.max(productList.page, 1), productList.totalPages);
+
+    if (currentPage === safeCurrentPage) {
+      return;
+    }
+
+    const timerId = window.setTimeout(() => {
+      setCurrentPage(safeCurrentPage);
+    }, 0);
+
+    return () => {
+      window.clearTimeout(timerId);
+    };
+  }, [currentPage, productList]);
 
   useEffect(() => {
     const currentTime = Date.now();
@@ -111,7 +146,7 @@ export default function ConsumerPage() {
 
   const handleSortChange = (sortOption: string) => {
     setFilterNow(Date.now());
-    setSelectedSortOption(sortOption);
+    setSelectedSortOption(normalizeSortOptionId(sortOption));
     setCurrentPage(1);
   };
 
