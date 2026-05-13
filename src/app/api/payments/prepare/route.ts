@@ -13,7 +13,8 @@ export async function POST(request: NextRequest): Promise<Response> {
     const body = await validateBody(preparePaymentSchema, request);
     const { serviceUser } = await requireActiveUser();
     await expireUserOrders(serviceUser.id);
-    const result = await preparePayment(serviceUser.id, body);
+    const successUrl = `${request.nextUrl.origin}/payment/success`;
+    const result = await preparePayment(serviceUser.id, body, successUrl);
     return success(result);
   } catch (error) {
     return routeError(error);

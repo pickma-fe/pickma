@@ -17,12 +17,22 @@ function escapeHtml(value: string): string {
 }
 
 export async function GET(request: NextRequest): Promise<Response> {
-  const orderNumber = request.nextUrl.searchParams.get('orderNumber');
-  if (!orderNumber) {
+  const { searchParams } = request.nextUrl;
+  const orderNumber = searchParams.get('orderNumber');
+  const provider = searchParams.get('provider');
+  const amount = searchParams.get('amount');
+  const successUrl = searchParams.get('successUrl');
+
+  if (!orderNumber || !provider || !amount || !successUrl) {
     return fail(ERROR_CODE.VALIDATION_ERROR, 400);
   }
 
   const safeOrderNumber = escapeHtml(orderNumber);
+
+  const callbackParams = new URLSearchParams({ orderNumber, provider, amount });
+  const safeCallbackUrl = escapeHtml(
+    `${successUrl}?${callbackParams.toString()}`
+  );
 
   const html = `<!DOCTYPE html>
 <html lang="ko">
@@ -31,7 +41,7 @@ export async function GET(request: NextRequest): Promise<Response> {
   <h1>Mock 결제 페이지</h1>
   <p>주문번호: <strong>${safeOrderNumber}</strong></p>
   <p>실제 provider 연동 전 결제 redirect 흐름을 검증하기 위한 페이지입니다.</p>
-  <p>실제 결제 없이 confirm API를 직접 호출해 결제 흐름을 검증하세요.</p>
+  <a href="${safeCallbackUrl}">결제하기</a>
 </body>
 </html>`;
 

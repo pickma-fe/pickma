@@ -6,6 +6,8 @@ export interface PrepareParams {
   orderNumber: string;
   amount: number;
   expiresAt: string;
+  provider: PaymentProvider;
+  successUrl: string;
 }
 
 export interface PrepareResult {

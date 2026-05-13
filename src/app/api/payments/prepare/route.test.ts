@@ -1,4 +1,4 @@
-import type { NextRequest } from 'next/server';
+import { NextRequest } from 'next/server';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { PreparePaymentResponse } from '@/contracts/payment';
@@ -43,11 +43,11 @@ const mockPrepareResult: PreparePaymentResponse = {
 const validBody = { provider: 'toss', orderNumber: 'PM2026TEST' };
 
 function makeRequest(body: object) {
-  return new Request('http://localhost/api/payments/prepare', {
+  return new NextRequest('http://localhost/api/payments/prepare', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
-  }) as unknown as NextRequest;
+  });
 }
 
 describe('POST /api/payments/prepare', () => {
@@ -76,7 +76,11 @@ describe('POST /api/payments/prepare', () => {
   it('expireUserOrders 후 preparePayment 호출', async () => {
     await POST(makeRequest(validBody));
     expect(expireUserOrders).toHaveBeenCalledWith('user-1');
-    expect(preparePayment).toHaveBeenCalledWith('user-1', validBody);
+    expect(preparePayment).toHaveBeenCalledWith(
+      'user-1',
+      validBody,
+      'http://localhost/payment/success'
+    );
     expect(
       vi.mocked(expireUserOrders).mock.invocationCallOrder[0]
     ).toBeLessThan(vi.mocked(preparePayment).mock.invocationCallOrder[0]);

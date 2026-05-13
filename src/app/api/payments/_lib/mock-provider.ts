@@ -1,10 +1,14 @@
 import type { PaymentProviderAdapter } from './providers';
 
 export const mockProvider: PaymentProviderAdapter = {
-  async prepare({ orderNumber }) {
-    return {
-      redirectUrl: `/api/payments/mock/checkout?orderNumber=${encodeURIComponent(orderNumber)}`,
-    };
+  async prepare({ orderNumber, provider, amount, successUrl }) {
+    const params = new URLSearchParams({
+      orderNumber,
+      provider,
+      amount: String(amount),
+      successUrl,
+    });
+    return { redirectUrl: `/api/payments/mock/checkout?${params.toString()}` };
   },
 
   async confirm({ orderNumber }) {

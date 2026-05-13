@@ -28,7 +28,8 @@ function mapConfirmRpcError(message: string): AppError {
 
 export async function preparePayment(
   userId: string,
-  body: PreparePaymentRequest
+  body: PreparePaymentRequest,
+  successUrl: string
 ): Promise<PreparePaymentResponse> {
   const supabase = createServiceRoleClient();
 
@@ -51,6 +52,8 @@ export async function preparePayment(
     orderNumber: body.orderNumber,
     amount: order.payment_amount,
     expiresAt: order.expires_at ?? new Date().toISOString(),
+    provider: body.provider,
+    successUrl,
   });
 
   return {

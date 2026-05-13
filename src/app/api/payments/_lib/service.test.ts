@@ -65,10 +65,11 @@ describe('preparePayment', () => {
     vi.mocked(createServiceRoleClient).mockReturnValue(
       client as unknown as ReturnType<typeof createServiceRoleClient>
     );
-    const result = await preparePayment(mockUserId, {
-      provider: 'toss',
-      orderNumber: 'PM2026TEST',
-    });
+    const result = await preparePayment(
+      mockUserId,
+      { provider: 'toss', orderNumber: 'PM2026TEST' },
+      'http://localhost/payment/success'
+    );
     expect(result.provider).toBe('toss');
     expect(result.flow).toBe('redirect');
     expect(result.redirectUrl).toContain('mock/checkout');
@@ -81,7 +82,11 @@ describe('preparePayment', () => {
       client as unknown as ReturnType<typeof createServiceRoleClient>
     );
     await expect(
-      preparePayment(mockUserId, { provider: 'toss', orderNumber: 'NOTFOUND' })
+      preparePayment(
+        mockUserId,
+        { provider: 'toss', orderNumber: 'NOTFOUND' },
+        'http://localhost/payment/success'
+      )
     ).rejects.toMatchObject({ code: ERROR_CODE.ORDER_NOT_FOUND });
   });
 
@@ -93,10 +98,11 @@ describe('preparePayment', () => {
       client as unknown as ReturnType<typeof createServiceRoleClient>
     );
     await expect(
-      preparePayment(mockUserId, {
-        provider: 'toss',
-        orderNumber: 'PM2026TEST',
-      })
+      preparePayment(
+        mockUserId,
+        { provider: 'toss', orderNumber: 'PM2026TEST' },
+        'http://localhost/payment/success'
+      )
     ).rejects.toMatchObject({ code: ERROR_CODE.ORDER_NOT_FOUND });
   });
 
@@ -106,10 +112,11 @@ describe('preparePayment', () => {
       client as unknown as ReturnType<typeof createServiceRoleClient>
     );
     await expect(
-      preparePayment(mockUserId, {
-        provider: 'toss',
-        orderNumber: 'PM2026TEST',
-      })
+      preparePayment(
+        mockUserId,
+        { provider: 'toss', orderNumber: 'PM2026TEST' },
+        'http://localhost/payment/success'
+      )
     ).rejects.toMatchObject({ code: ERROR_CODE.INTERNAL_SERVER_ERROR });
   });
 });
