@@ -157,6 +157,7 @@ describe('mapOrderDetailRow', () => {
       cancelled_at: null,
       picked_up_at: null,
       order_items: [baseItemRow],
+      payments: null,
     };
     const result = mapOrderDetailRow(row);
     expect(result.cancelledAt).toBeUndefined();
@@ -171,6 +172,7 @@ describe('mapOrderDetailRow', () => {
       cancelled_at: '2026-05-12T09:00:00.000Z',
       picked_up_at: '2026-05-12T10:30:00.000Z',
       order_items: [],
+      payments: null,
     };
     const result = mapOrderDetailRow(row);
     expect(result.cancelledAt).toBe('2026-05-12T09:00:00.000Z');
