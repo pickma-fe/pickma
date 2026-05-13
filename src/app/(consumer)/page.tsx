@@ -8,7 +8,9 @@ import {
   CONSUMER_PRODUCT_CATEGORIES,
   DEFAULT_DISCOUNT_OPTION_ID,
   DEFAULT_SORT_OPTION_ID,
+  normalizeDiscountOptionId,
   normalizeSortOptionId,
+  type ProductDiscountOptionId,
   type ProductSortOptionId,
 } from '@/lib/consumerProductFilters';
 import { useProducts } from '@/hooks/products/useProducts';
@@ -46,9 +48,8 @@ export default function ConsumerPage() {
   const [selectedRegion, setSelectedRegion] = useState(regionItems[0].value);
   const [selectedSortOption, setSelectedSortOption] =
     useState<ProductSortOptionId>(DEFAULT_SORT_OPTION_ID);
-  const [selectedDiscountOption, setSelectedDiscountOption] = useState(
-    DEFAULT_DISCOUNT_OPTION_ID
-  );
+  const [selectedDiscountOption, setSelectedDiscountOption] =
+    useState<ProductDiscountOptionId>(DEFAULT_DISCOUNT_OPTION_ID);
   const [keyword, setKeyword] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [filterNow, setFilterNow] = useState(() => Date.now());
@@ -152,7 +153,7 @@ export default function ConsumerPage() {
 
   const handleDiscountChange = (discountOption: string) => {
     setFilterNow(Date.now());
-    setSelectedDiscountOption(discountOption);
+    setSelectedDiscountOption(normalizeDiscountOptionId(discountOption));
     setCurrentPage(1);
   };
 
