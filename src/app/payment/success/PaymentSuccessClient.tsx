@@ -4,6 +4,7 @@ import { useSearchParams } from 'next/navigation';
 import { useEffect } from 'react';
 
 import type { PaymentProvider } from '@/types/payment';
+import { PAYMENT_PROVIDERS } from '@/types/payment';
 import { paymentApi } from '@/api/payments/paymentApi';
 
 export function PaymentSuccessClient() {
@@ -11,14 +12,19 @@ export function PaymentSuccessClient() {
 
   useEffect(() => {
     const orderNumber = searchParams.get('orderNumber');
-    const provider = searchParams.get('provider') as PaymentProvider | null;
+    const rawProvider = searchParams.get('provider');
     const amount = searchParams.get('amount');
+    const isValidProvider =
+      rawProvider !== null &&
+      (PAYMENT_PROVIDERS as readonly string[]).includes(rawProvider);
 
-    if (!orderNumber || !provider || !amount) {
+    if (!orderNumber || !isValidProvider || !amount) {
       window.opener?.postMessage({ success: false }, window.location.origin);
       window.close();
       return;
     }
+
+    const provider = rawProvider as PaymentProvider;
 
     paymentApi
       .confirmPayment({ provider, orderNumber, amount: Number(amount) })

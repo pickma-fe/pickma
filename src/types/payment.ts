@@ -1,4 +1,5 @@
-export type PaymentProvider = 'toss' | 'kakao_pay' | 'naver_pay';
+export const PAYMENT_PROVIDERS = ['toss', 'kakao_pay', 'naver_pay'] as const;
+export type PaymentProvider = (typeof PAYMENT_PROVIDERS)[number];
 
 export type PaymentMethod = 'card' | 'virtual_account' | 'mobile' | 'easy_pay';
 
