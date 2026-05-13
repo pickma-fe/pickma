@@ -13,7 +13,7 @@ export function useConfirmPayment() {
     onSuccess: (_, variables) => {
       void queryClient.invalidateQueries({ queryKey: ['orders', 'list'] });
       void queryClient.invalidateQueries({
-        queryKey: ['orders', 'detail', variables.orderId],
+        queryKey: ['orders', 'detail', variables.orderNumber],
       });
     },
   });

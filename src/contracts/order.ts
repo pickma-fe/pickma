@@ -1,4 +1,5 @@
 import type { PaginatedResult } from './common';
+import type { PaymentResponse } from './payment';
 
 export type OrderStatusParam =
   | 'payment_pending'
@@ -68,4 +69,5 @@ export interface OrderDetailResponse extends OrderListItemResponse {
   cancelReason?: string;
   pickedUpAt?: string;
   items: OrderItemResponse[];
+  payment?: PaymentResponse;
 }

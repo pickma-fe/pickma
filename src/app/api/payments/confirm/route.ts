@@ -9,8 +9,8 @@ import { validateBody } from '@/app/api/_lib/validation';
 import { mockPaymentConfirmResult } from '@/mocks/payments';
 
 const confirmPaymentSchema = z.object({
-  paymentKey: z.string().min(1),
-  orderId: z.string().min(1),
+  provider: z.enum(['toss', 'kakao_pay', 'naver_pay']),
+  orderNumber: z.string().min(1),
   amount: z.number().int().positive(),
 }) satisfies z.ZodType<ConfirmPaymentRequest>;
 
