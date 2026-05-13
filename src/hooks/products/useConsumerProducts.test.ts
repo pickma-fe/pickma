@@ -1,14 +1,12 @@
 import { describe, expect, it } from 'vitest';
 
-import type { ProductListItemResponse } from '@/contracts/product';
+import type { Product } from '@/types/product';
 
 import { ALL_CATEGORY_ID, useConsumerProducts } from './useConsumerProducts';
 
 const NOW = new Date('2026-05-06T09:00:00.000Z').getTime();
 
-function createProduct(
-  overrides: Partial<ProductListItemResponse> & { id: string }
-): ProductListItemResponse {
+function createProduct(overrides: Partial<Product> & { id: string }): Product {
   const { id, ...productOverrides } = overrides;
 
   return {
@@ -28,11 +26,11 @@ function createProduct(
     isSoldOut: false,
     isExpired: false,
     displayStatus: 'available',
-    endAt: '2026-05-06T12:00:00.000Z',
+    endAt: new Date('2026-05-06T12:00:00.000Z'),
     pickupStartTime: '2026-05-06T10:00:00.000Z',
     pickupEndTime: '2026-05-06T12:00:00.000Z',
     status: 'active',
-    updatedAt: '2026-05-06T08:00:00.000Z',
+    updatedAt: new Date('2026-05-06T08:00:00.000Z'),
     ...productOverrides,
   };
 }
@@ -69,7 +67,7 @@ describe('useConsumerProducts', () => {
         storeId: 'store_1',
         categoryId: 'category_bakery',
         discountRate: 45,
-        endAt: '2026-05-06T08:59:00.000Z',
+        endAt: new Date('2026-05-06T08:59:00.000Z'),
       }),
     ];
 
@@ -138,11 +136,11 @@ describe('useConsumerProducts', () => {
     const products = [
       createProduct({
         id: 'product_1',
-        endAt: '2026-05-06T12:00:00.000Z',
+        endAt: new Date('2026-05-06T12:00:00.000Z'),
       }),
       createProduct({
         id: 'product_2',
-        endAt: '2026-05-06T10:00:00.000Z',
+        endAt: new Date('2026-05-06T10:00:00.000Z'),
       }),
     ];
 

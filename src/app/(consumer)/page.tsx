@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import {
   DEFAULT_DISCOUNT_OPTION_ID,
@@ -11,13 +11,13 @@ import {
   ALL_CATEGORY_ID,
   getConsumerProductCategories,
 } from '@/hooks/products/useConsumerProducts';
+import { useProducts } from '@/hooks/products/useProducts';
 import { Footer } from '@/components/common';
 import { ConsumerHeader } from '@/components/consumer/ConsumerHeader';
 import { ConsumerHeaderSearch } from '@/components/consumer/ConsumerHeaderSearch';
 import { ConsumerProductList } from '@/components/consumer/ConsumerProductList';
 import { ProductFilterSidebar } from '@/components/consumer/ProductFilterSidebar';
 import { PromotionCarousel } from '@/components/consumer/PromotionCarousel';
-import { mockProducts } from '@/mocks/products';
 
 const regionItems = [
   { label: '서울 강남구 역삼동', value: '서울 강남구 역삼동' },
@@ -26,18 +26,7 @@ const regionItems = [
 ];
 
 const PRODUCTS_PER_PAGE = 10;
-const mockProductRegions: Record<string, string> = {
-  store_1: '서울 마포구 합정동',
-  store_2: '서울 성동구 왕십리',
-  store_3: '서울 강남구 역삼동',
-  store_4: '서울 강남구 역삼동',
-  store_5: '서울 마포구 합정동',
-  store_6: '서울 강남구 역삼동',
-  store_7: '서울 성동구 왕십리',
-  store_8: '서울 성동구 왕십리',
-  store_9: '서울 마포구 합정동',
-  store_10: '서울 강남구 역삼동',
-};
+const API_PRODUCTS_PAGE_SIZE = 100;
 
 export default function ConsumerPage() {
   const router = useRouter();
@@ -52,12 +41,22 @@ export default function ConsumerPage() {
   const [keyword, setKeyword] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [filterNow, setFilterNow] = useState(() => Date.now());
-  const productCategories = getConsumerProductCategories(mockProducts);
+  const {
+    data: productList,
+    isError: isProductsError,
+    isLoading: isProductsLoading,
+  } = useProducts({
+    page: 1,
+    pageSize: API_PRODUCTS_PAGE_SIZE,
+    region: selectedRegion,
+  });
+  const products = useMemo(() => productList?.items ?? [], [productList]);
+  const productCategories = getConsumerProductCategories(products);
 
   useEffect(() => {
     const currentTime = Date.now();
-    const nextEndAt = mockProducts
-      .map((product) => new Date(product.endAt).getTime())
+    const nextEndAt = products
+      .map((product) => product.endAt.getTime())
       .filter((endAt) => endAt > currentTime)
       .sort((a, b) => a - b)[0];
 
@@ -75,7 +74,7 @@ export default function ConsumerPage() {
     return () => {
       window.clearTimeout(timerId);
     };
-  }, [filterNow]);
+  }, [filterNow, products]);
 
   const handleCategoryChange = (categoryId: string) => {
     setFilterNow(Date.now());
@@ -127,6 +126,37 @@ export default function ConsumerPage() {
     router.push(`/search?${searchParams.toString()}`);
   };
 
+  const productListContent = (() => {
+    if (isProductsLoading) {
+      return (
+        <div className="flex min-h-80 items-center justify-center rounded-lg border border-dashed border-gray-200 bg-gray-50 text-sm font-medium text-gray-500">
+          상품을 불러오는 중입니다.
+        </div>
+      );
+    }
+
+    if (isProductsError) {
+      return (
+        <div className="flex min-h-80 items-center justify-center rounded-lg border border-dashed border-red-200 bg-red-50 text-sm font-medium text-red-500">
+          상품을 불러오지 못했습니다.
+        </div>
+      );
+    }
+
+    return (
+      <ConsumerProductList
+        products={products}
+        selectedCategoryId={selectedCategoryId}
+        selectedSortOption={selectedSortOption}
+        selectedDiscountOption={selectedDiscountOption}
+        currentPage={currentPage}
+        productsPerPage={PRODUCTS_PER_PAGE}
+        now={filterNow}
+        onPageChange={setCurrentPage}
+      />
+    );
+  })();
+
   return (
     <div className="bg-white">
       <ConsumerHeader
@@ -158,18 +188,7 @@ export default function ConsumerPage() {
           <section className="px-5 py-6 lg:px-6">
             <PromotionCarousel />
 
-            <ConsumerProductList
-              products={mockProducts}
-              selectedCategoryId={selectedCategoryId}
-              selectedSortOption={selectedSortOption}
-              selectedDiscountOption={selectedDiscountOption}
-              selectedRegion={selectedRegion}
-              productRegions={mockProductRegions}
-              currentPage={currentPage}
-              productsPerPage={PRODUCTS_PER_PAGE}
-              now={filterNow}
-              onPageChange={setCurrentPage}
-            />
+            {productListContent}
           </section>
         </div>
       </main>

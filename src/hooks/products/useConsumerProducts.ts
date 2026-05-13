@@ -1,6 +1,5 @@
 'use client';
 
-import type { ProductListItemResponse } from '@/contracts/product';
 import {
   normalizeDiscountOptionId,
   normalizeSortOptionId,
@@ -9,6 +8,7 @@ import {
   type ProductSortOptionId,
 } from '@/lib/consumerProductFilters';
 import { isProductAvailable } from '@/lib/product';
+import type { Product } from '@/types';
 
 export const ALL_CATEGORY_ID = 'category-all';
 
@@ -21,7 +21,7 @@ const categoryIconMap: Record<string, string> = {
 };
 
 type UseConsumerProductsParams = {
-  products: ProductListItemResponse[];
+  products: Product[];
   selectedCategoryId: string;
   selectedSortOption: string;
   selectedDiscountOption: string;
@@ -94,7 +94,7 @@ export function useConsumerProducts({
 }
 
 export function getConsumerProductCategories(
-  products: ProductListItemResponse[]
+  products: Product[]
 ): ProductFilterCategory[] {
   return [
     { id: ALL_CATEGORY_ID, name: '전체', icon: '🔲' },
@@ -122,7 +122,7 @@ export function getConsumerProductCategories(
 }
 
 function matchesDiscountOption(
-  product: ProductListItemResponse,
+  product: Product,
   discountOption: ProductDiscountOptionId
 ) {
   if (discountOption === 'all') {
@@ -149,12 +149,12 @@ function matchesDiscountOption(
 }
 
 function compareProducts(
-  a: ProductListItemResponse,
-  b: ProductListItemResponse,
+  a: Product,
+  b: Product,
   sortOption: ProductSortOptionId
 ) {
   if (sortOption === 'deadline') {
-    return new Date(a.endAt).getTime() - new Date(b.endAt).getTime();
+    return a.endAt.getTime() - b.endAt.getTime();
   }
 
   if (sortOption === 'discount-rate') {
