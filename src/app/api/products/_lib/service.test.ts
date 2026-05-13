@@ -129,6 +129,24 @@ describe('getProducts', () => {
     );
   });
 
+  it('region과 availableOnly를 함께 사용해도 DB 조회 결과를 유지한다', async () => {
+    const supabase = buildSupabase({ data: [baseRow], error: null, count: 1 });
+
+    const result = await getProducts(supabase, {
+      page: 1,
+      pageSize: 20,
+      region: '서울 마포구',
+      availableOnly: true,
+    });
+
+    expect(supabase._chain.eq).toHaveBeenCalledWith(
+      'stores.region',
+      '서울 마포구'
+    );
+    expect(result.items).toHaveLength(1);
+    expect(result.items[0].id).toBe(baseRow.id);
+  });
+
   it('region 파라미터가 없으면 stores.region 필터를 적용하지 않는다', async () => {
     const supabase = buildSupabase({ data: [], error: null, count: 0 });
 

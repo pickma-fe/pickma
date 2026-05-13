@@ -49,8 +49,14 @@ export default function ConsumerPage() {
     region: selectedRegion,
     categoryId:
       selectedCategoryId === ALL_CATEGORY_ID ? undefined : selectedCategoryId,
-    discountOption: selectedDiscountOption,
-    sortOption: selectedSortOption,
+    discountOption:
+      selectedDiscountOption === DEFAULT_DISCOUNT_OPTION_ID
+        ? undefined
+        : selectedDiscountOption,
+    sortOption:
+      selectedSortOption === DEFAULT_SORT_OPTION_ID
+        ? undefined
+        : selectedSortOption,
     availableOnly: true,
   });
   const products = useMemo(() => productList?.items ?? [], [productList]);
