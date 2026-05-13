@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 
 import { Button } from '@/components/common/Button/Button';
 
@@ -22,15 +22,17 @@ export function StoreImageEditForm({
     currentImage ?? null
   );
   const [error, setError] = useState<string | null>(null);
+  const [isSubmitted, setIsSubmitted] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    const currentUrl = previewUrl;
     return () => {
-      if (previewUrl?.startsWith('blob:')) {
-        URL.revokeObjectURL(previewUrl);
+      if (currentUrl?.startsWith('blob:') && !isSubmitted) {
+        URL.revokeObjectURL(currentUrl);
       }
     };
-  }, [previewUrl]);
+  }, [previewUrl, isSubmitted]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -55,9 +57,17 @@ export function StoreImageEditForm({
 
   const handleSubmit = () => {
     if (previewUrl) {
+      setIsSubmitted(true);
       onSubmit(previewUrl);
     }
   };
+
+  const handleCancel = useCallback(() => {
+    if (previewUrl?.startsWith('blob:') && previewUrl !== currentImage) {
+      URL.revokeObjectURL(previewUrl);
+    }
+    onCancel();
+  }, [previewUrl, currentImage, onCancel]);
 
   const renderImage = () => {
     if (!previewUrl) {
@@ -80,7 +90,13 @@ export function StoreImageEditForm({
     }
 
     return (
-      <Image src={previewUrl} alt={storeName} fill className="object-cover" />
+      <Image
+        src={previewUrl}
+        alt={storeName}
+        fill
+        sizes="(max-width: 768px) 100vw, 500px"
+        className="object-cover"
+      />
     );
   };
 
@@ -114,7 +130,7 @@ export function StoreImageEditForm({
       </div>
 
       <div className="flex justify-end gap-2">
-        <Button variant="outline" color="gray" onClick={onCancel}>
+        <Button variant="outline" color="gray" onClick={handleCancel}>
           취소
         </Button>
         <Button onClick={handleSubmit} disabled={!previewUrl}>
