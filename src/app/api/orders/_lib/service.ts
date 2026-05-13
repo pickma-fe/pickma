@@ -2,12 +2,20 @@ import type { ValidationIssue } from '@/contracts/common';
 import type {
   CreateOrderRequest,
   CreateOrderResponse,
+  OrderDetailResponse,
+  OrderListParams,
+  OrderListResponse,
 } from '@/contracts/order';
 import { AppError } from '@/lib/errors/appError';
 import { ERROR_CODE } from '@/lib/errors/errorCodes';
 import { createServiceRoleClient } from '@/lib/supabase/service';
 
-import { buildOrderName, mapCreateOrderResponse } from './mapper';
+import {
+  buildOrderName,
+  mapCreateOrderResponse,
+  mapOrderDetailRow,
+  mapOrderListRow,
+} from './mapper';
 
 const ORDER_EXPIRES_MINUTES = 10;
 
@@ -40,6 +48,64 @@ function mapRpcError(message: string): AppError {
     return new AppError(ERROR_CODE.VALIDATION_ERROR, 400, undefined, details);
   }
   return new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
+}
+
+export async function getOrders(
+  userId: string,
+  params: OrderListParams
+): Promise<OrderListResponse> {
+  const supabase = createServiceRoleClient();
+  const offset = (params.page - 1) * params.pageSize;
+
+  let query = supabase
+    .from('orders')
+    .select(
+      'id, order_number, store_id, total_amount, discount_amount, payment_amount, status, pickup_at, pickup_service_date, store_order_number, pickup_number, expires_at, created_at, updated_at, stores(name)',
+      { count: 'exact' }
+    )
+    .eq('user_id', userId);
+
+  if (params.status) {
+    query = query.eq('status', params.status);
+  }
+
+  const { data, count, error } = await query
+    .order(params.sort === 'createdAt' ? 'created_at' : 'pickup_at', {
+      ascending: params.order === 'asc',
+    })
+    .range(offset, offset + params.pageSize - 1);
+
+  if (error) throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
+
+  const totalCount = count ?? 0;
+  return {
+    items: (data ?? []).map((row) => mapOrderListRow(row)),
+    page: params.page,
+    pageSize: params.pageSize,
+    totalCount,
+    totalPages: Math.ceil(totalCount / params.pageSize),
+  };
+}
+
+export async function getOrder(
+  userId: string,
+  orderId: string
+): Promise<OrderDetailResponse> {
+  const supabase = createServiceRoleClient();
+
+  const { data, error } = await supabase
+    .from('orders')
+    .select(
+      'id, order_number, store_id, total_amount, discount_amount, payment_amount, status, pickup_at, pickup_service_date, store_order_number, pickup_number, expires_at, cancelled_at, cancel_reason, picked_up_at, created_at, updated_at, stores(name), order_items(id, order_id, product_id, product_name, original_price, discount_price, quantity, subtotal, created_at)'
+    )
+    .eq('id', orderId)
+    .eq('user_id', userId)
+    .maybeSingle();
+
+  if (error) throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
+  if (!data) throw new AppError(ERROR_CODE.ORDER_NOT_FOUND, 404);
+
+  return mapOrderDetailRow(data);
 }
 
 export async function expireUserOrders(userId: string): Promise<void> {
