@@ -6,6 +6,7 @@ export interface MenuItemResponse {
   category: string;
   price: number;
   image?: string;
+  status: 'active' | 'inactive';
   createdAt: string;
   updatedAt: string;
 }
@@ -26,7 +27,8 @@ export const mockMenus: MenuItemResponse[] = [
     description: '신선한 햄과 치즈가 듬뿍 들어간 샌드위치',
     category: '샌드위치',
     price: 6800,
-    image: '/images/mock/menu-sandwich.jpg',
+    image: '/images/mock/menus/menu-sandwich.jpg',
+    status: 'active',
     createdAt: '2024-05-20T00:00:00.000Z',
     updatedAt: '2024-05-20T00:00:00.000Z',
   },
@@ -37,7 +39,8 @@ export const mockMenus: MenuItemResponse[] = [
     description: '부드러운 리코타 치즈와 닭가슴살 샐러드',
     category: '샐러드',
     price: 8900,
-    image: '/images/mock/menu-salad.jpg',
+    image: '/images/mock/menus/menu-salad.jpg',
+    status: 'active',
     createdAt: '2024-05-20T00:00:00.000Z',
     updatedAt: '2024-05-20T00:00:00.000Z',
   },
@@ -48,7 +51,8 @@ export const mockMenus: MenuItemResponse[] = [
     description: '깔끔하고 진한 아이스 아메리카노',
     category: '음료',
     price: 4500,
-    image: '/images/mock/menu-coffee.jpg',
+    image: '/images/mock/menus/menu-coffee.jpg',
+    status: 'active',
     createdAt: '2024-05-18T00:00:00.000Z',
     updatedAt: '2024-05-18T00:00:00.000Z',
   },
@@ -59,7 +63,8 @@ export const mockMenus: MenuItemResponse[] = [
     description: '부드러운 우유와 에스프레소의 조화',
     category: '음료',
     price: 4800,
-    image: '/images/mock/menu-latte.jpg',
+    image: '/images/mock/menus/menu-latte.jpg',
+    status: 'active',
     createdAt: '2024-05-18T00:00:00.000Z',
     updatedAt: '2024-05-18T00:00:00.000Z',
   },
@@ -70,7 +75,8 @@ export const mockMenus: MenuItemResponse[] = [
     description: '진한 크림치즈의 풍미가 가득한 케이크',
     category: '디저트',
     price: 6200,
-    image: '/images/mock/menu-cheesecake.jpg',
+    image: '/images/mock/menus/menu-cheesecake.jpg',
+    status: 'active',
     createdAt: '2024-05-15T00:00:00.000Z',
     updatedAt: '2024-05-15T00:00:00.000Z',
   },
@@ -81,7 +87,8 @@ export const mockMenus: MenuItemResponse[] = [
     description: '달콤한 초코칩이 가득한 쿠키',
     category: '디저트',
     price: 2500,
-    image: '/images/mock/menu-cookie.jpg',
+    image: '/images/mock/menus/menu-cookie.jpg',
+    status: 'active',
     createdAt: '2024-05-10T00:00:00.000Z',
     updatedAt: '2024-05-10T00:00:00.000Z',
   },
@@ -92,7 +99,8 @@ export const mockMenus: MenuItemResponse[] = [
     description: '신선한 오렌지로 만든 생과일 주스',
     category: '음료',
     price: 5000,
-    image: '/images/mock/menu-orange.jpg',
+    image: '/images/mock/menus/menu-orange.jpg',
+    status: 'inactive',
     createdAt: '2024-05-10T00:00:00.000Z',
     updatedAt: '2024-05-10T00:00:00.000Z',
   },
@@ -103,7 +111,8 @@ export const mockMenus: MenuItemResponse[] = [
     description: '달콤하고 부드러운 단호박 스프',
     category: '스프',
     price: 5500,
-    image: '/images/mock/menu-soup.jpg',
+    image: '/images/mock/menus/menu-soup.jpg',
+    status: 'active',
     createdAt: '2024-05-10T00:00:00.000Z',
     updatedAt: '2024-05-10T00:00:00.000Z',
   },
@@ -117,11 +126,6 @@ export const mockMenuList: MenuListResponse = {
   totalPages: 1,
 };
 
-export const MENU_CATEGORIES = [
-  '전체',
-  '샌드위치',
-  '샐러드',
-  '음료',
-  '디저트',
-  '스프',
-];
+export const MENU_CATEGORIES = ['샌드위치', '샐러드', '음료', '디저트', '스프'];
+
+export const MENU_CATEGORY_FILTERS = ['전체', ...MENU_CATEGORIES];
