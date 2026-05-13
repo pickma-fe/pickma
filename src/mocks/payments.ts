@@ -14,13 +14,13 @@ export const mockPreparePaymentResult: PreparePaymentResponse = {
 
 export const mockPaymentResponse: PaymentResponse = {
   id: 'payment-uuid-1',
-  orderId: 'order-uuid-1',
-  orderNumber: 'TEST-001',
+  orderId: 'order_1',
+  orderNumber: 'PM20260429A1B2C3D4E5',
   provider: 'toss',
-  providerPaymentKey: 'mock_ppk_1234567890_TEST-001',
-  providerOrderId: 'mock_poi_TEST-001',
+  providerPaymentKey: 'mock_ppk_1234567890_PM20260429A1B2C3D4E5',
+  providerOrderId: 'mock_poi_PM20260429A1B2C3D4E5',
   method: 'card',
-  amount: 5000,
+  amount: 7200,
   status: 'paid',
   paidAt: '2026-05-13T12:00:00.000Z',
   createdAt: '2026-05-13T12:00:00.000Z',
