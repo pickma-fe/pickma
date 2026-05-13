@@ -74,7 +74,7 @@ export async function confirmPayment(
 
   const { data: order, error } = await supabase
     .from('orders')
-    .select('payment_amount, status, expires_at')
+    .select('id, payment_amount, status, expires_at')
     .eq('order_number', body.orderNumber)
     .eq('user_id', userId)
     .maybeSingle();
@@ -85,6 +85,10 @@ export async function confirmPayment(
     throw new AppError(ERROR_CODE.INVALID_ORDER_STATUS, 409);
   }
   if (order.expires_at && new Date(order.expires_at) <= new Date()) {
+    const { error: expireError } = await supabase.rpc('expire_order', {
+      p_order_id: order.id,
+    });
+    if (expireError) throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
     throw new AppError(ERROR_CODE.ORDER_EXPIRED, 409);
   }
   if (order.payment_amount !== body.amount) {

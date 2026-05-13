@@ -12,6 +12,7 @@ vi.mock('./providers');
 const mockUserId = 'user-1';
 
 const mockOrderRow = {
+  id: 'order-uuid-1',
   order_number: 'PM2026TEST',
   payment_amount: 5000,
   status: 'payment_pending',
@@ -166,7 +167,7 @@ describe('confirmPayment', () => {
     ).rejects.toMatchObject({ code: ERROR_CODE.INVALID_ORDER_STATUS });
   });
 
-  it('만료된 주문 → ORDER_EXPIRED', async () => {
+  it('만료된 주문 → expire_order RPC 호출 후 ORDER_EXPIRED', async () => {
     const client = makeClient({
       orderData: { ...mockOrderRow, expires_at: '2020-01-01T00:00:00.000Z' },
     });
@@ -180,6 +181,26 @@ describe('confirmPayment', () => {
         amount: 5000,
       })
     ).rejects.toMatchObject({ code: ERROR_CODE.ORDER_EXPIRED });
+    expect(client.rpc).toHaveBeenCalledWith('expire_order', {
+      p_order_id: 'order-uuid-1',
+    });
+  });
+
+  it('만료된 주문, expire_order RPC 실패 → INTERNAL_SERVER_ERROR', async () => {
+    const client = makeClient({
+      orderData: { ...mockOrderRow, expires_at: '2020-01-01T00:00:00.000Z' },
+      rpcError: { message: 'db error' },
+    });
+    vi.mocked(createServiceRoleClient).mockReturnValue(
+      client as unknown as ReturnType<typeof createServiceRoleClient>
+    );
+    await expect(
+      confirmPayment(mockUserId, {
+        provider: 'toss',
+        orderNumber: 'PM2026TEST',
+        amount: 5000,
+      })
+    ).rejects.toMatchObject({ code: ERROR_CODE.INTERNAL_SERVER_ERROR });
   });
 
   it('amount 불일치 → PAYMENT_AMOUNT_MISMATCH', async () => {
