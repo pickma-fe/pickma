@@ -24,6 +24,7 @@ const regionItems = [
 ];
 
 const PRODUCTS_PER_PAGE = 10;
+const PRODUCT_LIST_REFRESH_INTERVAL_MS = 60_000;
 
 export default function ConsumerPage() {
   const router = useRouter();
@@ -84,6 +85,17 @@ export default function ConsumerPage() {
       window.clearTimeout(timerId);
     };
   }, [filterNow, products, refetchProducts]);
+
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      setFilterNow(Date.now());
+      void refetchProducts();
+    }, PRODUCT_LIST_REFRESH_INTERVAL_MS);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, [refetchProducts]);
 
   const handleCategoryChange = (categoryId: string) => {
     setFilterNow(Date.now());
