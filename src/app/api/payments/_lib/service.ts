@@ -81,6 +81,9 @@ export async function confirmPayment(
 
   if (error) throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
   if (!order) throw new AppError(ERROR_CODE.ORDER_NOT_FOUND, 404);
+  if (order.status === 'expired') {
+    throw new AppError(ERROR_CODE.ORDER_EXPIRED, 409);
+  }
   if (order.status !== 'payment_pending') {
     throw new AppError(ERROR_CODE.INVALID_ORDER_STATUS, 409);
   }

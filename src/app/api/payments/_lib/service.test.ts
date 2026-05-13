@@ -151,6 +151,22 @@ describe('confirmPayment', () => {
     );
   });
 
+  it('status가 expired → ORDER_EXPIRED', async () => {
+    const client = makeClient({
+      orderData: { ...mockOrderRow, status: 'expired' },
+    });
+    vi.mocked(createServiceRoleClient).mockReturnValue(
+      client as unknown as ReturnType<typeof createServiceRoleClient>
+    );
+    await expect(
+      confirmPayment(mockUserId, {
+        provider: 'toss',
+        orderNumber: 'PM2026TEST',
+        amount: 5000,
+      })
+    ).rejects.toMatchObject({ code: ERROR_CODE.ORDER_EXPIRED });
+  });
+
   it('status가 payment_pending 아님 → INVALID_ORDER_STATUS', async () => {
     const client = makeClient({
       orderData: { ...mockOrderRow, status: 'reserved' },
