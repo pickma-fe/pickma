@@ -31,7 +31,9 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
   const { pathname, search } = request.nextUrl;
   const next = encodeURIComponent(pathname + search);
 
-  if (matchesAnyPrefix(pathname, ADMIN_PROTECTED)) {
+  const isMock = process.env.API_MOCK_ENABLED === 'true';
+
+  if (!isMock && matchesAnyPrefix(pathname, ADMIN_PROTECTED)) {
     if (!user) {
       return NextResponse.redirect(
         new URL(`/?auth=required&next=${next}`, request.url)
