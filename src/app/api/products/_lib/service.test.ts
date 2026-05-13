@@ -52,6 +52,12 @@ function buildChain(result: {
     order: vi.fn(),
     range: vi.fn().mockResolvedValue(result),
     single: vi.fn().mockResolvedValue(result),
+    then: vi.fn(
+      (
+        onFulfilled?: (value: typeof result) => unknown,
+        onRejected?: (reason: unknown) => unknown
+      ) => Promise.resolve(result).then(onFulfilled, onRejected)
+    ),
   };
   chain.select.mockReturnValue(chain);
   chain.eq.mockReturnValue(chain);
@@ -132,16 +138,30 @@ describe('getProducts', () => {
     ).toBe(true);
   });
 
-  it('페이지네이션: range를 올바른 인덱스로 호출한다', async () => {
-    const supabase = buildSupabase({ data: [], error: null, count: 0 });
+  it('페이지네이션: 서버에서 필터링한 결과를 올바른 인덱스로 자른다', async () => {
+    const rows = Array.from({ length: 8 }, (_, index) => ({
+      ...baseRow,
+      id: `00000000-0000-4000-8000-00000000005${index}`,
+      end_at: `2099-12-31T23:5${index}:59.000Z`,
+    }));
+    const supabase = buildSupabase({ data: rows, error: null, count: 8 });
 
-    await getProducts(supabase, { page: 2, pageSize: 5 });
+    const result = await getProducts(supabase, {
+      page: 2,
+      pageSize: 5,
+      availableOnly: true,
+    });
 
-    expect(supabase._chain.range).toHaveBeenCalledWith(5, 9);
+    expect(result.items).toHaveLength(3);
+    expect(result.items[0].id).toBe('00000000-0000-4000-8000-000000000055');
   });
 
   it('totalPages를 올바르게 계산한다', async () => {
-    const supabase = buildSupabase({ data: [], error: null, count: 23 });
+    const rows = Array.from({ length: 23 }, (_, index) => ({
+      ...baseRow,
+      id: `product_${index}`,
+    }));
+    const supabase = buildSupabase({ data: rows, error: null, count: 23 });
 
     const result = await getProducts(supabase, { page: 1, pageSize: 10 });
 

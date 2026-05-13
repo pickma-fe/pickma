@@ -1,24 +1,14 @@
 'use client';
 
 import {
+  ALL_CATEGORY_ID,
   normalizeDiscountOptionId,
   normalizeSortOptionId,
   type ProductDiscountOptionId,
-  type ProductFilterCategory,
   type ProductSortOptionId,
 } from '@/lib/consumerProductFilters';
 import { isProductAvailable } from '@/lib/product';
 import type { Product } from '@/types';
-
-export const ALL_CATEGORY_ID = 'category-all';
-
-const categoryIconMap: Record<string, string> = {
-  category_bakery: '🥖',
-  category_salad: '🥗',
-  category_lunchbox: '🍱',
-  category_cafe: '☕',
-  category_snack: '🍚',
-};
 
 type UseConsumerProductsParams = {
   products: Product[];
@@ -91,34 +81,6 @@ export function useConsumerProducts({
     totalPages,
     currentPage: safeCurrentPage,
   };
-}
-
-export function getConsumerProductCategories(
-  products: Product[]
-): ProductFilterCategory[] {
-  return [
-    { id: ALL_CATEGORY_ID, name: '전체', icon: '🔲' },
-    ...Array.from(
-      new Map(
-        products.flatMap((product) => {
-          if (!product.categoryId || !product.categoryName) {
-            return [];
-          }
-
-          return [
-            [
-              product.categoryId,
-              {
-                id: product.categoryId,
-                name: product.categoryName,
-                icon: categoryIconMap[product.categoryId] ?? '🍽️',
-              },
-            ] as const,
-          ];
-        })
-      ).values()
-    ),
-  ];
 }
 
 function matchesDiscountOption(

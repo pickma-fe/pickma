@@ -4,6 +4,10 @@ export interface ProductListParams {
   page: number;
   pageSize: number;
   region?: string;
+  categoryId?: string;
+  discountOption?: string;
+  sortOption?: string;
+  availableOnly?: boolean;
 }
 
 export interface ProductListItemResponse {

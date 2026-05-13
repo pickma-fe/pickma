@@ -4,13 +4,11 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 
 import {
+  ALL_CATEGORY_ID,
+  CONSUMER_PRODUCT_CATEGORIES,
   DEFAULT_DISCOUNT_OPTION_ID,
   DEFAULT_SORT_OPTION_ID,
 } from '@/lib/consumerProductFilters';
-import {
-  ALL_CATEGORY_ID,
-  getConsumerProductCategories,
-} from '@/hooks/products/useConsumerProducts';
 import { useProducts } from '@/hooks/products/useProducts';
 import { Footer } from '@/components/common';
 import { ConsumerHeader } from '@/components/consumer/ConsumerHeader';
@@ -20,13 +18,12 @@ import { ProductFilterSidebar } from '@/components/consumer/ProductFilterSidebar
 import { PromotionCarousel } from '@/components/consumer/PromotionCarousel';
 
 const regionItems = [
-  { label: '서울 강남구 역삼동', value: '서울 강남구 역삼동' },
-  { label: '서울 성동구 왕십리', value: '서울 성동구 왕십리' },
-  { label: '서울 마포구 합정동', value: '서울 마포구 합정동' },
+  { label: '서울 강남구 역삼동', value: '서울 강남구' },
+  { label: '서울 성동구 왕십리', value: '서울 성동구' },
+  { label: '서울 마포구 합정동', value: '서울 마포구' },
 ];
 
 const PRODUCTS_PER_PAGE = 10;
-const API_PRODUCTS_PAGE_SIZE = 100;
 
 export default function ConsumerPage() {
   const router = useRouter();
@@ -45,13 +42,18 @@ export default function ConsumerPage() {
     data: productList,
     isError: isProductsError,
     isLoading: isProductsLoading,
+    refetch: refetchProducts,
   } = useProducts({
-    page: 1,
-    pageSize: API_PRODUCTS_PAGE_SIZE,
+    page: currentPage,
+    pageSize: PRODUCTS_PER_PAGE,
     region: selectedRegion,
+    categoryId:
+      selectedCategoryId === ALL_CATEGORY_ID ? undefined : selectedCategoryId,
+    discountOption: selectedDiscountOption,
+    sortOption: selectedSortOption,
+    availableOnly: true,
   });
   const products = useMemo(() => productList?.items ?? [], [productList]);
-  const productCategories = getConsumerProductCategories(products);
 
   useEffect(() => {
     const currentTime = Date.now();
@@ -67,6 +69,7 @@ export default function ConsumerPage() {
     const timerId = window.setTimeout(
       () => {
         setFilterNow(Date.now());
+        void refetchProducts();
       },
       nextEndAt - currentTime + 1000
     );
@@ -74,7 +77,7 @@ export default function ConsumerPage() {
     return () => {
       window.clearTimeout(timerId);
     };
-  }, [filterNow, products]);
+  }, [filterNow, products, refetchProducts]);
 
   const handleCategoryChange = (categoryId: string) => {
     setFilterNow(Date.now());
@@ -146,12 +149,9 @@ export default function ConsumerPage() {
     return (
       <ConsumerProductList
         products={products}
-        selectedCategoryId={selectedCategoryId}
-        selectedSortOption={selectedSortOption}
-        selectedDiscountOption={selectedDiscountOption}
+        totalCount={productList?.totalCount ?? 0}
+        totalPages={productList?.totalPages ?? 0}
         currentPage={currentPage}
-        productsPerPage={PRODUCTS_PER_PAGE}
-        now={filterNow}
         onPageChange={setCurrentPage}
       />
     );
@@ -175,7 +175,7 @@ export default function ConsumerPage() {
       <main className="min-h-screen bg-white">
         <div className="mx-auto grid max-w-450 grid-cols-1 lg:grid-cols-[220px_1fr]">
           <ProductFilterSidebar
-            categories={productCategories}
+            categories={CONSUMER_PRODUCT_CATEGORIES}
             selectedCategoryId={selectedCategoryId}
             selectedSortOption={selectedSortOption}
             selectedDiscountOption={selectedDiscountOption}
