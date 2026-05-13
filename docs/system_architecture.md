@@ -272,7 +272,7 @@ sequenceDiagram
 - `/payment/success` 페이지: URL 파라미터(`orderNumber`, `provider`, `amount`)를 받아 `POST /api/payments/confirm`을 호출한다. 성공 시 `window.opener.postMessage({ success: true, orderNumber })`를 보내고 팝업을 닫는다. 실패 시 `window.opener.postMessage({ success: false })`를 보내고 팝업을 닫는다.
 - 부모 창: `message` 이벤트를 수신해 `success: true`이면 주문 상세 페이지로 이동한다 (프론트 결제 연동 phase에서 구현).
 - `POST /api/payments/confirm`: provider adapter를 통해 승인 후, `confirm_payment` DB RPC로 주문을 atomic하게 확정한다.
-- provider: 결제 승인 주체 (`mock | toss | kakao_pay | naver_pay`). P0에서는 provider 관계없이 mock adapter가 동작한다. 실제 provider adapter는 후속 phase에서 추가한다.
+- provider: 결제 승인 주체 (`toss | kakao_pay | naver_pay`). 실 provider adapter 연결 전까지는 provider 관계없이 mock adapter가 동작한다. 실제 provider adapter는 후속 phase에서 추가한다.
 - `orderNumber`는 PickMa 내부 주문 식별자이며, provider별 외부 주문 필드명은 adapter 내부에서만 다룬다.
 - `POST /api/payments/webhook`: 결제 상태 동기화용 endpoint, MVP 이후 우선순위 (P1).
 - 주문 생성, 결제 확정, 예약 해제에 따른 재고 변경은 Postgres RPC/transaction으로 atomic하게 처리한다.
