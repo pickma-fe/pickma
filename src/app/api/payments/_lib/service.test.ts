@@ -92,7 +92,7 @@ describe('preparePayment', () => {
     ).rejects.toMatchObject({ code: ERROR_CODE.ORDER_NOT_FOUND });
   });
 
-  it('만료된 주문 → ORDER_NOT_FOUND', async () => {
+  it('만료된 주문 → expire_order RPC 호출 후 ORDER_EXPIRED', async () => {
     const client = makeClient({
       orderData: { ...mockOrderRow, expires_at: '2020-01-01T00:00:00.000Z' },
     });
@@ -105,7 +105,27 @@ describe('preparePayment', () => {
         { provider: 'toss', orderNumber: 'PM2026TEST' },
         'http://localhost/payment/success'
       )
-    ).rejects.toMatchObject({ code: ERROR_CODE.ORDER_NOT_FOUND });
+    ).rejects.toMatchObject({ code: ERROR_CODE.ORDER_EXPIRED });
+    expect(client.rpc).toHaveBeenCalledWith('expire_order', {
+      p_order_id: 'order-uuid-1',
+    });
+  });
+
+  it('만료된 주문, expire_order RPC 실패 → INTERNAL_SERVER_ERROR', async () => {
+    const client = makeClient({
+      orderData: { ...mockOrderRow, expires_at: '2020-01-01T00:00:00.000Z' },
+      rpcError: { message: 'db error' },
+    });
+    vi.mocked(createServiceRoleClient).mockReturnValue(
+      client as unknown as ReturnType<typeof createServiceRoleClient>
+    );
+    await expect(
+      preparePayment(
+        mockUserId,
+        { provider: 'toss', orderNumber: 'PM2026TEST' },
+        'http://localhost/payment/success'
+      )
+    ).rejects.toMatchObject({ code: ERROR_CODE.INTERNAL_SERVER_ERROR });
   });
 
   it('DB 오류 → INTERNAL_SERVER_ERROR', async () => {

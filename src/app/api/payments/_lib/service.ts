@@ -35,7 +35,7 @@ export async function preparePayment(
 
   const { data: order, error } = await supabase
     .from('orders')
-    .select('order_number, payment_amount, status, expires_at')
+    .select('id, order_number, payment_amount, status, expires_at')
     .eq('order_number', body.orderNumber)
     .eq('user_id', userId)
     .eq('status', 'payment_pending')
@@ -44,7 +44,11 @@ export async function preparePayment(
   if (error) throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
   if (!order) throw new AppError(ERROR_CODE.ORDER_NOT_FOUND, 404);
   if (order.expires_at && new Date(order.expires_at) <= new Date()) {
-    throw new AppError(ERROR_CODE.ORDER_NOT_FOUND, 404);
+    const { error: expireError } = await supabase.rpc('expire_order', {
+      p_order_id: order.id,
+    });
+    if (expireError) throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
+    throw new AppError(ERROR_CODE.ORDER_EXPIRED, 409);
   }
 
   const adapter = getPaymentProviderAdapter(body.provider);
