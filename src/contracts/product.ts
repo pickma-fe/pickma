@@ -1,11 +1,18 @@
 import type { PaginatedResult } from './common';
 
+export type ProductDiscountOption =
+  | 'all'
+  | 'over-40'
+  | '30-to-40'
+  | '20-to-30'
+  | 'under-20';
+
 export interface ProductListParams {
   page: number;
   pageSize: number;
   region?: string;
   categoryId?: string;
-  discountOption?: string;
+  discountOption?: ProductDiscountOption;
   sort?: 'endAt' | 'discountRate' | 'discountPrice';
   order?: 'asc' | 'desc';
   availableOnly?: boolean;
