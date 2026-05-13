@@ -440,13 +440,12 @@ export interface OrderDetailResponse extends OrderListItemResponse {
 
 ## 5. Payments
 
-| PRD ID     | 기능          | Method | API                               | Auth       | Priority    |
-| ---------- | ------------- | ------ | --------------------------------- | ---------- | ----------- |
-| C-ORDER-03 | 결제 준비     | POST   | `/api/payments/prepare`           | user       | P0          |
-| C-ORDER-03 | 결제 승인     | POST   | `/api/payments/confirm`           | user       | P0          |
-| -          | Mock Checkout | GET    | `/api/payments/mock/checkout`     | -          | P0 (개발용) |
-| -          | 결제 Webhook  | POST   | `/api/payments/webhook`           | external   | P1          |
-| C-ORDER-04 | 결제 취소     | POST   | `/api/payments/:paymentId/cancel` | user/admin | P1          |
+| PRD ID     | 기능         | Method | API                               | Auth       | Priority |
+| ---------- | ------------ | ------ | --------------------------------- | ---------- | -------- |
+| C-ORDER-03 | 결제 준비    | POST   | `/api/payments/prepare`           | user       | P0       |
+| C-ORDER-03 | 결제 승인    | POST   | `/api/payments/confirm`           | user       | P0       |
+| -          | 결제 Webhook | POST   | `/api/payments/webhook`           | external   | P1       |
+| C-ORDER-04 | 결제 취소    | POST   | `/api/payments/:paymentId/cancel` | user/admin | P1       |
 
 ### 5.0 Provider 구조
 
@@ -487,14 +486,11 @@ Behavior:
 - 요청 사용자가 해당 주문의 주문자인지 `orderNumber + userId` 기준으로 확인한다.
 - 주문 상태가 `payment_pending`인지, 만료되지 않았는지 검증한다.
 - provider별 adapter를 통해 결제 시작 정보를 만들고, 공통 `flow: 'redirect'`, `redirectUrl`로 응답한다.
-- 실제 provider adapter 연결 전까지는 provider 관계없이 `GET /api/payments/mock/checkout?orderNumber=...` URL을 반환한다.
+- `redirectUrl`은 `/payment/success?orderNumber=...&provider=...&amount=...` 형태로 반환한다.
+- 클라이언트는 `redirectUrl`을 팝업 창(`window.open`)으로 열어 결제 흐름을 진행한다.
+- 실제 provider 연결 시 `redirectUrl`은 외부 결제 창 URL로 교체된다. 클라이언트 소비 방식(팝업)은 동일하게 유지한다.
 
-### 5.2 `GET /api/payments/mock/checkout`
-
-- `orderNumber` query 파라미터를 검증하고 mock checkout 응답을 제공한다.
-- 실제 결제 UI가 아니라 redirect/confirm 흐름을 수동으로 검증하기 위한 endpoint이다.
-
-### 5.3 `POST /api/payments/confirm`
+### 5.2 `POST /api/payments/confirm`
 
 Request:
 
@@ -523,7 +519,7 @@ Behavior:
 - provider Secret key는 서버 adapter 내부에서만 사용한다.
 - `payments` DB schema는 provider 결제 기록과 주문 확정에 집중한다. 수수료/정산 필드는 후속 Settlement/Fee Policy phase 범위이다.
 
-### 5.4 `PaymentResponse`
+### 5.3 `PaymentResponse`
 
 ```ts
 export interface PaymentResponse {
@@ -550,7 +546,7 @@ export interface PaymentResponse {
 - `providerOrderId`: provider에 전달한 주문 식별자 (`payments.provider_order_id`)
 - `providerPaymentKey`: provider 결제 키 (`payments.provider_payment_key`)
 
-### 5.5 결제 만료 처리
+### 5.4 결제 만료 처리
 
 - 만료 대상은 `payment_pending` 주문만 해당한다.
 - 초기 구현은 API 진입 시 lazy cleanup과 결제 confirm 시점 검사를 함께 사용한다.
@@ -564,7 +560,7 @@ DB source:
 - `payments`
 - `products`
 
-### 5.6 `POST /api/payments/webhook`
+### 5.5 `POST /api/payments/webhook`
 
 - Toss가 호출하는 결제 상태 동기화 endpoint이다.
 - MVP에서는 명세만 유지하고 구현 우선순위는 P1로 둔다.

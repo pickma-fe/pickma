@@ -246,9 +246,9 @@ TanStack Query Provider는 `src/app/providers.tsx`에 둔다. `providers.tsx`는
 ```mermaid
 sequenceDiagram
     participant U as 사용자
-    participant C as Client
+    participant C as 부모 창 (Client)
+    participant W as 팝업 창 (/payment/success)
     participant A as PickMa API
-    participant P as Payment Provider
     participant D as Supabase DB
 
     U->>C: 상품/수량/픽업시간 선택
@@ -256,21 +256,23 @@ sequenceDiagram
     A->>D: 주문 생성, 재고 임시 예약
     A->>C: orderNumber, orderName, amount, expiresAt 반환
     C->>A: POST /api/payments/prepare (provider, orderNumber)
-    A->>P: provider adapter prepare
-    A->>C: flow: 'redirect', redirectUrl 반환
-    C-->>P: redirectUrl로 이동 (새 창 또는 현재 탭, UI phase에서 결정)
-    P->>C: confirm 페이지로 redirect
-    C->>A: POST /api/payments/confirm (provider, orderNumber, amount)
-    A->>P: provider adapter confirm
-    P->>A: 승인 결과
+    A->>C: flow: 'redirect', redirectUrl: /payment/success?... 반환
+    C->>W: window.open(redirectUrl) 팝업 열기
+    W->>A: POST /api/payments/confirm (provider, orderNumber, amount)
     A->>D: confirm_payment RPC (payment 저장, order 확정, 재고 확정)
-    A->>C: 예약 완료 응답 (200)
+    A->>W: 200 OK
+    W->>C: window.opener.postMessage({ success: true, orderNumber })
+    W->>W: window.close()
+    C->>C: 주문 상세 페이지로 이동
 ```
 
 - `POST /api/orders`: 주문 생성과 재고 임시 예약. `orderNumber`(PickMa 내부 식별자)를 반환한다.
-- `POST /api/payments/prepare`: provider adapter를 통해 결제 시작 정보를 만들고, `flow: 'redirect'`, `redirectUrl`을 반환한다. `redirectUrl` 소비 방식은 프론트 UI phase에서 결정한다.
+- `POST /api/payments/prepare`: provider adapter를 통해 결제 시작 정보를 만들고, `flow: 'redirect'`, `redirectUrl`을 반환한다. mock provider는 `/payment/success?orderNumber=...&provider=...&amount=...`를 반환한다. 실제 provider는 외부 결제 창 URL을 반환한다.
+- 클라이언트는 `redirectUrl`을 팝업 창(`window.open`)으로 열어 결제 흐름을 진행한다.
+- `/payment/success` 페이지: URL 파라미터(`orderNumber`, `provider`, `amount`)를 받아 `POST /api/payments/confirm`을 호출한다. 성공 시 `window.opener.postMessage({ success: true, orderNumber })`를 보내고 팝업을 닫는다. 실패 시 `window.opener.postMessage({ success: false })`를 보내고 팝업을 닫는다.
+- 부모 창: `message` 이벤트를 수신해 `success: true`이면 주문 상세 페이지로 이동한다 (프론트 결제 연동 phase에서 구현).
 - `POST /api/payments/confirm`: provider adapter를 통해 승인 후, `confirm_payment` DB RPC로 주문을 atomic하게 확정한다.
-- provider: 결제 승인 주체 (`mock | toss | kakao_pay | naver_pay`). P0에서는 mock provider만 실제 동작한다.
+- provider: 결제 승인 주체 (`mock | toss | kakao_pay | naver_pay`). P0에서는 provider 관계없이 mock adapter가 동작한다. 실제 provider adapter는 후속 phase에서 추가한다.
 - `orderNumber`는 PickMa 내부 주문 식별자이며, provider별 외부 주문 필드명은 adapter 내부에서만 다룬다.
 - `POST /api/payments/webhook`: 결제 상태 동기화용 endpoint, MVP 이후 우선순위 (P1).
 - 주문 생성, 결제 확정, 예약 해제에 따른 재고 변경은 Postgres RPC/transaction으로 atomic하게 처리한다.
@@ -320,6 +322,8 @@ src/
     (admin)/admin/
     auth/
       reset-password/
+    payment/
+      success/
     api/
       _lib/
       products/
