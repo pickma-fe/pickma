@@ -1,8 +1,10 @@
 'use client';
 
 import Image from 'next/image';
+import Link from 'next/link';
 import { useState } from 'react';
 
+import { useMenuStore } from '@/stores/menuStore';
 import { Badge } from '@/components/common/Badge/Badge';
 import { Button } from '@/components/common/Button/Button';
 import { Dropdown } from '@/components/common/Dropdown/Dropdown';
@@ -20,6 +22,7 @@ const PAGE_SIZE_OPTIONS = [
 ];
 
 export function MenuTable({ menus }: MenuTableProps) {
+  const { deleteMenu } = useMenuStore();
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
@@ -29,7 +32,13 @@ export function MenuTable({ menus }: MenuTableProps) {
 
   const handlePageSizeChange = (value: string) => {
     setPageSize(Number(value));
-    setCurrentPage(1); // 페이지 사이즈 변경 시 1페이지로 이동
+    setCurrentPage(1);
+  };
+
+  const handleDelete = (id: string, name: string) => {
+    if (confirm(`"${name}" 메뉴를 삭제하시겠습니까?`)) {
+      deleteMenu(id);
+    }
   };
 
   const formatPrice = (price: number) => {
@@ -94,6 +103,7 @@ export function MenuTable({ menus }: MenuTableProps) {
                           src={menu.image}
                           alt={menu.name}
                           fill
+                          sizes="56px"
                           className="object-cover"
                         />
                       ) : (
@@ -126,15 +136,20 @@ export function MenuTable({ menus }: MenuTableProps) {
                   {formatDate(menu.updatedAt)}
                 </td>
                 <td className="px-4 py-4 whitespace-nowrap">
-                  <Button
-                    variant="outline"
-                    color="gray"
-                    onClick={() => {
-                      // TODO: 메뉴 수정 모달 또는 페이지
-                    }}
-                  >
-                    수정
-                  </Button>
+                  <div className="flex gap-2">
+                    <Link href={`/seller/menu/${menu.id}/edit`}>
+                      <Button variant="outline" color="gray">
+                        수정
+                      </Button>
+                    </Link>
+                    <Button
+                      variant="outline"
+                      color="danger"
+                      onClick={() => handleDelete(menu.id, menu.name)}
+                    >
+                      삭제
+                    </Button>
+                  </div>
                 </td>
               </tr>
             ))}
@@ -142,8 +157,6 @@ export function MenuTable({ menus }: MenuTableProps) {
         </table>
       </div>
 
-      {/* Pagination */}
-      {/* Pagination */}
       <div className="relative flex items-center justify-center border-t border-gray-200 px-4 py-4">
         <Pagination
           totalPages={totalPages}

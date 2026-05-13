@@ -1,9 +1,10 @@
 'use client';
 
 import { Package, ShoppingBag, PackageX } from 'lucide-react';
+import Link from 'next/link';
 import { useState, useMemo } from 'react';
 
-import { useSellerMenus } from '@/hooks/seller/menus/useSellerMenus';
+import { useMenuStore } from '@/stores/menuStore';
 import { Button } from '@/components/common/Button/Button';
 import { Section } from '@/components/common/Section/Section';
 
@@ -11,11 +12,10 @@ import { MenuFilter } from './MenuFilter';
 import { MenuTable } from './MenuTable';
 
 export function MenuManageContent() {
-  const { data, isLoading } = useSellerMenus();
+  const { menus } = useMenuStore();
   const [selectedCategory, setSelectedCategory] = useState('전체');
   const [searchKeyword, setSearchKeyword] = useState('');
 
-  const menus = useMemo(() => data?.items ?? [], [data?.items]);
   const categories = useMemo(() => {
     const uniqueCategories = [...new Set(menus.map((menu) => menu.category))];
     return ['전체', ...uniqueCategories];
@@ -37,14 +37,6 @@ export function MenuManageContent() {
   const totalCount = menus.length;
   const activeCount = totalCount;
   const inactiveCount = 0;
-
-  const handleAddMenu = () => {
-    // TODO: 메뉴 등록 페이지 이동
-  };
-
-  if (isLoading) {
-    return <div className="p-8 text-center text-gray-500">로딩 중...</div>;
-  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -108,7 +100,9 @@ export function MenuManageContent() {
           onCategoryChange={setSelectedCategory}
           onSearchChange={setSearchKeyword}
         />
-        <Button onClick={handleAddMenu}>+ 메뉴 등록</Button>
+        <Link href="/seller/menu/new">
+          <Button>+ 메뉴 등록</Button>
+        </Link>
       </div>
 
       <MenuTable menus={filteredMenus} />
