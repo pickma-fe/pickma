@@ -503,7 +503,7 @@ export type ConfirmPaymentRequest = {
 // 후속 phase에서 provider별 union member 추가
 ```
 
-Response: `200 { data: undefined }`
+Response: `200 { data: null }`
 
 Behavior:
 
