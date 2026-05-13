@@ -5,6 +5,8 @@ import type {
   OrderListResponse,
 } from '@/contracts/order';
 
+import { mockPaymentResponse } from './payments';
+
 export const mockCreatedOrder: CreateOrderResponse = {
   id: 'order_1',
   orderNumber: 'PM20260429A1B2C3D4E5',
@@ -65,6 +67,7 @@ export const mockOrders: OrderListItemResponse[] = [
 export const mockOrderDetail: OrderDetailResponse = {
   ...mockOrders[0],
   items: mockOrderItems,
+  payment: mockPaymentResponse,
 };
 
 export const mockOrderList: OrderListResponse = {
