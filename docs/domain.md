@@ -269,11 +269,11 @@ export interface CreatedOrderPaymentInfo {
 
 ## 7. Payment
 
-- provider: 결제 승인 주체 (`mock | toss | kakao_pay | naver_pay`)
+- provider: 결제 승인 주체 (`toss | kakao_pay | naver_pay`)
 - method: 사용자가 선택한 결제 수단 (`card | virtual_account | mobile | easy_pay`)
 
 ```ts
-export type PaymentProvider = 'mock' | 'toss' | 'kakao_pay' | 'naver_pay';
+export type PaymentProvider = 'toss' | 'kakao_pay' | 'naver_pay';
 
 export type PaymentMethod = 'card' | 'virtual_account' | 'mobile' | 'easy_pay';
 

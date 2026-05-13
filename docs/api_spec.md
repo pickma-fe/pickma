@@ -451,10 +451,11 @@ export interface OrderDetailResponse extends OrderListItemResponse {
 ### 5.0 Provider 구조
 
 - PickMa 내부 주문 식별자는 `orderNumber`(`orders.order_number`)를 사용한다.
-- provider: 결제 승인 주체 (`mock | toss | kakao_pay | naver_pay`)
+- provider: 결제 승인 주체 (`toss | kakao_pay | naver_pay`)
 - method: 사용자가 선택한 결제 수단 (`card | virtual_account | mobile | easy_pay`)
 - Toss의 `orderId`, KakaoPay의 `partner_order_id` 등 외부 필드명은 adapter 내부에서만 다룬다.
-- P0에서는 mock provider만 실제 동작하고, 미구현 provider는 `NOT_IMPLEMENTED` 501을 반환한다.
+- `API_MOCK_ENABLED=true`이면 provider 관계없이 실제 provider API 호출 없이 mock 흐름으로 동작한다.
+- `API_MOCK_ENABLED=false`이면 미구현 provider는 `NOT_IMPLEMENTED` 501을 반환한다.
 - 실제 provider Secret key는 서버 adapter 내부에서만 사용한다.
 - Toss/KakaoPay/NaverPay 실제 연결, webhook, cancel/refund는 후속 phase 범위이다.
 
@@ -487,7 +488,7 @@ Behavior:
 - 요청 사용자가 해당 주문의 주문자인지 `orderNumber + userId` 기준으로 확인한다.
 - 주문 상태가 `payment_pending`인지, 만료되지 않았는지 검증한다.
 - provider별 adapter를 통해 결제 시작 정보를 만들고, 공통 `flow: 'redirect'`, `redirectUrl`로 응답한다.
-- mock provider는 `GET /api/payments/mock/checkout?orderNumber=...` URL을 반환한다.
+- `API_MOCK_ENABLED=true`이면 provider 관계없이 `GET /api/payments/mock/checkout?orderNumber=...` URL을 반환한다.
 
 ### 5.2 `GET /api/payments/mock/checkout`
 
@@ -502,11 +503,11 @@ Request:
 
 ```ts
 export type ConfirmPaymentRequest = {
-  provider: 'mock';
+  provider: PaymentProvider;
   orderNumber: string;
   amount: number;
 };
-// 후속 phase에서 toss | kakao_pay | naver_pay union member 추가
+// 후속 phase에서 provider별 union member 추가
 ```
 
 Response: `200 { data: undefined }`

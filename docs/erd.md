@@ -235,23 +235,23 @@
 
 ## 2.9 payments (결제)
 
-| 컬럼명                 | 타입         | 제약조건                 | 설명                                |
-| ---------------------- | ------------ | ------------------------ | ----------------------------------- |
-| `id`                   | uuid         | PK                       | 결제 ID                             |
-| `order_id`             | uuid         | FK, UNIQUE, NOT NULL     | 주문                                |
-| `provider`             | enum         | NOT NULL, DEFAULT 'mock' | 결제 승인 주체                      |
-| `provider_payment_key` | varchar(200) |                          | provider 결제 키                    |
-| `provider_order_id`    | varchar(200) |                          | provider에 전달한 주문 식별자       |
-| `method`               | enum         | NOT NULL                 | 결제 수단                           |
-| `method_detail`        | text         |                          | provider 결제수단 상세 (예: 카드명) |
-| `amount`               | int          | NOT NULL                 | 금액                                |
-| `status`               | enum         | NOT NULL                 | 상태                                |
-| `paid_at`              | timestamp    |                          | 결제 시간                           |
-| `refunded_at`          | timestamp    |                          | 환불 시간                           |
-| `refund_reason`        | varchar(500) |                          | 사유                                |
-| `pg_response`          | jsonb        |                          | provider raw 응답                   |
-| `created_at`           | timestamp    | DEFAULT now()            | 생성                                |
-| `updated_at`           | timestamp    | DEFAULT now()            | 수정                                |
+| 컬럼명                 | 타입         | 제약조건             | 설명                                |
+| ---------------------- | ------------ | -------------------- | ----------------------------------- |
+| `id`                   | uuid         | PK                   | 결제 ID                             |
+| `order_id`             | uuid         | FK, UNIQUE, NOT NULL | 주문                                |
+| `provider`             | enum         | NOT NULL             | 결제 승인 주체                      |
+| `provider_payment_key` | varchar(200) |                      | provider 결제 키                    |
+| `provider_order_id`    | varchar(200) |                      | provider에 전달한 주문 식별자       |
+| `method`               | enum         | NOT NULL             | 결제 수단                           |
+| `method_detail`        | text         |                      | provider 결제수단 상세 (예: 카드명) |
+| `amount`               | int          | NOT NULL             | 금액                                |
+| `status`               | enum         | NOT NULL             | 상태                                |
+| `paid_at`              | timestamp    |                      | 결제 시간                           |
+| `refunded_at`          | timestamp    |                      | 환불 시간                           |
+| `refund_reason`        | varchar(500) |                      | 사유                                |
+| `pg_response`          | jsonb        |                      | provider raw 응답                   |
+| `created_at`           | timestamp    | DEFAULT now()        | 생성                                |
+| `updated_at`           | timestamp    | DEFAULT now()        | 수정                                |
 
 **UNIQUE:**
 
