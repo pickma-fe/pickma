@@ -73,7 +73,13 @@ export default function ConsumerPage() {
     order: productSortQuery.order,
     availableOnly: true,
   });
-  const products = useMemo(() => productList?.items ?? [], [productList]);
+  const products = useMemo(
+    () =>
+      (productList?.items ?? []).filter(
+        (product) => product.endAt.getTime() > filterNow
+      ),
+    [filterNow, productList]
+  );
 
   useEffect(() => {
     if (!productList) {
@@ -114,7 +120,7 @@ export default function ConsumerPage() {
         setFilterNow(Date.now());
         void refetchProducts();
       },
-      nextEndAt - currentTime + 1000
+      Math.max(0, nextEndAt - currentTime)
     );
 
     return () => {
