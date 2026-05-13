@@ -1,5 +1,6 @@
 'use client';
 
+import type { ProductDetail } from '@/types/product';
 import { useProduct } from '@/hooks/products/useProduct';
 import { Footer } from '@/components/common';
 
@@ -11,12 +12,18 @@ import { ProductReservationPanel } from './ProductReservationPanel';
 
 interface ProductDetailContainerProps {
   productId: string;
+  initialProduct: ProductDetail;
 }
 
 export function ProductDetailContainer({
   productId,
+  initialProduct,
 }: ProductDetailContainerProps) {
-  const { data: product, isError, isLoading } = useProduct(productId);
+  const {
+    data: product = initialProduct,
+    isError,
+    isLoading,
+  } = useProduct(productId, initialProduct);
 
   if (isLoading) {
     return (
