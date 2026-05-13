@@ -31,9 +31,12 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
   const { pathname, search } = request.nextUrl;
   const next = encodeURIComponent(pathname + search);
 
-  const isMock = process.env.API_MOCK_ENABLED === 'true';
+  // dev 환경에서만 mock 우회 — UI-auth phase에서 이 조건 제거 및 실제 보호 라우트 정책으로 교체
+  const isDevMock =
+    process.env.NODE_ENV === 'development' &&
+    process.env.API_MOCK_ENABLED === 'true';
 
-  if (!isMock && matchesAnyPrefix(pathname, ADMIN_PROTECTED)) {
+  if (!isDevMock && matchesAnyPrefix(pathname, ADMIN_PROTECTED)) {
     if (!user) {
       return NextResponse.redirect(
         new URL(`/?auth=required&next=${next}`, request.url)
