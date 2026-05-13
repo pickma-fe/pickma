@@ -1,7 +1,4 @@
 import type { PaymentMethod, PaymentProvider } from '@/types/payment';
-import { AppError } from '@/lib/errors/appError';
-import { ERROR_CODE } from '@/lib/errors/errorCodes';
-import { isApiMockEnabled } from '@/app/api/_lib/mock';
 
 import { mockProvider } from './mock-provider';
 
@@ -35,9 +32,7 @@ export interface PaymentProviderAdapter {
 export function getPaymentProviderAdapter(
   provider: PaymentProvider
 ): PaymentProviderAdapter {
-  if (isApiMockEnabled()) return mockProvider;
-  switch (provider) {
-    default:
-      throw new AppError(ERROR_CODE.NOT_IMPLEMENTED, 501);
-  }
+  // Temporary P0 pass-through until real provider adapters are connected.
+  void provider;
+  return mockProvider;
 }

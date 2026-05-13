@@ -454,8 +454,7 @@ export interface OrderDetailResponse extends OrderListItemResponse {
 - provider: 결제 승인 주체 (`toss | kakao_pay | naver_pay`)
 - method: 사용자가 선택한 결제 수단 (`card | virtual_account | mobile | easy_pay`)
 - Toss의 `orderId`, KakaoPay의 `partner_order_id` 등 외부 필드명은 adapter 내부에서만 다룬다.
-- `API_MOCK_ENABLED=true`이면 provider 관계없이 실제 provider API 호출 없이 mock 흐름으로 동작한다.
-- `API_MOCK_ENABLED=false`이면 미구현 provider는 `NOT_IMPLEMENTED` 501을 반환한다.
+- 실제 provider adapter 연결 전까지는 provider 관계없이 실제 provider API 호출 없이 임시 mock adapter로 결제 흐름을 통과시킨다.
 - 실제 provider Secret key는 서버 adapter 내부에서만 사용한다.
 - Toss/KakaoPay/NaverPay 실제 연결, webhook, cancel/refund는 후속 phase 범위이다.
 
@@ -488,12 +487,10 @@ Behavior:
 - 요청 사용자가 해당 주문의 주문자인지 `orderNumber + userId` 기준으로 확인한다.
 - 주문 상태가 `payment_pending`인지, 만료되지 않았는지 검증한다.
 - provider별 adapter를 통해 결제 시작 정보를 만들고, 공통 `flow: 'redirect'`, `redirectUrl`로 응답한다.
-- `API_MOCK_ENABLED=true`이면 provider 관계없이 `GET /api/payments/mock/checkout?orderNumber=...` URL을 반환한다.
+- 실제 provider adapter 연결 전까지는 provider 관계없이 `GET /api/payments/mock/checkout?orderNumber=...` URL을 반환한다.
 
 ### 5.2 `GET /api/payments/mock/checkout`
 
-- `API_MOCK_ENABLED=true`일 때만 동작한다.
-- mock 비활성 상태에서는 404를 반환한다.
 - `orderNumber` query 파라미터를 검증하고 mock checkout 응답을 제공한다.
 - 실제 결제 UI가 아니라 redirect/confirm 흐름을 수동으로 검증하기 위한 endpoint이다.
 

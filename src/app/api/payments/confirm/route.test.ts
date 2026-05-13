@@ -52,11 +52,12 @@ describe('POST /api/payments/confirm', () => {
     vi.mocked(confirmPayment).mockResolvedValue(undefined);
   });
 
-  it('성공 → 200 + data undefined', async () => {
+  it('성공 → 200 + data null', async () => {
     const res = await POST(makeRequest(validBody));
     expect(res.status).toBe(200);
     const body = (await res.json()) as { statusCode: number; data: unknown };
     expect(body.statusCode).toBe(200);
+    expect(body.data).toBeNull();
   });
 
   it('expireUserOrders 후 confirmPayment 호출', async () => {

@@ -14,7 +14,7 @@ export async function POST(request: NextRequest): Promise<Response> {
     const { serviceUser } = await requireActiveUser();
     await expireUserOrders(serviceUser.id);
     await confirmPayment(serviceUser.id, body);
-    return success(undefined);
+    return success(null);
   } catch (error) {
     return routeError(error);
   }

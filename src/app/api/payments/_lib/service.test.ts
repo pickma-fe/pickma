@@ -18,6 +18,8 @@ const mockOrderRow = {
   expires_at: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
 };
 
+type MockOrderRow = typeof mockOrderRow;
+
 const mockAdapter = {
   prepare: vi.fn().mockResolvedValue({
     redirectUrl: '/api/payments/mock/checkout?orderNumber=PM2026TEST',
@@ -34,6 +36,10 @@ function makeClient({
   orderData = mockOrderRow,
   orderError = null as { message: string } | null,
   rpcError = null as { message: string } | null,
+}: {
+  orderData?: MockOrderRow | null;
+  orderError?: { message: string } | null;
+  rpcError?: { message: string } | null;
 } = {}) {
   const queryMock = {
     select: vi.fn().mockReturnThis(),
