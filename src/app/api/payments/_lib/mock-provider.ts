@@ -7,7 +7,8 @@ export const mockProvider: PaymentProviderAdapter = {
       provider,
       amount: String(amount),
     });
-    return { redirectUrl: `${successUrl}?${params.toString()}` };
+    const delimiter = successUrl.includes('?') ? '&' : '?';
+    return { redirectUrl: `${successUrl}${delimiter}${params.toString()}` };
   },
 
   async confirm({ orderNumber }) {
