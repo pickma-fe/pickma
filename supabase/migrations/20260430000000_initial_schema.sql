@@ -165,7 +165,10 @@ CREATE TABLE payments (
   refund_reason        varchar(500),
   pg_response          jsonb,
   created_at           timestamptz      NOT NULL DEFAULT now(),
-  updated_at           timestamptz      NOT NULL DEFAULT now()
+  updated_at           timestamptz      NOT NULL DEFAULT now(),
+  CONSTRAINT check_provider_identifiers CHECK (
+    provider_payment_key IS NOT NULL OR provider_order_id IS NOT NULL
+  )
 );
 
 CREATE TABLE wishlists (
