@@ -43,18 +43,7 @@ export const sellerSidebarSections: SidebarSection[] = [
         id: 'products',
         label: '상품 관리',
         icon: Package,
-        children: [
-          {
-            id: 'product-list',
-            label: '상품 목록',
-            href: '/seller/products',
-          },
-          {
-            id: 'product-new',
-            label: '상품 등록',
-            href: '/seller/products/new',
-          },
-        ],
+        href: '/seller/products',
       },
     ],
   },
@@ -65,18 +54,7 @@ export const sellerSidebarSections: SidebarSection[] = [
         id: 'orders',
         label: '주문 관리',
         icon: ClipboardList,
-        children: [
-          {
-            id: 'order-list',
-            label: '주문 확인',
-            href: '/seller/orders',
-          },
-          {
-            id: 'order-refund',
-            label: '주문 취소/환불',
-            href: '/seller/orders/refund',
-          },
-        ],
+        href: '/seller/orders',
       },
     ],
   },
