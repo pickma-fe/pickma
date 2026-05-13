@@ -12,6 +12,31 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: '14.5';
   };
+  graphql_public: {
+    Tables: {
+      [_ in never]: never;
+    };
+    Views: {
+      [_ in never]: never;
+    };
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json;
+          operationName?: string;
+          query?: string;
+          variables?: Json;
+        };
+        Returns: Json;
+      };
+    };
+    Enums: {
+      [_ in never]: never;
+    };
+    CompositeTypes: {
+      [_ in never]: never;
+    };
+  };
   public: {
     Tables: {
       categories: {
@@ -227,10 +252,13 @@ export type Database = {
           created_at: string;
           id: string;
           method: Database['public']['Enums']['payment_method'];
+          method_detail: string | null;
           order_id: string;
           paid_at: string | null;
-          payment_key: string | null;
           pg_response: Json | null;
+          provider: Database['public']['Enums']['payment_provider'];
+          provider_order_id: string | null;
+          provider_payment_key: string | null;
           refund_reason: string | null;
           refunded_at: string | null;
           status: Database['public']['Enums']['payment_status'];
@@ -241,10 +269,13 @@ export type Database = {
           created_at?: string;
           id?: string;
           method: Database['public']['Enums']['payment_method'];
+          method_detail?: string | null;
           order_id: string;
           paid_at?: string | null;
-          payment_key?: string | null;
           pg_response?: Json | null;
+          provider: Database['public']['Enums']['payment_provider'];
+          provider_order_id?: string | null;
+          provider_payment_key?: string | null;
           refund_reason?: string | null;
           refunded_at?: string | null;
           status: Database['public']['Enums']['payment_status'];
@@ -255,10 +286,13 @@ export type Database = {
           created_at?: string;
           id?: string;
           method?: Database['public']['Enums']['payment_method'];
+          method_detail?: string | null;
           order_id?: string;
           paid_at?: string | null;
-          payment_key?: string | null;
           pg_response?: Json | null;
+          provider?: Database['public']['Enums']['payment_provider'];
+          provider_order_id?: string | null;
+          provider_payment_key?: string | null;
           refund_reason?: string | null;
           refunded_at?: string | null;
           status?: Database['public']['Enums']['payment_status'];
@@ -567,8 +601,11 @@ export type Database = {
         Args: {
           p_amount: number;
           p_method: Database['public']['Enums']['payment_method'];
+          p_method_detail: string;
           p_order_number: string;
-          p_payment_key: string;
+          p_provider: Database['public']['Enums']['payment_provider'];
+          p_provider_order_id: string;
+          p_provider_payment_key: string;
         };
         Returns: {
           success: boolean;
@@ -606,6 +643,7 @@ export type Database = {
         | 'no_show'
         | 'expired';
       payment_method: 'card' | 'virtual_account' | 'mobile' | 'easy_pay';
+      payment_provider: 'toss' | 'kakao_pay' | 'naver_pay';
       payment_status: 'pending' | 'paid' | 'failed' | 'cancelled' | 'refunded';
       product_status: 'active' | 'closed';
       social_provider: 'google' | 'kakao';
@@ -740,6 +778,9 @@ export type CompositeTypes<
     : never;
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
       order_status: [
@@ -752,6 +793,7 @@ export const Constants = {
         'expired',
       ],
       payment_method: ['card', 'virtual_account', 'mobile', 'easy_pay'],
+      payment_provider: ['toss', 'kakao_pay', 'naver_pay'],
       payment_status: ['pending', 'paid', 'failed', 'cancelled', 'refunded'],
       product_status: ['active', 'closed'],
       social_provider: ['google', 'kakao'],
