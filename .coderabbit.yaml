@@ -160,8 +160,7 @@ reviews:
           - PickMa 내부 주문 식별자는 orderNumber이며, provider별 외부 주문 필드명은 adapter 내부에서만 다루는가
           - 클라이언트가 전달한 결제 금액을 DB의 주문 금액과 대조 검증하는가 (금액 위변조 방지)
           - 결제 완료 후 payment 저장, 주문 확정, 재고 확정 처리가 confirm_payment RPC로 원자적으로 처리되는가
-          - 미구현 provider는 NOT_IMPLEMENTED 501을 반환하는가
-          - GET /api/payments/mock/checkout은 API_MOCK_ENABLED=true일 때만 동작하고 mock 비활성 시 404를 반환하는가
+          - 실 provider adapter 연결 전까지 provider 인자와 무관하게 mock adapter를 사용하는가 (API_MOCK_ENABLED 플래그와 무관)
         - 주문 API (/api/orders):
           - 재고 부족 시 예약을 거부하는가
           - 주문 상태 전이가 docs/api_spec.md와 일치하는가
