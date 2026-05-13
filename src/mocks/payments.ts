@@ -26,5 +26,3 @@ export const mockPaymentResponse: PaymentResponse = {
   createdAt: '2026-05-13T12:00:00.000Z',
   updatedAt: '2026-05-13T12:00:00.000Z',
 };
-
-export const mockPaymentConfirmResult = undefined;
