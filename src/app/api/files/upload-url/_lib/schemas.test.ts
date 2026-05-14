@@ -92,22 +92,6 @@ describe('createFileUploadUrlSchema', () => {
       expect(result.success).toBe(false);
     });
 
-    it('storeId는 UUID 형식이어야 한다', () => {
-      expect(
-        createFileUploadUrlSchema.safeParse({
-          ...baseValid,
-          storeId: 'not-a-uuid',
-        }).success
-      ).toBe(false);
-
-      expect(
-        createFileUploadUrlSchema.safeParse({
-          ...baseValid,
-          storeId: '00000000-0000-4000-8000-000000000001',
-        }).success
-      ).toBe(true);
-    });
-
     it('알 수 없는 필드를 거부한다', () => {
       const result = createFileUploadUrlSchema.safeParse({
         ...baseValid,

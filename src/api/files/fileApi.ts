@@ -8,7 +8,6 @@ import { apiClient } from '@/api/apiClient';
 
 interface UploadFileOptions {
   documentType?: SellerApplicationDocumentType;
-  storeId?: string;
 }
 
 export function createUploadUrl(
@@ -28,7 +27,6 @@ export async function uploadFile(
     fileSize: file.size,
     mimeType: file.type,
     documentType: options?.documentType,
-    storeId: options?.storeId,
   });
 
   const res = await fetch(signedUrl, {

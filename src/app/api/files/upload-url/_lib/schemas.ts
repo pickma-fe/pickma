@@ -23,7 +23,6 @@ export const createFileUploadUrlSchema = z
     fileSize: z.number().int().positive(),
     mimeType: z.string().min(1),
     documentType: z.enum(SELLER_APPLICATION_DOCUMENT_TYPES).optional(),
-    storeId: z.uuid().optional(),
   })
   .strict()
   .superRefine((data, ctx) => {
