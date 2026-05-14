@@ -64,7 +64,7 @@ export function PickupTimeChangeModal({
     setDraftPickupTime(pickupTime);
   };
   const handleConfirmPickupTimeChange = () => {
-    if (!draftPickupTime) {
+    if (!draftPickupTime || isDraftPickupTimePast) {
       return;
     }
 
