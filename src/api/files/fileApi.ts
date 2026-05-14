@@ -10,12 +10,26 @@ interface UploadFileOptions {
   documentType?: SellerApplicationDocumentType;
 }
 
+interface SellerDocumentUploadOptions {
+  documentType: SellerApplicationDocumentType;
+}
+
 export function createUploadUrl(
   req: CreateFileUploadUrlRequest
 ): Promise<FileUploadUrlResponse> {
   return apiClient.post<FileUploadUrlResponse>('/api/files/upload-url', req);
 }
 
+export function uploadFile(
+  purpose: 'seller_application_document',
+  file: File,
+  options: SellerDocumentUploadOptions
+): Promise<string>;
+export function uploadFile(
+  purpose: Exclude<FileUploadPurpose, 'seller_application_document'>,
+  file: File,
+  options?: UploadFileOptions
+): Promise<string>;
 export async function uploadFile(
   purpose: FileUploadPurpose,
   file: File,
@@ -43,10 +57,27 @@ export async function uploadFile(
 }
 
 export function uploadFiles(
+  purpose: 'seller_application_document',
+  files: File[],
+  options: SellerDocumentUploadOptions
+): Promise<string[]>;
+export function uploadFiles(
+  purpose: Exclude<FileUploadPurpose, 'seller_application_document'>,
+  files: File[],
+  options?: UploadFileOptions
+): Promise<string[]>;
+export function uploadFiles(
   purpose: FileUploadPurpose,
   files: File[],
   options?: UploadFileOptions
 ): Promise<string[]> {
+  if (purpose === 'seller_application_document') {
+    return Promise.all(
+      files.map((file) =>
+        uploadFile(purpose, file, options as SellerDocumentUploadOptions)
+      )
+    );
+  }
   return Promise.all(files.map((file) => uploadFile(purpose, file, options)));
 }
 
