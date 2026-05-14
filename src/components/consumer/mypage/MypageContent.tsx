@@ -31,9 +31,7 @@ export function MypageContent() {
     pageSize: ORDER_LIST_PAGE_SIZE,
   });
   const reservations: MypageReservation[] =
-    orderList?.items
-      .filter((order) => order.status !== 'paymentPending')
-      .map((order) => mapOrderToMypageReservation(order)) ?? [];
+    orderList?.items.map((order) => mapOrderToMypageReservation(order)) ?? [];
   const totalPages = orderList?.totalPages ?? 1;
 
   const handleRetryReservations = () => {
