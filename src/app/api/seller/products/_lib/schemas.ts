@@ -12,7 +12,7 @@ const timeStringSchema = z
 
 export const createSellerProductSchema = z
   .object({
-    menuItemId: z.string().min(1),
+    menuItemId: z.uuid(),
     discountPrice: z.number().int().nonnegative(),
     stock: z.number().int().nonnegative(),
     endAt: z.iso.datetime(),
