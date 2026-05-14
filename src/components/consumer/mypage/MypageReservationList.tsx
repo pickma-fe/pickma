@@ -19,9 +19,10 @@ interface MypageReservationListProps {
   isError?: boolean;
   isLoading?: boolean;
   isRefetching?: boolean;
-  hasNextPage?: boolean;
+  currentPage: number;
+  totalPages: number;
   onRetry?: () => void;
-  onLoadMore?: () => void;
+  onPageChange: (page: number) => void;
 }
 
 const reservationTabs: ReservationTab[] = [
@@ -45,9 +46,10 @@ export function MypageReservationList({
   isError = false,
   isLoading = false,
   isRefetching = false,
-  hasNextPage = false,
+  currentPage,
+  totalPages,
   onRetry,
-  onLoadMore,
+  onPageChange,
 }: MypageReservationListProps) {
   const [activeTabId, setActiveTabId] = useState<ReservationTab['id']>('all');
   const filteredReservations =
@@ -58,6 +60,12 @@ export function MypageReservationList({
         );
   const handleChangeTab = (index: number) => {
     setActiveTabId(reservationTabs[index]?.id ?? 'all');
+  };
+  const handleClickPrevPage = () => {
+    onPageChange(currentPage - 1);
+  };
+  const handleClickNextPage = () => {
+    onPageChange(currentPage + 1);
   };
 
   return (
@@ -141,17 +149,30 @@ export function MypageReservationList({
                 </div>
               ) : null}
 
-              {!isLoading && !isError && hasNextPage && onLoadMore ? (
-                <div className="flex justify-center pt-2">
+              {!isLoading && !isError && totalPages > 1 ? (
+                <div className="flex items-center justify-center gap-4 pt-2">
                   <Button
                     type="button"
                     variant="outline"
                     color="gray"
-                    disabled={isRefetching}
-                    className="min-w-48"
-                    onClick={onLoadMore}
+                    disabled={isRefetching || currentPage <= 1}
+                    className="min-w-24"
+                    onClick={handleClickPrevPage}
                   >
-                    {isRefetching ? '불러오는 중' : '예약 더 보기'}
+                    이전
+                  </Button>
+                  <span className="text-sm font-semibold text-gray-700">
+                    {currentPage} / {totalPages}
+                  </span>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    color="gray"
+                    disabled={isRefetching || currentPage >= totalPages}
+                    className="min-w-24"
+                    onClick={handleClickNextPage}
+                  >
+                    다음
                   </Button>
                 </div>
               ) : null}

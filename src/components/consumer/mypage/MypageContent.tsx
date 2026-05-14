@@ -10,8 +10,7 @@ import {
   type MypageReservation,
 } from './mypageReservationMapper';
 
-const ORDER_LIST_PAGE_SIZE = 20;
-const ORDER_LIST_MAX_PAGE_SIZE = 100;
+const ORDER_LIST_PAGE_SIZE = 10;
 
 const ORDER_LIST_QUERY_BASE = {
   sort: 'pickupAt' as const,
@@ -19,7 +18,7 @@ const ORDER_LIST_QUERY_BASE = {
 };
 
 export function MypageContent() {
-  const [pageSize, setPageSize] = useState(ORDER_LIST_PAGE_SIZE);
+  const [currentPage, setCurrentPage] = useState(1);
   const {
     data: orderList,
     isError,
@@ -28,23 +27,21 @@ export function MypageContent() {
     refetch,
   } = useOrders({
     ...ORDER_LIST_QUERY_BASE,
-    page: 1,
-    pageSize,
+    page: currentPage,
+    pageSize: ORDER_LIST_PAGE_SIZE,
   });
   const reservations: MypageReservation[] =
-    orderList?.items.map((order) => mapOrderToMypageReservation(order)) ?? [];
-  const hasNextPage = orderList
-    ? orderList.totalCount > pageSize && pageSize < ORDER_LIST_MAX_PAGE_SIZE
-    : false;
+    orderList?.items
+      .filter((order) => order.status !== 'paymentPending')
+      .map((order) => mapOrderToMypageReservation(order)) ?? [];
+  const totalPages = orderList?.totalPages ?? 1;
 
   const handleRetryReservations = () => {
     void refetch();
   };
 
-  const handleLoadMoreReservations = () => {
-    setPageSize((prevPageSize) =>
-      Math.min(prevPageSize + ORDER_LIST_PAGE_SIZE, ORDER_LIST_MAX_PAGE_SIZE)
-    );
+  const handleChangePage = (page: number) => {
+    setCurrentPage(Math.min(Math.max(page, 1), totalPages));
   };
 
   return (
@@ -53,9 +50,10 @@ export function MypageContent() {
       isError={isError}
       isLoading={isLoading}
       isRefetching={isFetching}
-      hasNextPage={hasNextPage}
+      currentPage={currentPage}
+      totalPages={totalPages}
       onRetry={handleRetryReservations}
-      onLoadMore={handleLoadMoreReservations}
+      onPageChange={handleChangePage}
     />
   );
 }
