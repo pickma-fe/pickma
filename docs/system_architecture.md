@@ -9,7 +9,7 @@
 | Client State    | Zustand                                     | UI/클라이언트 상태                       |
 | Server State    | TanStack Query                              | API 데이터 캐싱, refetch, mutation       |
 | Auth/DB/Storage | Supabase, `@supabase/ssr`                   | Auth, PostgreSQL, Storage                |
-| Payment         | Provider adapter 구조 (mock P0, Toss P1)    | prepare/confirm 분리, provider별 adapter |
+| Payment         | Provider adapter 구조 (mock + Toss MVP)     | prepare/confirm 분리, provider별 adapter |
 | Deployment      | Vercel                                      | Next.js 배포                             |
 
 ---
@@ -105,8 +105,9 @@ export const config = {
 
 - 공개: `/`, `/search`, `/products/:path*`, `/seller`
 - 로그인 필요: `/order/:path*`, `/payment`, `/mypage/:path*`
-- 판매자 등록/상태 흐름: `/seller/register`, `/seller/pending`은 로그인 사용자를 대상으로 하며, 가게 등록 상태에 따라 redirect를 분기한다.
-- 승인된 판매자 필요: `/seller/dashboard/:path*`, `/seller/products/:path*`, `/seller/orders/:path*`, `/seller/store/:path*`
+- 판매자 onboarding 흐름: `/seller/register`, `/seller/pending`은 로그인 사용자를 대상으로 하며, seller application 상태, `users.role`, 내 가게 존재 여부에 따라 seller 영역에서 분기한다.
+- 승인된 판매자 필요: `/seller/store/:path*`
+- 승인된 판매자와 승인된 가게 필요: `/seller/dashboard/:path*`, `/seller/products/:path*`, `/seller/orders/:path*`
 - 관리자 필요: `/admin/:path*`
 
 미인증 redirect 권장안:
@@ -147,10 +148,18 @@ src/api/
   stores/
     storeApi.ts
     storeMapper.ts
+  seller-applications/
+    sellerApplicationApi.ts
+    sellerApplicationMapper.ts
+  files/
+    fileApi.ts
   users/
     userApi.ts
     userMapper.ts
   seller/
+    onboarding/
+      sellerOnboardingApi.ts
+      sellerOnboardingMapper.ts
     products/
       sellerProductApi.ts
       sellerProductMapper.ts
@@ -158,6 +167,9 @@ src/api/
       sellerOrderApi.ts
       sellerOrderMapper.ts
   admin/
+    sellers/
+      adminSellerApplicationApi.ts
+      adminSellerApplicationMapper.ts
     stores/
       adminStoreApi.ts
       adminStoreMapper.ts
@@ -178,6 +190,7 @@ src/api/
 - 성공 시 `envelope.data`만 반환하고, 실패 시 `ApiError`를 throw한다.
 - 도메인 API 객체는 단수형으로 둔다. 예: `productApi`, `orderApi`.
 - 공개/소비자 API, 판매자 API, 관리자 API는 접근 주체와 반환 데이터가 다르므로 클라이언트 API와 hook도 역할별로 분리한다.
+- 파일 업로드는 도메인별 API가 아니라 `files/fileApi.ts` 공통 helper가 signed upload URL 발급과 실제 업로드를 감싼다. 도메인 hook은 파일 helper를 조합해 최종 도메인 API를 호출한다.
 - `src/api`와 `src/hooks`는 Phase 1에서 도메인별 barrel export를 만들지 않고 직접 파일 import를 기본으로 한다.
 - barrel export는 `src/types/index.ts`, `src/contracts/index.ts`, `src/lib/errors/index.ts`처럼 공통 타입/contract/error에 한정해 사용한다.
 
@@ -205,6 +218,17 @@ src/app/api/
 - `mapper.ts`는 Supabase row/join 결과를 contract DTO로 변환한다.
 - `schemas.ts`는 해당 도메인 Route Handler의 Zod schema를 담당한다.
 - 파일명 앞에 `_`를 붙이지 않고, Next.js private folder인 `_lib/`만 사용한다.
+
+### 5.3 서버 인증/권한 helper
+
+- `requireActiveUser()`: 로그인된 active 사용자 확인.
+- `requireAdmin()`: `users.role = 'admin'` 확인.
+- `requireSeller()`: `users.role = 'seller'` 확인. 승인된 판매자이지만 아직 가게가 없는 상태를 허용한다.
+- `requireSellerStore()`: `requireSeller()` 이후 내 가게 존재와 `stores.status = 'approved'`를 확인한다.
+
+상품/주문처럼 가게 소유권이 필요한 seller API는 `requireSellerStore()`를 사용한다. 가게 등록, seller onboarding 상태 조회처럼 가게가 아직 없을 수 있는 흐름은 `requireSeller()` 또는 `requireActiveUser()`를 사용한다.
+
+판매자 승인은 `seller_applications.status = 'approved'`와 `users.role = 'seller'` 전환을 atomic하게 처리한다. `seller_applications`에는 `reviewed_by`를 저장하지 않고, 관리자 작업자 추적은 후속 감사 로그 도메인에서 다룬다.
 
 ---
 
@@ -272,9 +296,9 @@ sequenceDiagram
 - `/payment/success` 페이지: URL 파라미터(`orderNumber`, `provider`, `amount`)를 받아 `POST /api/payments/confirm`을 호출한다. 성공 시 `window.opener.postMessage({ success: true, orderNumber }, window.location.origin)`을 보내고 팝업을 닫는다. 실패 시 `window.opener.postMessage({ success: false }, window.location.origin)`을 보내고 팝업을 닫는다. `targetOrigin`은 항상 명시하며 와일드카드(`'*'`)는 정보 유출 위험으로 사용하지 않는다.
 - 부모 창: `message` 이벤트를 수신할 때 `event.origin === window.location.origin` 으로 출처를 엄격하게 검증(`===`)한 뒤, 메시지 구조(`{ success, orderNumber }`)를 확인하고, `success: true`이면 주문 상세 페이지로 이동한다 (프론트 결제 연동 phase에서 구현).
 - `POST /api/payments/confirm`: provider adapter를 통해 승인 후, `confirm_payment` DB RPC로 주문을 atomic하게 확정한다.
-- provider: 결제 승인 주체 (`toss | kakao_pay | naver_pay`). 실 provider adapter 연결 전까지는 provider 관계없이 mock adapter가 동작한다. 실제 provider adapter는 후속 phase에서 추가한다.
+- provider: 결제 승인 주체 (`toss | kakao_pay | naver_pay`). 실 provider adapter 연결 전까지는 provider 관계없이 mock adapter가 동작한다. MVP 실제 provider adapter는 Toss를 우선 구현한다.
 - `orderNumber`는 PickMa 내부 주문 식별자이며, provider별 외부 주문 필드명은 adapter 내부에서만 다룬다.
-- `POST /api/payments/webhook`: 결제 상태 동기화용 endpoint, MVP 이후 우선순위 (P1).
+- `POST /api/payments/webhook`: 결제 상태 동기화용 endpoint. Toss adapter 구현 시 운영 필수성을 재판정하며, 기본 우선순위는 P1이다.
 - 주문 생성, 결제 확정, 예약 해제에 따른 재고 변경은 Postgres RPC/transaction으로 atomic하게 처리한다.
 - `payment_pending` 주문은 `expiresAt` 이후 `expired`로 전환하고 `reserved_stock`을 복구한다.
 - 초기 구현은 API 진입 시 lazy cleanup과 결제 confirm 시점 검사를 사용하고, scheduled job/cron은 MVP 이후 보강한다.
