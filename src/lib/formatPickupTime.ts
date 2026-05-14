@@ -14,7 +14,7 @@ function getPickupDate(value: string, now: Date) {
   const date = new Date(value);
 
   if (Number.isNaN(date.getTime())) {
-    return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    return null;
   }
 
   return date;
@@ -46,6 +46,11 @@ function addDays(value: Date, days: number) {
 
 export function formatPickupDateLabel(value: string, now = new Date()) {
   const pickupDate = getPickupDate(value, now);
+
+  if (pickupDate === null) {
+    return null;
+  }
+
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const tomorrow = addDays(today, 1);
   const formattedDate = formatPickupDate(pickupDate);
@@ -149,6 +154,11 @@ export function isPastPickupTimeSlot(
   }
 
   const pickupDate = getPickupDate(pickupDateTime, now);
+
+  if (pickupDate === null) {
+    return true;
+  }
+
   const pickupDateOnly = new Date(
     pickupDate.getFullYear(),
     pickupDate.getMonth(),

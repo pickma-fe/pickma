@@ -59,7 +59,7 @@ export function OrderCheckoutPanel({
   finalPaymentPrice,
 }: OrderCheckoutPanelProps) {
   const pickupPlace = getPickupPlace(product);
-  const [referenceNow] = useState(() => new Date());
+  const [referenceNow, setReferenceNow] = useState(() => new Date());
   const pickupDateLabel = formatPickupDateLabel(
     product.pickupStartTime,
     referenceNow
@@ -71,6 +71,10 @@ export function OrderCheckoutPanel({
     )
   );
   const [isPickupTimeModalOpen, setIsPickupTimeModalOpen] = useState(false);
+  const handleOpenPickupTimeModal = () => {
+    setReferenceNow(new Date());
+    setIsPickupTimeModalOpen(true);
+  };
 
   return (
     <>
@@ -89,10 +93,10 @@ export function OrderCheckoutPanel({
           icon={<Clock className="size-5" aria-hidden="true" />}
           title="픽업 시간"
           actionLabel="변경"
-          onAction={() => setIsPickupTimeModalOpen(true)}
+          onAction={handleOpenPickupTimeModal}
         >
           <p className="font-medium text-gray-900">
-            {pickupDateLabel} {pickupTime.label}
+            {pickupDateLabel ? `${pickupDateLabel} ${pickupTime.label}` : '-'}
           </p>
         </OrderInfoBlock>
 

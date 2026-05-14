@@ -47,6 +47,7 @@ export function PickupTimeChangeModal({
     initialDraftPickupTime
   );
   const pickupDateLabel = formatPickupDateLabel(pickupStartTime, referenceNow);
+  const hasValidPickupDate = pickupDateLabel !== null;
   const isDraftPickupTimePast =
     draftPickupTime !== null &&
     isPastPickupTimeSlot(
@@ -56,8 +57,20 @@ export function PickupTimeChangeModal({
     );
   const hasAvailablePickupTime = pickupTimeOptions.some(
     (option) =>
+      hasValidPickupDate &&
       !isPastPickupTimeSlot(option.startAt, pickupStartTime, referenceNow)
   );
+  const handleSelectPickupTime = (pickupTime: PickupTimeOption) => {
+    setDraftPickupTime(pickupTime);
+  };
+  const handleConfirmPickupTimeChange = () => {
+    if (!draftPickupTime) {
+      return;
+    }
+
+    onChangePickupTime(draftPickupTime);
+    onClose();
+  };
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="픽업 시간 변경" size="md">
@@ -78,7 +91,7 @@ export function PickupTimeChangeModal({
             </button>
 
             <span className="text-base font-semibold text-gray-900">
-              {pickupDateLabel}
+              {pickupDateLabel ?? '-'}
             </span>
 
             <button
@@ -113,13 +126,13 @@ export function PickupTimeChangeModal({
                   variant="outline"
                   color={isSelected ? 'primary' : 'gray'}
                   aria-pressed={isSelected}
-                  disabled={isDisabled}
+                  disabled={!hasValidPickupDate || isDisabled}
                   className={[
                     'h-auto rounded-md px-3 py-3 text-sm',
                     isSelected && !isDisabled ? 'bg-primary-50' : 'bg-white',
                     isDisabled ? 'text-gray-300' : '',
                   ].join(' ')}
-                  onClick={() => setDraftPickupTime(option)}
+                  onClick={() => handleSelectPickupTime(option)}
                 >
                   {option.label}
                 </Button>
@@ -146,12 +159,7 @@ export function PickupTimeChangeModal({
           <Button
             type="button"
             disabled={draftPickupTime === null || isDraftPickupTimePast}
-            onClick={() => {
-              if (draftPickupTime) {
-                onChangePickupTime(draftPickupTime);
-              }
-              onClose();
-            }}
+            onClick={handleConfirmPickupTimeChange}
           >
             변경하기
           </Button>
