@@ -16,7 +16,6 @@ export interface CreateFileUploadUrlRequest {
   fileSize: number;
   mimeType: string;
   documentType?: SellerApplicationDocumentType;
-  storeId?: string;
 }
 
 export interface FileUploadUrlResponse {

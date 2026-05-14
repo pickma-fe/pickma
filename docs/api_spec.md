@@ -245,7 +245,6 @@ export interface CreateFileUploadUrlRequest {
   mimeType: string;
   fileSize: number;
   documentType?: SellerApplicationDocumentType;
-  storeId?: string;
 }
 ```
 
