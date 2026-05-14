@@ -2,9 +2,19 @@ import type { ReactNode } from 'react';
 
 import { Pagination } from '@/components/common/Pagination/Pagination';
 
+type Align = 'left' | 'center' | 'right';
+
+const ALIGN_CLASS: Record<Align, string> = {
+  left: 'text-left',
+  center: 'text-center',
+  right: 'text-right',
+};
+
 interface Column<T> {
   key: string;
   header: string;
+  headerAlign?: Align;
+  align?: Align;
   render: (item: T) => ReactNode;
 }
 
@@ -64,7 +74,7 @@ function TableBody<T>({
       {columns.map((col) => (
         <td
           key={col.key}
-          className="px-6 py-4 text-sm whitespace-nowrap text-gray-900"
+          className={`px-6 py-4 text-sm whitespace-nowrap text-gray-900 ${ALIGN_CLASS[col.align ?? 'left']}`}
         >
           {col.render(item)}
         </td>
@@ -91,7 +101,7 @@ export function AdminTable<T>({
                 <th
                   key={col.key}
                   scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase"
+                  className={`px-6 py-3 text-xs font-semibold tracking-wider text-gray-500 uppercase ${ALIGN_CLASS[col.headerAlign ?? 'left']}`}
                 >
                   {col.header}
                 </th>
@@ -110,7 +120,7 @@ export function AdminTable<T>({
         </table>
       </div>
       {pagination && pagination.totalPages > 1 && (
-        <div className="mt-4">
+        <div className="mt-4 flex justify-center">
           <Pagination
             currentPage={pagination.currentPage}
             totalPages={pagination.totalPages}
