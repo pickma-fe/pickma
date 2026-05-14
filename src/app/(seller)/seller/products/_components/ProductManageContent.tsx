@@ -1,14 +1,109 @@
 'use client';
 
 import { Package, ShoppingBag, PackageX } from 'lucide-react';
+import { useState, useMemo } from 'react';
 
 import { Section } from '@/components/common/Section/Section';
+import { mockProducts } from '@/mocks/products';
+
+import { ProductFilter } from './ProductFilter';
 
 export function ProductManageContent() {
-  // TODO: API 연동 시 실제 데이터로 교체
-  const totalCount = 32;
-  const activeCount = 28;
-  const soldOutCount = 4;
+  const [selectedStatus, setSelectedStatus] = useState('전체');
+  const [selectedCategory, setSelectedCategory] = useState('전체');
+  const [searchKeyword, setSearchKeyword] = useState('');
+  const [sortBy, setSortBy] = useState('latest');
+  const [detailFilter, setDetailFilter] = useState('전체');
+
+  // 카테고리 목록 추출
+  const categories = useMemo(() => {
+    return [
+      ...new Set(
+        mockProducts
+          .map((p) => p.categoryName ?? '')
+          .filter((name) => name !== '')
+      ),
+    ];
+  }, []);
+
+  // 필터링된 상품
+  const filteredProducts = useMemo(() => {
+    let result = [...mockProducts];
+
+    // 상태 필터
+    if (selectedStatus !== '전체') {
+      const statusMap: Record<string, string> = {
+        판매중: 'active',
+        품절: 'soldout',
+      };
+      result = result.filter((p) => p.status === statusMap[selectedStatus]);
+    }
+
+    // 카테고리 필터
+    if (selectedCategory !== '전체') {
+      result = result.filter((p) => p.categoryName === selectedCategory);
+    }
+
+    // 검색
+    if (searchKeyword) {
+      result = result.filter((p) =>
+        p.name.toLowerCase().includes(searchKeyword.toLowerCase())
+      );
+    }
+
+    // 상세 필터
+    switch (detailFilter) {
+      case 'in-stock':
+        result = result.filter((p) => p.availableStock > 0);
+        break;
+      case 'low-stock':
+        result = result.filter(
+          (p) => p.availableStock > 0 && p.availableStock <= 5
+        );
+        break;
+      case 'today-end':
+        const today = new Date().toDateString();
+        result = result.filter(
+          (p) => new Date(p.endAt).toDateString() === today
+        );
+        break;
+      case 'high-discount':
+        result = result.filter((p) => p.discountRate >= 30);
+        break;
+    }
+
+    // 정렬
+    switch (sortBy) {
+      case 'latest':
+        result.sort(
+          (a, b) =>
+            new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+        );
+        break;
+      case 'oldest':
+        result.sort(
+          (a, b) =>
+            new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime()
+        );
+        break;
+      case 'price-high':
+        result.sort((a, b) => b.discountPrice - a.discountPrice);
+        break;
+      case 'price-low':
+        result.sort((a, b) => a.discountPrice - b.discountPrice);
+        break;
+      case 'name':
+        result.sort((a, b) => a.name.localeCompare(b.name));
+        break;
+    }
+
+    return result;
+  }, [selectedStatus, selectedCategory, searchKeyword, sortBy, detailFilter]);
+
+  // 통계
+  const totalCount = mockProducts.length;
+  const activeCount = mockProducts.filter((p) => p.status === 'active').length;
+  const soldOutCount = mockProducts.filter((p) => p.isSoldOut).length;
 
   return (
     <div className="flex flex-col gap-6">
@@ -22,6 +117,7 @@ export function ProductManageContent() {
         </p>
       </div>
 
+      {/* 통계 카드 */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <Section variant="card" className="bg-white">
           <div className="flex items-center gap-4">
@@ -67,6 +163,27 @@ export function ProductManageContent() {
             </div>
           </div>
         </Section>
+      </div>
+
+      {/* 필터 */}
+      <ProductFilter
+        selectedStatus={selectedStatus}
+        selectedCategory={selectedCategory}
+        searchKeyword={searchKeyword}
+        sortBy={sortBy}
+        detailFilter={detailFilter}
+        categories={categories}
+        onStatusChange={setSelectedStatus}
+        onCategoryChange={setSelectedCategory}
+        onSearchChange={setSearchKeyword}
+        onSortChange={setSortBy}
+        onDetailFilterChange={setDetailFilter}
+      />
+
+      {/* TODO: 테이블 영역 (이슈 3) */}
+      <div className="rounded-lg border border-gray-200 bg-white p-8 text-center text-gray-500">
+        <p>필터링된 상품: {filteredProducts.length}개</p>
+        <p className="mt-2 text-sm">테이블 컴포넌트 구현 예정 (이슈 3)</p>
       </div>
     </div>
   );
