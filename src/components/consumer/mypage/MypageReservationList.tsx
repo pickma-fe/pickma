@@ -19,7 +19,9 @@ interface MypageReservationListProps {
   isError?: boolean;
   isLoading?: boolean;
   isRefetching?: boolean;
+  hasNextPage?: boolean;
   onRetry?: () => void;
+  onLoadMore?: () => void;
 }
 
 const reservationTabs: ReservationTab[] = [
@@ -43,7 +45,9 @@ export function MypageReservationList({
   isError = false,
   isLoading = false,
   isRefetching = false,
+  hasNextPage = false,
   onRetry,
+  onLoadMore,
 }: MypageReservationListProps) {
   const [activeTabId, setActiveTabId] = useState<ReservationTab['id']>('all');
   const filteredReservations =
@@ -134,6 +138,21 @@ export function MypageReservationList({
               {!isLoading && !isError && filteredReservations.length === 0 ? (
                 <div className="flex min-h-60 items-center justify-center rounded-lg border border-dashed border-gray-200 bg-gray-50 text-sm font-medium text-gray-500">
                   해당 상태의 예약이 없습니다.
+                </div>
+              ) : null}
+
+              {!isLoading && !isError && hasNextPage && onLoadMore ? (
+                <div className="flex justify-center pt-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    color="gray"
+                    disabled={isRefetching}
+                    className="min-w-48"
+                    onClick={onLoadMore}
+                  >
+                    {isRefetching ? '불러오는 중' : '예약 더 보기'}
+                  </Button>
                 </div>
               ) : null}
             </TabPanel>

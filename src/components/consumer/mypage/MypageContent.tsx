@@ -1,5 +1,7 @@
 'use client';
 
+import { useState } from 'react';
+
 import { useOrders } from '@/hooks/orders/useOrders';
 
 import { MypageReservationList } from './MypageReservationList';
@@ -8,28 +10,41 @@ import {
   type MypageReservation,
 } from './mypageReservationMapper';
 
-const ORDER_LIST_QUERY = {
-  page: 1,
-  pageSize: 20,
+const ORDER_LIST_PAGE_SIZE = 20;
+const ORDER_LIST_MAX_PAGE_SIZE = 100;
+
+const ORDER_LIST_QUERY_BASE = {
   sort: 'pickupAt' as const,
   order: 'desc' as const,
 };
 
 export function MypageContent() {
+  const [pageSize, setPageSize] = useState(ORDER_LIST_PAGE_SIZE);
   const {
     data: orderList,
     isError,
     isFetching,
     isLoading,
     refetch,
-  } = useOrders(ORDER_LIST_QUERY);
+  } = useOrders({
+    ...ORDER_LIST_QUERY_BASE,
+    page: 1,
+    pageSize,
+  });
   const reservations: MypageReservation[] =
-    orderList?.items.map((order, index) =>
-      mapOrderToMypageReservation(order, index)
-    ) ?? [];
+    orderList?.items.map((order) => mapOrderToMypageReservation(order)) ?? [];
+  const hasNextPage = orderList
+    ? orderList.totalCount > pageSize && pageSize < ORDER_LIST_MAX_PAGE_SIZE
+    : false;
 
   const handleRetryReservations = () => {
     void refetch();
+  };
+
+  const handleLoadMoreReservations = () => {
+    setPageSize((prevPageSize) =>
+      Math.min(prevPageSize + ORDER_LIST_PAGE_SIZE, ORDER_LIST_MAX_PAGE_SIZE)
+    );
   };
 
   return (
@@ -38,7 +53,9 @@ export function MypageContent() {
       isError={isError}
       isLoading={isLoading}
       isRefetching={isFetching}
+      hasNextPage={hasNextPage}
       onRetry={handleRetryReservations}
+      onLoadMore={handleLoadMoreReservations}
     />
   );
 }
