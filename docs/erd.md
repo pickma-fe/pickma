@@ -6,19 +6,21 @@
 
 # 1. 테이블 목록
 
-| 테이블명                | 설명             | 비고                        |
-| ----------------------- | ---------------- | --------------------------- |
-| `users`                 | 사용자           | 소비자, 판매자, 관리자 통합 |
-| `social_accounts`       | 소셜 로그인 계정 | Google, Kakao               |
-| `stores`                | 가게             | 판매자 1:1                  |
-| `categories`            | 카테고리         | 상품 분류                   |
-| `menu_items`            | 메뉴             | 판매자가 등록하는 기본 메뉴 |
-| `products`              | 상품             | 실제 판매 상품              |
-| `orders`                | 주문             | 예약 정보                   |
-| `order_items`           | 주문 상품        | 주문-상품 연결              |
-| `payments`              | 결제             | PG 결제 정보                |
-| `wishlists`             | 찜               | 관심 가게                   |
-| `store_order_sequences` | 매장 주문 순번   | 매장+픽업일 기준 순번 관리  |
+| 테이블명                       | 설명             | 비고                        |
+| ------------------------------ | ---------------- | --------------------------- |
+| `users`                        | 사용자           | 소비자, 판매자, 관리자 통합 |
+| `social_accounts`              | 소셜 로그인 계정 | Google, Kakao               |
+| `stores`                       | 가게             | 판매자 1:1                  |
+| `seller_applications`          | 판매자 신청      | 판매자 심사 신청            |
+| `seller_application_documents` | 판매자 신청 문서 | 신청 첨부 문서              |
+| `categories`                   | 카테고리         | 상품 분류                   |
+| `menu_items`                   | 메뉴             | 판매자가 등록하는 기본 메뉴 |
+| `products`                     | 상품             | 실제 판매 상품              |
+| `orders`                       | 주문             | 예약 정보                   |
+| `order_items`                  | 주문 상품        | 주문-상품 연결              |
+| `payments`                     | 결제             | PG 결제 정보                |
+| `wishlists`                    | 찜               | 관심 가게                   |
+| `store_order_sequences`        | 매장 주문 순번   | 매장+픽업일 기준 순번 관리  |
 
 ---
 
@@ -72,7 +74,7 @@
 | `image`           | varchar(500) |                                 | 이미지         |
 | `open_time`       | time         |                                 | 영업 시작      |
 | `close_time`      | time         |                                 | 영업 종료      |
-| `status`          | enum         | NOT NULL, DEFAULT 'pending'     | 상태           |
+| `status`          | enum         | NOT NULL, DEFAULT 'approved'    | 상태           |
 | `reject_reason`   | varchar(500) |                                 | 거절 사유      |
 | `created_at`      | timestamp    | NOT NULL, DEFAULT now()         | 생성일시       |
 | `updated_at`      | timestamp    | NOT NULL, DEFAULT now()         | 수정일시       |
@@ -374,6 +376,8 @@ users 1:N orders
 users 1:N social_accounts
 users 1:N wishlists
 users 1:1 stores
+users 1:N seller_applications
+seller_applications 1:N seller_application_documents
 stores 1:N wishlists
 stores 1:N menu_items
 menu_items 1:N products
