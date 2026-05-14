@@ -15,6 +15,26 @@ interface ProductDetailContainerProps {
   initialProduct: ProductDetail;
 }
 
+function getStatusMessage(params: { isFetching: boolean; isError: boolean }) {
+  if (params.isFetching) {
+    return {
+      role: 'status' as const,
+      className: 'bg-primary-50 text-primary-500',
+      text: '상품 정보를 최신 상태로 확인하는 중입니다.',
+    };
+  }
+
+  if (params.isError) {
+    return {
+      role: 'alert' as const,
+      className: 'bg-red-50 text-red-500',
+      text: '최신 상품 정보를 불러오지 못해 이전 정보를 표시합니다.',
+    };
+  }
+
+  return null;
+}
+
 export function ProductDetailContainer({
   productId,
   initialProduct,
@@ -25,13 +45,18 @@ export function ProductDetailContainer({
     isFetching,
     isLoading,
   } = useProduct(productId, initialProduct);
+  const statusMessage = getStatusMessage({ isFetching, isError });
 
   if (isLoading) {
     return (
       <div className="bg-white">
         <ConsumerHeader />
         <main className="flex min-h-screen items-center justify-center bg-white">
-          <p className="text-sm font-medium text-gray-500">
+          <p
+            role="status"
+            aria-live="polite"
+            className="text-sm font-medium text-gray-500"
+          >
             상품 정보를 불러오는 중입니다.
           </p>
         </main>
@@ -45,7 +70,11 @@ export function ProductDetailContainer({
       <div className="bg-white">
         <ConsumerHeader />
         <main className="flex min-h-screen items-center justify-center bg-white">
-          <p className="text-sm font-medium text-gray-500">
+          <p
+            role="alert"
+            aria-live="assertive"
+            className="text-sm font-medium text-gray-500"
+          >
             상품 정보를 불러오지 못했습니다.
           </p>
         </main>
@@ -59,18 +88,22 @@ export function ProductDetailContainer({
       <ConsumerHeader />
 
       <main className="min-h-screen bg-white">
-        <div aria-live="polite" className="mx-auto max-w-450 px-6 pt-4">
-          {isFetching ? (
-            <p className="bg-primary-50 text-primary-500 rounded-md px-4 py-3 text-sm font-medium">
-              상품 정보를 최신 상태로 확인하는 중입니다.
+        {statusMessage ? (
+          <div className="mx-auto max-w-450 px-6 pt-4">
+            <p
+              role={statusMessage.role}
+              aria-live={
+                statusMessage.role === 'alert' ? 'assertive' : 'polite'
+              }
+              className={[
+                'rounded-md px-4 py-3 text-sm font-medium',
+                statusMessage.className,
+              ].join(' ')}
+            >
+              {statusMessage.text}
             </p>
-          ) : null}
-          {isError ? (
-            <p className="rounded-md bg-red-50 px-4 py-3 text-sm font-medium text-red-500">
-              최신 상품 정보를 불러오지 못해 이전 정보를 표시합니다.
-            </p>
-          ) : null}
-        </div>
+          </div>
+        ) : null}
 
         <section className="mx-auto grid max-w-450 gap-8 px-6 py-10 lg:grid-cols-[minmax(0,1fr)_400px] xl:grid-cols-[minmax(0,1fr)_460px]">
           <div className="grid gap-8 xl:grid-cols-[560px_minmax(0,1fr)]">
