@@ -371,10 +371,13 @@ src/
     orders/
     stores/
     users/
+    seller-applications/
+    files/
     seller/
       products/
       orders/
     admin/
+      sellers/
       stores/
       users/
       products/
