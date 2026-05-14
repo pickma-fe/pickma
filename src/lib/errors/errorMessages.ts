@@ -21,6 +21,9 @@ export const ERROR_MESSAGES: Record<ErrorCode, string> = {
   ORDER_NUMBER_EXHAUSTED: '주문번호가 모두 소진되었습니다.',
   PICKUP_NUMBER_EXHAUSTED: '픽업 번호가 모두 소진되었습니다.',
   AUTH_IDENTITY_CONFLICT: '이미 다른 로그인 방식으로 가입된 이메일입니다.',
+  FILE_UPLOAD_NOT_ALLOWED: '파일 업로드 권한이 없습니다.',
+  FILE_TYPE_NOT_ALLOWED: '허용되지 않는 파일 형식입니다.',
+  FILE_TOO_LARGE: '파일 크기가 허용 한도를 초과했습니다.',
   NOT_IMPLEMENTED: '아직 구현되지 않은 API입니다.',
   INTERNAL_SERVER_ERROR: '서버 오류가 발생했습니다.',
 };

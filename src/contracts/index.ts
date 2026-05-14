@@ -18,6 +18,12 @@ export type {
   PreparePaymentResponse,
 } from './payment';
 export type {
+  CreateFileUploadUrlRequest,
+  FileUploadPurpose,
+  FileUploadUrlResponse,
+  SellerApplicationDocumentType,
+} from './file';
+export type {
   CreateOrderRequest,
   CreateOrderResponse,
   OrderDetailResponse,
