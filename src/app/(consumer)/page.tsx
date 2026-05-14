@@ -1,11 +1,10 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import {
   ALL_CATEGORY_ID,
-  CONSUMER_PRODUCT_CATEGORIES,
   DEFAULT_DISCOUNT_OPTION_ID,
   DEFAULT_SORT_OPTION_ID,
   normalizeDiscountOptionId,
@@ -14,12 +13,13 @@ import {
   type ProductSortOptionId,
 } from '@/lib/consumerProductFilters';
 import { useProducts } from '@/hooks/products/useProducts';
-import { Footer } from '@/components/common';
+import { Button, Footer } from '@/components/common';
 import { ConsumerHeader } from '@/components/consumer/ConsumerHeader';
 import { ConsumerHeaderSearch } from '@/components/consumer/ConsumerHeaderSearch';
 import { ConsumerProductList } from '@/components/consumer/ConsumerProductList';
 import { ProductFilterSidebar } from '@/components/consumer/ProductFilterSidebar';
 import { PromotionCarousel } from '@/components/consumer/PromotionCarousel';
+import { mockConsumerProductCategories } from '@/mocks/consumerProductCategories';
 
 const regionItems = [
   { label: '서울 강남구 역삼동', value: '서울 강남구' },
@@ -52,11 +52,11 @@ export default function ConsumerPage() {
     useState<ProductDiscountOptionId>(DEFAULT_DISCOUNT_OPTION_ID);
   const [keyword, setKeyword] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [filterNow, setFilterNow] = useState(() => Date.now());
   const productSortQuery = getProductSortQuery(selectedSortOption);
   const {
     data: productList,
     isError: isProductsError,
+    isFetching: isProductsFetching,
     isLoading: isProductsLoading,
     refetch: refetchProducts,
   } = useProducts({
@@ -73,13 +73,7 @@ export default function ConsumerPage() {
     order: productSortQuery.order,
     availableOnly: true,
   });
-  const products = useMemo(
-    () =>
-      (productList?.items ?? []).filter(
-        (product) => product.endAt.getTime() > filterNow
-      ),
-    [filterNow, productList]
-  );
+  const products = productList?.items;
 
   useEffect(() => {
     if (!productList) {
@@ -106,7 +100,7 @@ export default function ConsumerPage() {
 
   useEffect(() => {
     const currentTime = Date.now();
-    const nextEndAt = products
+    const nextEndAt = (products ?? [])
       .map((product) => product.endAt.getTime())
       .filter((endAt) => endAt > currentTime)
       .sort((a, b) => a - b)[0];
@@ -117,7 +111,6 @@ export default function ConsumerPage() {
 
     const timerId = window.setTimeout(
       () => {
-        setFilterNow(Date.now());
         void refetchProducts();
       },
       Math.max(0, nextEndAt - currentTime)
@@ -126,11 +119,10 @@ export default function ConsumerPage() {
     return () => {
       window.clearTimeout(timerId);
     };
-  }, [filterNow, products, refetchProducts]);
+  }, [products, refetchProducts]);
 
   useEffect(() => {
     const intervalId = window.setInterval(() => {
-      setFilterNow(Date.now());
       void refetchProducts();
     }, PRODUCT_LIST_REFRESH_INTERVAL_MS);
 
@@ -140,31 +132,26 @@ export default function ConsumerPage() {
   }, [refetchProducts]);
 
   const handleCategoryChange = (categoryId: string) => {
-    setFilterNow(Date.now());
     setSelectedCategoryId(categoryId);
     setCurrentPage(1);
   };
 
   const handleRegionChange = (region: string) => {
-    setFilterNow(Date.now());
     setSelectedRegion(region);
     setCurrentPage(1);
   };
 
   const handleSortChange = (sortOption: string) => {
-    setFilterNow(Date.now());
     setSelectedSortOption(normalizeSortOptionId(sortOption));
     setCurrentPage(1);
   };
 
   const handleDiscountChange = (discountOption: string) => {
-    setFilterNow(Date.now());
     setSelectedDiscountOption(normalizeDiscountOptionId(discountOption));
     setCurrentPage(1);
   };
 
   const handleResetFilters = () => {
-    setFilterNow(Date.now());
     setSelectedSortOption(DEFAULT_SORT_OPTION_ID);
     setSelectedDiscountOption(DEFAULT_DISCOUNT_OPTION_ID);
     setCurrentPage(1);
@@ -189,6 +176,10 @@ export default function ConsumerPage() {
     router.push(`/search?${searchParams.toString()}`);
   };
 
+  const handleRetryProducts = () => {
+    void refetchProducts();
+  };
+
   const productListContent = (() => {
     if (isProductsLoading) {
       return (
@@ -200,15 +191,30 @@ export default function ConsumerPage() {
 
     if (isProductsError) {
       return (
-        <div className="flex min-h-80 items-center justify-center rounded-lg border border-dashed border-red-200 bg-red-50 text-sm font-medium text-red-500">
-          상품을 불러오지 못했습니다.
+        <div className="flex min-h-80 flex-col items-center justify-center gap-4 rounded-lg border border-dashed border-red-200 bg-red-50 px-4 text-center">
+          <div>
+            <p className="text-sm font-semibold text-red-500">
+              상품을 불러오지 못했습니다.
+            </p>
+            <p className="mt-2 text-xs text-red-400">
+              일시적인 오류일 수 있으니 다시 시도해 주세요.
+            </p>
+          </div>
+          <Button
+            type="button"
+            color="danger"
+            disabled={isProductsFetching}
+            onClick={handleRetryProducts}
+          >
+            {isProductsFetching ? '다시 불러오는 중' : '다시 시도'}
+          </Button>
         </div>
       );
     }
 
     return (
       <ConsumerProductList
-        products={products}
+        products={products ?? []}
         totalCount={productList?.totalCount ?? 0}
         totalPages={productList?.totalPages ?? 0}
         currentPage={currentPage}
@@ -235,7 +241,7 @@ export default function ConsumerPage() {
       <main className="min-h-screen bg-white">
         <div className="mx-auto grid max-w-450 grid-cols-1 lg:grid-cols-[220px_1fr]">
           <ProductFilterSidebar
-            categories={CONSUMER_PRODUCT_CATEGORIES}
+            categories={mockConsumerProductCategories}
             selectedCategoryId={selectedCategoryId}
             selectedSortOption={selectedSortOption}
             selectedDiscountOption={selectedDiscountOption}
