@@ -15,7 +15,7 @@ export const createSellerProductSchema = z
     menuItemId: z.string().min(1),
     discountPrice: z.number().int().nonnegative(),
     stock: z.number().int().nonnegative(),
-    endAt: z.string().datetime(),
+    endAt: z.iso.datetime(),
     pickupStartTime: timeStringSchema,
     pickupEndTime: timeStringSchema,
   })
@@ -25,7 +25,7 @@ export const updateSellerProductSchema = z
   .object({
     discountPrice: z.number().int().nonnegative().optional(),
     stock: z.number().int().nonnegative().optional(),
-    endAt: z.string().datetime().optional(),
+    endAt: z.iso.datetime().optional(),
     pickupStartTime: timeStringSchema.optional(),
     pickupEndTime: timeStringSchema.optional(),
   })
