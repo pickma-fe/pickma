@@ -625,7 +625,7 @@ Seller API는 `requireSeller()`를 통과해야 한다. 특정 상품이 해당 
 `GET /api/seller/products`
 
 - Request: query 없음. pagination, sort, filter는 후속 seller product 화면 요구가 확정되면 추가한다.
-- Response: `200 { data: ProductListItemResponse[] }`
+- Response: `200 { statusCode: 200, data: ProductListItemResponse[] }`
 - 정책: 승인된 seller의 `store.id`와 일치하는 상품만 반환한다.
 
 `POST /api/seller/products`
@@ -636,18 +636,18 @@ Seller API는 `requireSeller()`를 통과해야 한다. 특정 상품이 해당 
   - `stock`: 0 이상의 정수
   - `endAt`: ISO datetime string
   - `pickupStartTime`, `pickupEndTime`: `HH:mm` 또는 `HH:mm:ss` time string
-- Response: `201 { data: ProductListItemResponse }`
+- Response: `201 { statusCode: 201, data: ProductListItemResponse }`
 - 정책: `menuItemId`는 seller store 소유여야 하며, product `category_id`는 menu item의 `category_id`를 복사한다.
 
 `PATCH /api/seller/products/:productId`
 
 - Request: `UpdateSellerProductRequest`, 최소 1개 필드 필요
-- Response: `200 { data: ProductListItemResponse }`
+- Response: `200 { statusCode: 200, data: ProductListItemResponse }`
 - 정책: product는 seller store 소유여야 한다. `stock` 수정 시 기존 `reserved_stock`보다 작게 저장할 수 없다.
 
 `DELETE /api/seller/products/:productId`
 
-- Response: `200 { data: null }`
+- Response: `200 { statusCode: 200, data: null }`
 - 정책: row를 삭제하지 않고 `products.status = 'closed'`로 변경한다.
 
 Seller product API의 pickup time은 서버 schema에서 `HH:mm:ss`로 정규화해 저장한다. 소유하지 않은 menu item/product 접근은 정보 노출을 줄이기 위해 `PRODUCT_NOT_FOUND`로 반환한다.
