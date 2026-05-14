@@ -1,29 +1,33 @@
-import { MoreVertical } from 'lucide-react';
 import Image from 'next/image';
 
+import type { OrderStatus } from '@/types/order';
 import { Button } from '@/components/common';
-import type { MockMypageReservation } from '@/mocks/mypage';
+
+import type { MypageReservation } from './mypageReservationMapper';
 
 interface MypageReservationCardProps {
-  reservation: MockMypageReservation;
+  reservation: MypageReservation;
 }
 
 type ReservationStatusGroup = 'pendingPickup' | 'completed' | 'cancelled';
+type ReservationDisplayGroup =
+  | 'paymentPending'
+  | 'pendingPickup'
+  | 'completed'
+  | 'cancelled';
 
-const statusGroupMap: Record<
-  MockMypageReservation['status'],
-  ReservationStatusGroup
-> = {
+const statusGroupMap: Record<OrderStatus, ReservationStatusGroup> = {
+  paymentPending: 'pendingPickup',
   reserved: 'pendingPickup',
   ready: 'pendingPickup',
   completed: 'completed',
   cancelled: 'cancelled',
-  no_show: 'cancelled',
+  noShow: 'cancelled',
   expired: 'cancelled',
 };
 
 const statusStyles: Record<
-  ReservationStatusGroup,
+  ReservationDisplayGroup,
   {
     label: string;
     className: string;
@@ -31,6 +35,12 @@ const statusStyles: Record<
     actionVariant: 'filled' | 'outline';
   }
 > = {
+  paymentPending: {
+    label: '결제 대기',
+    className: 'bg-yellow-50 text-yellow-600',
+    actionLabel: '결제하기',
+    actionVariant: 'filled',
+  },
   pendingPickup: {
     label: '픽업 대기',
     className: 'bg-primary-50 text-primary-500',
@@ -55,15 +65,20 @@ export function MypageReservationCard({
   reservation,
 }: MypageReservationCardProps) {
   const statusGroup = statusGroupMap[reservation.status];
-  const status = statusStyles[statusGroup];
+  const displayGroup =
+    reservation.status === 'paymentPending' ? 'paymentPending' : statusGroup;
+  const status = statusStyles[displayGroup];
+  const reservationTitle = reservation.productName
+    ? `${reservation.storeName} ${reservation.productName}`
+    : reservation.storeName;
 
   return (
     <article className="rounded-lg border border-gray-200 bg-white p-5">
-      <div className="grid gap-5 md:grid-cols-[150px_minmax(0,1fr)_120px_240px_24px] md:items-center">
+      <div className="grid gap-12 md:grid-cols-[150px_minmax(0,1fr)_120px_240px] md:items-center">
         <div className="relative aspect-square overflow-hidden rounded-md bg-gray-100">
           <Image
             src={reservation.imageUrl}
-            alt={reservation.productName}
+            alt={reservationTitle}
             fill
             sizes="150px"
             className="object-cover"
@@ -79,10 +94,15 @@ export function MypageReservationCard({
           >
             {status.label}
           </span>
-          <p className="mt-4 text-base font-bold text-gray-900">
-            {reservation.storeName} {reservation.productName}
+          <p className="mt-4 text-xl font-bold text-gray-900">
+            {reservationTitle}
           </p>
-          <dl className="mt-4 grid gap-2 text-sm md:grid-cols-[72px_minmax(0,1fr)]">
+          {!reservation.productName ? (
+            <p className="mt-2 text-sm text-gray-500">
+              상품 정보는 예약 상세에서 확인할 수 있습니다.
+            </p>
+          ) : null}
+          <dl className="mt-4 grid gap-2 text-base md:grid-cols-[72px_minmax(0,1fr)]">
             <dt className="text-gray-500">픽업 날짜</dt>
             <dd className="text-gray-700">
               {reservation.pickupDate} &nbsp; {reservation.pickupTime}
@@ -93,12 +113,14 @@ export function MypageReservationCard({
         </div>
 
         <div>
-          <p className="text-xl font-bold text-gray-900">
-            {reservation.price.toLocaleString('ko-KR')}원
+          <p className="text-2xl font-bold text-gray-900">
+            {reservation.price.toLocaleString()}원
           </p>
-          <p className="mt-2 text-sm text-gray-500">
-            수량&nbsp; {reservation.quantity}개
-          </p>
+          {reservation.quantity ? (
+            <p className="mt-2 text-base text-gray-500">
+              수량&nbsp; {reservation.quantity}개
+            </p>
+          ) : null}
         </div>
 
         <div className="flex gap-2 md:justify-end">
@@ -112,22 +134,18 @@ export function MypageReservationCard({
           </Button>
           <Button
             variant={status.actionVariant}
-            color={statusGroup === 'pendingPickup' ? 'primary' : 'gray'}
+            color={
+              displayGroup === 'pendingPickup' ||
+              displayGroup === 'paymentPending'
+                ? 'primary'
+                : 'gray'
+            }
             disabled
             className="h-12 min-w-32 px-5 text-sm"
           >
             {status.actionLabel}
           </Button>
         </div>
-
-        <button
-          type="button"
-          aria-label="예약 메뉴 열기"
-          disabled
-          className="hidden cursor-not-allowed rounded-sm p-1 text-gray-400 md:block"
-        >
-          <MoreVertical className="size-5" aria-hidden="true" />
-        </button>
       </div>
     </article>
   );
