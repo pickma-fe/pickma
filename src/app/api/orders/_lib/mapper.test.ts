@@ -224,7 +224,6 @@ describe('mapOrderDetailRow', () => {
     const result = mapOrderDetailRow(row);
     expect(result.payment).toBeDefined();
     expect(result.payment?.orderNumber).toBe(baseListRow.order_number);
-    expect(result.payment?.provider).toBe('toss');
     expect(result.payment?.status).toBe('paid');
     expect(result.payment?.amount).toBe(5000);
   });

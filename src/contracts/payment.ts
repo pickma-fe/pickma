@@ -1,21 +1,11 @@
-import type {
-  PaymentMethod,
-  PaymentProvider,
-  PaymentStatus,
-} from '@/types/payment';
-
-export type { PaymentProvider };
-
-export type PaymentFlow = 'redirect';
+import type { PaymentMethod, PaymentStatus } from '@/types/payment';
 
 export interface PreparePaymentRequest {
-  provider: PaymentProvider;
   orderNumber: string;
+  orderName: string;
 }
 
 export interface PreparePaymentResponse {
-  provider: PaymentProvider;
-  flow: PaymentFlow;
   redirectUrl: string;
   orderNumber: string;
   amount: number;
@@ -23,7 +13,7 @@ export interface PreparePaymentResponse {
 }
 
 export interface ConfirmPaymentRequest {
-  provider: PaymentProvider;
+  paymentKey: string;
   orderNumber: string;
   amount: number;
 }
@@ -32,9 +22,6 @@ export interface PaymentResponse {
   id: string;
   orderId: string;
   orderNumber: string;
-  provider: PaymentProvider;
-  providerPaymentKey?: string;
-  providerOrderId?: string;
   method: PaymentMethod;
   methodDetail?: string;
   amount: number;

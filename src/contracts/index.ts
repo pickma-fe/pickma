@@ -11,8 +11,6 @@ export type {
 } from './common';
 export type {
   ConfirmPaymentRequest,
-  PaymentFlow,
-  PaymentProvider,
   PaymentResponse,
   PreparePaymentRequest,
   PreparePaymentResponse,
