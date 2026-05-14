@@ -38,7 +38,7 @@ export async function uploadFile(
   });
 
   if (!res.ok) {
-    throw new Error(`파일 업로드 실패: ${res.status}`);
+    throw new Error(`FILE_UPLOAD_FAILED: ${res.status}`);
   }
 
   return storagePath;

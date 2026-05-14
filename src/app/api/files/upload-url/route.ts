@@ -14,6 +14,7 @@ export async function POST(request: NextRequest): Promise<Response> {
     const body = await validateBody(createFileUploadUrlSchema, request);
 
     let userId: string;
+    let storeId: string | undefined;
 
     if (body.purpose === 'profile_image') {
       const { authUser } = await requireActiveUser();
@@ -32,11 +33,12 @@ export async function POST(request: NextRequest): Promise<Response> {
       userId = authUser.id;
     } else {
       // seller_product_image
-      const { authUser } = await requireSeller();
+      const { authUser, store } = await requireSeller();
       userId = authUser.id;
+      storeId = store.id;
     }
 
-    const data = await createFileUploadUrl(body, userId);
+    const data = await createFileUploadUrl(body, userId, storeId);
     return success(data, 201);
   } catch (error) {
     return routeError(error);

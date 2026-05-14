@@ -242,9 +242,10 @@ export type SellerApplicationDocumentType =
 export interface CreateFileUploadUrlRequest {
   purpose: FileUploadPurpose;
   fileName: string;
-  contentType: string;
-  size: number;
+  mimeType: string;
+  fileSize: number;
   documentType?: SellerApplicationDocumentType;
+  storeId?: string;
 }
 ```
 
@@ -253,9 +254,8 @@ Response:
 ```ts
 export interface FileUploadUrlResponse {
   storagePath: string;
-  uploadUrl: string;
+  signedUrl: string;
   headers?: Record<string, string>;
-  expiresAt?: string;
 }
 ```
 

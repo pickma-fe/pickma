@@ -44,7 +44,8 @@ function sanitizeFileName(name: string): string {
 function buildStoragePath(
   req: CreateFileUploadUrlRequest,
   userId: string,
-  uploadId: string
+  uploadId: string,
+  storeId?: string
 ): string {
   const safeFileName = sanitizeFileName(req.fileName);
 
@@ -54,7 +55,7 @@ function buildStoragePath(
     case 'store_image':
       return `${userId}/${uploadId}/${safeFileName}`;
     case 'seller_product_image': {
-      const storePrefix = req.storeId ?? userId;
+      const storePrefix = storeId ?? userId;
       return `${storePrefix}/${uploadId}/${safeFileName}`;
     }
     case 'profile_image':
@@ -64,7 +65,8 @@ function buildStoragePath(
 
 export async function createFileUploadUrl(
   req: CreateFileUploadUrlRequest,
-  userId: string
+  userId: string,
+  storeId?: string
 ): Promise<FileUploadUrlResponse> {
   const policy = BUCKET_POLICIES[req.purpose];
 
@@ -77,7 +79,7 @@ export async function createFileUploadUrl(
   }
 
   const uploadId = crypto.randomUUID();
-  const storagePath = buildStoragePath(req, userId, uploadId);
+  const storagePath = buildStoragePath(req, userId, uploadId, storeId);
 
   const supabase = createServiceRoleClient();
   const { data, error } = await supabase.storage

@@ -124,7 +124,7 @@ describe('createFileUploadUrl', () => {
       expect(result.storagePath).toContain('/id_card/');
     });
 
-    it('seller_product_image에 storeId 지정 시 path prefix로 사용', async () => {
+    it('seller_product_image에 storeId 주입 시 path prefix로 사용', async () => {
       const storeId = 'store-00000000-0000-4000-8000-000000000002';
       const result = await createFileUploadUrl(
         {
@@ -132,11 +132,24 @@ describe('createFileUploadUrl', () => {
           fileName: 'item.jpg',
           fileSize: 1024,
           mimeType: 'image/jpeg',
-          storeId,
+        },
+        USER_ID,
+        storeId
+      );
+      expect(result.storagePath).toMatch(new RegExp(`^${storeId}/`));
+    });
+
+    it('seller_product_image에 storeId 없으면 userId로 폴백', async () => {
+      const result = await createFileUploadUrl(
+        {
+          purpose: 'seller_product_image',
+          fileName: 'item.jpg',
+          fileSize: 1024,
+          mimeType: 'image/jpeg',
         },
         USER_ID
       );
-      expect(result.storagePath).toMatch(new RegExp(`^${storeId}/`));
+      expect(result.storagePath).toMatch(new RegExp(`^${USER_ID}/`));
     });
 
     it('fileName 특수문자를 언더스코어로 치환', async () => {
