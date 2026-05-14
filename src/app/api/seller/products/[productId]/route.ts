@@ -1,38 +1,81 @@
 import type { NextRequest } from 'next/server';
-import { z } from 'zod';
 
-import type { UpdateSellerProductRequest } from '@/contracts/product';
 import { ERROR_CODE } from '@/lib/errors/errorCodes';
+import { requireSeller } from '@/app/api/_lib/auth';
 import { isApiMockEnabled } from '@/app/api/_lib/mock';
 import { fail, routeError, success } from '@/app/api/_lib/response';
 import { validateBody } from '@/app/api/_lib/validation';
 import { mockSellerCreatedProduct } from '@/mocks/seller';
 
-const updateSellerProductSchema = z.object({
-  discountPrice: z.number().int().nonnegative().optional(),
-  stock: z.number().int().nonnegative().optional(),
-  endAt: z.string().datetime().optional(),
-  pickupStartTime: z.string().datetime().optional(),
-  pickupEndTime: z.string().datetime().optional(),
-}) satisfies z.ZodType<UpdateSellerProductRequest>;
+import {
+  sellerProductIdSchema,
+  updateSellerProductSchema,
+} from '../_lib/schemas';
+import { deleteSellerProduct, updateSellerProduct } from '../_lib/service';
 
-export async function PATCH(request: NextRequest): Promise<Response> {
-  if (!isApiMockEnabled()) {
-    return fail(ERROR_CODE.NOT_IMPLEMENTED);
+function validateProductId(productId: string) {
+  const parsed = sellerProductIdSchema.safeParse(productId);
+  if (!parsed.success) {
+    return {
+      ok: false as const,
+      response: fail(
+        ERROR_CODE.VALIDATION_ERROR,
+        400,
+        parsed.error.issues.map((issue) => ({
+          path: issue.path.length ? issue.path.join('.') : 'productId',
+          message: issue.message,
+        }))
+      ),
+    };
   }
 
+  return { ok: true as const, productId: parsed.data };
+}
+
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ productId: string }> }
+): Promise<Response> {
+  const { productId } = await params;
+  const parsedProductId = validateProductId(productId);
+  if (!parsedProductId.ok) return parsedProductId.response;
+
   try {
-    await validateBody(updateSellerProductSchema, request);
-    return success(mockSellerCreatedProduct);
+    const body = await validateBody(updateSellerProductSchema, request);
+
+    if (isApiMockEnabled()) {
+      return success(mockSellerCreatedProduct);
+    }
+
+    const { store } = await requireSeller();
+    const data = await updateSellerProduct(
+      store.id,
+      parsedProductId.productId,
+      body
+    );
+    return success(data);
   } catch (error) {
     return routeError(error);
   }
 }
 
-export async function DELETE(): Promise<Response> {
-  if (!isApiMockEnabled()) {
-    return fail(ERROR_CODE.NOT_IMPLEMENTED);
+export async function DELETE(
+  _request: NextRequest,
+  { params }: { params: Promise<{ productId: string }> }
+): Promise<Response> {
+  const { productId } = await params;
+  const parsedProductId = validateProductId(productId);
+  if (!parsedProductId.ok) return parsedProductId.response;
+
+  if (isApiMockEnabled()) {
+    return success(null);
   }
 
-  return success(undefined);
+  try {
+    const { store } = await requireSeller();
+    const data = await deleteSellerProduct(store.id, parsedProductId.productId);
+    return success(data);
+  } catch (error) {
+    return routeError(error);
+  }
 }
