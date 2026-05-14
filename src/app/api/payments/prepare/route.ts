@@ -5,16 +5,17 @@ import { routeError, success } from '@/app/api/_lib/response';
 import { validateBody } from '@/app/api/_lib/validation';
 import { expireUserOrders } from '@/app/api/orders/_lib/service';
 
-import { confirmPaymentSchema } from '../_lib/schemas';
-import { confirmPayment } from '../_lib/service';
+import { preparePaymentSchema } from '../_lib/schemas';
+import { preparePayment } from '../_lib/service';
 
 export async function POST(request: NextRequest): Promise<Response> {
   try {
-    const body = await validateBody(confirmPaymentSchema, request);
+    const body = await validateBody(preparePaymentSchema, request);
     const { serviceUser } = await requireActiveUser();
     await expireUserOrders(serviceUser.id);
-    await confirmPayment(serviceUser.id, body);
-    return success(null);
+    const successUrl = `${request.nextUrl.origin}/payment/success`;
+    const result = await preparePayment(serviceUser.id, body, successUrl);
+    return success(result);
   } catch (error) {
     return routeError(error);
   }

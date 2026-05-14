@@ -9,7 +9,14 @@ export type {
   PaginatedResult,
   ValidationIssue,
 } from './common';
-export type { ConfirmPaymentRequest } from './payment';
+export type {
+  ConfirmPaymentRequest,
+  PaymentFlow,
+  PaymentProvider,
+  PaymentResponse,
+  PreparePaymentRequest,
+  PreparePaymentResponse,
+} from './payment';
 export type {
   CreateOrderRequest,
   CreateOrderResponse,

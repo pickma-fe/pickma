@@ -269,8 +269,13 @@ export interface CreatedOrderPaymentInfo {
 
 ## 7. Payment
 
+- provider: 결제 승인 주체 (`toss | kakao_pay | naver_pay`)
+- method: 사용자가 선택한 결제 수단 (`card | virtual_account | mobile | easy_pay`)
+
 ```ts
-export type PaymentMethod = 'card' | 'easyPay' | 'transfer' | 'virtualAccount';
+export type PaymentProvider = 'toss' | 'kakao_pay' | 'naver_pay';
+
+export type PaymentMethod = 'card' | 'virtual_account' | 'mobile' | 'easy_pay';
 
 export type PaymentStatus =
   | 'pending'
@@ -282,8 +287,12 @@ export type PaymentStatus =
 export interface Payment {
   id: string;
   orderId: string;
-  paymentKey?: string;
+  orderNumber: string;
+  provider: PaymentProvider;
+  providerPaymentKey?: string;
+  providerOrderId?: string;
   method: PaymentMethod;
+  methodDetail?: string;
   amount: number;
   status: PaymentStatus;
   paidAt?: Date;

@@ -17,6 +17,7 @@ CREATE TYPE store_status AS ENUM ('pending', 'approved', 'rejected', 'inactive')
 CREATE TYPE product_status AS ENUM ('active', 'closed');
 CREATE TYPE order_status AS ENUM (
   'payment_pending',
+  'processing',
   'reserved',
   'ready',
   'completed',
@@ -24,6 +25,7 @@ CREATE TYPE order_status AS ENUM (
   'no_show',
   'expired'
 );
+CREATE TYPE payment_provider AS ENUM ('toss', 'kakao_pay', 'naver_pay');
 CREATE TYPE payment_method AS ENUM ('card', 'virtual_account', 'mobile', 'easy_pay');
 CREATE TYPE payment_status AS ENUM ('pending', 'paid', 'failed', 'cancelled', 'refunded');
 CREATE TYPE social_provider AS ENUM ('google', 'kakao');
@@ -149,18 +151,24 @@ CREATE TABLE order_items (
 );
 
 CREATE TABLE payments (
-  id             uuid            PRIMARY KEY DEFAULT gen_random_uuid(),
-  order_id       uuid            UNIQUE NOT NULL REFERENCES orders(id) ON DELETE RESTRICT,
-  payment_key    varchar(200)    UNIQUE,
-  method         payment_method  NOT NULL,
-  amount         int             NOT NULL,
-  status         payment_status  NOT NULL,
-  paid_at        timestamptz,
-  refunded_at    timestamptz,
-  refund_reason  varchar(500),
-  pg_response    jsonb,
-  created_at     timestamptz     NOT NULL DEFAULT now(),
-  updated_at     timestamptz     NOT NULL DEFAULT now()
+  id                   uuid             PRIMARY KEY DEFAULT gen_random_uuid(),
+  order_id             uuid             UNIQUE NOT NULL REFERENCES orders(id) ON DELETE RESTRICT,
+  provider             payment_provider NOT NULL,
+  provider_payment_key varchar(200),
+  provider_order_id    varchar(200),
+  method               payment_method   NOT NULL,
+  method_detail        text,
+  amount               int              NOT NULL,
+  status               payment_status   NOT NULL,
+  paid_at              timestamptz,
+  refunded_at          timestamptz,
+  refund_reason        varchar(500),
+  pg_response          jsonb,
+  created_at           timestamptz      NOT NULL DEFAULT now(),
+  updated_at           timestamptz      NOT NULL DEFAULT now(),
+  CONSTRAINT check_provider_identifiers CHECK (
+    provider_payment_key IS NOT NULL OR provider_order_id IS NOT NULL
+  )
 );
 
 CREATE TABLE wishlists (
@@ -200,6 +208,15 @@ CREATE INDEX idx_orders_user_store_created
 
 CREATE INDEX idx_orders_store_pickup_sequence
   ON orders(store_id, pickup_service_date, store_order_sequence);
+
+-- Partial unique indexes: provider payment keys are only unique when assigned
+CREATE UNIQUE INDEX idx_payments_unique_provider_payment_key
+  ON payments(provider, provider_payment_key)
+  WHERE provider_payment_key IS NOT NULL;
+
+CREATE UNIQUE INDEX idx_payments_unique_provider_order_id
+  ON payments(provider, provider_order_id)
+  WHERE provider_order_id IS NOT NULL;
 
 -- Partial unique indexes: sequence/numbers are only unique when assigned
 CREATE UNIQUE INDEX idx_orders_unique_store_pickup_seq
@@ -597,16 +614,20 @@ GRANT  EXECUTE ON FUNCTION check_pickup_capacity(varchar) TO service_role;
 -- ============================================================
 -- RPC 3: confirm_payment
 -- Role: atomic payment confirmation + stock finalization + sequence/number issuance
--- Input: p_order_number, p_payment_key, p_method, p_amount
+-- Input: p_order_number, p_provider, p_provider_payment_key, p_provider_order_id,
+--        p_method, p_method_detail, p_amount
 -- Output: success
--- Note: p_method must be mapped from PG response by Route Handler service before calling
+-- Note: p_method must be mapped from provider response by Route Handler service before calling
 -- ============================================================
 
 CREATE OR REPLACE FUNCTION confirm_payment(
-  p_order_number varchar,
-  p_payment_key  varchar,
-  p_method       payment_method,
-  p_amount       int
+  p_order_number         varchar,
+  p_provider             payment_provider,
+  p_provider_payment_key varchar,
+  p_provider_order_id    varchar,
+  p_method               payment_method,
+  p_method_detail        text,
+  p_amount               int
 )
 RETURNS TABLE(success boolean)
 LANGUAGE plpgsql
@@ -628,7 +649,7 @@ BEGIN
     RAISE EXCEPTION 'ORDER_NOT_FOUND';
   END IF;
 
-  IF v_order.status != 'payment_pending' THEN
+  IF v_order.status != 'processing' THEN
     RAISE EXCEPTION 'INVALID_ORDER_STATUS';
   END IF;
 
@@ -665,8 +686,13 @@ BEGIN
    WHERE oi.order_id = v_order.id
      AND p.id = oi.product_id;
 
-  INSERT INTO payments (order_id, payment_key, method, amount, status, paid_at)
-    VALUES (v_order.id, p_payment_key, p_method, p_amount, 'paid', now());
+  INSERT INTO payments (
+    order_id, provider, provider_payment_key, provider_order_id,
+    method, method_detail, amount, status, paid_at
+  ) VALUES (
+    v_order.id, p_provider, p_provider_payment_key, p_provider_order_id,
+    p_method, p_method_detail, p_amount, 'paid', now()
+  );
 
   UPDATE orders
      SET status               = 'reserved',
@@ -679,8 +705,8 @@ BEGIN
 END;
 $$;
 
-REVOKE EXECUTE ON FUNCTION confirm_payment(varchar, varchar, payment_method, int) FROM PUBLIC;
-GRANT  EXECUTE ON FUNCTION confirm_payment(varchar, varchar, payment_method, int) TO service_role;
+REVOKE EXECUTE ON FUNCTION confirm_payment(varchar, payment_provider, varchar, varchar, payment_method, text, int) FROM PUBLIC;
+GRANT  EXECUTE ON FUNCTION confirm_payment(varchar, payment_provider, varchar, varchar, payment_method, text, int) TO service_role;
 
 -- ============================================================
 -- RPC 4: expire_order
@@ -734,7 +760,77 @@ REVOKE EXECUTE ON FUNCTION expire_order(uuid) FROM PUBLIC;
 GRANT  EXECUTE ON FUNCTION expire_order(uuid) TO service_role;
 
 -- ============================================================
--- RPC 5: cancel_order (contract only — SQL implementation in Phase 6)
+-- RPC 5: begin_payment_processing
+-- Role: atomically claims a payment_pending order for processing.
+--       Prevents duplicate adapter.confirm calls on concurrent requests.
+--       Flow: payment_pending → processing (claim) → reserved (confirm_payment)
+-- Input: p_order_id
+-- Output: success
+-- Errors: ORDER_NOT_FOUND | INVALID_ORDER_STATUS | ORDER_EXPIRED
+-- ============================================================
+CREATE OR REPLACE FUNCTION begin_payment_processing(p_order_id uuid)
+RETURNS TABLE(success boolean)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_order orders%ROWTYPE;
+BEGIN
+  SELECT * INTO v_order
+    FROM orders
+   WHERE id = p_order_id
+     FOR UPDATE;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'ORDER_NOT_FOUND';
+  END IF;
+
+  IF v_order.status != 'payment_pending' THEN
+    RAISE EXCEPTION 'INVALID_ORDER_STATUS';
+  END IF;
+
+  IF v_order.expires_at IS NOT NULL AND v_order.expires_at <= now() THEN
+    RAISE EXCEPTION 'ORDER_EXPIRED';
+  END IF;
+
+  UPDATE orders SET status = 'processing' WHERE id = p_order_id;
+
+  RETURN QUERY SELECT true;
+END;
+$$;
+
+REVOKE EXECUTE ON FUNCTION begin_payment_processing(uuid) FROM PUBLIC;
+GRANT  EXECUTE ON FUNCTION begin_payment_processing(uuid) TO service_role;
+
+-- ============================================================
+-- RPC 6: revert_payment_processing
+-- Role: rolls back processing → payment_pending when adapter.confirm fails.
+--       Allows the user to retry payment.
+-- Input: p_order_id
+-- Output: success
+-- ============================================================
+CREATE OR REPLACE FUNCTION revert_payment_processing(p_order_id uuid)
+RETURNS TABLE(success boolean)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  UPDATE orders
+     SET status = 'payment_pending'
+   WHERE id = p_order_id
+     AND status = 'processing';
+
+  RETURN QUERY SELECT true;
+END;
+$$;
+
+REVOKE EXECUTE ON FUNCTION revert_payment_processing(uuid) FROM PUBLIC;
+GRANT  EXECUTE ON FUNCTION revert_payment_processing(uuid) TO service_role;
+
+-- ============================================================
+-- RPC 7: cancel_order (contract only — SQL implementation in Phase 6)
 -- Role: user-initiated order cancellation + reserved stock restoration
 -- Input: p_order_id, p_reason
 -- Output: success

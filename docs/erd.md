@@ -149,27 +149,27 @@
 
 ## 2.7 orders (주문)
 
-| 컬럼명                 | 타입         | 제약조건                            | 설명                           |
-| ---------------------- | ------------ | ----------------------------------- | ------------------------------ |
-| `id`                   | uuid         | PK                                  | 주문 ID                        |
-| `order_number`         | varchar(20)  | UNIQUE, NOT NULL                    | 전역 주문번호, PG 주문 ID 매핑 |
-| `user_id`              | uuid         | FK → users.id, NOT NULL             | 사용자                         |
-| `store_id`             | uuid         | FK → stores.id, NOT NULL            | 가게                           |
-| `total_amount`         | int          | NOT NULL                            | 총 금액                        |
-| `discount_amount`      | int          | NOT NULL                            | 할인 금액                      |
-| `payment_amount`       | int          | NOT NULL                            | 결제 금액                      |
-| `status`               | enum         | NOT NULL, DEFAULT 'payment_pending' | 상태                           |
-| `pickup_at`            | timestamp    | NOT NULL                            | 사용자가 선택한 픽업 시간      |
-| `pickup_service_date`  | date         | NOT NULL                            | 픽업 운영 기준일               |
-| `store_order_sequence` | int          |                                     | 매장+픽업일 기준 결제완료 순번 |
-| `store_order_number`   | varchar(16)  |                                     | 판매자 운영용 주문번호         |
-| `pickup_number`        | varchar(4)   |                                     | 매장 현장 픽업번호             |
-| `expires_at`           | timestamp    |                                     | 결제 만료                      |
-| `picked_up_at`         | timestamp    |                                     | 픽업 완료                      |
-| `cancelled_at`         | timestamp    |                                     | 취소 시간                      |
-| `cancel_reason`        | varchar(500) |                                     | 사유                           |
-| `created_at`           | timestamp    | NOT NULL, DEFAULT now()             | 생성일시                       |
-| `updated_at`           | timestamp    | NOT NULL, DEFAULT now()             | 수정일시                       |
+| 컬럼명                 | 타입         | 제약조건                            | 설명                                                                         |
+| ---------------------- | ------------ | ----------------------------------- | ---------------------------------------------------------------------------- |
+| `id`                   | uuid         | PK                                  | 주문 ID                                                                      |
+| `order_number`         | varchar(20)  | UNIQUE, NOT NULL                    | PickMa 내부 전역 주문번호 (provider별 외부 주문 ID는 payments 테이블에 저장) |
+| `user_id`              | uuid         | FK → users.id, NOT NULL             | 사용자                                                                       |
+| `store_id`             | uuid         | FK → stores.id, NOT NULL            | 가게                                                                         |
+| `total_amount`         | int          | NOT NULL                            | 총 금액                                                                      |
+| `discount_amount`      | int          | NOT NULL                            | 할인 금액                                                                    |
+| `payment_amount`       | int          | NOT NULL                            | 결제 금액                                                                    |
+| `status`               | enum         | NOT NULL, DEFAULT 'payment_pending' | 상태                                                                         |
+| `pickup_at`            | timestamp    | NOT NULL                            | 사용자가 선택한 픽업 시간                                                    |
+| `pickup_service_date`  | date         | NOT NULL                            | 픽업 운영 기준일                                                             |
+| `store_order_sequence` | int          |                                     | 매장+픽업일 기준 결제완료 순번                                               |
+| `store_order_number`   | varchar(16)  |                                     | 판매자 운영용 주문번호                                                       |
+| `pickup_number`        | varchar(4)   |                                     | 매장 현장 픽업번호                                                           |
+| `expires_at`           | timestamp    |                                     | 결제 만료                                                                    |
+| `picked_up_at`         | timestamp    |                                     | 픽업 완료                                                                    |
+| `cancelled_at`         | timestamp    |                                     | 취소 시간                                                                    |
+| `cancel_reason`        | varchar(500) |                                     | 사유                                                                         |
+| `created_at`           | timestamp    | NOT NULL, DEFAULT now()             | 생성일시                                                                     |
+| `updated_at`           | timestamp    | NOT NULL, DEFAULT now()             | 수정일시                                                                     |
 
 ### 주문 정책
 
@@ -235,20 +235,36 @@
 
 ## 2.9 payments (결제)
 
-| 컬럼명          | 타입         | 제약조건             | 설명      |
-| --------------- | ------------ | -------------------- | --------- |
-| `id`            | uuid         | PK                   | 결제 ID   |
-| `order_id`      | uuid         | FK, UNIQUE, NOT NULL | 주문      |
-| `payment_key`   | varchar(200) | UNIQUE               | PG 키     |
-| `method`        | enum         | NOT NULL             | 결제 수단 |
-| `amount`        | int          | NOT NULL             | 금액      |
-| `status`        | enum         | NOT NULL             | 상태      |
-| `paid_at`       | timestamp    |                      | 결제 시간 |
-| `refunded_at`   | timestamp    |                      | 환불 시간 |
-| `refund_reason` | varchar(500) |                      | 사유      |
-| `pg_response`   | jsonb        |                      | 응답      |
-| `created_at`    | timestamp    | DEFAULT now()        | 생성      |
-| `updated_at`    | timestamp    | DEFAULT now()        | 수정      |
+| 컬럼명                 | 타입         | 제약조건             | 설명                                |
+| ---------------------- | ------------ | -------------------- | ----------------------------------- |
+| `id`                   | uuid         | PK                   | 결제 ID                             |
+| `order_id`             | uuid         | FK, UNIQUE, NOT NULL | 주문                                |
+| `provider`             | enum         | NOT NULL             | 결제 승인 주체                      |
+| `provider_payment_key` | varchar(200) |                      | provider 결제 키                    |
+| `provider_order_id`    | varchar(200) |                      | provider에 전달한 주문 식별자       |
+| `method`               | enum         | NOT NULL             | 결제 수단                           |
+| `method_detail`        | text         |                      | provider 결제수단 상세 (예: 카드명) |
+| `amount`               | int          | NOT NULL             | 금액                                |
+| `status`               | enum         | NOT NULL             | 상태                                |
+| `paid_at`              | timestamp    |                      | 결제 시간                           |
+| `refunded_at`          | timestamp    |                      | 환불 시간                           |
+| `refund_reason`        | varchar(500) |                      | 사유                                |
+| `pg_response`          | jsonb        |                      | provider raw 응답                   |
+| `created_at`           | timestamp    | DEFAULT now()        | 생성                                |
+| `updated_at`           | timestamp    | DEFAULT now()        | 수정                                |
+
+**UNIQUE:**
+
+- `order_id` (주문당 1건)
+- `(provider, provider_payment_key)` WHERE `provider_payment_key IS NOT NULL`
+- `(provider, provider_order_id)` WHERE `provider_order_id IS NOT NULL`
+
+**정산/수수료 정책**: `payments` 테이블은 provider 결제 기록과 주문 확정에 집중한다. 수수료율, 정산 주기, 취소/환불/노쇼 시 정산 기준은 후속 Settlement/Fee Policy phase에서 별도 DB schema로 추가한다.
+
+**`confirm_payment` RPC signature** (Phase 10 갱신):
+
+- 파라미터: `p_order_number`, `p_provider`, `p_provider_payment_key`, `p_provider_order_id`, `p_method`, `p_method_detail`, `p_amount`, `p_pg_response`
+- 주문 확정, 재고 확정, 번호 발급은 atomic하게 처리한다.
 
 ---
 
