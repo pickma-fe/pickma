@@ -92,8 +92,6 @@ describe('mapOrder', () => {
       id: 'payment-1',
       orderId: 'order-uuid-1',
       orderNumber: 'PM20260101A1B2C3D4E5',
-      provider: 'toss',
-      providerPaymentKey: 'ppk_test',
       method: 'card',
       amount: 8000,
       status: 'paid',
@@ -105,7 +103,6 @@ describe('mapOrder', () => {
     expect(result.payment).toBeDefined();
     expect(result.payment?.paidAt).toBeInstanceOf(Date);
     expect(result.payment?.createdAt).toBeInstanceOf(Date);
-    expect(result.payment?.provider).toBe('toss');
     expect(result.payment?.amount).toBe(8000);
   });
 });

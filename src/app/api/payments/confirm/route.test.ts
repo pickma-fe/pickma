@@ -31,7 +31,11 @@ const mockServiceUser = {
   updatedAt: '2026-01-01T00:00:00Z',
 };
 
-const validBody = { provider: 'toss', orderNumber: 'PM2026TEST', amount: 5000 };
+const validBody = {
+  paymentKey: 'mock_pk_test',
+  orderNumber: 'PM2026TEST',
+  amount: 5000,
+};
 
 function makeRequest(body: object) {
   return new Request('http://localhost/api/payments/confirm', {
@@ -99,8 +103,10 @@ describe('POST /api/payments/confirm', () => {
     expect(body.error.code).toBe('PAYMENT_CONFIRM_FAILED');
   });
 
-  it('유효하지 않은 provider → VALIDATION_ERROR 400', async () => {
-    const res = await POST(makeRequest({ ...validBody, provider: 'invalid' }));
+  it('paymentKey 누락 → VALIDATION_ERROR 400', async () => {
+    const res = await POST(
+      makeRequest({ orderNumber: 'PM2026TEST', amount: 5000 })
+    );
     expect(res.status).toBe(400);
     const body = (await res.json()) as { error: { code: string } };
     expect(body.error.code).toBe('VALIDATION_ERROR');

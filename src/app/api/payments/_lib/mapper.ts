@@ -1,14 +1,10 @@
-import type {
-  PaymentMethod,
-  PaymentProvider,
-  PaymentStatus,
-} from '@/types/payment';
+import type { PaymentMethod, PaymentStatus } from '@/types/payment';
 import type { PaymentResponse } from '@/contracts/payment';
 
 export interface PaymentRow {
   id: string;
   order_id: string;
-  provider: PaymentProvider;
+  provider: string;
   provider_payment_key: string | null;
   provider_order_id: string | null;
   method: PaymentMethod;
@@ -30,9 +26,6 @@ export function mapPaymentRow(
     id: row.id,
     orderId: row.order_id,
     orderNumber,
-    provider: row.provider,
-    providerPaymentKey: row.provider_payment_key ?? undefined,
-    providerOrderId: row.provider_order_id ?? undefined,
     method: row.method,
     methodDetail: row.method_detail ?? undefined,
     amount: row.amount,
