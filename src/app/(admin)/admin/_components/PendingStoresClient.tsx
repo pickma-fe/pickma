@@ -1,11 +1,16 @@
 'use client';
 
+import { useState } from 'react';
+
+import type { Store } from '@/types/store';
 import { usePendingAdminStores } from '@/hooks/admin/stores/usePendingAdminStores';
 
+import { PendingStoreDetailModal } from './PendingStoreDetailModal';
 import { PendingStoreTable } from './PendingStoreTable';
 
 export function PendingStoresClient() {
   const { data, isLoading, isError, refetch } = usePendingAdminStores();
+  const [selectedStore, setSelectedStore] = useState<Store | null>(null);
 
   if (isError) {
     return (
@@ -22,15 +27,21 @@ export function PendingStoresClient() {
     );
   }
 
-  const handleViewDetail = () => {};
-
   return (
-    <PendingStoreTable
-      data={data?.items ?? []}
-      isLoading={isLoading}
-      currentPage={data?.page ?? 1}
-      totalPages={data?.totalPages ?? 1}
-      onViewDetail={handleViewDetail}
-    />
+    <>
+      <PendingStoreTable
+        data={data?.items ?? []}
+        isLoading={isLoading}
+        currentPage={data?.page ?? 1}
+        totalPages={data?.totalPages ?? 1}
+        onViewDetail={setSelectedStore}
+      />
+      {selectedStore && (
+        <PendingStoreDetailModal
+          store={selectedStore}
+          onClose={() => setSelectedStore(null)}
+        />
+      )}
+    </>
   );
 }
