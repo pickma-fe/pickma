@@ -3,6 +3,8 @@
 --   supabase db query --linked --file supabase/refresh-seed-products.sql
 --   npx supabase db query --linked --file supabase/refresh-seed-products.sql
 
+BEGIN;
+
 -- 1. Clear test data (payments first due to RESTRICT FK, order_items cascade with orders)
 DELETE FROM public.payments;
 DELETE FROM public.orders;
@@ -35,3 +37,5 @@ UPDATE public.products SET
   reserved_stock = 0,
   status         = 'active'
 WHERE id = '00000000-0000-4000-8000-000000000054';
+
+COMMIT;
