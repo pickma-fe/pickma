@@ -332,7 +332,7 @@ describe('confirmPayment', () => {
     });
   });
 
-  it('callTossConfirm 실패 → revert_payment_processing 호출 후 PAYMENT_CONFIRM_FAILED', async () => {
+  it('callTossConfirm 네트워크 실패 → revert 후 PAYMENT_CONFIRM_FAILED 500', async () => {
     vi.stubEnv('PAYMENT_MOCK', 'false');
     const { callTossConfirm } = await import('./toss');
     vi.mocked(callTossConfirm).mockRejectedValueOnce(
@@ -348,7 +348,36 @@ describe('confirmPayment', () => {
         orderNumber: 'PM2026TEST',
         amount: 5000,
       })
-    ).rejects.toMatchObject({ code: ERROR_CODE.PAYMENT_CONFIRM_FAILED });
+    ).rejects.toMatchObject({
+      code: ERROR_CODE.PAYMENT_CONFIRM_FAILED,
+      statusCode: 500,
+    });
+    expect(client.rpc).toHaveBeenCalledWith('revert_payment_processing', {
+      p_order_id: 'order-uuid-1',
+    });
+  });
+
+  it('callTossConfirm AppError(INVALID_ORDER_STATUS 409) → revert 후 그대로 409 보존', async () => {
+    vi.stubEnv('PAYMENT_MOCK', 'false');
+    const { callTossConfirm } = await import('./toss');
+    const { AppError } = await import('@/lib/errors/appError');
+    vi.mocked(callTossConfirm).mockRejectedValueOnce(
+      new AppError(ERROR_CODE.INVALID_ORDER_STATUS, 409)
+    );
+    const client = makeClient();
+    vi.mocked(createServiceRoleClient).mockReturnValue(
+      client as unknown as ReturnType<typeof createServiceRoleClient>
+    );
+    await expect(
+      confirmPayment(mockUserId, {
+        paymentKey: 'toss_pk_dup',
+        orderNumber: 'PM2026TEST',
+        amount: 5000,
+      })
+    ).rejects.toMatchObject({
+      code: ERROR_CODE.INVALID_ORDER_STATUS,
+      statusCode: 409,
+    });
     expect(client.rpc).toHaveBeenCalledWith('revert_payment_processing', {
       p_order_id: 'order-uuid-1',
     });
