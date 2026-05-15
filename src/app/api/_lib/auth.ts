@@ -23,12 +23,16 @@ export async function checkApplicationEligibility(
   }
 
   const supabase = createServiceRoleClient();
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('seller_applications')
     .select('id')
     .eq('user_id', userId)
     .in('status', ['pending', 'approved'])
     .limit(1);
+
+  if (error) {
+    throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
+  }
 
   if (data && data.length > 0) {
     return { eligible: false, reason: 'application_already_submitted' };

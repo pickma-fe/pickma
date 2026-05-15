@@ -221,15 +221,13 @@ describe('checkApplicationEligibility', () => {
     vi.clearAllMocks();
   });
 
-  function setupServiceClient(applications: unknown[]) {
+  function setupServiceClient(applications: unknown[], error: unknown = null) {
     vi.mocked(createServiceRoleClient).mockReturnValue({
       from: vi.fn().mockReturnValue({
         select: vi.fn().mockReturnValue({
           eq: vi.fn().mockReturnValue({
             in: vi.fn().mockReturnValue({
-              limit: vi
-                .fn()
-                .mockResolvedValue({ data: applications, error: null }),
+              limit: vi.fn().mockResolvedValue({ data: applications, error }),
             }),
           }),
         }),
@@ -258,6 +256,16 @@ describe('checkApplicationEligibility', () => {
     setupServiceClient([]);
     const result = await checkApplicationEligibility('user-1', 'customer');
     expect(result).toEqual({ eligible: true });
+  });
+
+  it('DB 에러 시 INTERNAL_SERVER_ERROR를 던진다', async () => {
+    setupServiceClient([], { message: 'connection error' });
+    await expect(
+      checkApplicationEligibility('user-1', 'customer')
+    ).rejects.toMatchObject({
+      code: 'INTERNAL_SERVER_ERROR',
+      statusCode: 500,
+    });
   });
 });
 
