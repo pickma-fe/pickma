@@ -4,7 +4,38 @@ import type { UserResponse } from '@/contracts/user';
 import { AppError } from '@/lib/errors/appError';
 import { ERROR_CODE } from '@/lib/errors/errorCodes';
 import { createServerClient } from '@/lib/supabase/server';
+import { createServiceRoleClient } from '@/lib/supabase/service';
 import { getOrCreateUserByAuthUser } from '@/app/api/_lib/current-user';
+
+type EligibilityResult =
+  | { eligible: true }
+  | {
+      eligible: false;
+      reason: 'seller_already_registered' | 'application_already_submitted';
+    };
+
+export async function checkApplicationEligibility(
+  userId: string,
+  role: string
+): Promise<EligibilityResult> {
+  if (role === 'seller') {
+    return { eligible: false, reason: 'seller_already_registered' };
+  }
+
+  const supabase = createServiceRoleClient();
+  const { data } = await supabase
+    .from('seller_applications')
+    .select('id')
+    .eq('user_id', userId)
+    .in('status', ['pending', 'approved'])
+    .limit(1);
+
+  if (data && data.length > 0) {
+    return { eligible: false, reason: 'application_already_submitted' };
+  }
+
+  return { eligible: true };
+}
 
 export async function requireAuth() {
   const supabase = await createServerClient();

@@ -1,10 +1,17 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createServerClient } from '@/lib/supabase/server';
+import { createServiceRoleClient } from '@/lib/supabase/service';
 import { getOrCreateUserByAuthUser } from '@/app/api/_lib/current-user';
 
-import { requireActiveUser, requireAdmin, requireSeller } from './auth';
+import {
+  checkApplicationEligibility,
+  requireActiveUser,
+  requireAdmin,
+  requireSeller,
+} from './auth';
 
+vi.mock('@/lib/supabase/service');
 vi.mock('@/lib/supabase/server');
 vi.mock('@/app/api/_lib/current-user');
 
@@ -206,6 +213,51 @@ describe('requireSeller', () => {
     const result = await requireSeller();
     expect(result.serviceUser.role).toBe('seller');
     expect(result.store).toEqual({ id: 'store-1' });
+  });
+});
+
+describe('checkApplicationEligibility', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  function setupServiceClient(applications: unknown[]) {
+    vi.mocked(createServiceRoleClient).mockReturnValue({
+      from: vi.fn().mockReturnValue({
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({
+            in: vi.fn().mockReturnValue({
+              limit: vi
+                .fn()
+                .mockResolvedValue({ data: applications, error: null }),
+            }),
+          }),
+        }),
+      }),
+    } as unknown as ReturnType<typeof createServiceRoleClient>);
+  }
+
+  it('role이 seller면 seller_already_registered를 반환한다', async () => {
+    const result = await checkApplicationEligibility('user-1', 'seller');
+    expect(result).toEqual({
+      eligible: false,
+      reason: 'seller_already_registered',
+    });
+  });
+
+  it('pending 신청이 있으면 application_already_submitted를 반환한다', async () => {
+    setupServiceClient([{ id: 'app-1' }]);
+    const result = await checkApplicationEligibility('user-1', 'customer');
+    expect(result).toEqual({
+      eligible: false,
+      reason: 'application_already_submitted',
+    });
+  });
+
+  it('신청이 없으면 eligible true를 반환한다', async () => {
+    setupServiceClient([]);
+    const result = await checkApplicationEligibility('user-1', 'customer');
+    expect(result).toEqual({ eligible: true });
   });
 });
 
