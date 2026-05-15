@@ -9,6 +9,22 @@ export interface TossConfirmResult {
   methodDetail: string | null;
 }
 
+const TOSS_CONFIRM_ERROR_MAP: Record<string, () => AppError> = {
+  ALREADY_PROCESSED_PAYMENT: () =>
+    new AppError(ERROR_CODE.INVALID_ORDER_STATUS, 409),
+  PAYMENT_AMOUNT_MISMATCH: () =>
+    new AppError(ERROR_CODE.PAYMENT_AMOUNT_MISMATCH, 400),
+  NOT_FOUND_PAYMENT: () => new AppError(ERROR_CODE.ORDER_NOT_FOUND, 404),
+};
+
+const CARD_REJECTION_CODES = new Set([
+  'INVALID_STOPPED_CARD',
+  'INVALID_REJECT_CARD',
+  'EXCEED_MAX_DAILY_PAYMENT_COUNT',
+  'EXCEED_MAX_PAYMENT_AMOUNT',
+  'INVALID_CARD_EXPIRATION',
+]);
+
 const TOSS_METHOD_MAP: Record<string, PaymentMethod> = {
   카드: 'card',
   가상계좌: 'virtual_account',
@@ -65,8 +81,10 @@ export async function callTossConfirm(params: {
     } catch {
       // ignore parse failure
     }
-    if (code === 'ALREADY_PROCESSED_PAYMENT') {
-      throw new AppError(ERROR_CODE.INVALID_ORDER_STATUS, 409);
+    const mapped = TOSS_CONFIRM_ERROR_MAP[code];
+    if (mapped) throw mapped();
+    if (CARD_REJECTION_CODES.has(code)) {
+      throw new AppError(ERROR_CODE.PAYMENT_CONFIRM_FAILED, 400);
     }
     throw new AppError(ERROR_CODE.PAYMENT_CONFIRM_FAILED, 500);
   }

@@ -143,8 +143,9 @@ export async function confirmPayment(
         amount: order.payment_amount,
       });
     }
-  } catch {
+  } catch (e) {
     await supabase.rpc('revert_payment_processing', { p_order_id: order.id });
+    if (e instanceof AppError) throw e;
     throw new AppError(ERROR_CODE.PAYMENT_CONFIRM_FAILED, 500);
   }
 

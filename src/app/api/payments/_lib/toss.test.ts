@@ -131,7 +131,7 @@ describe('callTossConfirm', () => {
     expect(result.methodDetail).toBe('카카오페이');
   });
 
-  it('Toss 에러 응답 { code, message } → PAYMENT_CONFIRM_FAILED', async () => {
+  it('카드 거절(INVALID_STOPPED_CARD) → PAYMENT_CONFIRM_FAILED 400', async () => {
     vi.mocked(fetch).mockResolvedValueOnce(
       new Response(
         JSON.stringify({
@@ -147,7 +147,32 @@ describe('callTossConfirm', () => {
         orderNumber: 'PM2026TEST',
         amount: 5000,
       })
-    ).rejects.toMatchObject({ code: ERROR_CODE.PAYMENT_CONFIRM_FAILED });
+    ).rejects.toMatchObject({
+      code: ERROR_CODE.PAYMENT_CONFIRM_FAILED,
+      statusCode: 400,
+    });
+  });
+
+  it('알 수 없는 Toss 에러 → PAYMENT_CONFIRM_FAILED 500', async () => {
+    vi.mocked(fetch).mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({
+          code: 'UNKNOWN_TOSS_ERROR',
+          message: '알 수 없는 오류',
+        }),
+        { status: 500 }
+      )
+    );
+    await expect(
+      callTossConfirm({
+        paymentKey: 'toss_pk_err',
+        orderNumber: 'PM2026TEST',
+        amount: 5000,
+      })
+    ).rejects.toMatchObject({
+      code: ERROR_CODE.PAYMENT_CONFIRM_FAILED,
+      statusCode: 500,
+    });
   });
 
   it('ALREADY_PROCESSED_PAYMENT → INVALID_ORDER_STATUS 409', async () => {
@@ -169,6 +194,50 @@ describe('callTossConfirm', () => {
     ).rejects.toMatchObject({
       code: ERROR_CODE.INVALID_ORDER_STATUS,
       statusCode: 409,
+    });
+  });
+
+  it('PAYMENT_AMOUNT_MISMATCH → PAYMENT_AMOUNT_MISMATCH 400', async () => {
+    vi.mocked(fetch).mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({
+          code: 'PAYMENT_AMOUNT_MISMATCH',
+          message: '금액 불일치',
+        }),
+        { status: 400 }
+      )
+    );
+    await expect(
+      callTossConfirm({
+        paymentKey: 'toss_pk_mismatch',
+        orderNumber: 'PM2026TEST',
+        amount: 5000,
+      })
+    ).rejects.toMatchObject({
+      code: ERROR_CODE.PAYMENT_AMOUNT_MISMATCH,
+      statusCode: 400,
+    });
+  });
+
+  it('NOT_FOUND_PAYMENT → ORDER_NOT_FOUND 404', async () => {
+    vi.mocked(fetch).mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({
+          code: 'NOT_FOUND_PAYMENT',
+          message: '결제 정보 없음',
+        }),
+        { status: 404 }
+      )
+    );
+    await expect(
+      callTossConfirm({
+        paymentKey: 'toss_pk_notfound',
+        orderNumber: 'PM2026TEST',
+        amount: 5000,
+      })
+    ).rejects.toMatchObject({
+      code: ERROR_CODE.ORDER_NOT_FOUND,
+      statusCode: 404,
     });
   });
 
