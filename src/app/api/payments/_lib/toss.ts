@@ -96,7 +96,10 @@ export async function callTossConfirm(params: {
     if (CARD_REJECTION_CODES.has(code)) {
       throw new AppError(ERROR_CODE.PAYMENT_CONFIRM_FAILED, 400);
     }
-    throw new AppError(ERROR_CODE.PAYMENT_CONFIRM_FAILED, 500);
+    throw new AppError(
+      ERROR_CODE.PAYMENT_CONFIRM_FAILED,
+      response.status >= 400 && response.status < 500 ? 400 : 500
+    );
   }
 
   const data = (await response.json()) as {
