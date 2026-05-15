@@ -19,4 +19,12 @@ export type {
   ProductDisplayStatus,
   ProductStatus,
 } from './product';
+export type {
+  SellerApplication,
+  SellerApplicationDocument,
+  SellerApplicationDocumentType,
+  SellerApplicationStatus,
+  SellerApplicationStatusForOnboarding,
+  SellerOnboardingStatus,
+} from './seller-application';
 export type { User, UserRole, UserStatus } from './user';

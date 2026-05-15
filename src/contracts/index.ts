@@ -1,6 +1,9 @@
 export type {
+  AdminPendingSellerApplicationListResponse,
+  AdminPendingSellerApplicationResponse,
   AdminStoreListResponse,
   AdminStoreResponse,
+  RejectSellerApplicationRequest,
   RejectStoreRequest,
 } from './admin';
 export type {
@@ -21,7 +24,6 @@ export type {
   CreateFileUploadUrlRequest,
   FileUploadPurpose,
   FileUploadUrlResponse,
-  SellerApplicationDocumentType,
 } from './file';
 export type {
   CreateOrderRequest,
@@ -32,6 +34,14 @@ export type {
   OrderListParams,
   OrderListResponse,
 } from './order';
+export type {
+  CreateSellerApplicationRequest,
+  SellerApplicationDocumentReadUrlResponse,
+  SellerApplicationDocumentResponse,
+  SellerApplicationDocumentType,
+  SellerApplicationResponse,
+  SellerOnboardingStatusResponse,
+} from './seller-application';
 export type { CreateStoreRequest, StoreResponse } from './store';
 export type {
   ProductDetailResponse,
