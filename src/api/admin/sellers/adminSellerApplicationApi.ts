@@ -10,7 +10,8 @@ export const adminSellerApplicationApi = {
     pageSize = 20
   ): Promise<AdminPendingSellerApplicationListResponse> {
     return apiClient.get<AdminPendingSellerApplicationListResponse>(
-      `/api/admin/sellers/pending?page=${page}&pageSize=${pageSize}`
+      '/api/admin/sellers/pending',
+      { page, pageSize }
     );
   },
 
