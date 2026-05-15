@@ -17,6 +17,8 @@ const mockOrderRow = {
   payment_amount: 5000,
   status: 'payment_pending',
   expires_at: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+  store_id: 'store-uuid-1',
+  pickup_service_date: '2026-05-15',
 };
 
 type MockOrderRow = typeof mockOrderRow;
@@ -32,20 +34,36 @@ function makeClient({
   orderData = mockOrderRow,
   orderError = null as { message: string } | null,
   rpcErrors = {},
+  seqLastSequence = 0,
+  seqError = null as { message: string } | null,
 }: {
   orderData?: MockOrderRow | null;
   orderError?: { message: string } | null;
   rpcErrors?: Record<string, { message: string } | null>;
+  seqLastSequence?: number;
+  seqError?: { message: string } | null;
 } = {}) {
-  const queryMock = {
+  const orderQueryMock = {
     select: vi.fn().mockReturnThis(),
     eq: vi.fn().mockReturnThis(),
     maybeSingle: vi
       .fn()
       .mockResolvedValue({ data: orderData, error: orderError }),
   };
+  const seqQueryMock = {
+    select: vi.fn().mockReturnThis(),
+    eq: vi.fn().mockReturnThis(),
+    maybeSingle: vi.fn().mockResolvedValue({
+      data: seqLastSequence > 0 ? { last_sequence: seqLastSequence } : null,
+      error: seqError,
+    }),
+  };
   return {
-    from: vi.fn().mockReturnValue(queryMock),
+    from: vi
+      .fn()
+      .mockImplementation((table: string) =>
+        table === 'store_order_sequences' ? seqQueryMock : orderQueryMock
+      ),
     rpc: vi
       .fn()
       .mockImplementation((fnName: string) =>
@@ -309,6 +327,27 @@ describe('confirmPayment', () => {
         amount: 5000,
       })
     ).rejects.toMatchObject({ code: ERROR_CODE.ORDER_NOT_FOUND });
+  });
+
+  it('픽업번호 capacity 소진(last_sequence >= 2574) → PICKUP_NUMBER_EXHAUSTED 409, begin 미호출', async () => {
+    const client = makeClient({ seqLastSequence: 2574 });
+    vi.mocked(createServiceRoleClient).mockReturnValue(
+      client as unknown as ReturnType<typeof createServiceRoleClient>
+    );
+    await expect(
+      confirmPayment(mockUserId, {
+        paymentKey: 'mock_pk_test',
+        orderNumber: 'PM2026TEST',
+        amount: 5000,
+      })
+    ).rejects.toMatchObject({
+      code: ERROR_CODE.PICKUP_NUMBER_EXHAUSTED,
+      statusCode: 409,
+    });
+    expect(client.rpc).not.toHaveBeenCalledWith(
+      'begin_payment_processing',
+      expect.anything()
+    );
   });
 
   it('begin_payment_processing 실패(경쟁 요청) → INVALID_ORDER_STATUS 409', async () => {
