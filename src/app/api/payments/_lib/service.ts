@@ -97,7 +97,9 @@ export async function confirmPayment(
 
   const { data: order, error } = await supabase
     .from('orders')
-    .select('id, payment_amount, status, expires_at')
+    .select(
+      'id, payment_amount, status, expires_at, store_id, pickup_service_date'
+    )
     .eq('order_number', body.orderNumber)
     .eq('user_id', userId)
     .maybeSingle();
@@ -119,6 +121,17 @@ export async function confirmPayment(
   }
   if (order.payment_amount !== body.amount) {
     throw new AppError(ERROR_CODE.PAYMENT_AMOUNT_MISMATCH, 400);
+  }
+
+  const { data: seqRow, error: seqError } = await supabase
+    .from('store_order_sequences')
+    .select('last_sequence')
+    .eq('store_id', order.store_id)
+    .eq('pickup_service_date', order.pickup_service_date)
+    .maybeSingle();
+  if (seqError) throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
+  if (seqRow && seqRow.last_sequence >= 2574) {
+    throw new AppError(ERROR_CODE.PICKUP_NUMBER_EXHAUSTED, 409);
   }
 
   const { error: beginError } = await supabase.rpc('begin_payment_processing', {
