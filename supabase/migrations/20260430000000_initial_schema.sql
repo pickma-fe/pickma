@@ -29,6 +29,8 @@ CREATE TYPE payment_provider AS ENUM ('toss', 'kakao_pay', 'naver_pay');
 CREATE TYPE payment_method AS ENUM ('card', 'virtual_account', 'mobile', 'easy_pay');
 CREATE TYPE payment_status AS ENUM ('pending', 'paid', 'failed', 'cancelled', 'refunded');
 CREATE TYPE social_provider AS ENUM ('google', 'kakao');
+CREATE TYPE seller_application_status AS ENUM ('pending', 'approved', 'rejected');
+CREATE TYPE seller_application_document_type AS ENUM ('business_license', 'id_card', 'bankbook', 'business_report');
 
 -- ============================================================
 -- Tables
@@ -77,7 +79,7 @@ CREATE TABLE stores (
   image            varchar(500),
   open_time        time,
   close_time       time,
-  status           store_status  NOT NULL DEFAULT 'pending',
+  status           store_status  NOT NULL DEFAULT 'approved',
   reject_reason    varchar(500),
   created_at       timestamptz   NOT NULL DEFAULT now(),
   updated_at       timestamptz   NOT NULL DEFAULT now()
@@ -190,6 +192,35 @@ CREATE TABLE store_order_sequences (
   CONSTRAINT check_last_sequence_non_negative CHECK (last_sequence >= 0)
 );
 
+CREATE TABLE seller_applications (
+  id                    uuid                          PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id               uuid                          NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+  status                seller_application_status     NOT NULL DEFAULT 'pending',
+  business_number       varchar(50)                   NOT NULL,
+  company_name          varchar(100)                  NOT NULL,
+  representative_name   varchar(100)                  NOT NULL,
+  business_address      varchar(255)                  NOT NULL,
+  business_type         varchar(100)                  NOT NULL,
+  business_category     varchar(100)                  NOT NULL,
+  reject_reason         varchar(500),
+  reviewed_at           timestamptz,
+  created_at            timestamptz                   NOT NULL DEFAULT now(),
+  updated_at            timestamptz                   NOT NULL DEFAULT now()
+);
+
+CREATE TABLE seller_application_documents (
+  id                  uuid                              PRIMARY KEY DEFAULT gen_random_uuid(),
+  application_id      uuid                              NOT NULL REFERENCES seller_applications(id) ON DELETE CASCADE,
+  type                seller_application_document_type  NOT NULL,
+  storage_path        varchar(500)                      NOT NULL,
+  original_file_name  varchar(255)                      NOT NULL,
+  content_type        varchar(100)                      NOT NULL,
+  size                int                               NOT NULL,
+  created_at          timestamptz                       NOT NULL DEFAULT now(),
+  UNIQUE (application_id, type),
+  CONSTRAINT check_document_size_positive CHECK (size > 0)
+);
+
 -- ============================================================
 -- Indexes
 -- ============================================================
@@ -217,6 +248,11 @@ CREATE UNIQUE INDEX idx_payments_unique_provider_payment_key
 CREATE UNIQUE INDEX idx_payments_unique_provider_order_id
   ON payments(provider, provider_order_id)
   WHERE provider_order_id IS NOT NULL;
+
+-- Partial unique index: at most one pending/approved application per user
+CREATE UNIQUE INDEX idx_seller_applications_unique_active
+  ON seller_applications(user_id)
+  WHERE status IN ('pending', 'approved');
 
 -- Partial unique indexes: sequence/numbers are only unique when assigned
 CREATE UNIQUE INDEX idx_orders_unique_store_pickup_seq
@@ -268,6 +304,10 @@ CREATE TRIGGER set_payments_updated_at
 
 CREATE TRIGGER set_store_order_sequences_updated_at
   BEFORE UPDATE ON store_order_sequences
+  FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+CREATE TRIGGER set_seller_applications_updated_at
+  BEFORE UPDATE ON seller_applications
   FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
 -- ============================================================
@@ -374,6 +414,10 @@ CREATE POLICY "wishlists: owner all"
   ON wishlists USING (auth.uid() = user_id);
 CREATE POLICY "wishlists: owner insert"
   ON wishlists FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+-- seller_applications: service_role bypasses RLS; no authenticated/anon GRANT → direct access blocked
+ALTER TABLE seller_applications ENABLE ROW LEVEL SECURITY;
+ALTER TABLE seller_application_documents ENABLE ROW LEVEL SECURITY;
 
 -- ============================================================
 -- RPC helpers
@@ -854,6 +898,40 @@ $$;
 
 REVOKE EXECUTE ON FUNCTION cancel_order(uuid, varchar) FROM PUBLIC;
 GRANT  EXECUTE ON FUNCTION cancel_order(uuid, varchar) TO service_role;
+
+-- ============================================================
+-- RPC 8: approve_seller_application
+-- Role: atomic seller application approval — sets status=approved and role=seller
+-- Input: application_id
+-- Output: void
+-- Errors: raises exception if no pending application found with that id
+-- ============================================================
+CREATE OR REPLACE FUNCTION approve_seller_application(application_id uuid)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_user_id uuid;
+BEGIN
+  UPDATE seller_applications
+     SET status      = 'approved',
+         reviewed_at = now()
+   WHERE id     = application_id
+     AND status = 'pending'
+  RETURNING user_id INTO v_user_id;
+
+  IF v_user_id IS NULL THEN
+    RAISE EXCEPTION 'APPLICATION_NOT_PENDING';
+  END IF;
+
+  UPDATE users SET role = 'seller' WHERE id = v_user_id;
+END;
+$$;
+
+REVOKE EXECUTE ON FUNCTION approve_seller_application(uuid) FROM PUBLIC;
+GRANT  EXECUTE ON FUNCTION approve_seller_application(uuid) TO service_role;
 
 -- ============================================================
 -- Storage Buckets
