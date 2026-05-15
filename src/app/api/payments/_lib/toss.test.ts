@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ERROR_CODE } from '@/lib/errors/errorCodes';
 
@@ -34,6 +34,11 @@ describe('callTossConfirm', () => {
   beforeEach(() => {
     vi.stubEnv('TOSS_SECRET_KEY', 'test_secret_key');
     vi.stubGlobal('fetch', vi.fn());
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.unstubAllGlobals();
   });
 
   it('Basic auth 헤더와 Idempotency-Key를 포함해 Toss API 호출', async () => {
