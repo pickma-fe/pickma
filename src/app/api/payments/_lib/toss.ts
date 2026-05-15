@@ -56,9 +56,9 @@ export async function callTossConfirm(params: {
   }
 
   const credentials = Buffer.from(`${secretKey}:`).toString('base64');
-  const response = await fetch(
-    'https://api.tosspayments.com/v1/payments/confirm',
-    {
+  let response: Response;
+  try {
+    response = await fetch('https://api.tosspayments.com/v1/payments/confirm', {
       method: 'POST',
       headers: {
         Authorization: `Basic ${credentials}`,
@@ -70,8 +70,18 @@ export async function callTossConfirm(params: {
         orderId: params.orderNumber,
         amount: params.amount,
       }),
+      signal: AbortSignal.timeout(10_000),
+    });
+  } catch (e) {
+    if (e instanceof DOMException && e.name === 'TimeoutError') {
+      throw new AppError(
+        ERROR_CODE.PAYMENT_CONFIRM_FAILED,
+        500,
+        'Toss confirm timeout'
+      );
     }
-  );
+    throw e;
+  }
 
   if (!response.ok) {
     let code = 'UNKNOWN';
