@@ -13,6 +13,8 @@ import {
   type TossConfirmResult,
 } from './toss';
 
+const PICKUP_NUMBER_DAILY_CAPACITY = 2574;
+
 const BEGIN_RPC_ERROR_MAP: Record<string, () => AppError> = {
   ORDER_NOT_FOUND: () => new AppError(ERROR_CODE.ORDER_NOT_FOUND, 404),
   INVALID_ORDER_STATUS: () =>
@@ -132,7 +134,7 @@ export async function confirmPayment(
     .eq('pickup_service_date', order.pickup_service_date)
     .maybeSingle();
   if (seqError) throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
-  if (seqRow && seqRow.last_sequence >= 2574) {
+  if (seqRow && seqRow.last_sequence >= PICKUP_NUMBER_DAILY_CAPACITY) {
     throw new AppError(ERROR_CODE.PICKUP_NUMBER_EXHAUSTED, 409);
   }
 
