@@ -584,7 +584,7 @@ export interface OrderDetailResponse extends OrderListItemResponse {
 | -          | 결제 Webhook | POST   | `/api/payments/webhook`           | external   | P1       |
 | C-ORDER-04 | 결제 취소    | POST   | `/api/payments/:paymentId/cancel` | user/admin | P1       |
 
-### 6.0 결제 구조
+### 5.0 결제 구조
 
 - PickMa 내부 주문 식별자는 `orderNumber`(`orders.order_number`)를 사용한다.
 - PG: Toss Payments 단일 PG. 어댑터 패턴 없이 서버 내부에서 직접 연결한다.
