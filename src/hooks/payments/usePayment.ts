@@ -1,7 +1,7 @@
 'use client';
 
 import { useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 import { paymentApi } from '@/api/payments/paymentApi';
 
@@ -9,6 +9,7 @@ export function usePayment() {
   const queryClient = useQueryClient();
   const [isPending, setIsPending] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+  const inFlightRef = useRef(false);
 
   async function openPayment({
     orderNumber,
@@ -17,6 +18,8 @@ export function usePayment() {
     orderNumber: string;
     orderName: string;
   }): Promise<{ orderNumber: string }> {
+    if (inFlightRef.current) throw new Error('payment_in_progress');
+    inFlightRef.current = true;
     setIsPending(true);
     setError(null);
     try {
@@ -70,6 +73,7 @@ export function usePayment() {
       setError(err);
       throw err;
     } finally {
+      inFlightRef.current = false;
       setIsPending(false);
     }
   }
