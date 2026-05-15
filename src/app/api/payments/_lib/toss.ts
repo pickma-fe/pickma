@@ -97,7 +97,13 @@ export async function callTossConfirm(params: {
     easyPay?: { provider?: string };
   };
 
-  const method = TOSS_METHOD_MAP[data.method] ?? 'card';
+  const method = TOSS_METHOD_MAP[data.method];
+  if (!method)
+    throw new AppError(
+      ERROR_CODE.PAYMENT_CONFIRM_FAILED,
+      500,
+      `Unsupported Toss method: ${data.method}`
+    );
 
   let methodDetail: string | null = null;
   if (method === 'easy_pay' && data.easyPay?.provider) {
