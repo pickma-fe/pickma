@@ -25,7 +25,15 @@ export function usePayment() {
         orderName,
       });
 
-      const popup = window.open(redirectUrl, '_blank', 'width=500,height=700');
+      const w = 800,
+        h = 800;
+      const left = Math.round((screen.width - w) / 2);
+      const top = Math.round((screen.height - h) / 2);
+      const popup = window.open(
+        redirectUrl,
+        '_blank',
+        `width=${w},height=${h},left=${left},top=${top}`
+      );
       if (!popup) throw new Error('팝업이 차단되었습니다');
 
       return await new Promise((resolve, reject) => {
