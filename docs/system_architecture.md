@@ -2,15 +2,15 @@
 
 ## 1. 기술 스택
 
-| 계층            | 기술                                        | 비고                                     |
-| --------------- | ------------------------------------------- | ---------------------------------------- |
-| Frontend        | Next.js 16 App Router, React 19, TypeScript | SSR/CSR 혼합                             |
-| Styling         | Tailwind CSS, Headless UI                   | UI 구현                                  |
-| Client State    | Zustand                                     | UI/클라이언트 상태                       |
-| Server State    | TanStack Query                              | API 데이터 캐싱, refetch, mutation       |
-| Auth/DB/Storage | Supabase, `@supabase/ssr`                   | Auth, PostgreSQL, Storage                |
-| Payment         | Provider adapter 구조 (mock + Toss MVP)     | prepare/confirm 분리, provider별 adapter |
-| Deployment      | Vercel                                      | Next.js 배포                             |
+| 계층            | 기술                                        | 비고                                                         |
+| --------------- | ------------------------------------------- | ------------------------------------------------------------ |
+| Frontend        | Next.js 16 App Router, React 19, TypeScript | SSR/CSR 혼합                                                 |
+| Styling         | Tailwind CSS, Headless UI                   | UI 구현                                                      |
+| Client State    | Zustand                                     | UI/클라이언트 상태                                           |
+| Server State    | TanStack Query                              | API 데이터 캐싱, refetch, mutation                           |
+| Auth/DB/Storage | Supabase, `@supabase/ssr`                   | Auth, PostgreSQL, Storage                                    |
+| Payment         | Toss Payments 직접 연결                     | prepare/confirm 분리, PAYMENT_MOCK 환경변수로 mock/real 분기 |
+| Deployment      | Vercel                                      | Next.js 배포                                                 |
 
 ---
 
