@@ -250,4 +250,21 @@ describe('createSellerApplication', () => {
         e instanceof AppError && e.code === ERROR_CODE.INTERNAL_SERVER_ERROR
     );
   });
+
+  it('RPC unique index 충돌(23505) 시 APPLICATION_ALREADY_SUBMITTED를 던진다', async () => {
+    vi.mocked(createServiceRoleClient).mockReturnValue(
+      buildStorageMock(true, {
+        code: '23505',
+        message: 'duplicate key',
+      }) as unknown as ReturnType<typeof createServiceRoleClient>
+    );
+
+    await expect(
+      createSellerApplication(USER_ID, VALID_BODY)
+    ).rejects.toSatisfy(
+      (e: unknown) =>
+        e instanceof AppError &&
+        e.code === ERROR_CODE.APPLICATION_ALREADY_SUBMITTED
+    );
+  });
 });

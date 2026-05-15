@@ -83,6 +83,9 @@ export async function createSellerApplication(
   );
 
   if (rpcError || !applicationId) {
+    if (rpcError?.code === '23505') {
+      throw new AppError(ERROR_CODE.APPLICATION_ALREADY_SUBMITTED, 409);
+    }
     throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
   }
 
