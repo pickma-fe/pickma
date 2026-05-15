@@ -135,6 +135,25 @@ describe('createSellerApplication', () => {
     expect(result.documents).toHaveLength(4);
   });
 
+  it('storage list를 각 문서의 폴더와 파일명으로 호출한다', async () => {
+    const mock = buildStorageMock();
+    vi.mocked(createServiceRoleClient).mockReturnValue(
+      mock as unknown as ReturnType<typeof createServiceRoleClient>
+    );
+
+    await createSellerApplication(USER_ID, VALID_BODY);
+
+    const listMock = mock.storage.from.mock.results[0]?.value
+      .list as ReturnType<typeof vi.fn>;
+    expect(listMock).toHaveBeenCalledTimes(4);
+    VALID_DOCUMENTS.forEach((doc) => {
+      const segments = doc.storagePath.split('/');
+      const folder = segments.slice(0, -1).join('/');
+      const fileName = segments[segments.length - 1];
+      expect(listMock).toHaveBeenCalledWith(folder, { search: fileName });
+    });
+  });
+
   it('문서 타입이 중복이면 VALIDATION_ERROR를 던진다', async () => {
     vi.mocked(createServiceRoleClient).mockReturnValue(
       buildStorageMock() as unknown as ReturnType<
