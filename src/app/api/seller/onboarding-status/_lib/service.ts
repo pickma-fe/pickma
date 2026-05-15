@@ -1,3 +1,5 @@
+import { AppError } from '@/lib/errors/appError';
+import { ERROR_CODE } from '@/lib/errors/errorCodes';
 import { createServiceRoleClient } from '@/lib/supabase/service';
 
 export interface OnboardingStatusData {
@@ -22,6 +24,10 @@ export async function getSellerOnboardingStatus(
       .limit(1),
     supabase.from('stores').select('id').eq('user_id', userId).limit(1),
   ]);
+
+  if (userResult.error || applicationResult.error || storeResult.error) {
+    throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
+  }
 
   const role = userResult.data?.role ?? 'customer';
 
