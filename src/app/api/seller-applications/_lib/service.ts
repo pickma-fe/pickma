@@ -62,42 +62,50 @@ export async function createSellerApplication(
     }
   }
 
-  const { data: application, error: appError } = await supabase
-    .from('seller_applications')
-    .insert({
-      user_id: userId,
-      status: 'pending',
-      business_number: body.businessNumber,
-      company_name: body.companyName,
-      representative_name: body.representativeName,
-      business_address: body.businessAddress,
-      business_type: body.businessType,
-      business_category: body.businessCategory,
-    })
-    .select()
-    .single();
-
-  if (appError || !application) {
-    throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
-  }
-
-  const { data: documents, error: docError } = await supabase
-    .from('seller_application_documents')
-    .insert(
-      body.documents.map((doc) => ({
-        application_id: application.id,
+  const { data: applicationId, error: rpcError } = await supabase.rpc(
+    'create_seller_application',
+    {
+      p_user_id: userId,
+      p_business_number: body.businessNumber,
+      p_company_name: body.companyName,
+      p_representative_name: body.representativeName,
+      p_business_address: body.businessAddress,
+      p_business_type: body.businessType,
+      p_business_category: body.businessCategory,
+      p_documents: body.documents.map((doc) => ({
         type: doc.type,
         storage_path: doc.storagePath,
         original_file_name: doc.originalFileName,
         content_type: doc.contentType,
         size: doc.size,
-      }))
-    )
-    .select();
+      })),
+    }
+  );
 
-  if (docError || !documents) {
+  if (rpcError || !applicationId) {
     throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
   }
 
-  return toSellerApplicationResponse(application, documents);
+  const [appResult, docsResult] = await Promise.all([
+    supabase
+      .from('seller_applications')
+      .select('*')
+      .eq('id', applicationId)
+      .single(),
+    supabase
+      .from('seller_application_documents')
+      .select('*')
+      .eq('application_id', applicationId),
+  ]);
+
+  if (
+    appResult.error ||
+    !appResult.data ||
+    docsResult.error ||
+    !docsResult.data
+  ) {
+    throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
+  }
+
+  return toSellerApplicationResponse(appResult.data, docsResult.data);
 }

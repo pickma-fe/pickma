@@ -685,6 +685,19 @@ export type Database = {
         Args: { application_id: string };
         Returns: undefined;
       };
+      create_seller_application: {
+        Args: {
+          p_user_id: string;
+          p_business_number: string;
+          p_company_name: string;
+          p_representative_name: string;
+          p_business_address: string;
+          p_business_type: string;
+          p_business_category: string;
+          p_documents: Json;
+        };
+        Returns: string;
+      };
       begin_payment_processing: {
         Args: { p_order_id: string };
         Returns: {

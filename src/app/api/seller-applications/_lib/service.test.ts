@@ -80,7 +80,7 @@ const MOCK_DOCUMENTS = VALID_DOCUMENTS.map((doc, i) => ({
   created_at: '2026-05-01T00:00:00Z',
 }));
 
-function buildStorageMock(fileExists = true) {
+function buildStorageMock(fileExists = true, rpcError: unknown = null) {
   return {
     storage: {
       from: vi.fn().mockReturnValue({
@@ -90,11 +90,12 @@ function buildStorageMock(fileExists = true) {
         }),
       }),
     },
+    rpc: vi.fn().mockResolvedValue({ data: 'app-1', error: rpcError }),
     from: vi.fn().mockImplementation((table: string) => {
       if (table === 'seller_applications') {
         return {
-          insert: vi.fn().mockReturnValue({
-            select: vi.fn().mockReturnValue({
+          select: vi.fn().mockReturnValue({
+            eq: vi.fn().mockReturnValue({
               single: vi.fn().mockResolvedValue({
                 data: MOCK_APPLICATION,
                 error: null,
@@ -105,8 +106,8 @@ function buildStorageMock(fileExists = true) {
       }
       // seller_application_documents
       return {
-        insert: vi.fn().mockReturnValue({
-          select: vi.fn().mockResolvedValue({
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockResolvedValue({
             data: MOCK_DOCUMENTS,
             error: null,
           }),
@@ -213,6 +214,21 @@ describe('createSellerApplication', () => {
     ).rejects.toSatisfy(
       (e: unknown) =>
         e instanceof AppError && e.code === ERROR_CODE.VALIDATION_ERROR
+    );
+  });
+
+  it('RPC 에러 시 INTERNAL_SERVER_ERROR를 던진다', async () => {
+    vi.mocked(createServiceRoleClient).mockReturnValue(
+      buildStorageMock(true, { message: 'db error' }) as unknown as ReturnType<
+        typeof createServiceRoleClient
+      >
+    );
+
+    await expect(
+      createSellerApplication(USER_ID, VALID_BODY)
+    ).rejects.toSatisfy(
+      (e: unknown) =>
+        e instanceof AppError && e.code === ERROR_CODE.INTERNAL_SERVER_ERROR
     );
   });
 });
