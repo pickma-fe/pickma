@@ -68,8 +68,11 @@ describe('POST /api/payments/prepare', () => {
       data: PreparePaymentResponse;
     };
     expect(body.statusCode).toBe(200);
-    expect(body.data.redirectUrl).toContain('paymentKey=');
-    expect(body.data.amount).toBe(5000);
+    const redirect = new URL(body.data.redirectUrl, 'http://localhost');
+    expect(redirect.pathname).toBe('/payment/success');
+    expect(redirect.searchParams.get('paymentKey')).toBeTruthy();
+    expect(redirect.searchParams.get('orderId')).toBe(body.data.orderNumber);
+    expect(redirect.searchParams.get('amount')).toBe(String(body.data.amount));
   });
 
   it('expireUserOrders 후 preparePayment 호출', async () => {
