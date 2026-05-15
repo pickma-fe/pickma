@@ -123,6 +123,8 @@ export async function confirmPayment(
     throw new AppError(ERROR_CODE.PAYMENT_AMOUNT_MISMATCH, 400);
   }
 
+  // Fast-fail guard: begin_payment_processing 호출을 막기 위한 사전 체크.
+  // TOCTOU 경쟁이 존재하므로 최종 정합성은 confirm_payment RPC 내부에서 보장한다.
   const { data: seqRow, error: seqError } = await supabase
     .from('store_order_sequences')
     .select('last_sequence')
