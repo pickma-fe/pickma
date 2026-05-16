@@ -1,4 +1,3 @@
-import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 
 import type { ApiSuccess } from '@/contracts/common';
@@ -10,6 +9,8 @@ import { productIdSchema } from '@/app/api/products/_lib/schemas';
 interface ProductDetailPageProps {
   params: Promise<{ productId: string }>;
 }
+
+const PRODUCT_DETAIL_FETCH_TIMEOUT_MS = 5000;
 
 export default async function ProductDetailPage({
   params,
@@ -29,20 +30,10 @@ export default async function ProductDetailPage({
 }
 
 async function getProductDetailOrNotFound(productId: string) {
-  const requestHeaders = await headers();
-  const host = requestHeaders.get('host');
-
-  if (!host) {
-    throw new Error('Missing request host');
-  }
-
-  const protocol = requestHeaders.get('x-forwarded-proto') ?? 'http';
-  const response = await fetch(
-    `${protocol}://${host}/api/products/${productId}`,
-    {
-      cache: 'no-store',
-    }
-  );
+  const response = await fetch(`${getAppOrigin()}/api/products/${productId}`, {
+    cache: 'no-store',
+    signal: AbortSignal.timeout(PRODUCT_DETAIL_FETCH_TIMEOUT_MS),
+  });
 
   if (response.status === 404) {
     notFound();
@@ -54,4 +45,24 @@ async function getProductDetailOrNotFound(productId: string) {
 
   const body = (await response.json()) as ApiSuccess<ProductDetailResponse>;
   return mapProductDetail(body.data);
+}
+
+function getAppOrigin() {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+
+  if (!appUrl) {
+    if (process.env.NODE_ENV !== 'production') {
+      return `http://localhost:${process.env.PORT ?? '3000'}`;
+    }
+
+    throw new Error('Missing NEXT_PUBLIC_APP_URL');
+  }
+
+  const origin = new URL(appUrl).origin;
+
+  if (!origin.startsWith('http://') && !origin.startsWith('https://')) {
+    throw new Error('Invalid NEXT_PUBLIC_APP_URL');
+  }
+
+  return origin;
 }
