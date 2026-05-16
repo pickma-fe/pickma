@@ -45,10 +45,14 @@ export function usePayment() {
           if (event.source !== popup) return;
           cleanup();
           if (event.data?.success === true) {
+            const msgOrderNumber = (event.data as { orderNumber?: unknown })
+              .orderNumber;
+            if (typeof msgOrderNumber !== 'string' || !msgOrderNumber) {
+              reject(new Error('payment_failed'));
+              return;
+            }
             void queryClient.invalidateQueries({ queryKey: ['orders'] });
-            resolve({
-              orderNumber: (event.data as { orderNumber: string }).orderNumber,
-            });
+            resolve({ orderNumber: msgOrderNumber });
           } else {
             reject(new Error('payment_failed'));
           }
