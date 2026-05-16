@@ -1,11 +1,18 @@
+'use client';
+
 import { ChevronRight, Ticket } from 'lucide-react';
 import Image from 'next/image';
 
-import { mockMypageUser, mockRecentlyViewedProducts } from '@/mocks/mypage';
+import { useMe } from '@/hooks/users/useMe';
+import { mockRecentlyViewedProducts } from '@/mocks/mypage';
 
 const FALLBACK_PROFILE_IMAGE = '/images/mock/profile.jpg';
 
 export function MypageSummaryPanel() {
+  const { data: user, isError, isLoading } = useMe();
+  const userName = user?.name ?? '사용자';
+  const profileImage = user?.profileImage || FALLBACK_PROFILE_IMAGE;
+
   return (
     <aside className="space-y-12">
       <section className="rounded-lg border border-gray-200 bg-white">
@@ -22,22 +29,46 @@ export function MypageSummaryPanel() {
         </div>
 
         <div className="flex items-center gap-4 px-6 py-6">
-          <div className="bg-primary-50 relative size-16 overflow-hidden rounded-full">
-            <Image
-              src={mockMypageUser.profileImage ?? FALLBACK_PROFILE_IMAGE}
-              alt={`${mockMypageUser.name} 프로필`}
-              fill
-              sizes="64px"
-              className="object-cover"
-            />
-          </div>
-          <div>
-            <p className="text-lg font-bold text-gray-900">
-              {mockMypageUser.name} 님
+          {isLoading ? (
+            <p
+              role="status"
+              aria-live="polite"
+              className="text-sm font-medium text-gray-500"
+            >
+              내 정보를 불러오는 중입니다.
             </p>
-            <p className="mt-1 text-sm text-gray-500">{mockMypageUser.email}</p>
-            <p className="mt-1 text-sm text-gray-500">{mockMypageUser.phone}</p>
-          </div>
+          ) : null}
+
+          {isError ? (
+            <p
+              role="alert"
+              aria-live="assertive"
+              className="text-sm font-medium text-red-500"
+            >
+              내 정보를 불러오지 못했습니다.
+            </p>
+          ) : null}
+
+          {!isLoading && !isError && user ? (
+            <>
+              <div className="bg-primary-50 relative size-16 overflow-hidden rounded-full">
+                <Image
+                  src={profileImage}
+                  alt={`${userName} 프로필`}
+                  fill
+                  sizes="64px"
+                  className="object-cover"
+                />
+              </div>
+              <div>
+                <p className="text-lg font-bold text-gray-900">{userName} 님</p>
+                <p className="mt-1 text-sm text-gray-500">{user.email}</p>
+                <p className="mt-1 text-sm text-gray-500">
+                  {user.phone ?? '등록된 전화번호가 없습니다.'}
+                </p>
+              </div>
+            </>
+          ) : null}
         </div>
       </section>
 
