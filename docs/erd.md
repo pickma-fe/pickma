@@ -6,19 +6,21 @@
 
 # 1. 테이블 목록
 
-| 테이블명                | 설명             | 비고                        |
-| ----------------------- | ---------------- | --------------------------- |
-| `users`                 | 사용자           | 소비자, 판매자, 관리자 통합 |
-| `social_accounts`       | 소셜 로그인 계정 | Google, Kakao               |
-| `stores`                | 가게             | 판매자 1:1                  |
-| `categories`            | 카테고리         | 상품 분류                   |
-| `menu_items`            | 메뉴             | 판매자가 등록하는 기본 메뉴 |
-| `products`              | 상품             | 실제 판매 상품              |
-| `orders`                | 주문             | 예약 정보                   |
-| `order_items`           | 주문 상품        | 주문-상품 연결              |
-| `payments`              | 결제             | PG 결제 정보                |
-| `wishlists`             | 찜               | 관심 가게                   |
-| `store_order_sequences` | 매장 주문 순번   | 매장+픽업일 기준 순번 관리  |
+| 테이블명                       | 설명             | 비고                        |
+| ------------------------------ | ---------------- | --------------------------- |
+| `users`                        | 사용자           | 소비자, 판매자, 관리자 통합 |
+| `social_accounts`              | 소셜 로그인 계정 | Google, Kakao               |
+| `stores`                       | 가게             | 판매자 1:1                  |
+| `seller_applications`          | 판매자 신청      | 판매자 심사 신청            |
+| `seller_application_documents` | 판매자 신청 문서 | 신청 첨부 문서              |
+| `categories`                   | 카테고리         | 상품 분류                   |
+| `menu_items`                   | 메뉴             | 판매자가 등록하는 기본 메뉴 |
+| `products`                     | 상품             | 실제 판매 상품              |
+| `orders`                       | 주문             | 예약 정보                   |
+| `order_items`                  | 주문 상품        | 주문-상품 연결              |
+| `payments`                     | 결제             | PG 결제 정보                |
+| `wishlists`                    | 찜               | 관심 가게                   |
+| `store_order_sequences`        | 매장 주문 순번   | 매장+픽업일 기준 순번 관리  |
 
 ---
 
@@ -72,14 +74,66 @@
 | `image`           | varchar(500) |                                 | 이미지         |
 | `open_time`       | time         |                                 | 영업 시작      |
 | `close_time`      | time         |                                 | 영업 종료      |
-| `status`          | enum         | NOT NULL, DEFAULT 'pending'     | 상태           |
+| `status`          | enum         | NOT NULL, DEFAULT 'approved'    | 상태           |
 | `reject_reason`   | varchar(500) |                                 | 거절 사유      |
 | `created_at`      | timestamp    | NOT NULL, DEFAULT now()         | 생성일시       |
 | `updated_at`      | timestamp    | NOT NULL, DEFAULT now()         | 수정일시       |
 
+신규 설계에서는 가게 등록을 seller 승인 이후에만 허용하고, 새 가게는 `approved` 상태로 생성한다. `pending`/`rejected`는 기존 구현/데이터 호환 또는 후속 마이그레이션 검토 대상으로 남긴다.
+
 ---
 
-## 2.4 categories (카테고리)
+## 2.4 seller_applications (판매자 신청)
+
+| 컬럼명                | 타입         | 제약조건                    | 설명           |
+| --------------------- | ------------ | --------------------------- | -------------- |
+| `id`                  | uuid         | PK                          | 신청 ID        |
+| `user_id`             | uuid         | FK → users.id, NOT NULL     | 신청자 ID      |
+| `status`              | varchar(20)  | NOT NULL, DEFAULT 'pending' | 심사 상태      |
+| `business_number`     | varchar(20)  | NOT NULL                    | 사업자등록번호 |
+| `company_name`        | varchar(200) | NOT NULL                    | 상호명         |
+| `representative_name` | varchar(100) | NOT NULL                    | 대표자명       |
+| `business_address`    | varchar(500) | NOT NULL                    | 사업장 주소    |
+| `business_type`       | varchar(100) | NOT NULL                    | 업태           |
+| `business_category`   | varchar(100) | NOT NULL                    | 종목           |
+| `reject_reason`       | text         |                             | 거절 사유      |
+| `reviewed_at`         | timestamp    |                             | 심사 일시      |
+| `created_at`          | timestamp    | NOT NULL, DEFAULT now()     | 생성일시       |
+| `updated_at`          | timestamp    | NOT NULL, DEFAULT now()     | 수정일시       |
+
+**CHECK:** `status IN ('pending', 'approved', 'rejected')`
+
+**UNIQUE 후보:**
+
+- pending 신청은 사용자당 1개만 허용: `(user_id) WHERE status = 'pending'`
+- approved 신청은 사용자당 1개만 허용: `(user_id) WHERE status = 'approved'`
+
+`reviewed_by`는 저장하지 않는다. 관리자 작업자 추적은 후속 감사 로그 도메인으로 분리한다.
+
+---
+
+## 2.5 seller_application_documents (판매자 신청 문서)
+
+| 컬럼명               | 타입         | 제약조건                              | 설명             |
+| -------------------- | ------------ | ------------------------------------- | ---------------- |
+| `id`                 | uuid         | PK                                    | 문서 ID          |
+| `application_id`     | uuid         | FK → seller_applications.id, NOT NULL | 신청 ID          |
+| `type`               | varchar(40)  | NOT NULL                              | 문서 타입        |
+| `storage_path`       | varchar(500) | NOT NULL                              | Storage path     |
+| `original_file_name` | varchar(255) | NOT NULL                              | 원본 파일명      |
+| `content_type`       | varchar(100) | NOT NULL                              | MIME type        |
+| `size`               | int          | NOT NULL, CHECK size > 0              | 파일 크기(bytes) |
+| `created_at`         | timestamp    | NOT NULL, DEFAULT now()               | 생성일시         |
+
+**CHECK:** `type IN ('business_license', 'id_card', 'bankbook', 'business_report')`
+
+**UNIQUE:** `(application_id, type)`
+
+파일은 private bucket `seller-application-documents`에 저장한다. 관리자 조회는 signed read URL로 처리한다.
+
+---
+
+## 2.6 categories (카테고리)
 
 | 컬럼명       | 타입        | 제약조건                | 설명        |
 | ------------ | ----------- | ----------------------- | ----------- |
@@ -91,23 +145,26 @@
 
 ---
 
-## 2.5 menu_items (메뉴)
+## 2.7 menu_items (메뉴)
 
-| 컬럼명           | 타입         | 제약조건                 | 설명      |
-| ---------------- | ------------ | ------------------------ | --------- |
-| `id`             | uuid         | PK                       | 메뉴 ID   |
-| `store_id`       | uuid         | FK → stores.id, NOT NULL | 가게 ID   |
-| `category_id`    | uuid         | FK → categories.id       | 카테고리  |
-| `name`           | varchar(100) | NOT NULL                 | 메뉴명    |
-| `description`    | text         |                          | 설명      |
-| `image`          | varchar(500) |                          | 이미지    |
-| `original_price` | int          | NOT NULL                 | 기본 가격 |
-| `created_at`     | timestamp    | NOT NULL, DEFAULT now()  | 생성일시  |
-| `updated_at`     | timestamp    | NOT NULL, DEFAULT now()  | 수정일시  |
+| 컬럼명           | 타입         | 제약조건                   | 설명      |
+| ---------------- | ------------ | -------------------------- | --------- |
+| `id`             | uuid         | PK                         | 메뉴 ID   |
+| `store_id`       | uuid         | FK → stores.id, NOT NULL   | 가게 ID   |
+| `category_id`    | uuid         | FK → categories.id         | 카테고리  |
+| `status`         | varchar(20)  | NOT NULL, DEFAULT 'active' | 메뉴 상태 |
+| `name`           | varchar(100) | NOT NULL                   | 메뉴명    |
+| `description`    | text         |                            | 설명      |
+| `image`          | varchar(500) |                            | 이미지    |
+| `original_price` | int          | NOT NULL                   | 기본 가격 |
+| `created_at`     | timestamp    | NOT NULL, DEFAULT now()    | 생성일시  |
+| `updated_at`     | timestamp    | NOT NULL, DEFAULT now()    | 수정일시  |
+
+**CHECK:** `status IN ('active', 'inactive')`
 
 ---
 
-## 2.6 products (상품)
+## 2.8 products (상품)
 
 | 컬럼명              | 타입      | 제약조건                     | 설명      |
 | ------------------- | --------- | ---------------------------- | --------- |
@@ -147,7 +204,7 @@
 
 ---
 
-## 2.7 orders (주문)
+## 2.9 orders (주문)
 
 | 컬럼명                 | 타입         | 제약조건                            | 설명                                                                         |
 | ---------------------- | ------------ | ----------------------------------- | ---------------------------------------------------------------------------- |
@@ -217,7 +274,7 @@
 
 ---
 
-## 2.8 order_items (주문 상품)
+## 2.10 order_items (주문 상품)
 
 | 컬럼명           | 타입         | 제약조건                   | 설명        |
 | ---------------- | ------------ | -------------------------- | ----------- |
@@ -233,7 +290,7 @@
 
 ---
 
-## 2.9 payments (결제)
+## 2.11 payments (결제)
 
 | 컬럼명                 | 타입         | 제약조건             | 설명                                |
 | ---------------------- | ------------ | -------------------- | ----------------------------------- |
@@ -268,7 +325,7 @@
 
 ---
 
-## 2.10 wishlists (찜)
+## 2.12 wishlists (찜)
 
 | 컬럼명       | 타입      | 제약조건      | 설명   |
 | ------------ | --------- | ------------- | ------ |
@@ -281,7 +338,7 @@
 
 ---
 
-## 2.11 store_order_sequences (매장 주문 순번)
+## 2.13 store_order_sequences (매장 주문 순번)
 
 | 컬럼명                | 타입      | 제약조건                 | 설명                            |
 | --------------------- | --------- | ------------------------ | ------------------------------- |
@@ -319,6 +376,8 @@ users 1:N orders
 users 1:N social_accounts
 users 1:N wishlists
 users 1:1 stores
+users 1:N seller_applications
+seller_applications 1:N seller_application_documents
 stores 1:N wishlists
 stores 1:N menu_items
 menu_items 1:N products
