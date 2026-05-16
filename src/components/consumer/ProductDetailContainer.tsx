@@ -1,5 +1,6 @@
 'use client';
 
+import type { ProductDetail } from '@/types/product';
 import { useProduct } from '@/hooks/products/useProduct';
 import { Footer } from '@/components/common';
 
@@ -11,6 +12,7 @@ import { ProductReservationPanel } from './ProductReservationPanel';
 
 interface ProductDetailContainerProps {
   productId: string;
+  initialProduct: ProductDetail;
 }
 
 function getStatusMessage(params: { isFetching: boolean; isError: boolean }) {
@@ -35,13 +37,14 @@ function getStatusMessage(params: { isFetching: boolean; isError: boolean }) {
 
 export function ProductDetailContainer({
   productId,
+  initialProduct,
 }: ProductDetailContainerProps) {
   const {
-    data: product,
+    data: product = initialProduct,
     isError,
     isFetching,
     isLoading,
-  } = useProduct(productId);
+  } = useProduct(productId, initialProduct);
   const statusMessage = getStatusMessage({ isFetching, isError });
 
   if (isLoading) {
@@ -128,6 +131,7 @@ export function ProductDetailContainer({
 
           <aside className="lg:sticky lg:top-24 lg:self-start">
             <ProductReservationPanel
+              productId={product.id}
               price={product.discountPrice}
               availableStock={product.availableStock}
               pickupStartTime={product.pickupStartTime}
