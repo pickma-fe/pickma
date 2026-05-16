@@ -1,6 +1,5 @@
 'use client';
 
-import type { ProductDetail } from '@/types/product';
 import { useProduct } from '@/hooks/products/useProduct';
 import { Footer } from '@/components/common';
 
@@ -12,7 +11,6 @@ import { ProductReservationPanel } from './ProductReservationPanel';
 
 interface ProductDetailContainerProps {
   productId: string;
-  initialProduct: ProductDetail;
 }
 
 function getStatusMessage(params: { isFetching: boolean; isError: boolean }) {
@@ -37,14 +35,13 @@ function getStatusMessage(params: { isFetching: boolean; isError: boolean }) {
 
 export function ProductDetailContainer({
   productId,
-  initialProduct,
 }: ProductDetailContainerProps) {
   const {
-    data: product = initialProduct,
+    data: product,
     isError,
     isFetching,
     isLoading,
-  } = useProduct(productId, initialProduct);
+  } = useProduct(productId);
   const statusMessage = getStatusMessage({ isFetching, isError });
 
   if (isLoading) {
@@ -76,6 +73,20 @@ export function ProductDetailContainer({
             className="text-sm font-medium text-gray-500"
           >
             상품 정보를 불러오지 못했습니다.
+          </p>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (!product) {
+    return (
+      <div className="bg-white">
+        <ConsumerHeader />
+        <main className="flex min-h-screen items-center justify-center bg-white">
+          <p className="text-sm font-medium text-gray-500">
+            상품 정보를 확인할 수 없습니다.
           </p>
         </main>
         <Footer />
