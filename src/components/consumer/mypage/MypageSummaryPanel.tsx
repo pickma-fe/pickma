@@ -8,10 +8,22 @@ import { mockRecentlyViewedProducts } from '@/mocks/mypage';
 
 const FALLBACK_PROFILE_IMAGE = '/images/mock/profile.jpg';
 
+function getSafeProfileImage(profileImage?: string) {
+  if (!profileImage) {
+    return FALLBACK_PROFILE_IMAGE;
+  }
+
+  if (profileImage.startsWith('/')) {
+    return profileImage;
+  }
+
+  return FALLBACK_PROFILE_IMAGE;
+}
+
 export function MypageSummaryPanel() {
   const { data: user, isError, isLoading } = useMe();
   const userName = user?.name ?? '사용자';
-  const profileImage = user?.profileImage || FALLBACK_PROFILE_IMAGE;
+  const profileImage = getSafeProfileImage(user?.profileImage);
 
   return (
     <aside className="space-y-12">
