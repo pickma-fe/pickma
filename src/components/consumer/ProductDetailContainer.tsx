@@ -8,6 +8,7 @@ import { ProductDetailInfo } from './ProductDetailInfo';
 import { ProductDetailTabs } from './ProductDetailTabs';
 import { ProductImageGallery } from './ProductImageGallery';
 import { ProductReservationPanel } from './ProductReservationPanel';
+import { RecentProductTracker } from './RecentProductTracker';
 
 interface ProductDetailContainerProps {
   productId: string;
@@ -96,6 +97,14 @@ export function ProductDetailContainer({
 
   return (
     <div className="bg-white">
+      <RecentProductTracker
+        product={{
+          id: product.id,
+          name: product.name,
+          imageUrl: product.image,
+        }}
+      />
+
       <ConsumerHeader />
 
       <main className="min-h-screen bg-white">

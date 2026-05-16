@@ -2,11 +2,13 @@
 
 import { ChevronRight, Ticket } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 
+import { useRecentProducts } from '@/hooks/products/useRecentProducts';
 import { useMe } from '@/hooks/users/useMe';
-import { mockRecentlyViewedProducts } from '@/mocks/mypage';
 
 const FALLBACK_PROFILE_IMAGE = '/images/mock/profile.jpg';
+const FALLBACK_RECENT_PRODUCT_IMAGE = '/images/products/noimage.png';
 
 function isSupabaseStorageImage(profileImage: string) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -44,8 +46,21 @@ function getSafeProfileImage(profileImage?: string) {
   return FALLBACK_PROFILE_IMAGE;
 }
 
+function getSafeProductImage(imageUrl?: string) {
+  if (!imageUrl) {
+    return FALLBACK_RECENT_PRODUCT_IMAGE;
+  }
+
+  if (imageUrl.startsWith('/')) {
+    return imageUrl;
+  }
+
+  return FALLBACK_RECENT_PRODUCT_IMAGE;
+}
+
 export function MypageSummaryPanel() {
   const { data: user, isError, isLoading } = useMe();
+  const recentProducts = useRecentProducts().slice(0, 4);
   const userName = user?.name ?? '사용자';
   const profileImage = getSafeProfileImage(user?.profileImage);
 
@@ -133,27 +148,39 @@ export function MypageSummaryPanel() {
             type="button"
             disabled
             className="inline-flex cursor-not-allowed items-center gap-1 text-sm font-medium text-gray-400"
+            aria-disabled="true"
           >
             전체보기
             <ChevronRight className="size-4" aria-hidden="true" />
           </button>
         </div>
 
-        <div className="mt-5 grid grid-cols-4 gap-3">
-          {mockRecentlyViewedProducts.map((product) => (
-            <div key={product.id}>
-              <div className="relative aspect-square overflow-hidden rounded-md bg-gray-100">
-                <Image
-                  src={product.imageUrl}
-                  alt={product.name}
-                  fill
-                  sizes="72px"
-                  className="object-cover"
-                />
-              </div>
-            </div>
-          ))}
-        </div>
+        {recentProducts.length > 0 ? (
+          <div className="mt-5 grid grid-cols-4 gap-3">
+            {recentProducts.map((product) => (
+              <Link
+                key={product.id}
+                href={`/products/${product.id}`}
+                aria-label={`${product.name} 상품 상세 보기`}
+                className="focus-visible:ring-primary-500 rounded-md focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+              >
+                <div className="relative aspect-square overflow-hidden rounded-md bg-gray-100">
+                  <Image
+                    src={getSafeProductImage(product.imageUrl)}
+                    alt={product.name}
+                    fill
+                    sizes="72px"
+                    className="object-cover"
+                  />
+                </div>
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <p className="mt-5 rounded-md border border-dashed border-gray-200 bg-gray-50 px-4 py-6 text-center text-sm font-medium text-gray-500">
+            최근 본 상품이 없습니다.
+          </p>
+        )}
       </section>
     </aside>
   );
