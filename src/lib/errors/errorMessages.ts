@@ -13,6 +13,7 @@ export const ERROR_MESSAGES: Record<ErrorCode, string> = {
   OUT_OF_STOCK: '재고가 부족합니다.',
   PRODUCT_EXPIRED: '판매가 마감된 상품입니다.',
   PRODUCT_NOT_AVAILABLE: '구매할 수 없는 상품입니다.',
+  INVALID_ORDER_STATUS: '현재 주문 상태에서는 진행할 수 없습니다.',
   ORDER_EXPIRED: '결제 가능 시간이 만료되었습니다.',
   PAYMENT_AMOUNT_MISMATCH: '결제 금액이 일치하지 않습니다.',
   PAYMENT_CONFIRM_FAILED: '결제 승인에 실패했습니다.',
@@ -20,6 +21,9 @@ export const ERROR_MESSAGES: Record<ErrorCode, string> = {
   ORDER_NUMBER_EXHAUSTED: '주문번호가 모두 소진되었습니다.',
   PICKUP_NUMBER_EXHAUSTED: '픽업 번호가 모두 소진되었습니다.',
   AUTH_IDENTITY_CONFLICT: '이미 다른 로그인 방식으로 가입된 이메일입니다.',
+  FILE_UPLOAD_NOT_ALLOWED: '파일 업로드 권한이 없습니다.',
+  FILE_TYPE_NOT_ALLOWED: '허용되지 않는 파일 형식입니다.',
+  FILE_TOO_LARGE: '파일 크기가 허용 한도를 초과했습니다.',
   NOT_IMPLEMENTED: '아직 구현되지 않은 API입니다.',
   INTERNAL_SERVER_ERROR: '서버 오류가 발생했습니다.',
 };

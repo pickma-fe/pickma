@@ -10,11 +10,9 @@ export function useConfirmPayment() {
 
   return useMutation<void, Error, ConfirmPaymentRequest>({
     mutationFn: (body) => paymentApi.confirmPayment(body),
-    onSuccess: (_, variables) => {
+    onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['orders', 'list'] });
-      void queryClient.invalidateQueries({
-        queryKey: ['orders', 'detail', variables.orderId],
-      });
+      void queryClient.invalidateQueries({ queryKey: ['orders', 'detail'] });
     },
   });
 }

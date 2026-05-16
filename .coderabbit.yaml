@@ -119,7 +119,7 @@ reviews:
         - 보호 페이지 (/order/[productId], /payment, /mypage/**): 미로그인 시 공개 진입점에 auth=required, next query를 붙여 리다이렉트하는가
         - 상품 목록: 마감 시간(end_time)이 지난 상품이 노출되지 않는가
         - 재고(stock) 0 이하인 상품에 예약 요청을 보낼 수 없는가
-        - 결제 플로우 순서: 주문 생성 → 토스페이먼츠 위젯 → 서버 측 결제 승인 (/api/payments)
+        - 결제 플로우 순서: 주문 생성 → POST /api/payments/prepare (provider, orderNumber) → provider redirectUrl → POST /api/payments/confirm → 주문 확정
 
     - path: 'src/app/(seller)/**'
       instructions: |
@@ -155,10 +155,12 @@ reviews:
         - 보안: 에러 응답에 스택 트레이스, 내부 경로 등 민감 정보 포함 금지
         - 외부 API 호출 실패 시 적절한 HTTP 상태 코드로 응답하는가 (500 남발 금지)
         - 결제 API:
-          - 주문 생성은 POST /api/orders, 결제 승인은 POST /api/payments/confirm 으로 분리되는가
-          - 결제 승인은 반드시 서버에서 토스페이먼츠 API를 직접 호출하는가
+          - 주문 생성은 POST /api/orders, 결제 준비는 POST /api/payments/prepare, 결제 승인은 POST /api/payments/confirm 으로 분리되는가
+          - prepare/confirm은 provider adapter를 통해 처리하고, provider별 Secret key는 adapter 내부에서만 사용하는가
+          - PickMa 내부 주문 식별자는 orderNumber이며, provider별 외부 주문 필드명은 adapter 내부에서만 다루는가
           - 클라이언트가 전달한 결제 금액을 DB의 주문 금액과 대조 검증하는가 (금액 위변조 방지)
-          - 결제 완료 후 payment 저장, 주문 확정, 재고 확정 처리가 원자적으로 처리되는가
+          - 결제 완료 후 payment 저장, 주문 확정, 재고 확정 처리가 confirm_payment RPC로 원자적으로 처리되는가
+          - 실 provider adapter가 구현되기 전까지 mock adapter를 고정 사용하는가 (API_MOCK_ENABLED는 데이터 레이어 mock 여부를 제어하며, provider adapter 선택과는 별개)
         - 주문 API (/api/orders):
           - 재고 부족 시 예약을 거부하는가
           - 주문 상태 전이가 docs/api_spec.md와 일치하는가

@@ -31,6 +31,8 @@ export const sellerProductApi = {
   },
 
   deleteProduct(id: string): Promise<void> {
-    return apiClient.delete<void>(`/api/seller/products/${id}`);
+    return apiClient
+      .delete<null>(`/api/seller/products/${id}`)
+      .then(() => undefined);
   },
 };

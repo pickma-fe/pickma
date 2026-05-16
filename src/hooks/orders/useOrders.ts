@@ -9,6 +9,7 @@ import { orderApi } from '@/api/orders/orderApi';
 
 const ORDER_STATUS_TO_PARAM: Record<OrderStatus, OrderStatusParam> = {
   paymentPending: 'payment_pending',
+  processing: 'processing',
   reserved: 'reserved',
   ready: 'ready',
   completed: 'completed',

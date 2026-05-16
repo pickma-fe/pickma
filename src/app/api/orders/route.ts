@@ -1,35 +1,42 @@
 import type { NextRequest } from 'next/server';
-import { z } from 'zod';
 
-import type { CreateOrderRequest } from '@/contracts/order';
-import { ERROR_CODE } from '@/lib/errors/errorCodes';
+import { requireActiveUser } from '@/app/api/_lib/auth';
 import { isApiMockEnabled } from '@/app/api/_lib/mock';
-import { fail, routeError, success } from '@/app/api/_lib/response';
-import { validateBody } from '@/app/api/_lib/validation';
+import { routeError, success } from '@/app/api/_lib/response';
+import { validateBody, validateQuery } from '@/app/api/_lib/validation';
 import { mockCreatedOrder, mockOrderList } from '@/mocks/orders';
 
-const createOrderSchema = z.object({
-  productId: z.string().min(1),
-  quantity: z.number().int().positive(),
-  pickupAt: z.string().datetime(),
-}) satisfies z.ZodType<CreateOrderRequest>;
+import { createOrderSchema, orderListQuerySchema } from './_lib/schemas';
+import { createOrder, expireUserOrders, getOrders } from './_lib/service';
 
-export async function GET(): Promise<Response> {
-  if (!isApiMockEnabled()) {
-    return fail(ERROR_CODE.NOT_IMPLEMENTED);
+export async function GET(request: NextRequest): Promise<Response> {
+  if (isApiMockEnabled()) return success(mockOrderList);
+  try {
+    const params = validateQuery(
+      orderListQuerySchema,
+      request.nextUrl.searchParams
+    );
+    const { serviceUser } = await requireActiveUser();
+    await expireUserOrders(serviceUser.id);
+    const data = await getOrders(serviceUser.id, params);
+    return success(data);
+  } catch (error) {
+    return routeError(error);
   }
-
-  return success(mockOrderList);
 }
 
 export async function POST(request: NextRequest): Promise<Response> {
-  if (!isApiMockEnabled()) {
-    return fail(ERROR_CODE.NOT_IMPLEMENTED);
-  }
-
   try {
-    await validateBody(createOrderSchema, request);
-    return success(mockCreatedOrder, 201);
+    if (isApiMockEnabled()) {
+      await validateBody(createOrderSchema, request);
+      return success(mockCreatedOrder, 201);
+    }
+
+    const body = await validateBody(createOrderSchema, request);
+    const { serviceUser } = await requireActiveUser();
+    await expireUserOrders(serviceUser.id);
+    const result = await createOrder(serviceUser.id, body);
+    return success(result, 201);
   } catch (error) {
     return routeError(error);
   }

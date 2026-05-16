@@ -11,7 +11,7 @@ import { MenuFilter } from './MenuFilter';
 import { MenuTable } from './MenuTable';
 
 export function MenuManageContent() {
-  const { data, isLoading } = useSellerMenus();
+  const { data, isLoading, isError } = useSellerMenus();
   const [selectedCategory, setSelectedCategory] = useState('전체');
   const [searchKeyword, setSearchKeyword] = useState('');
 
@@ -35,8 +35,10 @@ export function MenuManageContent() {
   }, [menus, selectedCategory, searchKeyword]);
 
   const totalCount = menus.length;
-  const activeCount = totalCount;
-  const inactiveCount = 0;
+  const activeCount = menus.filter((menu) => menu.status === 'active').length;
+  const inactiveCount = menus.filter(
+    (menu) => menu.status === 'inactive'
+  ).length;
 
   const handleAddMenu = () => {
     // TODO: 메뉴 등록 페이지 이동
@@ -44,6 +46,17 @@ export function MenuManageContent() {
 
   if (isLoading) {
     return <div className="p-8 text-center text-gray-500">로딩 중...</div>;
+  }
+
+  if (isError) {
+    return (
+      <div className="p-8 text-center">
+        <p className="text-sm text-red-600">
+          메뉴 목록을 불러오는데 실패했습니다.
+        </p>
+        <p className="mt-2 text-xs text-gray-500">잠시 후 다시 시도해주세요.</p>
+      </div>
+    );
   }
 
   return (
