@@ -16,7 +16,7 @@ export async function getSellerOnboardingStatus(
   const supabase = createServiceRoleClient();
 
   const [userResult, applicationResult, storeResult] = await Promise.all([
-    supabase.from('users').select('role').eq('id', userId).single(),
+    supabase.from('users').select('role').eq('id', userId).maybeSingle(),
     supabase
       .from('seller_applications')
       .select('status, reject_reason')

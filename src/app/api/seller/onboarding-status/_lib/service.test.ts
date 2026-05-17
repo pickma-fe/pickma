@@ -31,12 +31,10 @@ function buildClient(opts: {
       return {
         select: vi.fn().mockReturnValue({
           eq: vi.fn().mockReturnValue({
-            single: vi
-              .fn()
-              .mockResolvedValue({
-                data: { role },
-                error: errors.users ?? null,
-              }),
+            maybeSingle: vi.fn().mockResolvedValue({
+              data: { role },
+              error: errors.users ?? null,
+            }),
           }),
         }),
       };
