@@ -62,7 +62,11 @@ function formatPickupTime(value: string) {
 function findProductByOrder(
   order: OrderListItemResponse,
   index: number
-): ProductListItemResponse {
+): ProductListItemResponse | null {
+  if (mockProducts.length === 0) {
+    return null;
+  }
+
   return (
     mockProducts.find((product) => product.storeName === order.storeName) ??
     mockProducts[index % mockProducts.length]
@@ -71,24 +75,29 @@ function findProductByOrder(
 
 export const mockMypageUser = mockUser;
 
-export const mockMypageReservations: MockMypageReservation[] = mockOrders.map(
-  (order, index) => {
+export const mockMypageReservations: MockMypageReservation[] =
+  mockOrders.flatMap((order, index) => {
     const product = findProductByOrder(order, index);
 
-    return {
-      id: order.id,
-      orderNumber: order.storeOrderNumber ?? order.orderNumber,
-      storeName: order.storeName,
-      productName: product.name,
-      imageUrl: product.image ?? '/images/products/bread.jpg',
-      pickupDate: formatPickupDate(order.pickupAt),
-      pickupTime: formatPickupTime(order.pickupAt),
-      quantity: 1,
-      price: order.paymentAmount,
-      status: order.status,
-    };
-  }
-);
+    if (!product) {
+      return [];
+    }
+
+    return [
+      {
+        id: order.id,
+        orderNumber: order.storeOrderNumber ?? order.orderNumber,
+        storeName: order.storeName,
+        productName: product.name,
+        imageUrl: product.image ?? '/images/products/bread.jpg',
+        pickupDate: formatPickupDate(order.pickupAt),
+        pickupTime: formatPickupTime(order.pickupAt),
+        quantity: 1,
+        price: order.paymentAmount,
+        status: order.status,
+      },
+    ];
+  });
 
 export const mockRecentlyViewedProducts = mockProducts
   .slice(0, 4)

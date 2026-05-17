@@ -104,6 +104,7 @@ export function MypageReservationCard({
           <Button
             variant="outline"
             color="gray"
+            disabled
             className="h-12 min-w-32 px-5 text-sm"
           >
             예약 상세보기
@@ -111,6 +112,7 @@ export function MypageReservationCard({
           <Button
             variant={status.actionVariant}
             color={statusGroup === 'pendingPickup' ? 'primary' : 'gray'}
+            disabled
             className="h-12 min-w-32 px-5 text-sm"
           >
             {status.actionLabel}
@@ -120,7 +122,8 @@ export function MypageReservationCard({
         <button
           type="button"
           aria-label="예약 메뉴 열기"
-          className="hidden rounded-sm p-1 text-gray-700 hover:bg-gray-50 md:block"
+          disabled
+          className="hidden cursor-not-allowed rounded-sm p-1 text-gray-400 md:block"
         >
           <MoreVertical className="size-5" aria-hidden="true" />
         </button>

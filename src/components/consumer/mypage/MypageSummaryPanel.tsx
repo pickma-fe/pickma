@@ -13,7 +13,8 @@ export function MypageSummaryPanel() {
           <h2 className="text-lg font-bold text-gray-900">내 정보</h2>
           <button
             type="button"
-            className="inline-flex items-center gap-1 text-sm font-medium text-gray-500"
+            disabled
+            className="inline-flex cursor-not-allowed items-center gap-1 text-sm font-medium text-gray-400"
           >
             수정하기
             <ChevronRight className="size-4" aria-hidden="true" />
@@ -63,7 +64,8 @@ export function MypageSummaryPanel() {
           <h2 className="text-lg font-bold text-gray-900">최근 본 상품</h2>
           <button
             type="button"
-            className="inline-flex items-center gap-1 text-sm font-medium text-gray-500"
+            disabled
+            className="inline-flex cursor-not-allowed items-center gap-1 text-sm font-medium text-gray-400"
           >
             전체보기
             <ChevronRight className="size-4" aria-hidden="true" />

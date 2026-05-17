@@ -50,8 +50,9 @@ export function MypageSidebar() {
           <button
             key={item.label}
             type="button"
+            disabled={!item.active}
             className={[
-              'flex w-full items-center gap-3 rounded-md px-4 py-3 text-left text-base font-semibold',
+              'flex w-full items-center gap-3 rounded-md px-4 py-3 text-left text-base font-semibold disabled:cursor-not-allowed disabled:opacity-50',
               item.active
                 ? 'bg-primary-50 text-primary-500'
                 : 'text-gray-700 hover:bg-gray-50',
@@ -71,7 +72,8 @@ export function MypageSidebar() {
             <button
               key={item.label}
               type="button"
-              className="flex w-full items-center gap-3 rounded-md px-4 py-3 text-left text-base font-medium text-gray-700 hover:bg-gray-50"
+              disabled
+              className="flex w-full cursor-not-allowed items-center gap-3 rounded-md px-4 py-3 text-left text-base font-medium text-gray-700 opacity-50"
             >
               {item.icon}
               {item.label}
