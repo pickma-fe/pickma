@@ -1,9 +1,14 @@
+'use client';
+
 import Image from 'next/image';
+import { useState } from 'react';
 
 import type { OrderStatus } from '@/types/order';
 import { Button } from '@/components/common';
 
+import { MypageReservationDetailModal } from './MypageReservationDetailModal';
 import type { MypageReservation } from './mypageReservationMapper';
+import { PickupCodeModal } from './PickupCodeModal';
 
 interface MypageReservationCardProps {
   reservation: MypageReservation;
@@ -72,87 +77,125 @@ const statusStyles: Record<
 export function MypageReservationCard({
   reservation,
 }: MypageReservationCardProps) {
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [isPickupCodeModalOpen, setIsPickupCodeModalOpen] = useState(false);
   const displayGroup = statusDisplayMap[reservation.status];
   const status = statusStyles[displayGroup];
+  const isPickupCodeAvailable =
+    displayGroup === 'pendingPickup' && Boolean(reservation.pickupCode);
   const reservationTitle = reservation.productName
     ? `${reservation.storeName} ${reservation.productName}`
     : reservation.storeName;
 
+  const handleOpenDetailModal = () => {
+    setIsDetailModalOpen(true);
+  };
+
+  const handleCloseDetailModal = () => {
+    setIsDetailModalOpen(false);
+  };
+
+  const handleOpenPickupCodeModal = () => {
+    if (!isPickupCodeAvailable) {
+      return;
+    }
+
+    setIsPickupCodeModalOpen(true);
+  };
+
+  const handleClosePickupCodeModal = () => {
+    setIsPickupCodeModalOpen(false);
+  };
+
   return (
-    <article className="rounded-lg border border-gray-200 bg-white p-5">
-      <div className="grid gap-12 md:grid-cols-[150px_minmax(0,1fr)_120px_240px] md:items-center">
-        <div className="relative aspect-square overflow-hidden rounded-md bg-gray-100">
-          <Image
-            src={reservation.imageUrl}
-            alt={reservationTitle}
-            fill
-            sizes="150px"
-            className="object-cover"
-          />
-        </div>
+    <>
+      <article className="rounded-lg border border-gray-200 bg-white p-5">
+        <div className="grid gap-12 md:grid-cols-[150px_minmax(0,1fr)_120px_240px] md:items-center">
+          <div className="relative aspect-square overflow-hidden rounded-md bg-gray-100">
+            <Image
+              src={reservation.imageUrl}
+              alt={reservationTitle}
+              fill
+              sizes="150px"
+              className="object-cover"
+            />
+          </div>
 
-        <div className="min-w-0">
-          <span
-            className={[
-              'inline-flex rounded-sm px-3 py-1 text-xs font-bold',
-              status.className,
-            ].join(' ')}
-          >
-            {status.label}
-          </span>
-          <p className="mt-4 text-xl font-bold text-gray-900">
-            {reservationTitle}
-          </p>
-          {!reservation.productName ? (
-            <p className="mt-2 text-sm text-gray-500">
-              상품 정보는 예약 상세에서 확인할 수 있습니다.
+          <div className="min-w-0">
+            <span
+              className={[
+                'inline-flex rounded-sm px-3 py-1 text-xs font-bold',
+                status.className,
+              ].join(' ')}
+            >
+              {status.label}
+            </span>
+            <p className="mt-4 text-xl font-bold text-gray-900">
+              {reservationTitle}
             </p>
-          ) : null}
-          <dl className="mt-4 grid gap-2 text-base md:grid-cols-[72px_minmax(0,1fr)]">
-            <dt className="text-gray-500">픽업 날짜</dt>
-            <dd className="text-gray-700">
-              {reservation.pickupDate} &nbsp; {reservation.pickupTime}
-            </dd>
-            <dt className="text-gray-500">주문번호</dt>
-            <dd className="text-gray-700">{reservation.orderNumber}</dd>
-          </dl>
-        </div>
+            {!reservation.productName ? (
+              <p className="mt-2 text-sm text-gray-500">
+                상품 정보는 예약 상세에서 확인할 수 있습니다.
+              </p>
+            ) : null}
+            <dl className="mt-4 grid gap-2 text-base md:grid-cols-[72px_minmax(0,1fr)]">
+              <dt className="text-gray-500">픽업 날짜</dt>
+              <dd className="text-gray-700">
+                {reservation.pickupDate} &nbsp; {reservation.pickupTime}
+              </dd>
+              <dt className="text-gray-500">주문번호</dt>
+              <dd className="text-gray-700">{reservation.orderNumber}</dd>
+            </dl>
+          </div>
 
-        <div>
-          <p className="text-2xl font-bold text-gray-900">
-            {reservation.price.toLocaleString()}원
-          </p>
-          {reservation.quantity ? (
-            <p className="mt-2 text-base text-gray-500">
-              수량&nbsp; {reservation.quantity}개
+          <div>
+            <p className="text-2xl font-bold text-gray-900">
+              {reservation.price.toLocaleString()}원
             </p>
-          ) : null}
-        </div>
+            {reservation.quantity ? (
+              <p className="mt-2 text-base text-gray-500">
+                수량&nbsp; {reservation.quantity}개
+              </p>
+            ) : null}
+          </div>
 
-        <div className="flex gap-2 md:justify-end">
-          <Button
-            variant="outline"
-            color="gray"
-            disabled
-            className="h-12 min-w-32 px-5 text-sm"
-          >
-            예약 상세보기
-          </Button>
-          <Button
-            variant={status.actionVariant}
-            color={
-              displayGroup === 'pendingPickup' ||
-              displayGroup === 'paymentPending'
-                ? 'primary'
-                : 'gray'
-            }
-            disabled
-            className="h-12 min-w-32 px-5 text-sm"
-          >
-            {status.actionLabel}
-          </Button>
+          <div className="flex gap-2 md:justify-end">
+            <Button
+              variant="outline"
+              color="gray"
+              className="h-12 min-w-32 px-5 text-sm"
+              onClick={handleOpenDetailModal}
+            >
+              예약 상세보기
+            </Button>
+            <Button
+              variant={status.actionVariant}
+              color={
+                displayGroup === 'pendingPickup' ||
+                displayGroup === 'paymentPending'
+                  ? 'primary'
+                  : 'gray'
+              }
+              disabled={!isPickupCodeAvailable}
+              className="h-12 min-w-32 px-5 text-sm"
+              onClick={handleOpenPickupCodeModal}
+            >
+              {status.actionLabel}
+            </Button>
+          </div>
         </div>
-      </div>
-    </article>
+      </article>
+
+      <MypageReservationDetailModal
+        isOpen={isDetailModalOpen}
+        reservation={reservation}
+        onClose={handleCloseDetailModal}
+      />
+      <PickupCodeModal
+        isOpen={isPickupCodeModalOpen}
+        reservation={reservation}
+        onClose={handleClosePickupCodeModal}
+      />
+    </>
   );
 }
