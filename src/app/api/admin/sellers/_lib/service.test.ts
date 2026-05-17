@@ -145,7 +145,7 @@ describe('approveSellerApplication', () => {
     );
   });
 
-  it('RPC 오류면 VALIDATION_ERROR를 던진다', async () => {
+  it('RPC APPLICATION_NOT_PENDING이면 VALIDATION_ERROR를 던진다', async () => {
     vi.mocked(createServiceRoleClient).mockReturnValue({
       from: vi.fn().mockReturnValue({
         select: vi.fn().mockReturnValue({
@@ -165,6 +165,29 @@ describe('approveSellerApplication', () => {
     await expect(approveSellerApplication(APP_ID)).rejects.toSatisfy(
       (e: unknown) =>
         e instanceof AppError && e.code === ERROR_CODE.VALIDATION_ERROR
+    );
+  });
+
+  it('RPC 내부 오류면 INTERNAL_SERVER_ERROR를 던진다', async () => {
+    vi.mocked(createServiceRoleClient).mockReturnValue({
+      from: vi.fn().mockReturnValue({
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({
+            single: vi.fn().mockResolvedValue({
+              data: { id: APP_ID },
+              error: null,
+            }),
+          }),
+        }),
+      }),
+      rpc: vi
+        .fn()
+        .mockResolvedValue({ error: { message: 'unexpected error' } }),
+    } as unknown as ReturnType<typeof createServiceRoleClient>);
+
+    await expect(approveSellerApplication(APP_ID)).rejects.toSatisfy(
+      (e: unknown) =>
+        e instanceof AppError && e.code === ERROR_CODE.INTERNAL_SERVER_ERROR
     );
   });
 });

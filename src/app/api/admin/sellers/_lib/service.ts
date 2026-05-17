@@ -108,7 +108,10 @@ export async function approveSellerApplication(id: string): Promise<void> {
   });
 
   if (rpcError) {
-    throw new AppError(ERROR_CODE.VALIDATION_ERROR, 400);
+    if (rpcError.message === 'APPLICATION_NOT_PENDING') {
+      throw new AppError(ERROR_CODE.VALIDATION_ERROR, 400);
+    }
+    throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
   }
 }
 
