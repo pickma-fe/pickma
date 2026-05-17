@@ -30,6 +30,12 @@ export async function POST(request: NextRequest): Promise<Response> {
         serviceUser.role
       );
       if (!eligibility.eligible) {
+        if (eligibility.reason === 'seller_already_registered') {
+          throw new AppError(ERROR_CODE.SELLER_ALREADY_REGISTERED, 409);
+        }
+        if (eligibility.reason === 'application_already_submitted') {
+          throw new AppError(ERROR_CODE.APPLICATION_ALREADY_SUBMITTED, 409);
+        }
         throw new AppError(ERROR_CODE.FILE_UPLOAD_NOT_ALLOWED, 403);
       }
       userId = authUser.id;
