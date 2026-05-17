@@ -93,7 +93,13 @@ export async function approveSellerApplication(id: string): Promise<void> {
     .eq('id', id)
     .single();
 
-  if (findError || !application) {
+  if (findError) {
+    if (findError.code === 'PGRST116') {
+      throw new AppError(ERROR_CODE.SELLER_APPLICATION_NOT_FOUND, 404);
+    }
+    throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
+  }
+  if (!application) {
     throw new AppError(ERROR_CODE.SELLER_APPLICATION_NOT_FOUND, 404);
   }
 
@@ -118,7 +124,13 @@ export async function rejectSellerApplication(
     .eq('id', id)
     .single();
 
-  if (findError || !application) {
+  if (findError) {
+    if (findError.code === 'PGRST116') {
+      throw new AppError(ERROR_CODE.SELLER_APPLICATION_NOT_FOUND, 404);
+    }
+    throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
+  }
+  if (!application) {
     throw new AppError(ERROR_CODE.SELLER_APPLICATION_NOT_FOUND, 404);
   }
 
