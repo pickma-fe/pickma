@@ -91,6 +91,9 @@ export async function createSellerApplication(
     if (rpcError?.code === '23505') {
       throw new AppError(ERROR_CODE.APPLICATION_ALREADY_SUBMITTED, 409);
     }
+    if (rpcError?.message === 'INVALID_APPLICATION_DOCUMENTS') {
+      throw new AppError(ERROR_CODE.VALIDATION_ERROR, 400);
+    }
     throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
   }
 

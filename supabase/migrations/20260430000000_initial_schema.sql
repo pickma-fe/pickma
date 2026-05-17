@@ -958,6 +958,18 @@ DECLARE
   v_application_id uuid;
   v_doc            jsonb;
 BEGIN
+  IF jsonb_typeof(p_documents) <> 'array'
+     OR jsonb_array_length(p_documents) <> 4 THEN
+    RAISE EXCEPTION 'INVALID_APPLICATION_DOCUMENTS';
+  END IF;
+
+  IF (
+    SELECT COUNT(DISTINCT (elem->>'type')::seller_application_document_type)
+    FROM jsonb_array_elements(p_documents) AS elem
+  ) <> 4 THEN
+    RAISE EXCEPTION 'INVALID_APPLICATION_DOCUMENTS';
+  END IF;
+
   INSERT INTO seller_applications (
     user_id, status, business_number, company_name, representative_name,
     business_address, business_type, business_category
