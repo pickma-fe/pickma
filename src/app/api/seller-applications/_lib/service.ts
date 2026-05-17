@@ -18,9 +18,11 @@ function validateDocumentStoragePath(
   documentType: string
 ): boolean {
   const segments = storagePath.split('/');
-  if (segments.length < 4) return false;
-  if (segments[0] !== userId) return false;
-  if (segments[2] !== documentType) return false;
+  if (segments.length !== 4) return false;
+  const [pathUserId, uploadId, pathDocumentType, fileName] = segments;
+  if (!pathUserId || !uploadId || !pathDocumentType || !fileName) return false;
+  if (pathUserId !== userId) return false;
+  if (pathDocumentType !== documentType) return false;
   return true;
 }
 

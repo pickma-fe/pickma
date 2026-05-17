@@ -176,6 +176,30 @@ describe('createSellerApplication', () => {
     );
   });
 
+  it('path 파일명이 비어 있으면 VALIDATION_ERROR를 던진다', async () => {
+    vi.mocked(createServiceRoleClient).mockReturnValue(
+      buildStorageMock() as unknown as ReturnType<
+        typeof createServiceRoleClient
+      >
+    );
+
+    await expect(
+      createSellerApplication(USER_ID, {
+        ...VALID_BODY,
+        documents: [
+          {
+            ...VALID_DOCUMENTS[0],
+            storagePath: `${USER_ID}/upload-1/business_license/`,
+          },
+          ...VALID_DOCUMENTS.slice(1),
+        ],
+      })
+    ).rejects.toSatisfy(
+      (e: unknown) =>
+        e instanceof AppError && e.code === ERROR_CODE.VALIDATION_ERROR
+    );
+  });
+
   it('path의 userId segment가 다르면 VALIDATION_ERROR를 던진다', async () => {
     vi.mocked(createServiceRoleClient).mockReturnValue(
       buildStorageMock() as unknown as ReturnType<
