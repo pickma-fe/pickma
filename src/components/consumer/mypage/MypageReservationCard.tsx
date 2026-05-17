@@ -82,7 +82,9 @@ export function MypageReservationCard({
   const displayGroup = statusDisplayMap[reservation.status];
   const status = statusStyles[displayGroup];
   const isPickupCodeAvailable =
-    displayGroup === 'pendingPickup' && Boolean(reservation.pickupCode);
+    (reservation.status === 'reserved' || reservation.status === 'ready') &&
+    Boolean(reservation.pickupCode);
+  const shouldShowPickupCodeButton = displayGroup === 'pendingPickup';
   const reservationTitle = reservation.productName
     ? `${reservation.storeName} ${reservation.productName}`
     : reservation.storeName;
@@ -133,11 +135,6 @@ export function MypageReservationCard({
             <p className="mt-4 text-xl font-bold text-gray-900">
               {reservationTitle}
             </p>
-            {!reservation.productName ? (
-              <p className="mt-2 text-sm text-gray-500">
-                상품 정보는 예약 상세에서 확인할 수 있습니다.
-              </p>
-            ) : null}
             <dl className="mt-4 grid gap-2 text-base md:grid-cols-[72px_minmax(0,1fr)]">
               <dt className="text-gray-500">픽업 날짜</dt>
               <dd className="text-gray-700">
@@ -168,20 +165,19 @@ export function MypageReservationCard({
             >
               예약 상세보기
             </Button>
-            <Button
-              variant={status.actionVariant}
-              color={
-                displayGroup === 'pendingPickup' ||
-                displayGroup === 'paymentPending'
-                  ? 'primary'
-                  : 'gray'
-              }
-              disabled={!isPickupCodeAvailable}
-              className="h-12 min-w-32 px-5 text-sm"
-              onClick={handleOpenPickupCodeModal}
-            >
-              {status.actionLabel}
-            </Button>
+            {shouldShowPickupCodeButton ? (
+              <Button
+                variant={status.actionVariant}
+                color="primary"
+                disabled={!isPickupCodeAvailable}
+                className="h-12 min-w-32 px-5 text-sm"
+                onClick={handleOpenPickupCodeModal}
+              >
+                {reservation.pickupCode
+                  ? '픽업 코드 보기'
+                  : '픽업 코드 발급 전'}
+              </Button>
+            ) : null}
           </div>
         </div>
       </article>
@@ -191,11 +187,13 @@ export function MypageReservationCard({
         reservation={reservation}
         onClose={handleCloseDetailModal}
       />
-      <PickupCodeModal
-        isOpen={isPickupCodeModalOpen}
-        reservation={reservation}
-        onClose={handleClosePickupCodeModal}
-      />
+      {reservation.pickupCode ? (
+        <PickupCodeModal
+          isOpen={isPickupCodeModalOpen}
+          reservation={reservation}
+          onClose={handleClosePickupCodeModal}
+        />
+      ) : null}
     </>
   );
 }

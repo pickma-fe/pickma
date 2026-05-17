@@ -10,7 +10,7 @@ export interface MypageReservation {
   imageUrl: string;
   pickupDate: string;
   pickupTime: string;
-  pickupCode: string;
+  pickupCode: string | null;
   quantity: number | null;
   price: number;
   status: OrderStatus;
@@ -54,8 +54,7 @@ export function mapOrderToMypageReservation(
     imageUrl: FALLBACK_RESERVATION_IMAGE_URL,
     pickupDate: formatPickupDate(order.pickupAt),
     pickupTime: formatPickupTime(order.pickupAt),
-    pickupCode:
-      order.pickupNumber ?? order.storeOrderNumber ?? order.orderNumber,
+    pickupCode: order.pickupNumber ?? null,
     quantity: null,
     price: order.paymentAmount,
     status: order.status,
