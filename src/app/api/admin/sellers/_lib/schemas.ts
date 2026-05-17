@@ -2,6 +2,8 @@ import { z } from 'zod';
 
 import type { RejectSellerApplicationRequest } from '@/contracts/admin';
 
+export const paramsIdSchema = z.object({ id: z.string().uuid() });
+
 export const rejectSellerApplicationSchema = z
   .object({
     reason: z.string().min(1),
