@@ -13,7 +13,7 @@ export function useCreateSellerApplication() {
     mutationFn: (body) => sellerApplicationApi.createSellerApplication(body),
     onSuccess: () => {
       void queryClient.invalidateQueries({
-        queryKey: ['seller', 'onboarding-status'],
+        queryKey: ['sellers', 'onboarding-status'],
       });
     },
   });

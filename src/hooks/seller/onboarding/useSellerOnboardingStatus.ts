@@ -7,7 +7,7 @@ import { sellerOnboardingApi } from '@/api/seller/onboarding/sellerOnboardingApi
 
 export function useSellerOnboardingStatus() {
   return useQuery<SellerOnboardingStatus>({
-    queryKey: ['seller', 'onboarding-status'],
+    queryKey: ['sellers', 'onboarding-status'],
     queryFn: () => sellerOnboardingApi.getSellerOnboardingStatus(),
     staleTime: 30 * 1000,
   });
