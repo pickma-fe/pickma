@@ -7,7 +7,7 @@ import { adminSellerApplicationApi } from '@/api/admin/sellers/adminSellerApplic
 
 export function useAdminPendingSellerApplications(page = 1, pageSize = 20) {
   return useQuery<AdminPendingSellerApplicationListResponse>({
-    queryKey: ['admin', 'sellers', 'pending', page, pageSize],
+    queryKey: ['sellers', 'pending', { page, pageSize }],
     queryFn: () =>
       adminSellerApplicationApi.getPendingSellerApplications(page, pageSize),
   });

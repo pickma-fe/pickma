@@ -11,7 +11,7 @@ export function useApproveSellerApplication() {
     mutationFn: (id) => adminSellerApplicationApi.approveSellerApplication(id),
     onSuccess: () => {
       void queryClient.invalidateQueries({
-        queryKey: ['admin', 'sellers', 'pending'],
+        queryKey: ['sellers', 'pending'],
       });
     },
   });

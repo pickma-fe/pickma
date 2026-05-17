@@ -12,7 +12,7 @@ export function useRejectSellerApplication() {
       adminSellerApplicationApi.rejectSellerApplication(id, { reason }),
     onSuccess: () => {
       void queryClient.invalidateQueries({
-        queryKey: ['admin', 'sellers', 'pending'],
+        queryKey: ['sellers', 'pending'],
       });
     },
   });
