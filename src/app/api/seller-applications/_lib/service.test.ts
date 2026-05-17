@@ -88,10 +88,15 @@ function buildStorageMock(
   return {
     storage: {
       from: vi.fn().mockReturnValue({
-        list: vi.fn().mockResolvedValue({
-          data: fileExists ? [{ name: 'file.pdf' }] : [],
-          error: storageError,
-        }),
+        list: vi
+          .fn()
+          .mockImplementation((_folder: string, opts?: { search?: string }) => {
+            const name = opts?.search ?? 'file';
+            return Promise.resolve({
+              data: fileExists ? [{ name }] : [],
+              error: storageError,
+            });
+          }),
       }),
     },
     rpc: vi.fn().mockResolvedValue({ data: 'app-1', error: rpcError }),

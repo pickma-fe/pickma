@@ -55,15 +55,16 @@ export async function createSellerApplication(
       const fileName = segments[segments.length - 1];
       return supabase.storage
         .from('seller-application-documents')
-        .list(folder, { search: fileName });
+        .list(folder, { search: fileName })
+        .then((result) => ({ ...result, expectedFileName: fileName }));
     })
   );
 
-  for (const { data, error } of storageChecks) {
+  for (const { data, error, expectedFileName } of storageChecks) {
     if (error) {
       throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
     }
-    if (!data || data.length === 0) {
+    if (!data?.some((item) => item.name === expectedFileName)) {
       throw new AppError(ERROR_CODE.VALIDATION_ERROR, 400);
     }
   }
