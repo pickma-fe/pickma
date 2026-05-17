@@ -57,7 +57,10 @@ export async function createSellerApplication(
   );
 
   for (const { data, error } of storageChecks) {
-    if (error || !data || data.length === 0) {
+    if (error) {
+      throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
+    }
+    if (!data || data.length === 0) {
       throw new AppError(ERROR_CODE.VALIDATION_ERROR, 400);
     }
   }
