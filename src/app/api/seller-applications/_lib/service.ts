@@ -33,6 +33,7 @@ export async function createSellerApplication(
   const docTypes = body.documents.map((d) => d.type);
   const uniqueTypes = new Set(docTypes);
   if (
+    body.documents.length !== REQUIRED_DOCUMENT_TYPES.length ||
     uniqueTypes.size !== REQUIRED_DOCUMENT_TYPES.length ||
     REQUIRED_DOCUMENT_TYPES.some((t) => !uniqueTypes.has(t))
   ) {
