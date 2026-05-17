@@ -6,7 +6,7 @@ export function toSellerOnboardingStatusResponse(
   data: OnboardingStatusData
 ): SellerOnboardingStatusResponse {
   return {
-    role: data.role as SellerOnboardingStatusResponse['role'],
+    role: data.role,
     applicationStatus: data.applicationStatus,
     hasStore: data.hasStore,
     ...(data.latestRejectReason !== undefined && {

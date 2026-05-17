@@ -1,9 +1,10 @@
+import type { SellerOnboardingStatusResponse } from '@/contracts/seller-application';
 import { AppError } from '@/lib/errors/appError';
 import { ERROR_CODE } from '@/lib/errors/errorCodes';
 import { createServiceRoleClient } from '@/lib/supabase/service';
 
 export interface OnboardingStatusData {
-  role: string;
+  role: SellerOnboardingStatusResponse['role'];
   applicationStatus: 'none' | 'pending' | 'approved' | 'rejected';
   hasStore: boolean;
   latestRejectReason?: string;
