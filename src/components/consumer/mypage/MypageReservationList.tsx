@@ -19,10 +19,7 @@ interface MypageReservationListProps {
   isError?: boolean;
   isLoading?: boolean;
   isRefetching?: boolean;
-  currentPage: number;
-  totalPages: number;
   onRetry?: () => void;
-  onPageChange: (page: number) => void;
 }
 
 const reservationTabs: ReservationTab[] = [
@@ -46,10 +43,7 @@ export function MypageReservationList({
   isError = false,
   isLoading = false,
   isRefetching = false,
-  currentPage,
-  totalPages,
   onRetry,
-  onPageChange,
 }: MypageReservationListProps) {
   const [activeTabId, setActiveTabId] = useState<ReservationTab['id']>('all');
   const filteredReservations =
@@ -60,12 +54,6 @@ export function MypageReservationList({
         );
   const handleChangeTab = (index: number) => {
     setActiveTabId(reservationTabs[index]?.id ?? 'all');
-  };
-  const handleClickPrevPage = () => {
-    onPageChange(currentPage - 1);
-  };
-  const handleClickNextPage = () => {
-    onPageChange(currentPage + 1);
   };
 
   return (
@@ -146,34 +134,6 @@ export function MypageReservationList({
               {!isLoading && !isError && filteredReservations.length === 0 ? (
                 <div className="flex min-h-60 items-center justify-center rounded-lg border border-dashed border-gray-200 bg-gray-50 text-sm font-medium text-gray-500">
                   해당 상태의 예약이 없습니다.
-                </div>
-              ) : null}
-
-              {!isLoading && !isError && totalPages > 1 ? (
-                <div className="flex items-center justify-center gap-4 pt-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    color="gray"
-                    disabled={isRefetching || currentPage <= 1}
-                    className="min-w-24"
-                    onClick={handleClickPrevPage}
-                  >
-                    이전
-                  </Button>
-                  <span className="text-sm font-semibold text-gray-700">
-                    {currentPage} / {totalPages}
-                  </span>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    color="gray"
-                    disabled={isRefetching || currentPage >= totalPages}
-                    className="min-w-24"
-                    onClick={handleClickNextPage}
-                  >
-                    다음
-                  </Button>
                 </div>
               ) : null}
             </TabPanel>
