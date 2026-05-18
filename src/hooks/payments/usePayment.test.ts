@@ -174,6 +174,66 @@ describe('usePayment', () => {
     );
   });
 
+  it('success:true 메시지에 orderNumber가 없으면 payment_failed reject', async () => {
+    const popup = makePopup();
+    vi.stubGlobal('open', vi.fn().mockReturnValue(popup));
+    const { result } = renderHook(() => usePayment(), {
+      wrapper: createWrapper(),
+    });
+
+    const promise = result.current.openPayment({
+      orderNumber: 'PM2026TEST',
+      orderName: '크루아상 2개',
+    });
+
+    await waitFor(() => expect(window.open).toHaveBeenCalled());
+
+    act(() => {
+      window.dispatchEvent(
+        new MessageEvent('message', {
+          origin: window.location.origin,
+          source: popup,
+          data: { success: true },
+        })
+      );
+    });
+
+    await expect(promise).rejects.toThrow('payment_failed');
+    expect(mockRouterPush).toHaveBeenCalledWith(
+      '/order/fail?reason=payment_failed'
+    );
+  });
+
+  it('success:true 메시지의 orderNumber가 요청값과 다르면 payment_failed reject', async () => {
+    const popup = makePopup();
+    vi.stubGlobal('open', vi.fn().mockReturnValue(popup));
+    const { result } = renderHook(() => usePayment(), {
+      wrapper: createWrapper(),
+    });
+
+    const promise = result.current.openPayment({
+      orderNumber: 'PM2026TEST',
+      orderName: '크루아상 2개',
+    });
+
+    await waitFor(() => expect(window.open).toHaveBeenCalled());
+
+    act(() => {
+      window.dispatchEvent(
+        new MessageEvent('message', {
+          origin: window.location.origin,
+          source: popup,
+          data: { success: true, orderNumber: 'PM2026OTHER' },
+        })
+      );
+    });
+
+    await expect(promise).rejects.toThrow('payment_failed');
+    expect(mockRouterPush).toHaveBeenCalledWith(
+      '/order/fail?reason=payment_failed'
+    );
+  });
+
   it('다른 origin 메시지는 무시 → 이후 정상 메시지 처리', async () => {
     const popup = makePopup();
     vi.stubGlobal('open', vi.fn().mockReturnValue(popup));

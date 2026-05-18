@@ -49,7 +49,10 @@ export function usePayment() {
           if (event.data?.success === true) {
             const msgOrderNumber = (event.data as { orderNumber?: unknown })
               .orderNumber;
-            if (typeof msgOrderNumber !== 'string' || !msgOrderNumber) {
+            if (
+              typeof msgOrderNumber !== 'string' ||
+              msgOrderNumber !== orderNumber
+            ) {
               router.push('/order/fail?reason=payment_failed');
               reject(new Error('payment_failed'));
               return;
