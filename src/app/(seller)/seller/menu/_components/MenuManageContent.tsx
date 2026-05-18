@@ -14,6 +14,7 @@ export function MenuManageContent() {
   const { data, isLoading, isError } = useSellerMenus();
   const [selectedCategory, setSelectedCategory] = useState('전체');
   const [searchKeyword, setSearchKeyword] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
 
   const menus = useMemo(() => data?.items ?? [], [data?.items]);
   const categories = useMemo(() => {
@@ -39,6 +40,16 @@ export function MenuManageContent() {
   const inactiveCount = menus.filter(
     (menu) => menu.status === 'inactive'
   ).length;
+
+  const handleCategoryChange = (category: string) => {
+    setSelectedCategory(category);
+    setCurrentPage(1);
+  };
+
+  const handleSearchChange = (keyword: string) => {
+    setSearchKeyword(keyword);
+    setCurrentPage(1);
+  };
 
   const handleAddMenu = () => {
     // TODO: 메뉴 등록 페이지 이동
@@ -118,13 +129,17 @@ export function MenuManageContent() {
           categories={categories}
           selectedCategory={selectedCategory}
           searchKeyword={searchKeyword}
-          onCategoryChange={setSelectedCategory}
-          onSearchChange={setSearchKeyword}
+          onCategoryChange={handleCategoryChange}
+          onSearchChange={handleSearchChange}
         />
         <Button onClick={handleAddMenu}>+ 메뉴 등록</Button>
       </div>
 
-      <MenuTable menus={filteredMenus} />
+      <MenuTable
+        menus={filteredMenus}
+        currentPage={currentPage}
+        onPageChange={setCurrentPage}
+      />
     </div>
   );
 }
