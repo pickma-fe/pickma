@@ -69,3 +69,6 @@ src/app/**/dev-test/
 
 # Supabase CLI local state
 supabase/.temp/
+
+# Local auth seed (실제 계정 정보 포함, 커밋 금지)
+supabase/seeds/*.local.sql
