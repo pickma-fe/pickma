@@ -16,7 +16,11 @@
 
 DO $$
 DECLARE
-  v_user_id  uuid := 'LOCAL_ADMIN_ID';   -- 예: gen_random_uuid() 결과
+  -- DB reset 후 최초 1회 실행이라면 gen_random_uuid() 를 그대로 써도 된다.
+  -- 패스워드 변경 등 재실행이 필요하다면 아래 값을 고정 UUID 로 교체해야
+  -- ON CONFLICT (id) DO UPDATE 가 동작한다.
+  -- 고정 UUID 생성: SELECT gen_random_uuid(); 결과를 복붙
+  v_user_id  uuid := gen_random_uuid();
   v_email    text := 'LOCAL_ADMIN_EMAIL'; -- 예: 'admin@example.com'
   v_password text := 'LOCAL_ADMIN_PASSWORD'; -- 평문 비밀번호 (hash 는 아래에서 생성)
   v_name     text := '관리자';
