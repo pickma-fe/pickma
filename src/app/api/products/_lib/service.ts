@@ -60,7 +60,7 @@ export async function getProducts(
   }
 
   if (keyword) {
-    query = query.ilike('menu_items.name', `%${keyword}%`);
+    query = query.ilike('menu_items.name', `%${escapeILikePattern(keyword)}%`);
   }
 
   if (params.availableOnly) {
@@ -202,6 +202,10 @@ function compareProducts(
 
 function getSortOrder(params: ProductListParams) {
   return params.order ?? 'asc';
+}
+
+function escapeILikePattern(pattern: string): string {
+  return pattern.replace(/[%_]/g, '\\$&');
 }
 
 export async function getProductById(
