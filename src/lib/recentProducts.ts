@@ -35,10 +35,14 @@ export function getRecentProductsRawSnapshot() {
     return EMPTY_RECENT_PRODUCTS;
   }
 
-  return (
-    window.localStorage.getItem(RECENT_PRODUCTS_STORAGE_KEY) ??
-    EMPTY_RECENT_PRODUCTS
-  );
+  try {
+    return (
+      window.localStorage.getItem(RECENT_PRODUCTS_STORAGE_KEY) ??
+      EMPTY_RECENT_PRODUCTS
+    );
+  } catch {
+    return EMPTY_RECENT_PRODUCTS;
+  }
 }
 
 export function getRecentProductsServerSnapshot() {
@@ -82,11 +86,15 @@ export function addRecentProduct(product: RecentProductInput) {
     ),
   ].slice(0, MAX_RECENT_PRODUCTS);
 
-  window.localStorage.setItem(
-    RECENT_PRODUCTS_STORAGE_KEY,
-    JSON.stringify(nextProducts)
-  );
-  window.dispatchEvent(new Event(RECENT_PRODUCTS_EVENT));
+  try {
+    window.localStorage.setItem(
+      RECENT_PRODUCTS_STORAGE_KEY,
+      JSON.stringify(nextProducts)
+    );
+    window.dispatchEvent(new Event(RECENT_PRODUCTS_EVENT));
+  } catch {
+    return;
+  }
 }
 
 function isRecentProduct(value: unknown): value is RecentProduct {
