@@ -195,7 +195,6 @@ export interface Category {
   name: string;
   icon?: string;
   sortOrder: number;
-  createdAt: Date;
 }
 
 export interface MenuItem {
