@@ -2,7 +2,11 @@ import type { NextRequest } from 'next/server';
 
 import { AppError } from '@/lib/errors/appError';
 import { ERROR_CODE } from '@/lib/errors/errorCodes';
-import { requireActiveUser, requireSeller } from '@/app/api/_lib/auth';
+import {
+  checkApplicationEligibility,
+  requireActiveUser,
+  requireSeller,
+} from '@/app/api/_lib/auth';
 import { routeError, success } from '@/app/api/_lib/response';
 import { validateBody } from '@/app/api/_lib/validation';
 
@@ -21,7 +25,17 @@ export async function POST(request: NextRequest): Promise<Response> {
       userId = authUser.id;
     } else if (body.purpose === 'seller_application_document') {
       const { authUser, serviceUser } = await requireActiveUser();
-      if (serviceUser.role === 'seller') {
+      const eligibility = await checkApplicationEligibility(
+        authUser.id,
+        serviceUser.role
+      );
+      if (!eligibility.eligible) {
+        if (eligibility.reason === 'seller_already_registered') {
+          throw new AppError(ERROR_CODE.SELLER_ALREADY_REGISTERED, 409);
+        }
+        if (eligibility.reason === 'application_already_submitted') {
+          throw new AppError(ERROR_CODE.APPLICATION_ALREADY_SUBMITTED, 409);
+        }
         throw new AppError(ERROR_CODE.FILE_UPLOAD_NOT_ALLOWED, 403);
       }
       userId = authUser.id;

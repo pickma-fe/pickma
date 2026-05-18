@@ -378,6 +378,103 @@ export type Database = {
           },
         ];
       };
+      seller_application_documents: {
+        Row: {
+          application_id: string;
+          content_type: string;
+          created_at: string;
+          id: string;
+          original_file_name: string;
+          size: number;
+          storage_path: string;
+          type: Database['public']['Enums']['seller_application_document_type'];
+        };
+        Insert: {
+          application_id: string;
+          content_type: string;
+          created_at?: string;
+          id?: string;
+          original_file_name: string;
+          size: number;
+          storage_path: string;
+          type: Database['public']['Enums']['seller_application_document_type'];
+        };
+        Update: {
+          application_id?: string;
+          content_type?: string;
+          created_at?: string;
+          id?: string;
+          original_file_name?: string;
+          size?: number;
+          storage_path?: string;
+          type?: Database['public']['Enums']['seller_application_document_type'];
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'seller_application_documents_application_id_fkey';
+            columns: ['application_id'];
+            isOneToOne: false;
+            referencedRelation: 'seller_applications';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      seller_applications: {
+        Row: {
+          business_address: string;
+          business_category: string;
+          business_number: string;
+          business_type: string;
+          company_name: string;
+          created_at: string;
+          id: string;
+          reject_reason: string | null;
+          representative_name: string;
+          reviewed_at: string | null;
+          status: Database['public']['Enums']['seller_application_status'];
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          business_address: string;
+          business_category: string;
+          business_number: string;
+          business_type: string;
+          company_name: string;
+          created_at?: string;
+          id?: string;
+          reject_reason?: string | null;
+          representative_name: string;
+          reviewed_at?: string | null;
+          status?: Database['public']['Enums']['seller_application_status'];
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          business_address?: string;
+          business_category?: string;
+          business_number?: string;
+          business_type?: string;
+          company_name?: string;
+          created_at?: string;
+          id?: string;
+          reject_reason?: string | null;
+          representative_name?: string;
+          reviewed_at?: string | null;
+          status?: Database['public']['Enums']['seller_application_status'];
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'seller_applications_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       social_accounts: {
         Row: {
           created_at: string;
@@ -584,6 +681,10 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      approve_seller_application: {
+        Args: { application_id: string };
+        Returns: undefined;
+      };
       begin_payment_processing: {
         Args: { p_order_id: string };
         Returns: {
@@ -630,6 +731,19 @@ export type Database = {
           payment_amount: number;
         }[];
       };
+      create_seller_application: {
+        Args: {
+          p_business_address: string;
+          p_business_category: string;
+          p_business_number: string;
+          p_business_type: string;
+          p_company_name: string;
+          p_documents: Json;
+          p_representative_name: string;
+          p_user_id: string;
+        };
+        Returns: string;
+      };
       expire_order: {
         Args: { p_order_id: string };
         Returns: {
@@ -659,6 +773,12 @@ export type Database = {
       payment_provider: 'toss' | 'kakao_pay' | 'naver_pay';
       payment_status: 'pending' | 'paid' | 'failed' | 'cancelled' | 'refunded';
       product_status: 'active' | 'closed';
+      seller_application_document_type:
+        | 'business_license'
+        | 'id_card'
+        | 'bankbook'
+        | 'business_report';
+      seller_application_status: 'pending' | 'approved' | 'rejected';
       social_provider: 'google' | 'kakao';
       store_status: 'pending' | 'approved' | 'rejected' | 'inactive';
       user_role: 'customer' | 'seller' | 'admin';
@@ -810,6 +930,13 @@ export const Constants = {
       payment_provider: ['toss', 'kakao_pay', 'naver_pay'],
       payment_status: ['pending', 'paid', 'failed', 'cancelled', 'refunded'],
       product_status: ['active', 'closed'],
+      seller_application_document_type: [
+        'business_license',
+        'id_card',
+        'bankbook',
+        'business_report',
+      ],
+      seller_application_status: ['pending', 'approved', 'rejected'],
       social_provider: ['google', 'kakao'],
       store_status: ['pending', 'approved', 'rejected', 'inactive'],
       user_role: ['customer', 'seller', 'admin'],
