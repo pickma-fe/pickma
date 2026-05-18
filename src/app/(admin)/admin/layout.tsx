@@ -1,6 +1,6 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
 import { ApiError } from '@/api/apiClient';
@@ -16,8 +16,9 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { data: user, isLoading, isError, error } = useMe();
+  const { data: user, isLoading, isError, error, refetch } = useMe();
   const router = useRouter();
+  const pathname = usePathname();
   const { mutateAsync: signOut } = useSignOut();
 
   async function handleSignOut() {
@@ -29,10 +30,9 @@ export default function AdminLayout({
     if (isLoading) return;
 
     if (isError) {
-      if (
-        error instanceof ApiError &&
-        (error.statusCode === 401 || error.statusCode === 403)
-      ) {
+      if (error instanceof ApiError && error.statusCode === 401) {
+        router.push(`/?auth=required&next=${encodeURIComponent(pathname)}`);
+      } else if (error instanceof ApiError && error.statusCode === 403) {
         router.push('/');
       }
       return;
@@ -41,7 +41,7 @@ export default function AdminLayout({
     if (user?.role !== 'admin') {
       router.push('/');
     }
-  }, [isLoading, isError, error, user, router]);
+  }, [isLoading, isError, error, user, router, pathname]);
 
   if (isLoading) {
     return (
@@ -61,10 +61,17 @@ export default function AdminLayout({
     }
 
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="flex min-h-screen flex-col items-center justify-center gap-3">
         <span className="text-sm text-gray-500">
           오류가 발생했습니다. 잠시 후 다시 시도해주세요.
         </span>
+        <button
+          type="button"
+          onClick={() => void refetch()}
+          className="rounded-sm border border-gray-300 px-4 py-1.5 text-sm text-gray-700 hover:bg-gray-50"
+        >
+          다시 시도
+        </button>
       </div>
     );
   }
