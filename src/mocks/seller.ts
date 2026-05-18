@@ -3,9 +3,25 @@ import type {
   OrderListItemResponse,
 } from '@/contracts/order';
 import type { ProductListItemResponse } from '@/contracts/product';
+import type { SellerApplicationResponse } from '@/contracts/seller-application';
 
 import { mockOrderDetail, mockOrders } from './orders';
 import { mockProducts } from './products';
+
+export const mockSellerApplication: SellerApplicationResponse = {
+  id: 'application_mock_1',
+  userId: 'user_mock_1',
+  status: 'pending',
+  businessNumber: '000-00-00001',
+  companyName: '테스트 회사',
+  representativeName: '테스트 대표',
+  businessAddress: '서울시 테스트구 테스트로 1',
+  businessType: '식품',
+  businessCategory: '베이커리',
+  documents: [],
+  createdAt: '2026-05-18T00:00:00.000Z',
+  updatedAt: '2026-05-18T00:00:00.000Z',
+};
 
 export const mockSellerProducts: ProductListItemResponse[] = mockProducts;
 

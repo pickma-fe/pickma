@@ -5,8 +5,10 @@ import {
   checkApplicationEligibility,
   requireActiveUser,
 } from '@/app/api/_lib/auth';
+import { isApiMockEnabled } from '@/app/api/_lib/mock';
 import { fail, routeError, success } from '@/app/api/_lib/response';
 import { validateBody } from '@/app/api/_lib/validation';
+import { mockSellerApplication } from '@/mocks/seller';
 
 import { createSellerApplicationSchema } from './_lib/schemas';
 import { createSellerApplication } from './_lib/service';
@@ -14,6 +16,11 @@ import { createSellerApplication } from './_lib/service';
 export async function POST(request: NextRequest): Promise<Response> {
   try {
     const body = await validateBody(createSellerApplicationSchema, request);
+
+    if (isApiMockEnabled()) {
+      return success(mockSellerApplication, 201);
+    }
+
     const { authUser, serviceUser } = await requireActiveUser();
 
     const eligibility = await checkApplicationEligibility(
