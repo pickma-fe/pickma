@@ -65,35 +65,38 @@ export type Database = {
       };
       menu_items: {
         Row: {
-          category_id: string | null;
+          category_id: string;
           created_at: string;
           description: string | null;
           id: string;
           image: string | null;
           name: string;
           original_price: number;
+          status: string;
           store_id: string;
           updated_at: string;
         };
         Insert: {
-          category_id?: string | null;
+          category_id: string;
           created_at?: string;
           description?: string | null;
           id?: string;
           image?: string | null;
           name: string;
           original_price: number;
+          status?: string;
           store_id: string;
           updated_at?: string;
         };
         Update: {
-          category_id?: string | null;
+          category_id?: string;
           created_at?: string;
           description?: string | null;
           id?: string;
           image?: string | null;
           name?: string;
           original_price?: number;
+          status?: string;
           store_id?: string;
           updated_at?: string;
         };

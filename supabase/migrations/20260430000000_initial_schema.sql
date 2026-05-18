@@ -87,11 +87,12 @@ CREATE TABLE stores (
 CREATE TABLE menu_items (
   id              uuid          PRIMARY KEY DEFAULT gen_random_uuid(),
   store_id        uuid          NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
-  category_id     uuid          REFERENCES categories(id) ON DELETE SET NULL,
+  category_id     uuid          NOT NULL REFERENCES categories(id) ON DELETE RESTRICT,
   name            varchar(100)  NOT NULL,
   description     text,
   image           varchar(500),
   original_price  int           NOT NULL,
+  status          varchar(10)   NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'inactive')),
   created_at      timestamptz   NOT NULL DEFAULT now(),
   updated_at      timestamptz   NOT NULL DEFAULT now()
 );
