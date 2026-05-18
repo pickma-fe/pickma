@@ -69,13 +69,15 @@ export async function createSellerProduct(
   const supabase = createServiceRoleClient();
   const { data: menuItem, error: menuItemError } = await supabase
     .from('menu_items')
-    .select('id, store_id, category_id')
+    .select('id, store_id, category_id, status')
     .eq('id', body.menuItemId)
     .eq('store_id', storeId)
     .maybeSingle();
 
   if (menuItemError) throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
-  if (!menuItem) throw new AppError(ERROR_CODE.PRODUCT_NOT_FOUND, 404);
+  if (!menuItem) throw new AppError(ERROR_CODE.MENU_ITEM_NOT_FOUND, 404);
+  if (menuItem.status === 'inactive')
+    throw new AppError(ERROR_CODE.MENU_ITEM_INACTIVE, 409);
 
   const { data, error } = await supabase
     .from('products')

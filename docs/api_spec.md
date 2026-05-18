@@ -893,7 +893,7 @@ Seller product API는 `requireSellerStore()`를 통과해야 한다. 특정 상�
 - Response: `200 { statusCode: 200, data: null }`
 - 정책: row를 삭제하지 않고 `products.status = 'closed'`로 변경한다.
 
-Seller product API의 pickup time은 서버 schema에서 `HH:mm:ss`로 정규화해 저장한다. 소유하지 않은 menu item/product 접근은 정보 노출을 줄이기 위해 `PRODUCT_NOT_FOUND`로 반환한다.
+Seller product API의 pickup time은 서버 schema에서 `HH:mm:ss`로 정규화해 저장한다. 소유하지 않은 product 접근은 `PRODUCT_NOT_FOUND`(404)로 반환한다. 상품 생성 시 menu item이 없으면 `MENU_ITEM_NOT_FOUND`(404), 판매 중지(`inactive`) 상태이면 `MENU_ITEM_INACTIVE`(409)를 반환한다.
 
 ---
 
