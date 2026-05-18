@@ -1,3 +1,4 @@
+import type { MenuItemResponse } from '@/contracts/menu-item';
 import type {
   OrderDetailResponse,
   OrderListItemResponse,
@@ -62,6 +63,57 @@ export const mockSellerApplication: SellerApplicationResponse = {
   ],
   createdAt: '2026-05-18T00:00:00.000Z',
   updatedAt: '2026-05-18T00:00:00.000Z',
+};
+
+export const mockSellerMenuItems: MenuItemResponse[] = [
+  {
+    id: 'menu_item_mock_1',
+    storeId: 'store_1',
+    categoryId: 'cat_1',
+    categoryName: '베이커리',
+    name: '마감 할인 크루아상 세트',
+    description: '당일 생산 후 남은 크루아상과 페이스트리를 담은 세트입니다.',
+    originalPrice: 12000,
+    status: 'active',
+    createdAt: '2026-05-18T09:00:00.000Z',
+    updatedAt: '2026-05-18T09:00:00.000Z',
+  },
+  {
+    id: 'menu_item_mock_2',
+    storeId: 'store_1',
+    categoryId: 'cat_1',
+    categoryName: '베이커리',
+    name: '페이스트리 박스',
+    description: '갓 구운 페이스트리 모음 박스입니다.',
+    originalPrice: 9000,
+    status: 'active',
+    createdAt: '2026-05-18T09:00:00.000Z',
+    updatedAt: '2026-05-18T09:00:00.000Z',
+  },
+  {
+    id: 'menu_item_mock_3',
+    storeId: 'store_1',
+    categoryId: 'cat_2',
+    categoryName: '카페/음료',
+    name: '아메리카노 세트',
+    description: '아메리카노 2잔 세트입니다.',
+    originalPrice: 8000,
+    status: 'inactive',
+    createdAt: '2026-05-18T09:00:00.000Z',
+    updatedAt: '2026-05-18T09:00:00.000Z',
+  },
+];
+
+export const mockCreatedSellerMenuItem: MenuItemResponse = {
+  id: 'menu_item_mock_new',
+  storeId: 'store_1',
+  categoryId: 'cat_1',
+  categoryName: '베이커리',
+  name: '새 메뉴',
+  originalPrice: 10000,
+  status: 'active',
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
 };
 
 export const mockSellerProducts: ProductListItemResponse[] = mockProducts;
