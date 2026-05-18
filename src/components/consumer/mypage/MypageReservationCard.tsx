@@ -18,6 +18,7 @@ type ReservationDisplayGroup =
 
 const statusGroupMap: Record<OrderStatus, ReservationStatusGroup> = {
   paymentPending: 'pendingPickup',
+  processing: 'pendingPickup',
   reserved: 'pendingPickup',
   ready: 'pendingPickup',
   completed: 'completed',
