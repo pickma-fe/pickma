@@ -2,9 +2,9 @@
 
 import { ANONYMOUS, loadTossPayments } from '@tosspayments/tosspayments-sdk';
 import { useSearchParams } from 'next/navigation';
-import { useEffect } from 'react';
+import { Suspense, useEffect } from 'react';
 
-export default function TossCheckoutPage() {
+function TossCheckoutInner() {
   const searchParams = useSearchParams();
 
   useEffect(() => {
@@ -44,4 +44,12 @@ export default function TossCheckoutPage() {
   }, [searchParams]);
 
   return null;
+}
+
+export default function TossCheckoutPage() {
+  return (
+    <Suspense>
+      <TossCheckoutInner />
+    </Suspense>
+  );
 }
