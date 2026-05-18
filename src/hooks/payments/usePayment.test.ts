@@ -12,6 +12,13 @@ vi.mock('@/api/payments/paymentApi', () => ({
 }));
 
 const mockInvalidateQueries = vi.fn().mockResolvedValue(undefined);
+const mockRouterPush = vi.fn();
+
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: mockRouterPush,
+  }),
+}));
 
 vi.mock('@tanstack/react-query', async (importOriginal) => {
   const actual = await importOriginal<Record<string, unknown>>();
@@ -84,6 +91,9 @@ describe('usePayment', () => {
     });
 
     await expect(promise).resolves.toEqual({ orderNumber: 'PM2026TEST' });
+    expect(mockRouterPush).toHaveBeenCalledWith(
+      '/order/complete?orderNumber=PM2026TEST'
+    );
   });
 
   it('window.open 반환값이 null → 팝업 차단 에러 reject', async () => {
@@ -129,6 +139,9 @@ describe('usePayment', () => {
     expect(mockInvalidateQueries).toHaveBeenCalledWith({
       queryKey: ['orders'],
     });
+    expect(mockRouterPush).toHaveBeenCalledWith(
+      '/order/complete?orderNumber=PM2026TEST'
+    );
   });
 
   it('success:false 메시지 수신 시 reject', async () => {
@@ -156,6 +169,9 @@ describe('usePayment', () => {
     });
 
     await expect(promise).rejects.toThrow('payment_failed');
+    expect(mockRouterPush).toHaveBeenCalledWith(
+      '/order/fail?reason=payment_failed'
+    );
   });
 
   it('다른 origin 메시지는 무시 → 이후 정상 메시지 처리', async () => {
@@ -212,5 +228,8 @@ describe('usePayment', () => {
     (popup as unknown as { closed: boolean }).closed = true;
 
     await expect(promise).rejects.toThrow('payment_cancelled');
+    expect(mockRouterPush).toHaveBeenCalledWith(
+      '/order/fail?reason=payment_cancelled'
+    );
   }, 3000);
 });
