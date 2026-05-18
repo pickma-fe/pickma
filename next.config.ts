@@ -23,13 +23,7 @@ function getSupabaseImageRemotePatterns(): NonNullable<
 
 const nextConfig: NextConfig = {
   images: {
-    remotePatterns: [
-      ...getSupabaseImageRemotePatterns(),
-      {
-        protocol: 'https',
-        hostname: '**',
-      },
-    ],
+    remotePatterns: getSupabaseImageRemotePatterns(),
   },
   reactCompiler: true,
 };

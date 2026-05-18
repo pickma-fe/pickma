@@ -55,16 +55,6 @@ function getSafeProductImage(imageUrl?: string) {
     return imageUrl;
   }
 
-  try {
-    const url = new URL(imageUrl);
-
-    if (url.protocol === 'https:') {
-      return imageUrl;
-    }
-  } catch {
-    return FALLBACK_RECENT_PRODUCT_IMAGE;
-  }
-
   return FALLBACK_RECENT_PRODUCT_IMAGE;
 }
 
