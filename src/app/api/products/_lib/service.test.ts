@@ -237,6 +237,38 @@ describe('getProducts', () => {
     expect(supabase._chain.ilike).not.toHaveBeenCalled();
   });
 
+  it('확장 경로에서 keyword+discountOption 조합 시 인메모리 keyword 필터를 적용한다', async () => {
+    const rows = [
+      { ...baseRow, id: '00000000-0000-4000-8000-000000000051' },
+      {
+        ...baseRow,
+        id: '00000000-0000-4000-8000-000000000052',
+        menu_items: { ...baseRow.menu_items, name: '소금빵 세트' },
+      },
+      {
+        ...baseRow,
+        id: '00000000-0000-4000-8000-000000000053',
+        menu_items: { ...baseRow.menu_items, name: '크루아상 단품' },
+      },
+    ];
+    const supabase = buildSupabase({
+      data: rows,
+      error: null,
+      count: rows.length,
+    });
+
+    const result = await getProducts(supabase, {
+      page: 1,
+      pageSize: 20,
+      keyword: '크루아상',
+      discountOption: 'over-40',
+    });
+
+    expect(supabase._chain.range).not.toHaveBeenCalled();
+    expect(result.items).toHaveLength(2);
+    expect(result.items.every((i) => i.name.includes('크루아상'))).toBe(true);
+  });
+
   it('region 파라미터가 없으면 stores.region 필터를 적용하지 않는다', async () => {
     const supabase = buildSupabase({ data: [], error: null, count: 0 });
 
