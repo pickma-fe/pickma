@@ -67,7 +67,26 @@ describe('useCreateStore', () => {
 
     expect(fileApi.uploadFile).not.toHaveBeenCalled();
     expect(storeApi.createStore).toHaveBeenCalledWith(
-      expect.objectContaining({ name: '픽마 베이커리', image: undefined })
+      expect.objectContaining({ name: '픽마 베이커리' })
+    );
+  });
+
+  it('image path가 있으면 uploadFile 없이 그대로 전달한다', async () => {
+    vi.mocked(storeApi.createStore).mockResolvedValue(mockStore);
+
+    const { wrapper } = createWrapper();
+    const { result } = renderHook(() => useCreateStore(), { wrapper });
+
+    await act(async () => {
+      await result.current.mutateAsync({
+        ...validInput,
+        image: 'stores/existing.jpg',
+      });
+    });
+
+    expect(fileApi.uploadFile).not.toHaveBeenCalled();
+    expect(storeApi.createStore).toHaveBeenCalledWith(
+      expect.objectContaining({ image: 'stores/existing.jpg' })
     );
   });
 

@@ -18,11 +18,11 @@ export function useCreateStore() {
 
   return useMutation<MyStore, Error, CreateStoreVariables>({
     mutationFn: async ({ imageFile, ...input }) => {
-      let image: string | undefined;
       if (imageFile) {
-        image = await fileApi.uploadFile('store_image', imageFile);
+        const image = await fileApi.uploadFile('store_image', imageFile);
+        return storeApi.createStore(toCreateStoreRequest({ ...input, image }));
       }
-      return storeApi.createStore(toCreateStoreRequest({ ...input, image }));
+      return storeApi.createStore(toCreateStoreRequest(input));
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['stores', 'my'] });
