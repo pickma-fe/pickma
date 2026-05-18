@@ -1,7 +1,7 @@
 'use client';
 
 import { Package, ShoppingBag, PackageX } from 'lucide-react';
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 
 import { useSellerMenus } from '@/hooks/seller/menus/useSellerMenus';
 import { Button } from '@/components/common/Button/Button';
@@ -16,24 +16,20 @@ export function MenuManageContent() {
   const [searchKeyword, setSearchKeyword] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
 
-  const menus = useMemo(() => data?.items ?? [], [data?.items]);
-  const categories = useMemo(() => {
-    const uniqueCategories = [...new Set(menus.map((menu) => menu.category))];
-    return ['전체', ...uniqueCategories];
-  }, [menus]);
+  const menus = data?.items ?? [];
 
-  const filteredMenus = useMemo(() => {
-    return menus.filter((menu) => {
-      const matchCategory =
-        selectedCategory === '전체' || menu.category === selectedCategory;
+  const categories = ['전체', ...new Set(menus.map((menu) => menu.category))];
 
-      const matchSearch =
-        searchKeyword === '' ||
-        menu.name.toLowerCase().includes(searchKeyword.toLowerCase());
+  const filteredMenus = menus.filter((menu) => {
+    const matchCategory =
+      selectedCategory === '전체' || menu.category === selectedCategory;
 
-      return matchCategory && matchSearch;
-    });
-  }, [menus, selectedCategory, searchKeyword]);
+    const matchSearch =
+      searchKeyword === '' ||
+      menu.name.toLowerCase().includes(searchKeyword.toLowerCase());
+
+    return matchCategory && matchSearch;
+  });
 
   const totalCount = menus.length;
   const activeCount = menus.filter((menu) => menu.status === 'active').length;
