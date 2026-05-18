@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 
+import type { OrderStatusParam } from '@/contracts/order';
 import { Section } from '@/components/common/Section/Section';
 import { mockOrders } from '@/mocks/orders';
 
@@ -62,16 +63,17 @@ const STAT_CARDS = [
 ];
 
 export function OrderManageContent() {
+  const [orders, setOrders] = useState(mockOrders);
   const [selectedStatus, setSelectedStatus] = useState('전체');
   const [searchKeyword, setSearchKeyword] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
 
   const getCount = (value: string) => {
-    if (value === '전체') return mockOrders.length;
-    return mockOrders.filter((o) => o.status === value).length;
+    if (value === '전체') return orders.length;
+    return orders.filter((o) => o.status === value).length;
   };
 
-  const filteredOrders = mockOrders.filter((order) => {
+  const filteredOrders = orders.filter((order) => {
     const matchStatus =
       selectedStatus === '전체' || order.status === selectedStatus;
 
@@ -81,6 +83,16 @@ export function OrderManageContent() {
 
     return matchStatus && matchSearch;
   });
+
+  const handleOrderAction = (orderId: string, newStatus: string) => {
+    setOrders((prev) =>
+      prev.map((order) =>
+        order.id === orderId
+          ? { ...order, status: newStatus as OrderStatusParam }
+          : order
+      )
+    );
+  };
 
   const handleStatusChange = (status: string) => {
     setSelectedStatus(status);
@@ -155,6 +167,7 @@ export function OrderManageContent() {
         orders={filteredOrders}
         currentPage={currentPage}
         onPageChange={setCurrentPage}
+        onOrderAction={handleOrderAction}
       />
     </div>
   );
