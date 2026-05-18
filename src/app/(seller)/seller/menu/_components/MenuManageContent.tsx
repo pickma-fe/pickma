@@ -1,22 +1,51 @@
 'use client';
 
 import { Package, ShoppingBag, PackageX } from 'lucide-react';
+import { useState } from 'react';
 
 import { useSellerMenus } from '@/hooks/seller/menus/useSellerMenus';
 import { Button } from '@/components/common/Button/Button';
 import { Section } from '@/components/common/Section/Section';
 
+import { MenuFilter } from './MenuFilter';
 import { MenuTable } from './MenuTable';
 
 export function MenuManageContent() {
   const { data, isLoading, isError } = useSellerMenus();
+  const [selectedCategory, setSelectedCategory] = useState('전체');
+  const [searchKeyword, setSearchKeyword] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
 
   const menus = data?.items ?? [];
+
+  const categories = ['전체', ...new Set(menus.map((menu) => menu.category))];
+
+  const filteredMenus = menus.filter((menu) => {
+    const matchCategory =
+      selectedCategory === '전체' || menu.category === selectedCategory;
+
+    const matchSearch =
+      searchKeyword === '' ||
+      menu.name.toLowerCase().includes(searchKeyword.toLowerCase());
+
+    return matchCategory && matchSearch;
+  });
+
   const totalCount = menus.length;
   const activeCount = menus.filter((menu) => menu.status === 'active').length;
   const inactiveCount = menus.filter(
     (menu) => menu.status === 'inactive'
   ).length;
+
+  const handleCategoryChange = (category: string) => {
+    setSelectedCategory(category);
+    setCurrentPage(1);
+  };
+
+  const handleSearchChange = (keyword: string) => {
+    setSearchKeyword(keyword);
+    setCurrentPage(1);
+  };
 
   const handleAddMenu = () => {
     // TODO: 메뉴 등록 페이지 이동
@@ -48,8 +77,8 @@ export function MenuManageContent() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <Section variant="card" className="bg-white">
+      <Section variant="card" className="bg-white">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
           <div className="flex items-center gap-4">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100">
               <Package className="h-6 w-6 text-gray-600" />
@@ -62,9 +91,7 @@ export function MenuManageContent() {
               </p>
             </div>
           </div>
-        </Section>
 
-        <Section variant="card" className="bg-white">
           <div className="flex items-center gap-4">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
               <ShoppingBag className="h-6 w-6 text-green-600" />
@@ -77,9 +104,7 @@ export function MenuManageContent() {
               </p>
             </div>
           </div>
-        </Section>
 
-        <Section variant="card" className="bg-white">
           <div className="flex items-center gap-4">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
               <PackageX className="h-6 w-6 text-red-600" />
@@ -92,14 +117,25 @@ export function MenuManageContent() {
               </p>
             </div>
           </div>
-        </Section>
-      </div>
+        </div>
+      </Section>
 
-      <div className="flex justify-end">
+      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+        <MenuFilter
+          categories={categories}
+          selectedCategory={selectedCategory}
+          searchKeyword={searchKeyword}
+          onCategoryChange={handleCategoryChange}
+          onSearchChange={handleSearchChange}
+        />
         <Button onClick={handleAddMenu}>+ 메뉴 등록</Button>
       </div>
 
-      <MenuTable menus={menus} />
+      <MenuTable
+        menus={filteredMenus}
+        currentPage={currentPage}
+        onPageChange={setCurrentPage}
+      />
     </div>
   );
 }

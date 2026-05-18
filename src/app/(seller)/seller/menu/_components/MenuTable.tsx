@@ -11,6 +11,8 @@ import type { MenuItemResponse } from '@/mocks/menus';
 
 interface MenuTableProps {
   menus: MenuItemResponse[];
+  currentPage: number;
+  onPageChange: (page: number) => void;
 }
 
 const PAGE_SIZE_OPTIONS = [
@@ -27,8 +29,11 @@ const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString('ko-KR');
 };
 
-export function MenuTable({ menus }: MenuTableProps) {
-  const [currentPage, setCurrentPage] = useState(1);
+export function MenuTable({
+  menus,
+  currentPage,
+  onPageChange,
+}: MenuTableProps) {
   const [pageSize, setPageSize] = useState(10);
 
   const totalPages = Math.ceil(menus.length / pageSize);
@@ -37,7 +42,7 @@ export function MenuTable({ menus }: MenuTableProps) {
 
   const handlePageSizeChange = (value: string) => {
     setPageSize(Number(value));
-    setCurrentPage(1);
+    onPageChange(1);
   };
 
   if (menus.length === 0) {
@@ -163,7 +168,7 @@ export function MenuTable({ menus }: MenuTableProps) {
         <Pagination
           totalPages={totalPages}
           currentPage={currentPage}
-          onPageChange={setCurrentPage}
+          onPageChange={onPageChange}
         />
         <div className="absolute right-4">
           <Dropdown
