@@ -23,7 +23,6 @@ function mapPayment(dto: PaymentResponse): Payment {
     id: dto.id,
     orderId: dto.orderId,
     orderNumber: dto.orderNumber,
-    provider: dto.provider,
     method: dto.method,
     methodDetail: dto.methodDetail,
     amount: dto.amount,

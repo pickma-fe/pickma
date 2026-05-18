@@ -33,15 +33,13 @@ const mockServiceUser = {
 };
 
 const mockPrepareResult: PreparePaymentResponse = {
-  provider: 'toss',
-  flow: 'redirect',
   redirectUrl:
-    '/payment/success?orderNumber=PM2026TEST&provider=toss&amount=5000',
+    '/payment/success?paymentKey=mock_pk_test&orderId=PM2026TEST&amount=5000',
   orderNumber: 'PM2026TEST',
   amount: 5000,
 };
 
-const validBody = { provider: 'toss', orderNumber: 'PM2026TEST' };
+const validBody = { orderNumber: 'PM2026TEST', orderName: '크루아상 2개' };
 
 function makeRequest(body: object) {
   return new NextRequest('http://localhost/api/payments/prepare', {
@@ -70,8 +68,11 @@ describe('POST /api/payments/prepare', () => {
       data: PreparePaymentResponse;
     };
     expect(body.statusCode).toBe(200);
-    expect(body.data.redirectUrl).toContain('/payment/success');
-    expect(body.data.amount).toBe(5000);
+    const redirect = new URL(body.data.redirectUrl, 'http://localhost');
+    expect(redirect.pathname).toBe('/payment/success');
+    expect(redirect.searchParams.get('paymentKey')).toBeTruthy();
+    expect(redirect.searchParams.get('orderId')).toBe(body.data.orderNumber);
+    expect(redirect.searchParams.get('amount')).toBe(String(body.data.amount));
   });
 
   it('expireUserOrders 후 preparePayment 호출', async () => {
@@ -107,18 +108,16 @@ describe('POST /api/payments/prepare', () => {
     expect(body.error.code).toBe('ORDER_NOT_FOUND');
   });
 
-  it('유효하지 않은 provider → VALIDATION_ERROR 400', async () => {
-    const res = await POST(
-      makeRequest({ ...validBody, provider: 'invalid_provider' })
-    );
+  it('orderNumber 누락 → VALIDATION_ERROR 400', async () => {
+    const res = await POST(makeRequest({ orderName: '크루아상 2개' }));
     expect(res.status).toBe(400);
     const body = (await res.json()) as { error: { code: string } };
     expect(body.error.code).toBe('VALIDATION_ERROR');
     expect(requireActiveUser).not.toHaveBeenCalled();
   });
 
-  it('orderNumber 누락 → VALIDATION_ERROR 400', async () => {
-    const res = await POST(makeRequest({ provider: 'toss' }));
+  it('orderName 누락 → VALIDATION_ERROR 400', async () => {
+    const res = await POST(makeRequest({ orderNumber: 'PM2026TEST' }));
     expect(res.status).toBe(400);
     const body = (await res.json()) as { error: { code: string } };
     expect(body.error.code).toBe('VALIDATION_ERROR');

@@ -353,12 +353,10 @@ export interface CreatedOrderPaymentInfo {
 
 ## 9. Payment
 
-- provider: 결제 승인 주체 (`toss | kakao_pay | naver_pay`)
 - method: 사용자가 선택한 결제 수단 (`card | virtual_account | mobile | easy_pay`)
+- provider 정보(Toss paymentKey, orderId 등)는 DB `payments` 테이블에만 저장하며 Domain 타입에는 노출하지 않는다.
 
 ```ts
-export type PaymentProvider = 'toss' | 'kakao_pay' | 'naver_pay';
-
 export type PaymentMethod = 'card' | 'virtual_account' | 'mobile' | 'easy_pay';
 
 export type PaymentStatus =
@@ -372,9 +370,6 @@ export interface Payment {
   id: string;
   orderId: string;
   orderNumber: string;
-  provider: PaymentProvider;
-  providerPaymentKey?: string;
-  providerOrderId?: string;
   method: PaymentMethod;
   methodDetail?: string;
   amount: number;

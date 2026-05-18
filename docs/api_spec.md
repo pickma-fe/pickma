@@ -584,15 +584,17 @@ export interface OrderDetailResponse extends OrderListItemResponse {
 | -          | 결제 Webhook | POST   | `/api/payments/webhook`           | external   | P1       |
 | C-ORDER-04 | 결제 취소    | POST   | `/api/payments/:paymentId/cancel` | user/admin | P1       |
 
-### 6.0 Provider 구조
+### 5.0 결제 구조
 
 - PickMa 내부 주문 식별자는 `orderNumber`(`orders.order_number`)를 사용한다.
-- provider: 결제 승인 주체 (`toss | kakao_pay | naver_pay`)
-- method: 사용자가 선택한 결제 수단 (`card | virtual_account | mobile | easy_pay`)
+- PG: Toss Payments 단일 PG. 어댑터 패턴 없이 서버 내부에서 직접 연결한다.
+- method: 사용자가 선택한 결제 수단 (`card | virtual_account | mobile | easy_pay`). Toss 응답 한국어 값을 서버에서 매핑한다.
+- `PAYMENT_MOCK=true` 환경변수 설정 시 Toss API를 호출하지 않고 mock 결과를 반환한다. Toss 키 없이 로컬 개발이 가능하다.
+- Toss Secret key(`TOSS_SECRET_KEY`)는 서버에서만 사용하며, client bundle에 노출하지 않는다.
+- 결제 페이지: `/payment/toss-checkout` (Toss 결제창 진입), `/payment/success` (confirm 처리), `/payment/fail` (취소/실패 처리).
+- webhook, cancel/refund는 P1 backlog.
 - Toss의 `orderId`, KakaoPay의 `partner_order_id` 등 외부 필드명은 adapter 내부에서만 다룬다.
-- 실제 provider adapter 연결 전까지는 provider 관계없이 실제 provider API 호출 없이 임시 mock adapter로 결제 흐름을 통과시킨다.
-- MVP 실제 provider adapter는 Toss를 우선 구현한다.
-- 실제 provider Secret key는 서버 adapter 내부에서만 사용한다.
+- 향후 KakaoPay/NaverPay 등 provider adapter를 추가할 경우 provider 값은 `toss | kakao_pay | naver_pay` 중 하나로 확장하고, provider Secret key는 서버 adapter 내부에서만 사용한다.
 - KakaoPay/NaverPay adapter, webhook, cancel/refund는 Toss MVP adapter 구현 후 별도 phase 또는 Phase 11 운영 필수성 판단에서 승격 여부를 결정한다.
 
 ### 6.1 `POST /api/payments/prepare`
@@ -601,8 +603,8 @@ Request:
 
 ```ts
 export interface PreparePaymentRequest {
-  provider: PaymentProvider;
   orderNumber: string;
+  orderName: string;
 }
 ```
 
@@ -610,8 +612,6 @@ Response:
 
 ```ts
 export interface PreparePaymentResponse {
-  provider: PaymentProvider;
-  flow: PaymentFlow;
   redirectUrl: string;
   orderNumber: string;
   amount: number;
@@ -623,22 +623,21 @@ Behavior:
 
 - 요청 사용자가 해당 주문의 주문자인지 `orderNumber + userId` 기준으로 확인한다.
 - 주문 상태가 `payment_pending`인지, 만료되지 않았는지 검증한다.
-- provider별 adapter를 통해 결제 시작 정보를 만들고, 공통 `flow: 'redirect'`, `redirectUrl`로 응답한다.
-- `redirectUrl`은 `/payment/success?orderNumber=...&provider=...&amount=...` 형태로 반환한다.
+- `PAYMENT_MOCK=true`: `redirectUrl = /payment/success?paymentKey=mock_pk_...&orderId={orderNumber}&amount={amount}`
+- `PAYMENT_MOCK` 미설정/`false`: `redirectUrl = /payment/toss-checkout?orderNumber=...&amount=...&orderName=...`
 - 클라이언트는 `redirectUrl`을 팝업 창(`window.open`)으로 열어 결제 흐름을 진행한다.
-- Toss adapter 연결 시 `redirectUrl`은 Toss 결제 창 URL로 교체된다. 클라이언트 소비 방식(팝업)은 동일하게 유지한다.
+- 향후 provider adapter로 확장해도 클라이언트 소비 방식(팝업)은 동일하게 유지한다.
 
 ### 6.2 `POST /api/payments/confirm`
 
 Request:
 
 ```ts
-export type ConfirmPaymentRequest = {
-  provider: PaymentProvider;
+export interface ConfirmPaymentRequest {
+  paymentKey: string;
   orderNumber: string;
   amount: number;
-};
-// Toss adapter phase에서 provider별 필드가 필요하면 union member를 추가한다.
+}
 ```
 
 Response: `200 { data: null }`
@@ -649,13 +648,14 @@ Behavior:
 - 주문 상태가 `payment_pending`인지 확인한다.
 - `expiresAt`이 지난 주문은 Postgres RPC/transaction으로 `orders.status = expired` 처리와 `reserved_stock` 복구를 atomic하게 수행한 뒤 `ORDER_EXPIRED`를 반환한다.
 - DB의 주문 금액과 `amount`가 일치하는지 검증한다.
-- provider adapter를 통해 승인 처리 후 DB RPC를 호출해 결제 확정한다.
+- `PAYMENT_MOCK=true`: mock 결과를 바로 사용한다.
+- `PAYMENT_MOCK` 미설정/`false`: Toss confirm API(`POST https://api.tosspayments.com/v1/payments/confirm`)를 서버에서 호출한다. Auth: `Basic base64(TOSS_SECRET_KEY:)`.
+- 승인 후 `confirm_payment` DB RPC로 주문을 atomic하게 확정한다.
 - 결제 확정 시 Postgres RPC/transaction으로 `orders.status = reserved`, `stock` 감소, `reserved_stock` 감소, 매장 운영 번호 발급을 atomic하게 처리한다.
 - `storeOrderNumber`는 `pickupServiceDate(YYYYMMDD)` + `-` + 7자리 매장별/픽업일별 결제완료 sequence로 생성한다. 예: `20260501-0000001`.
 - `pickupNumber`는 같은 sequence에서 `A-01`부터 `Z-99`까지 생성한다. 매장+픽업일 기준 2,574건을 초과하면 주문 확정 실패로 처리한다.
 - 취소/환불/노쇼가 발생해도 이미 발급된 `storeOrderNumber`와 `pickupNumber`는 회수하거나 재사용하지 않는다.
-- provider Secret key는 서버 adapter 내부에서만 사용한다.
-- `payments` DB schema는 provider 결제 기록과 주문 확정에 집중한다. 수수료/정산 필드는 후속 Settlement/Fee Policy phase 범위이다.
+- `payments` DB schema는 결제 기록과 주문 확정에 집중한다. 수수료/정산 필드는 후속 Settlement/Fee Policy phase 범위이다.
 
 ### 6.3 `PaymentResponse`
 
@@ -664,13 +664,10 @@ export interface PaymentResponse {
   id: string;
   orderId: string;
   orderNumber: string;
-  provider: PaymentProvider;
-  providerPaymentKey?: string;
-  providerOrderId?: string;
-  method: PaymentMethodParam;
+  method: PaymentMethod;
   methodDetail?: string;
   amount: number;
-  status: PaymentStatusParam;
+  status: PaymentStatus;
   paidAt?: string;
   refundedAt?: string;
   refundReason?: string;
@@ -681,8 +678,7 @@ export interface PaymentResponse {
 
 - `orderId`: 내부 주문 UUID (`orders.id`)
 - `orderNumber`: PickMa 전역 주문번호 (`orders.order_number`)
-- `providerOrderId`: provider에 전달한 주문 식별자 (`payments.provider_order_id`)
-- `providerPaymentKey`: provider 결제 키 (`payments.provider_payment_key`)
+- provider/providerPaymentKey/providerOrderId는 서버 내부 DB에만 저장되며 API 응답에는 포함하지 않는다.
 
 ### 6.4 결제 만료 처리
 

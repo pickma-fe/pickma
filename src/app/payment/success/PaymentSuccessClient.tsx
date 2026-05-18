@@ -3,25 +3,20 @@
 import { useSearchParams } from 'next/navigation';
 import { useEffect } from 'react';
 
-import type { PaymentProvider } from '@/types/payment';
-import { PAYMENT_PROVIDERS } from '@/types/payment';
 import { paymentApi } from '@/api/payments/paymentApi';
 
 export function PaymentSuccessClient() {
   const searchParams = useSearchParams();
 
   useEffect(() => {
-    const orderNumber = searchParams.get('orderNumber');
-    const rawProvider = searchParams.get('provider');
+    const paymentKey = searchParams.get('paymentKey');
+    const orderId = searchParams.get('orderId');
     const rawAmount = searchParams.get('amount');
     const parsedAmount = rawAmount === null ? Number.NaN : Number(rawAmount);
-    const isValidProvider =
-      rawProvider !== null &&
-      (PAYMENT_PROVIDERS as readonly string[]).includes(rawProvider);
 
     if (
-      !orderNumber ||
-      !isValidProvider ||
+      !paymentKey ||
+      !orderId ||
       !Number.isFinite(parsedAmount) ||
       parsedAmount <= 0
     ) {
@@ -30,13 +25,15 @@ export function PaymentSuccessClient() {
       return;
     }
 
-    const provider = rawProvider as PaymentProvider;
-
     paymentApi
-      .confirmPayment({ provider, orderNumber, amount: parsedAmount })
+      .confirmPayment({
+        paymentKey,
+        orderNumber: orderId,
+        amount: parsedAmount,
+      })
       .then(() => {
         window.opener?.postMessage(
-          { success: true, orderNumber },
+          { success: true, orderNumber: orderId },
           window.location.origin
         );
       })

@@ -7,7 +7,13 @@ import { AppError } from '@/lib/errors/appError';
 import { ERROR_CODE } from '@/lib/errors/errorCodes';
 import { createServiceRoleClient } from '@/lib/supabase/service';
 
-import { getPaymentProviderAdapter } from './providers';
+import {
+  buildTossCheckoutUrl,
+  callTossConfirm,
+  type TossConfirmResult,
+} from './toss';
+
+const PICKUP_NUMBER_DAILY_CAPACITY = 2574;
 
 const BEGIN_RPC_ERROR_MAP: Record<string, () => AppError> = {
   ORDER_NOT_FOUND: () => new AppError(ERROR_CODE.ORDER_NOT_FOUND, 404),
@@ -65,19 +71,20 @@ export async function preparePayment(
     throw new AppError(ERROR_CODE.ORDER_EXPIRED, 409);
   }
 
-  const adapter = getPaymentProviderAdapter(body.provider);
-  const result = await adapter.prepare({
-    orderNumber: body.orderNumber,
-    amount: order.payment_amount,
-    expiresAt: order.expires_at ?? new Date().toISOString(),
-    provider: body.provider,
-    successUrl,
-  });
+  let redirectUrl: string;
+  if (process.env.PAYMENT_MOCK === 'true') {
+    const paymentKey = `mock_pk_${Date.now()}_${body.orderNumber}`;
+    redirectUrl = `${successUrl}?paymentKey=${paymentKey}&orderId=${body.orderNumber}&amount=${order.payment_amount}`;
+  } else {
+    redirectUrl = buildTossCheckoutUrl({
+      orderNumber: body.orderNumber,
+      amount: order.payment_amount,
+      orderName: body.orderName,
+    });
+  }
 
   return {
-    provider: body.provider,
-    flow: 'redirect',
-    redirectUrl: result.redirectUrl,
+    redirectUrl,
     orderNumber: body.orderNumber,
     amount: order.payment_amount,
     expiresAt: order.expires_at ?? undefined,
@@ -92,7 +99,9 @@ export async function confirmPayment(
 
   const { data: order, error } = await supabase
     .from('orders')
-    .select('id, payment_amount, status, expires_at')
+    .select(
+      'id, payment_amount, status, expires_at, store_id, pickup_service_date'
+    )
     .eq('order_number', body.orderNumber)
     .eq('user_id', userId)
     .maybeSingle();
@@ -116,31 +125,55 @@ export async function confirmPayment(
     throw new AppError(ERROR_CODE.PAYMENT_AMOUNT_MISMATCH, 400);
   }
 
+  // Fast-fail guard: begin_payment_processing 호출을 막기 위한 사전 체크.
+  // TOCTOU 경쟁이 존재하므로 최종 정합성은 confirm_payment RPC 내부에서 보장한다.
+  const { data: seqRow, error: seqError } = await supabase
+    .from('store_order_sequences')
+    .select('last_sequence')
+    .eq('store_id', order.store_id)
+    .eq('pickup_service_date', order.pickup_service_date)
+    .maybeSingle();
+  if (seqError) throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
+  if (seqRow && seqRow.last_sequence >= PICKUP_NUMBER_DAILY_CAPACITY) {
+    throw new AppError(ERROR_CODE.PICKUP_NUMBER_EXHAUSTED, 409);
+  }
+
   const { error: beginError } = await supabase.rpc('begin_payment_processing', {
     p_order_id: order.id,
   });
   if (beginError) throw mapBeginRpcError(beginError.message);
 
-  const adapter = getPaymentProviderAdapter(body.provider);
-  let confirmed: Awaited<ReturnType<typeof adapter.confirm>>;
+  let confirmed: TossConfirmResult;
+
   try {
-    confirmed = await adapter.confirm({
-      orderNumber: body.orderNumber,
-      amount: body.amount,
-    });
-  } catch {
+    if (process.env.PAYMENT_MOCK === 'true') {
+      confirmed = {
+        providerPaymentKey: body.paymentKey,
+        providerOrderId: body.orderNumber,
+        method: 'card',
+        methodDetail: null,
+      };
+    } else {
+      confirmed = await callTossConfirm({
+        paymentKey: body.paymentKey,
+        orderNumber: body.orderNumber,
+        amount: order.payment_amount,
+      });
+    }
+  } catch (e) {
     await supabase.rpc('revert_payment_processing', { p_order_id: order.id });
+    if (e instanceof AppError) throw e;
     throw new AppError(ERROR_CODE.PAYMENT_CONFIRM_FAILED, 500);
   }
 
   const { error: rpcError } = await supabase.rpc('confirm_payment', {
     p_order_number: body.orderNumber,
-    p_provider: body.provider,
+    p_provider: 'toss',
     p_provider_payment_key: confirmed.providerPaymentKey,
     p_provider_order_id: confirmed.providerOrderId,
     p_method: confirmed.method,
     p_method_detail: confirmed.methodDetail ?? '',
-    p_amount: body.amount,
+    p_amount: order.payment_amount,
   });
 
   if (rpcError) throw mapConfirmRpcError(rpcError.message);

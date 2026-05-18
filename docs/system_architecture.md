@@ -2,15 +2,15 @@
 
 ## 1. 기술 스택
 
-| 계층            | 기술                                        | 비고                                     |
-| --------------- | ------------------------------------------- | ---------------------------------------- |
-| Frontend        | Next.js 16 App Router, React 19, TypeScript | SSR/CSR 혼합                             |
-| Styling         | Tailwind CSS, Headless UI                   | UI 구현                                  |
-| Client State    | Zustand                                     | UI/클라이언트 상태                       |
-| Server State    | TanStack Query                              | API 데이터 캐싱, refetch, mutation       |
-| Auth/DB/Storage | Supabase, `@supabase/ssr`                   | Auth, PostgreSQL, Storage                |
-| Payment         | Provider adapter 구조 (mock + Toss MVP)     | prepare/confirm 분리, provider별 adapter |
-| Deployment      | Vercel                                      | Next.js 배포                             |
+| 계층            | 기술                                        | 비고                                                         |
+| --------------- | ------------------------------------------- | ------------------------------------------------------------ |
+| Frontend        | Next.js 16 App Router, React 19, TypeScript | SSR/CSR 혼합                                                 |
+| Styling         | Tailwind CSS, Headless UI                   | UI 구현                                                      |
+| Client State    | Zustand                                     | UI/클라이언트 상태                                           |
+| Server State    | TanStack Query                              | API 데이터 캐싱, refetch, mutation                           |
+| Auth/DB/Storage | Supabase, `@supabase/ssr`                   | Auth, PostgreSQL, Storage                                    |
+| Payment         | Toss Payments 직접 연결                     | prepare/confirm 분리, PAYMENT_MOCK 환경변수로 mock/real 분기 |
+| Deployment      | Vercel                                      | Next.js 배포                                                 |
 
 ---
 
@@ -270,35 +270,58 @@ TanStack Query Provider는 `src/app/providers.tsx`에 둔다. `providers.tsx`는
 ```mermaid
 sequenceDiagram
     participant U as 사용자
-    participant C as 부모 창 (Client)
-    participant W as 팝업 창 (/payment/success)
+    participant C as 부모 창 (usePayment hook)
+    participant P as 팝업 창
     participant A as PickMa API
+    participant T as Toss API
     participant D as Supabase DB
 
-    U->>C: 상품/수량/픽업시간 선택
-    C->>A: POST /api/orders
-    A->>D: 주문 생성, 재고 임시 예약
-    A->>C: orderNumber, orderName, amount, expiresAt 반환
-    C->>A: POST /api/payments/prepare (provider, orderNumber)
-    A->>C: flow: 'redirect', redirectUrl: /payment/success?... 반환
-    C->>W: window.open(redirectUrl) 팝업 열기
-    W->>A: POST /api/payments/confirm (provider, orderNumber, amount)
+    U->>C: 결제 버튼 클릭
+    C->>A: POST /api/payments/prepare { orderNumber, orderName }
+    A->>D: 주문 조회 + 만료 검증
+    note over A: PAYMENT_MOCK=true: redirectUrl=/payment/success?paymentKey=mock_pk_...
+    note over A: PAYMENT_MOCK 미설정: redirectUrl=/payment/toss-checkout?...
+    A->>C: { redirectUrl, orderNumber, amount }
+    C->>P: window.open(redirectUrl) 팝업 열기
+
+    alt Toss 경로
+        P->>P: /payment/toss-checkout SDK requestPayment()
+        P->>T: Toss 결제창 진행
+        T->>P: /payment/success?paymentKey=...&orderId=...&amount=...
+    else Mock 경로
+        P->>P: /payment/success?paymentKey=mock_pk_...&orderId=...
+    end
+
+    P->>A: POST /api/payments/confirm { paymentKey, orderNumber, amount }
+    note over A: PAYMENT_MOCK=true: mock 결과 사용
+    note over A: PAYMENT_MOCK 미설정: Toss confirm API 호출
+    A->>T: POST /v1/payments/confirm (PAYMENT_MOCK=false 시)
+    T->>A: 결제 결과
     A->>D: confirm_payment RPC (payment 저장, order 확정, 재고 확정)
-    A->>W: 200 OK
-    W->>C: window.opener.postMessage({ success: true, orderNumber })
-    W->>W: window.close()
-    C->>C: 주문 상세 페이지로 이동
+    A->>P: 200 OK
+    P->>C: postMessage({ success: true, orderNumber })
+    P->>P: window.close()
+    C->>C: orders query invalidate → 주문 상세 이동
+
+    alt 결제 취소/실패
+        P->>P: /payment/fail
+        P->>C: postMessage({ success: false })
+        P->>P: window.close()
+        C->>C: 에러 처리
+    end
 ```
 
 - `POST /api/orders`: 주문 생성과 재고 임시 예약. `orderNumber`(PickMa 내부 식별자)를 반환한다.
-- `POST /api/payments/prepare`: provider adapter를 통해 결제 시작 정보를 만들고, `flow: 'redirect'`, `redirectUrl`을 반환한다. mock provider는 `/payment/success?orderNumber=...&provider=...&amount=...`를 반환한다. 실제 provider는 외부 결제 창 URL을 반환한다.
-- 클라이언트는 `redirectUrl`을 팝업 창(`window.open`)으로 열어 결제 흐름을 진행한다.
-- `/payment/success` 페이지: URL 파라미터(`orderNumber`, `provider`, `amount`)를 받아 `POST /api/payments/confirm`을 호출한다. 성공 시 `window.opener.postMessage({ success: true, orderNumber }, window.location.origin)`을 보내고 팝업을 닫는다. 실패 시 `window.opener.postMessage({ success: false }, window.location.origin)`을 보내고 팝업을 닫는다. `targetOrigin`은 항상 명시하며 와일드카드(`'*'`)는 정보 유출 위험으로 사용하지 않는다.
-- 부모 창: `message` 이벤트를 수신할 때 `event.origin === window.location.origin` 으로 출처를 엄격하게 검증(`===`)한 뒤, 메시지 구조(`{ success, orderNumber }`)를 확인하고, `success: true`이면 주문 상세 페이지로 이동한다 (프론트 결제 연동 phase에서 구현).
-- `POST /api/payments/confirm`: provider adapter를 통해 승인 후, `confirm_payment` DB RPC로 주문을 atomic하게 확정한다.
-- provider: 결제 승인 주체 (`toss | kakao_pay | naver_pay`). 실 provider adapter 연결 전까지는 provider 관계없이 mock adapter가 동작한다. MVP 실제 provider adapter는 Toss를 우선 구현한다.
-- `orderNumber`는 PickMa 내부 주문 식별자이며, provider별 외부 주문 필드명은 adapter 내부에서만 다룬다.
-- `POST /api/payments/webhook`: 결제 상태 동기화용 endpoint. Toss adapter 구현 시 운영 필수성을 재판정하며, 기본 우선순위는 P1이다.
+- `usePayment` hook: `openPayment({ orderNumber, orderName })` 한 번 호출로 prepare → 팝업 열기 → postMessage 수신까지 처리한다.
+- `POST /api/payments/prepare`: `PAYMENT_MOCK=true`이면 `/payment/success?paymentKey=mock_pk_...&orderId={orderNumber}&amount={amount}`를 반환한다. 그 외에는 `/payment/toss-checkout?orderNumber=...&amount=...&orderName=...`를 반환한다.
+- `/payment/toss-checkout`: Toss SDK `requestPayment()`를 호출한다. 성공 시 `/payment/success`, 실패/취소 시 `/payment/fail`로 리다이렉트된다.
+- `/payment/success`: URL 파라미터(`paymentKey`, `orderId`, `amount`)를 받아 `POST /api/payments/confirm`을 호출한다. 성공/실패 모두 `postMessage` 후 팝업을 닫는다.
+- `/payment/fail`: `postMessage({ success: false })` 후 팝업을 닫는다.
+- `postMessage` `targetOrigin`은 항상 `window.location.origin`을 명시하며 와일드카드(`'*'`)는 사용하지 않는다.
+- 부모 창: `message` 이벤트를 수신할 때 `event.origin === window.location.origin` 검증 및 `event.source === popup` 검증을 모두 수행한다.
+- `POST /api/payments/confirm`: Toss confirm API(`POST https://api.tosspayments.com/v1/payments/confirm`)를 서버에서 호출 후 `confirm_payment` DB RPC로 주문을 atomic하게 확정한다.
+- 향후 provider adapter로 확장할 경우 결제 승인 주체는 `toss | kakao_pay | naver_pay` 중 하나로 표현하고, provider별 외부 주문 필드명은 adapter 내부에서만 다룬다.
+- `POST /api/payments/webhook`: 결제 상태 동기화용 endpoint. Toss adapter 구현 시 운영 필수성을 재판정하며, 기본 우선순위는 P1(backlog)이다.
 - 주문 생성, 결제 확정, 예약 해제에 따른 재고 변경은 Postgres RPC/transaction으로 atomic하게 처리한다.
 - `payment_pending` 주문은 `expiresAt` 이후 `expired`로 전환하고 `reserved_stock`을 복구한다.
 - 초기 구현은 API 진입 시 lazy cleanup과 결제 confirm 시점 검사를 사용하고, scheduled job/cron은 MVP 이후 보강한다.
@@ -431,28 +454,29 @@ src/
 
 ## 10. 환경 변수
 
-| 변수명                                 | 용도                          | 공개 여부 |
-| -------------------------------------- | ----------------------------- | --------- |
-| `NEXT_PUBLIC_SUPABASE_URL`             | Supabase URL                  | Public    |
-| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Supabase Publishable key      | Public    |
-| `SUPABASE_SECRET_KEY`                  | 관리자/서버 전용 Supabase key | Secret    |
-| `NEXT_PUBLIC_TOSS_CLIENT_KEY`          | Toss 클라이언트 키            | Public    |
-| `TOSS_SECRET_KEY`                      | Toss Secret key               | Secret    |
-| `NEXT_PUBLIC_APP_URL`                  | 앱 URL                        | Public    |
-| `API_MOCK_ENABLED`                     | Route Handler mock 응답 여부  | Secret    |
+| 변수명                                 | 용도                                                          | 공개 여부 |
+| -------------------------------------- | ------------------------------------------------------------- | --------- |
+| `NEXT_PUBLIC_SUPABASE_URL`             | Supabase URL                                                  | Public    |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Supabase Publishable key                                      | Public    |
+| `SUPABASE_SECRET_KEY`                  | 관리자/서버 전용 Supabase key                                 | Secret    |
+| `NEXT_PUBLIC_TOSS_CLIENT_KEY`          | Toss 클라이언트 키                                            | Public    |
+| `TOSS_SECRET_KEY`                      | Toss Secret key                                               | Secret    |
+| `NEXT_PUBLIC_APP_URL`                  | 앱 URL                                                        | Public    |
+| `API_MOCK_ENABLED`                     | Route Handler mock 응답 여부                                  | Secret    |
+| `PAYMENT_MOCK`                         | `true`이면 Toss API 미호출, mock 결제 결과 반환. 로컬 개발용. | Secret    |
 
 ---
 
 ## 11. 보안 고려사항
 
-| 항목        | 대응 방안                                                                 |
-| ----------- | ------------------------------------------------------------------------- |
-| 인증        | Supabase Auth, cookie session, proxy refresh                              |
-| 페이지 접근 | proxy에서 보호 라우트 1차 제어                                            |
-| API 권한    | Route Handler/helper/service에서 최종 검증                                |
-| 데이터 접근 | 클라이언트 DB 직접 접근 금지, RLS 병행                                    |
-| 결제        | provider Secret key는 서버 adapter 내부에서만 사용, confirm API 서버 호출 |
-| 환경 변수   | 민감 정보는 서버 전용 변수로 관리                                         |
+| 항목        | 대응 방안                                                                        |
+| ----------- | -------------------------------------------------------------------------------- |
+| 인증        | Supabase Auth, cookie session, proxy refresh                                     |
+| 페이지 접근 | proxy에서 보호 라우트 1차 제어                                                   |
+| API 권한    | Route Handler/helper/service에서 최종 검증                                       |
+| 데이터 접근 | 클라이언트 DB 직접 접근 금지, RLS 병행                                           |
+| 결제        | `TOSS_SECRET_KEY`는 서버에서만 사용, confirm API 서버 호출, client bundle 미노출 |
+| 환경 변수   | 민감 정보는 서버 전용 변수로 관리                                                |
 
 ---
 
