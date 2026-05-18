@@ -131,6 +131,7 @@ export function MenuForm({ initialData, isEdit = false }: MenuFormProps) {
       allergyInfo: formData.allergyInfo,
       tags: formData.tags,
       storeId: 'store-1',
+      status: 'active' as const,
     };
 
     if (isEdit && initialData) {

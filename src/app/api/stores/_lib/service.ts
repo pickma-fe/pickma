@@ -1,6 +1,8 @@
 import type { StoreResponse, CreateStoreRequest } from '@/contracts/store';
+import type { UserResponse } from '@/contracts/user';
 import { AppError } from '@/lib/errors/appError';
 import { ERROR_CODE } from '@/lib/errors/errorCodes';
+import { createServerClient } from '@/lib/supabase/server';
 import { createServiceRoleClient } from '@/lib/supabase/service';
 
 import { mapStoreRow } from './mapper';
@@ -34,6 +36,7 @@ export async function createStore(
       image: body.image ?? null,
       open_time: body.openTime ? body.openTime.slice(0, 8) : null,
       close_time: body.closeTime ? body.closeTime.slice(0, 8) : null,
+      status: 'approved' as const,
     })
     .select('*')
     .single();
@@ -46,5 +49,24 @@ export async function createStore(
   }
   if (!row) throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
 
-  return mapStoreRow(row);
+  return mapStoreRow(row, true);
+}
+
+export async function getMyStore(
+  userId: string,
+  userRole: UserResponse['role']
+): Promise<StoreResponse> {
+  const supabase = await createServerClient();
+
+  const { data, error } = await supabase
+    .from('stores')
+    .select('*')
+    .eq('user_id', userId)
+    .maybeSingle();
+
+  if (error) throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
+  if (data === null) throw new AppError(ERROR_CODE.STORE_NOT_FOUND, 404);
+
+  const canSell = userRole === 'seller' && data.status === 'approved';
+  return mapStoreRow(data, canSell);
 }

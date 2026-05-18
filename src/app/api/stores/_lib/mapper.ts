@@ -3,7 +3,7 @@ import type { Database } from '@/lib/supabase/database';
 
 type StoresRow = Database['public']['Tables']['stores']['Row'];
 
-export function mapStoreRow(row: StoresRow): StoreResponse {
+export function mapStoreRow(row: StoresRow, canSell: boolean): StoreResponse {
   return {
     id: row.id,
     userId: row.user_id,
@@ -18,8 +18,7 @@ export function mapStoreRow(row: StoresRow): StoreResponse {
     openTime: row.open_time ?? undefined,
     closeTime: row.close_time ?? undefined,
     status: row.status,
-    rejectReason: row.reject_reason ?? undefined,
-    canSell: false,
+    canSell,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };

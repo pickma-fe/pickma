@@ -12,6 +12,31 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: '14.5';
   };
+  graphql_public: {
+    Tables: {
+      [_ in never]: never;
+    };
+    Views: {
+      [_ in never]: never;
+    };
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json;
+          operationName?: string;
+          query?: string;
+          variables?: Json;
+        };
+        Returns: Json;
+      };
+    };
+    Enums: {
+      [_ in never]: never;
+    };
+    CompositeTypes: {
+      [_ in never]: never;
+    };
+  };
   public: {
     Tables: {
       categories: {
@@ -227,10 +252,13 @@ export type Database = {
           created_at: string;
           id: string;
           method: Database['public']['Enums']['payment_method'];
+          method_detail: string | null;
           order_id: string;
           paid_at: string | null;
-          payment_key: string | null;
           pg_response: Json | null;
+          provider: Database['public']['Enums']['payment_provider'];
+          provider_order_id: string | null;
+          provider_payment_key: string | null;
           refund_reason: string | null;
           refunded_at: string | null;
           status: Database['public']['Enums']['payment_status'];
@@ -241,10 +269,13 @@ export type Database = {
           created_at?: string;
           id?: string;
           method: Database['public']['Enums']['payment_method'];
+          method_detail?: string | null;
           order_id: string;
           paid_at?: string | null;
-          payment_key?: string | null;
           pg_response?: Json | null;
+          provider: Database['public']['Enums']['payment_provider'];
+          provider_order_id?: string | null;
+          provider_payment_key?: string | null;
           refund_reason?: string | null;
           refunded_at?: string | null;
           status: Database['public']['Enums']['payment_status'];
@@ -255,10 +286,13 @@ export type Database = {
           created_at?: string;
           id?: string;
           method?: Database['public']['Enums']['payment_method'];
+          method_detail?: string | null;
           order_id?: string;
           paid_at?: string | null;
-          payment_key?: string | null;
           pg_response?: Json | null;
+          provider?: Database['public']['Enums']['payment_provider'];
+          provider_order_id?: string | null;
+          provider_payment_key?: string | null;
           refund_reason?: string | null;
           refunded_at?: string | null;
           status?: Database['public']['Enums']['payment_status'];
@@ -344,6 +378,103 @@ export type Database = {
           },
         ];
       };
+      seller_application_documents: {
+        Row: {
+          application_id: string;
+          content_type: string;
+          created_at: string;
+          id: string;
+          original_file_name: string;
+          size: number;
+          storage_path: string;
+          type: Database['public']['Enums']['seller_application_document_type'];
+        };
+        Insert: {
+          application_id: string;
+          content_type: string;
+          created_at?: string;
+          id?: string;
+          original_file_name: string;
+          size: number;
+          storage_path: string;
+          type: Database['public']['Enums']['seller_application_document_type'];
+        };
+        Update: {
+          application_id?: string;
+          content_type?: string;
+          created_at?: string;
+          id?: string;
+          original_file_name?: string;
+          size?: number;
+          storage_path?: string;
+          type?: Database['public']['Enums']['seller_application_document_type'];
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'seller_application_documents_application_id_fkey';
+            columns: ['application_id'];
+            isOneToOne: false;
+            referencedRelation: 'seller_applications';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      seller_applications: {
+        Row: {
+          business_address: string;
+          business_category: string;
+          business_number: string;
+          business_type: string;
+          company_name: string;
+          created_at: string;
+          id: string;
+          reject_reason: string | null;
+          representative_name: string;
+          reviewed_at: string | null;
+          status: Database['public']['Enums']['seller_application_status'];
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          business_address: string;
+          business_category: string;
+          business_number: string;
+          business_type: string;
+          company_name: string;
+          created_at?: string;
+          id?: string;
+          reject_reason?: string | null;
+          representative_name: string;
+          reviewed_at?: string | null;
+          status?: Database['public']['Enums']['seller_application_status'];
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          business_address?: string;
+          business_category?: string;
+          business_number?: string;
+          business_type?: string;
+          company_name?: string;
+          created_at?: string;
+          id?: string;
+          reject_reason?: string | null;
+          representative_name?: string;
+          reviewed_at?: string | null;
+          status?: Database['public']['Enums']['seller_application_status'];
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'seller_applications_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       social_accounts: {
         Row: {
           created_at: string;
@@ -422,7 +553,6 @@ export type Database = {
           open_time: string | null;
           phone: string;
           region: string;
-          reject_reason: string | null;
           status: Database['public']['Enums']['store_status'];
           updated_at: string;
           user_id: string;
@@ -440,7 +570,6 @@ export type Database = {
           open_time?: string | null;
           phone: string;
           region: string;
-          reject_reason?: string | null;
           status?: Database['public']['Enums']['store_status'];
           updated_at?: string;
           user_id: string;
@@ -458,7 +587,6 @@ export type Database = {
           open_time?: string | null;
           phone?: string;
           region?: string;
-          reject_reason?: string | null;
           status?: Database['public']['Enums']['store_status'];
           updated_at?: string;
           user_id?: string;
@@ -550,6 +678,16 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      approve_seller_application: {
+        Args: { application_id: string };
+        Returns: undefined;
+      };
+      begin_payment_processing: {
+        Args: { p_order_id: string };
+        Returns: {
+          success: boolean;
+        }[];
+      };
       cancel_order: {
         Args: { p_order_id: string; p_reason: string };
         Returns: {
@@ -567,8 +705,11 @@ export type Database = {
         Args: {
           p_amount: number;
           p_method: Database['public']['Enums']['payment_method'];
+          p_method_detail: string;
           p_order_number: string;
-          p_payment_key: string;
+          p_provider: Database['public']['Enums']['payment_provider'];
+          p_provider_order_id: string;
+          p_provider_payment_key: string;
         };
         Returns: {
           success: boolean;
@@ -587,6 +728,19 @@ export type Database = {
           payment_amount: number;
         }[];
       };
+      create_seller_application: {
+        Args: {
+          p_business_address: string;
+          p_business_category: string;
+          p_business_number: string;
+          p_business_type: string;
+          p_company_name: string;
+          p_documents: Json;
+          p_representative_name: string;
+          p_user_id: string;
+        };
+        Returns: string;
+      };
       expire_order: {
         Args: { p_order_id: string };
         Returns: {
@@ -594,11 +748,18 @@ export type Database = {
         }[];
       };
       generate_order_number: { Args: never; Returns: string };
+      revert_payment_processing: {
+        Args: { p_order_id: string };
+        Returns: {
+          success: boolean;
+        }[];
+      };
       sequence_to_pickup_number: { Args: { seq: number }; Returns: string };
     };
     Enums: {
       order_status:
         | 'payment_pending'
+        | 'processing'
         | 'reserved'
         | 'ready'
         | 'completed'
@@ -606,10 +767,17 @@ export type Database = {
         | 'no_show'
         | 'expired';
       payment_method: 'card' | 'virtual_account' | 'mobile' | 'easy_pay';
+      payment_provider: 'toss' | 'kakao_pay' | 'naver_pay';
       payment_status: 'pending' | 'paid' | 'failed' | 'cancelled' | 'refunded';
       product_status: 'active' | 'closed';
+      seller_application_document_type:
+        | 'business_license'
+        | 'id_card'
+        | 'bankbook'
+        | 'business_report';
+      seller_application_status: 'pending' | 'approved' | 'rejected';
       social_provider: 'google' | 'kakao';
-      store_status: 'pending' | 'approved' | 'rejected' | 'inactive';
+      store_status: 'approved' | 'inactive';
       user_role: 'customer' | 'seller' | 'admin';
       user_status: 'active' | 'suspended' | 'deleted';
     };
@@ -740,10 +908,14 @@ export type CompositeTypes<
     : never;
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
       order_status: [
         'payment_pending',
+        'processing',
         'reserved',
         'ready',
         'completed',
@@ -752,10 +924,18 @@ export const Constants = {
         'expired',
       ],
       payment_method: ['card', 'virtual_account', 'mobile', 'easy_pay'],
+      payment_provider: ['toss', 'kakao_pay', 'naver_pay'],
       payment_status: ['pending', 'paid', 'failed', 'cancelled', 'refunded'],
       product_status: ['active', 'closed'],
+      seller_application_document_type: [
+        'business_license',
+        'id_card',
+        'bankbook',
+        'business_report',
+      ],
+      seller_application_status: ['pending', 'approved', 'rejected'],
       social_provider: ['google', 'kakao'],
-      store_status: ['pending', 'approved', 'rejected', 'inactive'],
+      store_status: ['approved', 'inactive'],
       user_role: ['customer', 'seller', 'admin'],
       user_status: ['active', 'suspended', 'deleted'],
     },

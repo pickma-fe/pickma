@@ -1,27 +1,17 @@
 'use client';
 
-import type { ProductListItemResponse } from '@/contracts/product';
 import {
+  ALL_CATEGORY_ID,
   normalizeDiscountOptionId,
   normalizeSortOptionId,
   type ProductDiscountOptionId,
-  type ProductFilterCategory,
   type ProductSortOptionId,
 } from '@/lib/consumerProductFilters';
 import { isProductAvailable } from '@/lib/product';
-
-export const ALL_CATEGORY_ID = 'category-all';
-
-const categoryIconMap: Record<string, string> = {
-  category_bakery: '🥖',
-  category_salad: '🥗',
-  category_lunchbox: '🍱',
-  category_cafe: '☕',
-  category_snack: '🍚',
-};
+import type { Product } from '@/types';
 
 type UseConsumerProductsParams = {
-  products: ProductListItemResponse[];
+  products: Product[];
   selectedCategoryId: string;
   selectedSortOption: string;
   selectedDiscountOption: string;
@@ -93,36 +83,8 @@ export function useConsumerProducts({
   };
 }
 
-export function getConsumerProductCategories(
-  products: ProductListItemResponse[]
-): ProductFilterCategory[] {
-  return [
-    { id: ALL_CATEGORY_ID, name: '전체', icon: '🔲' },
-    ...Array.from(
-      new Map(
-        products.flatMap((product) => {
-          if (!product.categoryId || !product.categoryName) {
-            return [];
-          }
-
-          return [
-            [
-              product.categoryId,
-              {
-                id: product.categoryId,
-                name: product.categoryName,
-                icon: categoryIconMap[product.categoryId] ?? '🍽️',
-              },
-            ] as const,
-          ];
-        })
-      ).values()
-    ),
-  ];
-}
-
 function matchesDiscountOption(
-  product: ProductListItemResponse,
+  product: Product,
   discountOption: ProductDiscountOptionId
 ) {
   if (discountOption === 'all') {
@@ -149,12 +111,12 @@ function matchesDiscountOption(
 }
 
 function compareProducts(
-  a: ProductListItemResponse,
-  b: ProductListItemResponse,
+  a: Product,
+  b: Product,
   sortOption: ProductSortOptionId
 ) {
   if (sortOption === 'deadline') {
-    return new Date(a.endAt).getTime() - new Date(b.endAt).getTime();
+    return a.endAt.getTime() - b.endAt.getTime();
   }
 
   if (sortOption === 'discount-rate') {

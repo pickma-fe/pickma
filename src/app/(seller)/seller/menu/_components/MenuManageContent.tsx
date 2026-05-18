@@ -2,7 +2,7 @@
 
 import { Package, ShoppingBag, PackageX } from 'lucide-react';
 import Link from 'next/link';
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 
 import { useMenuStore } from '@/stores/menuStore';
 import { Button } from '@/components/common/Button/Button';
@@ -15,28 +15,36 @@ export function MenuManageContent() {
   const { menus } = useMenuStore();
   const [selectedCategory, setSelectedCategory] = useState('전체');
   const [searchKeyword, setSearchKeyword] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
 
-  const categories = useMemo(() => {
-    const uniqueCategories = [...new Set(menus.map((menu) => menu.category))];
-    return ['전체', ...uniqueCategories];
-  }, [menus]);
+  const categories = ['전체', ...new Set(menus.map((menu) => menu.category))];
 
-  const filteredMenus = useMemo(() => {
-    return menus.filter((menu) => {
-      const matchCategory =
-        selectedCategory === '전체' || menu.category === selectedCategory;
+  const filteredMenus = menus.filter((menu) => {
+    const matchCategory =
+      selectedCategory === '전체' || menu.category === selectedCategory;
 
-      const matchSearch =
-        searchKeyword === '' ||
-        menu.name.toLowerCase().includes(searchKeyword.toLowerCase());
+    const matchSearch =
+      searchKeyword === '' ||
+      menu.name.toLowerCase().includes(searchKeyword.toLowerCase());
 
-      return matchCategory && matchSearch;
-    });
-  }, [menus, selectedCategory, searchKeyword]);
+    return matchCategory && matchSearch;
+  });
 
   const totalCount = menus.length;
-  const activeCount = totalCount;
-  const inactiveCount = 0;
+  const activeCount = menus.filter((menu) => menu.status === 'active').length;
+  const inactiveCount = menus.filter(
+    (menu) => menu.status === 'inactive'
+  ).length;
+
+  const handleCategoryChange = (category: string) => {
+    setSelectedCategory(category);
+    setCurrentPage(1);
+  };
+
+  const handleSearchChange = (keyword: string) => {
+    setSearchKeyword(keyword);
+    setCurrentPage(1);
+  };
 
   return (
     <div className="flex flex-col gap-6">
@@ -97,15 +105,19 @@ export function MenuManageContent() {
           categories={categories}
           selectedCategory={selectedCategory}
           searchKeyword={searchKeyword}
-          onCategoryChange={setSelectedCategory}
-          onSearchChange={setSearchKeyword}
+          onCategoryChange={handleCategoryChange}
+          onSearchChange={handleSearchChange}
         />
         <Link href="/seller/menu/new">
           <Button>+ 메뉴 등록</Button>
         </Link>
       </div>
 
-      <MenuTable menus={filteredMenus} />
+      <MenuTable
+        menus={filteredMenus}
+        currentPage={currentPage}
+        onPageChange={setCurrentPage}
+      />
     </div>
   );
 }

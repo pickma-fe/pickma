@@ -2,6 +2,7 @@ import type { Payment } from './payment';
 
 export type OrderStatus =
   | 'paymentPending'
+  | 'processing'
   | 'reserved'
   | 'ready'
   | 'completed'
