@@ -1,6 +1,6 @@
 'use client';
 
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect } from 'react';
 
 import { ApiError } from '@/api/apiClient';
@@ -19,6 +19,10 @@ export default function AdminLayout({
   const { data: user, isLoading, isError, error, refetch } = useMe();
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const currentPath = searchParams.toString()
+    ? `${pathname}?${searchParams.toString()}`
+    : pathname;
   const { mutateAsync: signOut } = useSignOut();
 
   async function handleSignOut() {
@@ -31,7 +35,7 @@ export default function AdminLayout({
 
     if (isError) {
       if (error instanceof ApiError && error.statusCode === 401) {
-        router.push(`/?auth=required&next=${encodeURIComponent(pathname)}`);
+        router.push(`/?auth=required&next=${encodeURIComponent(currentPath)}`);
       } else if (error instanceof ApiError && error.statusCode === 403) {
         router.push('/');
       }
@@ -41,7 +45,7 @@ export default function AdminLayout({
     if (user?.role !== 'admin') {
       router.push('/');
     }
-  }, [isLoading, isError, error, user, router, pathname]);
+  }, [isLoading, isError, error, user, router, currentPath]);
 
   if (isLoading) {
     return (
