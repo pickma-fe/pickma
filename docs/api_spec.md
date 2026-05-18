@@ -104,13 +104,13 @@ export interface PaginatedResult<T> {
 
 API contract의 status 값은 JSON-safe string이며, DB 저장 값과 Domain Type 값이 1:1 대응한다고 가정하지 않는다.
 
-| 대상    | API/DB 기준 값                                                                         | Domain 기준 값/파생값                                                                |
-| ------- | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
-| User    | `active`, `suspended`, `deleted`                                                       | 동일                                                                                 |
-| Store   | `approved`, `inactive`                                                                 | 신규 가게는 `approved`로 생성. `canSell = role seller && approved`                   |
-| Product | `active`, `closed`                                                                     | `status: active \| closed`, `isSoldOut`, `isExpired`, `displayStatus` 파생           |
-| Order   | `payment_pending`, `reserved`, `ready`, `completed`, `cancelled`, `no_show`, `expired` | `paymentPending`, `reserved`, `ready`, `completed`, `cancelled`, `noShow`, `expired` |
-| Payment | `pending`, `paid`, `failed`, `cancelled`, `refunded`                                   | 동일                                                                                 |
+| 대상    | API/DB 기준 값                                                                         | Domain 기준 값/파생값                                                                 |
+| ------- | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| User    | `active`, `suspended`, `deleted`                                                       | 동일                                                                                  |
+| Store   | `approved`, `inactive`                                                                 | 신규 가게는 `approved`로 생성. `canSell = role === 'seller' && status === 'approved'` |
+| Product | `active`, `closed`                                                                     | `status: active \| closed`, `isSoldOut`, `isExpired`, `displayStatus` 파생            |
+| Order   | `payment_pending`, `reserved`, `ready`, `completed`, `cancelled`, `no_show`, `expired` | `paymentPending`, `reserved`, `ready`, `completed`, `cancelled`, `noShow`, `expired`  |
+| Payment | `pending`, `paid`, `failed`, `cancelled`, `refunded`                                   | 동일                                                                                  |
 
 Product `displayStatus` 계산 기준:
 
