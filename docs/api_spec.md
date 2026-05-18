@@ -107,7 +107,7 @@ API contract의 status 값은 JSON-safe string이며, DB 저장 값과 Domain Ty
 | 대상    | API/DB 기준 값                                                                         | Domain 기준 값/파생값                                                                |
 | ------- | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
 | User    | `active`, `suspended`, `deleted`                                                       | 동일                                                                                 |
-| Store   | `pending`, `approved`, `rejected`, `inactive`                                          | 신규 가게는 seller 승인 후 `approved`로 생성. `canSell = role seller && approved`    |
+| Store   | `approved`, `inactive`                                                                 | 신규 가게는 `approved`로 생성. `canSell = role seller && approved`                   |
 | Product | `active`, `closed`                                                                     | `status: active \| closed`, `isSoldOut`, `isExpired`, `displayStatus` 파생           |
 | Order   | `payment_pending`, `reserved`, `ready`, `completed`, `cancelled`, `no_show`, `expired` | `paymentPending`, `reserved`, `ready`, `completed`, `cancelled`, `noShow`, `expired` |
 | Payment | `pending`, `paid`, `failed`, `cancelled`, `refunded`                                   | 동일                                                                                 |
