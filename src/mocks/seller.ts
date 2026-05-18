@@ -67,9 +67,9 @@ export const mockSellerApplication: SellerApplicationResponse = {
 
 export const mockSellerMenuItems: MenuItemResponse[] = [
   {
-    id: 'menu_item_mock_1',
-    storeId: 'store_1',
-    categoryId: 'cat_1',
+    id: '00000000-0000-4000-8000-000000000041',
+    storeId: '00000000-0000-4000-8000-000000000031',
+    categoryId: '00000000-0000-4000-8000-000000000011',
     categoryName: '베이커리',
     name: '마감 할인 크루아상 세트',
     description: '당일 생산 후 남은 크루아상과 페이스트리를 담은 세트입니다.',
@@ -79,9 +79,9 @@ export const mockSellerMenuItems: MenuItemResponse[] = [
     updatedAt: '2026-05-18T09:00:00.000Z',
   },
   {
-    id: 'menu_item_mock_2',
-    storeId: 'store_1',
-    categoryId: 'cat_1',
+    id: '00000000-0000-4000-8000-000000000042',
+    storeId: '00000000-0000-4000-8000-000000000031',
+    categoryId: '00000000-0000-4000-8000-000000000011',
     categoryName: '베이커리',
     name: '페이스트리 박스',
     description: '갓 구운 페이스트리 모음 박스입니다.',
@@ -91,9 +91,9 @@ export const mockSellerMenuItems: MenuItemResponse[] = [
     updatedAt: '2026-05-18T09:00:00.000Z',
   },
   {
-    id: 'menu_item_mock_3',
-    storeId: 'store_1',
-    categoryId: 'cat_2',
+    id: '00000000-0000-4000-8000-000000000043',
+    storeId: '00000000-0000-4000-8000-000000000031',
+    categoryId: '00000000-0000-4000-8000-000000000012',
     categoryName: '카페/음료',
     name: '아메리카노 세트',
     description: '아메리카노 2잔 세트입니다.',
@@ -105,9 +105,9 @@ export const mockSellerMenuItems: MenuItemResponse[] = [
 ];
 
 export const mockCreatedSellerMenuItem: MenuItemResponse = {
-  id: 'menu_item_mock_new',
-  storeId: 'store_1',
-  categoryId: 'cat_1',
+  id: '00000000-0000-4000-8000-000000000049',
+  storeId: '00000000-0000-4000-8000-000000000031',
+  categoryId: '00000000-0000-4000-8000-000000000011',
   categoryName: '베이커리',
   name: '새 메뉴',
   originalPrice: 10000,
