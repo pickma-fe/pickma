@@ -7,7 +7,7 @@ import { categoryApi } from '@/api/categories/categoryApi';
 
 export function useCategories() {
   return useQuery<Category[]>({
-    queryKey: ['categories'],
+    queryKey: ['categories', 'list', 'all'],
     queryFn: () => categoryApi.getCategories(),
   });
 }
