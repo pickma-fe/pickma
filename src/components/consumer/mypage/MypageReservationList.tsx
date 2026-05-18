@@ -2,7 +2,6 @@
 
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
 
-import type { OrderStatusParam } from '@/contracts/order';
 import type { MockMypageReservation } from '@/mocks/mypage';
 
 import { MypageReservationCard } from './MypageReservationCard';
@@ -25,9 +24,9 @@ const reservationTabs: ReservationTab[] = [
 
 const tabStatusMap: Record<
   Exclude<ReservationTab['id'], 'all'>,
-  OrderStatusParam[]
+  MockMypageReservation['status'][]
 > = {
-  pendingPickup: ['payment_pending', 'reserved', 'ready'],
+  pendingPickup: ['reserved', 'ready'],
   completed: ['completed'],
   cancelled: ['cancelled', 'no_show', 'expired'],
 };

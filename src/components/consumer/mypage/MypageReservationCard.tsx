@@ -1,7 +1,6 @@
 import { MoreVertical } from 'lucide-react';
 import Image from 'next/image';
 
-import type { OrderStatusParam } from '@/contracts/order';
 import { Button } from '@/components/common';
 import type { MockMypageReservation } from '@/mocks/mypage';
 
@@ -11,8 +10,10 @@ interface MypageReservationCardProps {
 
 type ReservationStatusGroup = 'pendingPickup' | 'completed' | 'cancelled';
 
-const statusGroupMap: Record<OrderStatusParam, ReservationStatusGroup> = {
-  payment_pending: 'pendingPickup',
+const statusGroupMap: Record<
+  MockMypageReservation['status'],
+  ReservationStatusGroup
+> = {
   reserved: 'pendingPickup',
   ready: 'pendingPickup',
   completed: 'completed',

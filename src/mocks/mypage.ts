@@ -18,7 +18,7 @@ export interface MockMypageReservation {
   pickupTime: string;
   quantity: number;
   price: number;
-  status: OrderStatusParam;
+  status: Exclude<OrderStatusParam, 'payment_pending'>;
 }
 
 function formatPickupDate(value: string) {
@@ -77,6 +77,10 @@ export const mockMypageUser = mockUser;
 
 export const mockMypageReservations: MockMypageReservation[] =
   mockOrders.flatMap((order, index) => {
+    if (order.status === 'payment_pending') {
+      return [];
+    }
+
     const product = findProductByOrder(order, index);
 
     if (!product) {
@@ -86,7 +90,7 @@ export const mockMypageReservations: MockMypageReservation[] =
     return [
       {
         id: order.id,
-        orderNumber: order.storeOrderNumber ?? order.orderNumber,
+        orderNumber: order.orderNumber,
         storeName: order.storeName,
         productName: product.name,
         imageUrl: product.image ?? '/images/products/bread.jpg',
