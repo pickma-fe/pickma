@@ -31,8 +31,7 @@ const mockRow = {
   image: null,
   open_time: null,
   close_time: null,
-  status: 'pending' as const,
-  reject_reason: null,
+  status: 'approved' as const,
   created_at: '2026-01-01T00:00:00Z',
   updated_at: '2026-01-01T00:00:00Z',
 };
@@ -45,8 +44,8 @@ const mockStoreResponse = {
   phone: '02-1234-5678',
   address: '서울시 마포구 월드컵북로 12',
   region: '서울 마포구',
-  status: 'pending' as const,
-  canSell: false,
+  status: 'approved' as const,
+  canSell: true,
   createdAt: '2026-01-01T00:00:00Z',
   updatedAt: '2026-01-01T00:00:00Z',
 };
@@ -123,7 +122,7 @@ describe('createStore', () => {
     });
   });
 
-  it('정상 생성 시 INSERT payload에 status/created_at/updated_at이 없고 mapStoreRow 결과를 반환한다', async () => {
+  it('정상 생성 시 INSERT payload에 status=approved가 있고 mapStoreRow(row, true) 결과를 반환한다', async () => {
     const { client, insertFn } = makeServiceClient(
       { data: null, error: null },
       { data: mockRow, error: null }
@@ -133,10 +132,10 @@ describe('createStore', () => {
     );
     const result = await createStore('user-1', mockBody);
     const insertPayload = insertFn.mock.calls[0][0];
-    expect(insertPayload).not.toHaveProperty('status');
+    expect(insertPayload.status).toBe('approved');
     expect(insertPayload).not.toHaveProperty('created_at');
     expect(insertPayload).not.toHaveProperty('updated_at');
-    expect(mapStoreRow).toHaveBeenCalledWith(mockRow, false);
+    expect(mapStoreRow).toHaveBeenCalledWith(mockRow, true);
     expect(result).toBe(mockStoreResponse);
   });
 
@@ -202,7 +201,7 @@ describe('createStore', () => {
 });
 
 type ServerClientRow = Omit<typeof mockRow, 'status'> & {
-  status: 'pending' | 'approved' | 'rejected' | 'inactive';
+  status: 'approved' | 'inactive';
 };
 
 function makeServerClient(result: {
@@ -284,16 +283,16 @@ describe('getMyStore', () => {
     );
   });
 
-  it('role=seller, status=pending이면 mapStoreRow(row, false)를 호출한다', async () => {
+  it('role=seller, status=inactive이면 mapStoreRow(row, false)를 호출한다', async () => {
     vi.mocked(createServerClient).mockResolvedValue(
       makeServerClient({
-        data: { ...mockRow, status: 'pending' as const },
+        data: { ...mockRow, status: 'inactive' as const },
         error: null,
       }) as unknown as Awaited<ReturnType<typeof createServerClient>>
     );
     await getMyStore('user-1', 'seller');
     expect(mapStoreRow).toHaveBeenCalledWith(
-      expect.objectContaining({ status: 'pending' }),
+      expect.objectContaining({ status: 'inactive' }),
       false
     );
   });

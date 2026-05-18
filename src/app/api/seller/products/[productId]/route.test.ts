@@ -3,14 +3,14 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ProductListItemResponse } from '@/contracts/product';
 import { AppError } from '@/lib/errors/appError';
 import { ERROR_CODE } from '@/lib/errors/errorCodes';
-import { requireSeller } from '@/app/api/_lib/auth';
+import { requireSellerStore } from '@/app/api/_lib/auth';
 import { isApiMockEnabled } from '@/app/api/_lib/mock';
 
 import { DELETE, PATCH } from './route';
 import { deleteSellerProduct, updateSellerProduct } from '../_lib/service';
 
 vi.mock('@/app/api/_lib/auth', () => ({
-  requireSeller: vi.fn(),
+  requireSellerStore: vi.fn(),
 }));
 
 vi.mock('@/app/api/_lib/mock', () => ({
@@ -31,7 +31,7 @@ const sellerResult = {
   authUser: {},
   serviceUser: {},
   store: { id: STORE_ID },
-} as Awaited<ReturnType<typeof requireSeller>>;
+} as Awaited<ReturnType<typeof requireSellerStore>>;
 
 function makeCtx(productId: string) {
   return { params: Promise.resolve({ productId }) };
@@ -85,12 +85,12 @@ describe('PATCH /api/seller/products/[productId]', () => {
     );
 
     expect(res.status).toBe(200);
-    expect(requireSeller).not.toHaveBeenCalled();
+    expect(requireSellerStore).not.toHaveBeenCalled();
   });
 
-  it('real 모드에서는 requireSeller store id로 service를 호출한다', async () => {
+  it('real 모드에서는 requireSellerStore store id로 service를 호출한다', async () => {
     vi.mocked(isApiMockEnabled).mockReturnValue(false);
-    vi.mocked(requireSeller).mockResolvedValue(sellerResult);
+    vi.mocked(requireSellerStore).mockResolvedValue(sellerResult);
     vi.mocked(updateSellerProduct).mockResolvedValue(product);
 
     const res = await PATCH(
@@ -108,7 +108,7 @@ describe('PATCH /api/seller/products/[productId]', () => {
 
   it('service가 PRODUCT_NOT_FOUND를 던지면 404를 반환한다', async () => {
     vi.mocked(isApiMockEnabled).mockReturnValue(false);
-    vi.mocked(requireSeller).mockResolvedValue(sellerResult);
+    vi.mocked(requireSellerStore).mockResolvedValue(sellerResult);
     vi.mocked(updateSellerProduct).mockRejectedValue(
       new AppError(ERROR_CODE.PRODUCT_NOT_FOUND, 404)
     );
@@ -151,9 +151,9 @@ describe('DELETE /api/seller/products/[productId]', () => {
     expect(body.data).toBeNull();
   });
 
-  it('real 모드에서는 requireSeller store id로 soft delete를 호출한다', async () => {
+  it('real 모드에서는 requireSellerStore store id로 soft delete를 호출한다', async () => {
     vi.mocked(isApiMockEnabled).mockReturnValue(false);
-    vi.mocked(requireSeller).mockResolvedValue(sellerResult);
+    vi.mocked(requireSellerStore).mockResolvedValue(sellerResult);
     vi.mocked(deleteSellerProduct).mockResolvedValue(null);
 
     const res = await DELETE(

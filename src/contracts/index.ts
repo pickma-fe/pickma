@@ -4,7 +4,6 @@ export type {
   AdminStoreListResponse,
   AdminStoreResponse,
   RejectSellerApplicationRequest,
-  RejectStoreRequest,
 } from './admin';
 export type {
   ApiErrorResponse,

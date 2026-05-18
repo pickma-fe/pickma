@@ -13,7 +13,7 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 CREATE TYPE user_role AS ENUM ('customer', 'seller', 'admin');
 CREATE TYPE user_status AS ENUM ('active', 'suspended', 'deleted');
-CREATE TYPE store_status AS ENUM ('pending', 'approved', 'rejected', 'inactive');
+CREATE TYPE store_status AS ENUM ('approved', 'inactive');
 CREATE TYPE product_status AS ENUM ('active', 'closed');
 CREATE TYPE order_status AS ENUM (
   'payment_pending',
@@ -80,7 +80,6 @@ CREATE TABLE stores (
   open_time        time,
   close_time       time,
   status           store_status  NOT NULL DEFAULT 'approved',
-  reject_reason    varchar(500),
   created_at       timestamptz   NOT NULL DEFAULT now(),
   updated_at       timestamptz   NOT NULL DEFAULT now()
 );
