@@ -8,6 +8,7 @@ import {
   requireSeller,
   requireSellerStore,
 } from '@/app/api/_lib/auth';
+import { isApiMockEnabled } from '@/app/api/_lib/mock';
 import { routeError, success } from '@/app/api/_lib/response';
 import { validateBody } from '@/app/api/_lib/validation';
 
@@ -17,6 +18,10 @@ import { createFileUploadUrl } from './_lib/service';
 export async function POST(request: NextRequest): Promise<Response> {
   try {
     const body = await validateBody(createFileUploadUrlSchema, request);
+
+    if (isApiMockEnabled()) {
+      return success({ signedUrl: '/api/mock/upload', storagePath: '' }, 201);
+    }
 
     let userId: string;
     let storeId: string | undefined;
