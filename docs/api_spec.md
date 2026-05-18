@@ -306,8 +306,8 @@ Seller menu request/response:
 export interface MenuItemResponse {
   id: string;
   storeId: string;
-  categoryId?: string;
-  categoryName?: string;
+  categoryId: string;
+  categoryName: string;
   status: 'active' | 'inactive';
   name: string;
   description?: string;
@@ -318,7 +318,7 @@ export interface MenuItemResponse {
 }
 
 export interface CreateMenuItemRequest {
-  categoryId?: string;
+  categoryId: string;
   name: string;
   description?: string;
   image?: string;
@@ -339,6 +339,7 @@ Behavior:
 
 - `GET /api/categories`는 공개 API이다.
 - seller menu API는 `requireSellerStore()`를 통과해야 한다.
+- `CreateMenuItemRequest.categoryId`는 필수이며, 존재하지 않는 category이면 `CATEGORY_NOT_FOUND` (404)를 반환한다.
 - 상품 생성 시 `menuItemId`는 seller store 소유 menu item이어야 한다.
 - 상품 생성 시 `menuItemId`는 `active` 상태여야 한다.
 - `products.category_id`는 상품 생성 시 `menu_items.category_id`를 복사한다.
