@@ -14,6 +14,7 @@ export const productListSchema = z
     pageSize: z.coerce.number().int().positive().max(100).default(20),
     region: z.string().trim().min(1).optional(),
     categoryId: z.string().trim().min(1).optional(),
+    keyword: z.string().trim().min(1).optional(),
     discountOption: z
       .enum(['all', 'over-40', '30-to-40', '20-to-30', 'under-20'])
       .optional(),

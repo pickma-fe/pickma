@@ -50,6 +50,7 @@ function buildChain(result: {
     select: vi.fn(),
     eq: vi.fn(),
     gt: vi.fn(),
+    ilike: vi.fn(),
     order: vi.fn(),
     range: vi.fn().mockResolvedValue(result),
     single: vi.fn().mockResolvedValue(result),
@@ -63,6 +64,7 @@ function buildChain(result: {
   chain.select.mockReturnValue(chain);
   chain.eq.mockReturnValue(chain);
   chain.gt.mockReturnValue(chain);
+  chain.ilike.mockReturnValue(chain);
   chain.order.mockReturnValue(chain);
   return chain;
 }
@@ -214,6 +216,25 @@ describe('getProducts', () => {
     });
 
     expect(supabase._chain.range).not.toHaveBeenCalled();
+  });
+
+  it('keyword 파라미터가 있으면 menu_items.name ILIKE 필터를 적용한다', async () => {
+    const supabase = buildSupabase({ data: [], error: null, count: 0 });
+
+    await getProducts(supabase, { page: 1, pageSize: 20, keyword: '크루아상' });
+
+    expect(supabase._chain.ilike).toHaveBeenCalledWith(
+      'menu_items.name',
+      '%크루아상%'
+    );
+  });
+
+  it('keyword 파라미터가 없으면 ILIKE 필터를 적용하지 않는다', async () => {
+    const supabase = buildSupabase({ data: [], error: null, count: 0 });
+
+    await getProducts(supabase, { page: 1, pageSize: 20 });
+
+    expect(supabase._chain.ilike).not.toHaveBeenCalled();
   });
 
   it('region 파라미터가 없으면 stores.region 필터를 적용하지 않는다', async () => {

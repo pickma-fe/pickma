@@ -425,7 +425,7 @@ Behavior:
 
 - `region`은 `stores.region` 기준으로 필터링한다.
 - `categoryId`는 `products.category_id` 기준으로 필터링한다.
-- `keyword`는 MVP에서 상품명(`menu_items.name`)과 가게명(`stores.name`) 검색을 우선 지원한다.
+- `keyword`는 상품명(`menu_items.name`) ILIKE 기준으로 필터링한다. 가게명(`stores.name`) 검색은 지원하지 않는다.
 - `sort` 기본값은 `endAt`, `order` 기본값은 `asc`이다.
 
 ### 4.2 `GET /api/products/:productId`
