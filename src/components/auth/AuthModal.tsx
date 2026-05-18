@@ -4,7 +4,7 @@ import { Dialog, DialogPanel, DialogTitle } from '@headlessui/react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { XIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { Suspense, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
@@ -15,7 +15,6 @@ import { useOAuthLogin } from '@/hooks/auth/useOAuthLogin';
 import { useResetPassword } from '@/hooks/auth/useResetPassword';
 import { Button, Input } from '@/components/common';
 
-import { AuthModalRouteSync } from './AuthModalRouteSync';
 import { type AuthModalView, useAuthModal } from './useAuthModal';
 
 function getSafeNextPath(next?: string): string {
@@ -94,9 +93,6 @@ export function AuthModal() {
           {view === 'reset' && <ResetForm onChangeView={changeAuthModalView} />}
         </DialogPanel>
       </div>
-      <Suspense fallback={null}>
-        <AuthModalRouteSync />
-      </Suspense>
     </Dialog>
   );
 }
