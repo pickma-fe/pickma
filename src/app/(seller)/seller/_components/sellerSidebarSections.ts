@@ -62,21 +62,10 @@ export const sellerSidebarSections: SidebarSection[] = [
     id: 'order',
     items: [
       {
-        id: 'orders',
+        id: 'order-list',
         label: '주문 관리',
         icon: ClipboardList,
-        children: [
-          {
-            id: 'order-list',
-            label: '주문 확인',
-            href: '/seller/orders',
-          },
-          {
-            id: 'order-refund',
-            label: '주문 취소/환불',
-            href: '/seller/orders/refund',
-          },
-        ],
+        href: '/seller/orders',
       },
     ],
   },
