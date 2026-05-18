@@ -19,8 +19,17 @@ export async function PATCH(
 ): Promise<Response> {
   try {
     const { menuItemId } = await params;
-    if (!menuItemIdSchema.safeParse(menuItemId).success) {
-      throw new AppError(ERROR_CODE.VALIDATION_ERROR, 400);
+    const menuItemIdResult = menuItemIdSchema.safeParse(menuItemId);
+    if (!menuItemIdResult.success) {
+      throw new AppError(
+        ERROR_CODE.VALIDATION_ERROR,
+        400,
+        undefined,
+        menuItemIdResult.error.issues.map((e) => ({
+          path: 'menuItemId',
+          message: e.message,
+        }))
+      );
     }
     const body = await validateBody(updateMenuItemSchema, request);
 
@@ -40,8 +49,17 @@ export async function DELETE(
 ): Promise<Response> {
   try {
     const { menuItemId } = await params;
-    if (!menuItemIdSchema.safeParse(menuItemId).success) {
-      throw new AppError(ERROR_CODE.VALIDATION_ERROR, 400);
+    const menuItemIdResult = menuItemIdSchema.safeParse(menuItemId);
+    if (!menuItemIdResult.success) {
+      throw new AppError(
+        ERROR_CODE.VALIDATION_ERROR,
+        400,
+        undefined,
+        menuItemIdResult.error.issues.map((e) => ({
+          path: 'menuItemId',
+          message: e.message,
+        }))
+      );
     }
 
     if (isApiMockEnabled()) return success(null);
