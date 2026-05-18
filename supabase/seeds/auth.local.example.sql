@@ -83,7 +83,7 @@ BEGIN
     now(),
     now()
   )
-  ON CONFLICT (provider, id) DO NOTHING;
+  ON CONFLICT (id) DO NOTHING;
 
   -- public.users
   INSERT INTO public.users (
