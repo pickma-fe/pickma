@@ -1034,6 +1034,9 @@ RPC에서 raise하는 예외는 아래 정책으로 API error code로 변환한�
 | `PRODUCT_NOT_FOUND`              | 404  | 상품을 찾을 수 없습니다.                       |
 | `ORDER_NOT_FOUND`                | 404  | 주문을 찾을 수 없습니다.                       |
 | `STORE_NOT_FOUND`                | 404  | 가게를 찾을 수 없습니다.                       |
+| `CATEGORY_NOT_FOUND`             | 404  | 카테고리를 찾을 수 없습니다.                   |
+| `MENU_ITEM_NOT_FOUND`            | 404  | 메뉴 아이템을 찾을 수 없습니다.                |
+| `MENU_ITEM_INACTIVE`             | 409  | 판매 중지된 메뉴 아이템입니다.                 |
 | `STORE_NOT_APPROVED`             | 403  | 승인된 가게만 사용할 수 있습니다.              |
 | `STORE_ALREADY_EXISTS`           | 409  | 이미 등록된 가게가 있습니다.                   |
 | `SELLER_APPLICATION_NOT_FOUND`   | 404  | 판매자 신청을 찾을 수 없습니다.                |
