@@ -14,7 +14,6 @@ const statusGroupMap: Record<
   MockMypageReservation['status'],
   ReservationStatusGroup
 > = {
-  processing: 'pendingPickup',
   reserved: 'pendingPickup',
   ready: 'pendingPickup',
   completed: 'completed',
