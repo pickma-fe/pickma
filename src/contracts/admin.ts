@@ -19,10 +19,6 @@ export interface AdminStoreResponse {
 
 export type AdminStoreListResponse = PaginatedResult<AdminStoreResponse>;
 
-export interface RejectStoreRequest {
-  reason: string;
-}
-
 export interface AdminPendingSellerApplicationResponse {
   id: string;
   userId: string;
