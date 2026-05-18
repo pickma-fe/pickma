@@ -200,13 +200,13 @@ export interface Category {
 export interface MenuItem {
   id: string;
   storeId: string;
-  categoryId?: string;
-  categoryName?: string;
-  status: 'active' | 'inactive';
+  categoryId: string;
+  categoryName: string;
   name: string;
   description?: string;
   image?: string;
   originalPrice: number;
+  status: 'active' | 'inactive';
   createdAt: Date;
   updatedAt: Date;
 }
