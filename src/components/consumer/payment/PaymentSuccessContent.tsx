@@ -120,6 +120,7 @@ export function PaymentSuccessContent() {
       })
       .catch(() => {
         notifyPaymentResult({ success: false });
+        closePopupIfOpened();
       });
   }, [confirmPayment, paymentQuery]);
 
