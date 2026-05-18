@@ -37,9 +37,12 @@ const CATEGORY_OPTIONS = [
   { label: '스프', value: '스프' },
 ];
 
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+
 export function MenuForm({ initialData, isEdit = false }: MenuFormProps) {
   const router = useRouter();
-  const { addMenu, updateMenu } = useMenuStore();
+  const addMenu = useMenuStore((state) => state.addMenu);
+  const updateMenu = useMenuStore((state) => state.updateMenu);
 
   const [formData, setFormData] = useState<MenuFormData>({
     name: initialData?.name ?? '',
@@ -64,6 +67,14 @@ export function MenuForm({ initialData, isEdit = false }: MenuFormProps) {
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      if (file.size > MAX_FILE_SIZE) {
+        setErrors((prev) => ({
+          ...prev,
+          image: '이미지 파일은 5MB 이하만 업로드 가능합니다.',
+        }));
+        e.currentTarget.value = '';
+        return;
+      }
       const url = URL.createObjectURL(file);
       handleChange('image', url);
     }
@@ -130,7 +141,7 @@ export function MenuForm({ initialData, isEdit = false }: MenuFormProps) {
       origin: formData.origin,
       allergyInfo: formData.allergyInfo,
       tags: formData.tags,
-      storeId: 'store-1',
+      storeId: initialData?.storeId ?? 'store_1',
       status: 'active' as const,
     };
 
@@ -241,6 +252,9 @@ export function MenuForm({ initialData, isEdit = false }: MenuFormProps) {
                   className="hidden"
                 />
               </label>
+            )}
+            {errors.image && (
+              <p className="text-sm text-red-500">{errors.image}</p>
             )}
           </div>
         </Section>

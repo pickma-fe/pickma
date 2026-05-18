@@ -11,7 +11,7 @@ const SELLER_PROTECTED = [
   '/seller/products',
   '/seller/orders',
   '/seller/store',
-  //'/seller/menu',
+  '/seller/menu',
 ];
 const ADMIN_PROTECTED = ['/admin'];
 
