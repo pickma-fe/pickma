@@ -94,7 +94,7 @@ export function MypageReservationCard({
 
         <div>
           <p className="text-xl font-bold text-gray-900">
-            {reservation.price.toLocaleString()}원
+            {reservation.price.toLocaleString('ko-KR')}원
           </p>
           <p className="mt-2 text-sm text-gray-500">
             수량&nbsp; {reservation.quantity}개
