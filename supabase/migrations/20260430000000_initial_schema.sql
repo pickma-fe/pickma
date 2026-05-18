@@ -30,6 +30,7 @@ CREATE TYPE payment_method AS ENUM ('card', 'virtual_account', 'mobile', 'easy_p
 CREATE TYPE payment_status AS ENUM ('pending', 'paid', 'failed', 'cancelled', 'refunded');
 CREATE TYPE social_provider AS ENUM ('google', 'kakao');
 CREATE TYPE seller_application_status AS ENUM ('pending', 'approved', 'rejected');
+CREATE TYPE menu_item_status AS ENUM ('active', 'inactive');
 CREATE TYPE seller_application_document_type AS ENUM ('business_license', 'id_card', 'bankbook', 'business_report');
 
 -- ============================================================
@@ -92,7 +93,7 @@ CREATE TABLE menu_items (
   description     text,
   image           varchar(500),
   original_price  int           NOT NULL,
-  status          varchar(10)   NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'inactive')),
+  status          menu_item_status  NOT NULL DEFAULT 'active',
   created_at      timestamptz   NOT NULL DEFAULT now(),
   updated_at      timestamptz   NOT NULL DEFAULT now()
 );

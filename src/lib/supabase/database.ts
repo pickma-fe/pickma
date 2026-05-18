@@ -72,7 +72,7 @@ export type Database = {
           image: string | null;
           name: string;
           original_price: number;
-          status: string;
+          status: Database['public']['Enums']['menu_item_status'];
           store_id: string;
           updated_at: string;
         };
@@ -84,7 +84,7 @@ export type Database = {
           image?: string | null;
           name: string;
           original_price: number;
-          status?: string;
+          status?: Database['public']['Enums']['menu_item_status'];
           store_id: string;
           updated_at?: string;
         };
@@ -96,7 +96,7 @@ export type Database = {
           image?: string | null;
           name?: string;
           original_price?: number;
-          status?: string;
+          status?: Database['public']['Enums']['menu_item_status'];
           store_id?: string;
           updated_at?: string;
         };
@@ -760,6 +760,7 @@ export type Database = {
       sequence_to_pickup_number: { Args: { seq: number }; Returns: string };
     };
     Enums: {
+      menu_item_status: 'active' | 'inactive';
       order_status:
         | 'payment_pending'
         | 'processing'
@@ -916,6 +917,7 @@ export const Constants = {
   },
   public: {
     Enums: {
+      menu_item_status: ['active', 'inactive'],
       order_status: [
         'payment_pending',
         'processing',

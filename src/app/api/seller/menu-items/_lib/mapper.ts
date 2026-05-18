@@ -1,4 +1,7 @@
 import type { MenuItemResponse } from '@/contracts/menu-item';
+import type { Database } from '@/lib/supabase/database';
+
+type MenuItemStatus = Database['public']['Enums']['menu_item_status'];
 
 export type MenuItemRow = {
   id: string;
@@ -8,7 +11,7 @@ export type MenuItemRow = {
   description: string | null;
   image: string | null;
   original_price: number;
-  status: string;
+  status: MenuItemStatus;
   created_at: string;
   updated_at: string;
   categories: {
@@ -27,7 +30,7 @@ export function mapMenuItemRow(row: MenuItemRow): MenuItemResponse {
     ...(row.description !== null && { description: row.description }),
     ...(row.image !== null && { image: row.image }),
     originalPrice: row.original_price,
-    status: row.status as 'active' | 'inactive',
+    status: row.status,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
