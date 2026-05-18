@@ -10,13 +10,25 @@ import { createMenuItemSchema, sellerMenuItemListSchema } from './_lib/schemas';
 import { createSellerMenuItem, getSellerMenuItems } from './_lib/service';
 
 export async function GET(request: NextRequest): Promise<Response> {
-  if (isApiMockEnabled()) return success(mockSellerMenuItems);
-
   try {
     const params = validateQuery(
       sellerMenuItemListSchema,
       request.nextUrl.searchParams
     );
+
+    if (isApiMockEnabled()) {
+      let items = mockSellerMenuItems;
+      if (params.categoryId)
+        items = items.filter((i) => i.categoryId === params.categoryId);
+      if (params.status)
+        items = items.filter((i) => i.status === params.status);
+      if (params.keyword) {
+        const keyword = params.keyword.toLowerCase();
+        items = items.filter((i) => i.name.toLowerCase().includes(keyword));
+      }
+      return success(items);
+    }
+
     const { store } = await requireSellerStore();
     const data = await getSellerMenuItems(store.id, params);
     return success(data);
