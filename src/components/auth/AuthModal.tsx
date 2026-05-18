@@ -4,7 +4,7 @@ import { Dialog, DialogPanel, DialogTitle } from '@headlessui/react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { XIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { Suspense, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
@@ -110,13 +110,23 @@ interface LoginFormProps {
 function LoginForm({ next, onClose, onChangeView }: LoginFormProps) {
   const router = useRouter();
   const { mutateAsync: emailLogin } = useEmailLogin();
-  const { signInWithOAuth, pendingProvider } = useOAuthLogin();
+  const {
+    signInWithOAuth,
+    pendingProvider,
+    error: oauthError,
+  } = useOAuthLogin();
   const {
     register,
     handleSubmit: handleSubmitRH,
     setError,
     formState: { errors, isSubmitting },
   } = useForm<LoginFields>({ resolver: zodResolver(loginSchema) });
+
+  useEffect(() => {
+    if (oauthError) {
+      setError('root', { message: getAuthErrorMessage(oauthError) });
+    }
+  }, [oauthError, setError]);
 
   async function handleSubmit(data: LoginFields) {
     try {
