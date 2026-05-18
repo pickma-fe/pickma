@@ -32,6 +32,7 @@ export interface Order {
   discountAmount: number;
   paymentAmount: number;
   status: OrderStatus;
+  image?: string;
   pickupAt: Date;
   pickupServiceDate: Date;
   storeOrderNumber?: string;

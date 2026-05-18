@@ -5,8 +5,8 @@ import {
   Clock,
   CheckCircle,
   XCircle,
-  AlertCircle,
   Package,
+  UtensilsCrossed,
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -14,6 +14,7 @@ import { Section } from '@/components/common/Section/Section';
 import { mockOrders } from '@/mocks/orders';
 
 import { OrderFilter } from './OrderFilter';
+import { OrderTable } from './OrderTable';
 
 const STAT_CARDS = [
   {
@@ -24,18 +25,25 @@ const STAT_CARDS = [
     iconColor: 'text-gray-600',
   },
   {
-    label: '수락 대기',
+    label: '접수 대기',
     value: 'processing',
     icon: ShoppingBag,
     bgColor: 'bg-yellow-100',
     iconColor: 'text-yellow-600',
   },
   {
-    label: '픽업 대기',
+    label: '준비 중',
     value: 'reserved',
-    icon: Clock,
+    icon: UtensilsCrossed,
     bgColor: 'bg-blue-100',
     iconColor: 'text-blue-600',
+  },
+  {
+    label: '준비 완료',
+    value: 'ready',
+    icon: Clock,
+    bgColor: 'bg-primary-100',
+    iconColor: 'text-primary-600',
   },
   {
     label: '픽업 완료',
@@ -51,34 +59,21 @@ const STAT_CARDS = [
     bgColor: 'bg-red-100',
     iconColor: 'text-red-600',
   },
-  {
-    label: '미수령',
-    value: 'no_show',
-    icon: AlertCircle,
-    bgColor: 'bg-gray-100',
-    iconColor: 'text-gray-600',
-  },
 ];
 
 export function OrderManageContent() {
   const [selectedStatus, setSelectedStatus] = useState('전체');
   const [searchKeyword, setSearchKeyword] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
 
   const getCount = (value: string) => {
     if (value === '전체') return mockOrders.length;
-    if (value === 'reserved')
-      return mockOrders.filter(
-        (o) => o.status === 'reserved' || o.status === 'ready'
-      ).length;
     return mockOrders.filter((o) => o.status === value).length;
   };
 
   const filteredOrders = mockOrders.filter((order) => {
     const matchStatus =
-      selectedStatus === '전체' ||
-      (selectedStatus === 'reserved'
-        ? order.status === 'reserved' || order.status === 'ready'
-        : order.status === selectedStatus);
+      selectedStatus === '전체' || order.status === selectedStatus;
 
     const matchSearch =
       searchKeyword === '' ||
@@ -89,10 +84,12 @@ export function OrderManageContent() {
 
   const handleStatusChange = (status: string) => {
     setSelectedStatus(status);
+    setCurrentPage(1);
   };
 
   const handleSearchChange = (keyword: string) => {
     setSearchKeyword(keyword);
+    setCurrentPage(1);
   };
 
   return (
@@ -102,7 +99,7 @@ export function OrderManageContent() {
           주문 관리
         </h1>
         <p className="mt-1 text-sm text-gray-500">
-          주문 현황을 확인하고, 판매 상태를 설정할 수 있습니다.
+          접수된 주문을 확인하고, 픽업 상태를 관리할 수 있습니다.
         </p>
       </div>
 
@@ -114,7 +111,7 @@ export function OrderManageContent() {
           return (
             <button
               key={card.value}
-              onClick={() => setSelectedStatus(card.value)}
+              onClick={() => handleStatusChange(card.value)}
               className="text-left"
             >
               <Section
@@ -154,10 +151,11 @@ export function OrderManageContent() {
         onSearchChange={handleSearchChange}
       />
 
-      <div className="rounded-lg border border-gray-200 bg-white p-8 text-center text-gray-500">
-        <p>필터링된 주문: {filteredOrders.length}건</p>
-        <p className="mt-2 text-sm">테이블 컴포넌트 구현 예정</p>
-      </div>
+      <OrderTable
+        orders={filteredOrders}
+        currentPage={currentPage}
+        onPageChange={setCurrentPage}
+      />
     </div>
   );
 }
