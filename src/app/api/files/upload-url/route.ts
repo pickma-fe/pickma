@@ -20,7 +20,13 @@ export async function POST(request: NextRequest): Promise<Response> {
     const body = await validateBody(createFileUploadUrlSchema, request);
 
     if (isApiMockEnabled()) {
-      return success({ signedUrl: '/api/mock/upload', storagePath: '' }, 201);
+      return success(
+        {
+          signedUrl: '/api/mock/upload',
+          storagePath: `mock/${body.purpose}/mock-file`,
+        },
+        201
+      );
     }
 
     let userId: string;
