@@ -3,7 +3,7 @@ import type { NextRequest } from 'next/server';
 
 import { createProxyClient } from '@/lib/supabase/proxy';
 
-const CONSUMER_PROTECTED = ['/mypage'];
+const CONSUMER_PROTECTED = ['/order', '/payment', '/mypage'];
 const SELLER_PROTECTED = [
   '/seller/register',
   '/seller/pending',
