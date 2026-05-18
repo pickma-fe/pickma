@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
 import { ApiError } from '@/api/apiClient';
+import { useSignOut } from '@/hooks/auth/useSignOut';
 import { useMe } from '@/hooks/users/useMe';
 import { Header } from '@/components/common/Header/Header';
 import { Sidebar } from '@/components/common/Sidebar/Sidebar';
@@ -17,6 +18,12 @@ export default function AdminLayout({
 }) {
   const { data: user, isLoading, isError, error } = useMe();
   const router = useRouter();
+  const { mutateAsync: signOut } = useSignOut();
+
+  async function handleSignOut() {
+    await signOut();
+    router.push('/');
+  }
 
   useEffect(() => {
     if (isLoading) return;
@@ -68,7 +75,17 @@ export default function AdminLayout({
 
   return (
     <div className="flex min-h-screen flex-col">
-      <Header user={user} logoHref="/admin" menuItems={[]} />
+      <Header
+        user={user}
+        logoHref="/admin"
+        menuItems={[
+          {
+            label: '로그아웃',
+            type: 'action',
+            onClick: () => void handleSignOut(),
+          },
+        ]}
+      />
       <div className="flex flex-1">
         <div className="hidden pt-4 lg:block">
           <Sidebar sections={adminSidebarSections} />
