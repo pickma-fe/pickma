@@ -553,7 +553,6 @@ export type Database = {
           open_time: string | null;
           phone: string;
           region: string;
-          reject_reason: string | null;
           status: Database['public']['Enums']['store_status'];
           updated_at: string;
           user_id: string;
@@ -571,7 +570,6 @@ export type Database = {
           open_time?: string | null;
           phone: string;
           region: string;
-          reject_reason?: string | null;
           status?: Database['public']['Enums']['store_status'];
           updated_at?: string;
           user_id: string;
@@ -589,7 +587,6 @@ export type Database = {
           open_time?: string | null;
           phone?: string;
           region?: string;
-          reject_reason?: string | null;
           status?: Database['public']['Enums']['store_status'];
           updated_at?: string;
           user_id?: string;
@@ -780,7 +777,7 @@ export type Database = {
         | 'business_report';
       seller_application_status: 'pending' | 'approved' | 'rejected';
       social_provider: 'google' | 'kakao';
-      store_status: 'pending' | 'approved' | 'rejected' | 'inactive';
+      store_status: 'approved' | 'inactive';
       user_role: 'customer' | 'seller' | 'admin';
       user_status: 'active' | 'suspended' | 'deleted';
     };
@@ -938,7 +935,7 @@ export const Constants = {
       ],
       seller_application_status: ['pending', 'approved', 'rejected'],
       social_provider: ['google', 'kakao'],
-      store_status: ['pending', 'approved', 'rejected', 'inactive'],
+      store_status: ['approved', 'inactive'],
       user_role: ['customer', 'seller', 'admin'],
       user_status: ['active', 'suspended', 'deleted'],
     },
