@@ -7,6 +7,7 @@ import { Section } from '@/components/common/Section/Section';
 import { mockProducts } from '@/mocks/products';
 
 import { ProductFilter } from './ProductFilter';
+import { ProductTable } from './ProductTable';
 
 export function ProductManageContent() {
   const [selectedStatus, setSelectedStatus] = useState('전체');
@@ -14,8 +15,8 @@ export function ProductManageContent() {
   const [searchKeyword, setSearchKeyword] = useState('');
   const [sortBy, setSortBy] = useState('latest');
   const [detailFilter, setDetailFilter] = useState('전체');
+  const [currentPage, setCurrentPage] = useState(1);
 
-  // 카테고리 목록 추출
   const categories = useMemo(() => {
     return [
       ...new Set(
@@ -26,11 +27,9 @@ export function ProductManageContent() {
     ];
   }, []);
 
-  // 필터링된 상품
   const filteredProducts = useMemo(() => {
     let result = [...mockProducts];
 
-    // 상태 필터
     if (selectedStatus !== '전체') {
       const statusMap: Record<string, string> = {
         판매중: 'active',
@@ -39,19 +38,16 @@ export function ProductManageContent() {
       result = result.filter((p) => p.status === statusMap[selectedStatus]);
     }
 
-    // 카테고리 필터
     if (selectedCategory !== '전체') {
       result = result.filter((p) => p.categoryName === selectedCategory);
     }
 
-    // 검색
     if (searchKeyword) {
       result = result.filter((p) =>
         p.name.toLowerCase().includes(searchKeyword.toLowerCase())
       );
     }
 
-    // 상세 필터
     switch (detailFilter) {
       case 'in-stock':
         result = result.filter((p) => p.availableStock > 0);
@@ -72,7 +68,6 @@ export function ProductManageContent() {
         break;
     }
 
-    // 정렬
     switch (sortBy) {
       case 'latest':
         result.sort(
@@ -100,14 +95,37 @@ export function ProductManageContent() {
     return result;
   }, [selectedStatus, selectedCategory, searchKeyword, sortBy, detailFilter]);
 
-  // 통계
   const totalCount = mockProducts.length;
   const activeCount = mockProducts.filter((p) => p.status === 'active').length;
   const soldOutCount = mockProducts.filter((p) => p.isSoldOut).length;
 
+  const handleStatusChange = (status: string) => {
+    setSelectedStatus(status);
+    setCurrentPage(1);
+  };
+
+  const handleCategoryChange = (category: string) => {
+    setSelectedCategory(category);
+    setCurrentPage(1);
+  };
+
+  const handleSearchChange = (keyword: string) => {
+    setSearchKeyword(keyword);
+    setCurrentPage(1);
+  };
+
+  const handleSortChange = (sort: string) => {
+    setSortBy(sort);
+    setCurrentPage(1);
+  };
+
+  const handleDetailFilterChange = (filter: string) => {
+    setDetailFilter(filter);
+    setCurrentPage(1);
+  };
+
   return (
     <div className="flex flex-col gap-6">
-      {/* 헤더 */}
       <div>
         <h1 className="text-xl font-bold text-gray-900 lg:text-2xl">
           상품 관리
@@ -117,7 +135,6 @@ export function ProductManageContent() {
         </p>
       </div>
 
-      {/* 통계 카드 */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <Section variant="card" className="bg-white">
           <div className="flex items-center gap-4">
@@ -165,7 +182,6 @@ export function ProductManageContent() {
         </Section>
       </div>
 
-      {/* 필터 */}
       <ProductFilter
         selectedStatus={selectedStatus}
         selectedCategory={selectedCategory}
@@ -173,18 +189,18 @@ export function ProductManageContent() {
         sortBy={sortBy}
         detailFilter={detailFilter}
         categories={categories}
-        onStatusChange={setSelectedStatus}
-        onCategoryChange={setSelectedCategory}
-        onSearchChange={setSearchKeyword}
-        onSortChange={setSortBy}
-        onDetailFilterChange={setDetailFilter}
+        onStatusChange={handleStatusChange}
+        onCategoryChange={handleCategoryChange}
+        onSearchChange={handleSearchChange}
+        onSortChange={handleSortChange}
+        onDetailFilterChange={handleDetailFilterChange}
       />
 
-      {/* TODO: 테이블 영역 (이슈 3) */}
-      <div className="rounded-lg border border-gray-200 bg-white p-8 text-center text-gray-500">
-        <p>필터링된 상품: {filteredProducts.length}개</p>
-        <p className="mt-2 text-sm">테이블 컴포넌트 구현 예정 (이슈 3)</p>
-      </div>
+      <ProductTable
+        products={filteredProducts}
+        currentPage={currentPage}
+        onPageChange={setCurrentPage}
+      />
     </div>
   );
 }
