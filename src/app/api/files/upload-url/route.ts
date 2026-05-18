@@ -6,6 +6,7 @@ import {
   checkApplicationEligibility,
   requireActiveUser,
   requireSeller,
+  requireSellerStore,
 } from '@/app/api/_lib/auth';
 import { routeError, success } from '@/app/api/_lib/response';
 import { validateBody } from '@/app/api/_lib/validation';
@@ -40,14 +41,11 @@ export async function POST(request: NextRequest): Promise<Response> {
       }
       userId = authUser.id;
     } else if (body.purpose === 'store_image') {
-      const { authUser, serviceUser } = await requireActiveUser();
-      if (serviceUser.role !== 'seller') {
-        throw new AppError(ERROR_CODE.FILE_UPLOAD_NOT_ALLOWED, 403);
-      }
+      const { authUser } = await requireSeller();
       userId = authUser.id;
     } else {
       // seller_product_image
-      const { authUser, store } = await requireSeller();
+      const { authUser, store } = await requireSellerStore();
       userId = authUser.id;
       storeId = store.id;
     }
