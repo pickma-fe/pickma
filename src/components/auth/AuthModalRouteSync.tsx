@@ -23,8 +23,7 @@ export function AuthModalRouteSync() {
     params.delete('next');
     const qs = params.toString();
     router.replace(qs ? `?${qs}` : window.location.pathname, { scroll: false });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [searchParams, openAuthModal, router]);
 
   return null;
 }
