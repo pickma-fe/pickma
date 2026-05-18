@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
+import { ApiError } from '@/api/apiClient';
 import { useMe } from '@/hooks/users/useMe';
 import { Header } from '@/components/common/Header/Header';
 import { Sidebar } from '@/components/common/Sidebar/Sidebar';
@@ -14,15 +15,26 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { data: user, isLoading, isError } = useMe();
+  const { data: user, isLoading, isError, error } = useMe();
   const router = useRouter();
 
   useEffect(() => {
-    if (isLoading || isError) return;
+    if (isLoading) return;
+
+    if (isError) {
+      if (
+        error instanceof ApiError &&
+        (error.statusCode === 401 || error.statusCode === 403)
+      ) {
+        router.push('/');
+      }
+      return;
+    }
+
     if (user?.role !== 'admin') {
       router.push('/');
     }
-  }, [isLoading, isError, user, router]);
+  }, [isLoading, isError, error, user, router]);
 
   if (isLoading) {
     return (
@@ -33,6 +45,14 @@ export default function AdminLayout({
   }
 
   if (isError) {
+    const isAuthError =
+      error instanceof ApiError &&
+      (error.statusCode === 401 || error.statusCode === 403);
+
+    if (isAuthError) {
+      return null;
+    }
+
     return (
       <div className="flex min-h-screen items-center justify-center">
         <span className="text-sm text-gray-500">
