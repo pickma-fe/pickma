@@ -1,10 +1,12 @@
 'use client';
 
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Upload, X } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { useForm, useWatch } from 'react-hook-form';
+import { Controller, useForm, useWatch } from 'react-hook-form';
+import { z } from 'zod';
 
 import { useMenuStore } from '@/stores/menuStore';
 import { Button } from '@/components/common/Button/Button';
@@ -18,16 +20,25 @@ interface MenuFormProps {
   isEdit?: boolean;
 }
 
-interface MenuFormData {
-  name: string;
-  category: string;
-  description: string;
-  price: string;
-  image: string;
-  origin: string;
-  allergyInfo: string;
-  tags: string[];
-}
+const menuFormSchema = z.object({
+  name: z.string().min(1, '메뉴명을 입력해주세요.'),
+  category: z.string().min(1, '카테고리를 선택해주세요.'),
+  description: z.string().optional(),
+  price: z
+    .string()
+    .min(1, '가격을 입력해주세요.')
+    .refine(
+      (value) => Number.isFinite(Number(value)),
+      '올바른 가격을 입력해주세요.'
+    )
+    .refine((value) => Number(value) >= 1, '가격을 입력해주세요.'),
+  image: z.string().optional(),
+  origin: z.string().optional(),
+  allergyInfo: z.string().optional(),
+  tags: z.array(z.string()),
+});
+
+type MenuFormData = z.infer<typeof menuFormSchema>;
 
 const CATEGORY_OPTIONS = [
   { label: '카테고리를 선택해주세요', value: '' },
@@ -55,6 +66,7 @@ export function MenuForm({ initialData, isEdit = false }: MenuFormProps) {
     control,
     formState: { errors },
   } = useForm<MenuFormData>({
+    resolver: zodResolver(menuFormSchema),
     defaultValues: {
       name: initialData?.name ?? '',
       category: initialData?.category ?? '',
@@ -69,7 +81,6 @@ export function MenuForm({ initialData, isEdit = false }: MenuFormProps) {
 
   const image = useWatch({ control, name: 'image' });
   const tags = useWatch({ control, name: 'tags' });
-  const category = useWatch({ control, name: 'category' });
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -94,8 +105,8 @@ export function MenuForm({ initialData, isEdit = false }: MenuFormProps) {
   };
 
   const handleAddTag = () => {
-    if (tagInput.trim() && !tags.includes(tagInput.trim())) {
-      setValue('tags', [...tags, tagInput.trim()]);
+    if (tagInput.trim() && !tags?.includes(tagInput.trim())) {
+      setValue('tags', [...(tags ?? []), tagInput.trim()]);
       setTagInput('');
     }
   };
@@ -103,7 +114,7 @@ export function MenuForm({ initialData, isEdit = false }: MenuFormProps) {
   const handleRemoveTag = (tag: string) => {
     setValue(
       'tags',
-      tags.filter((t) => t !== tag)
+      (tags ?? []).filter((t) => t !== tag)
     );
   };
 
@@ -118,12 +129,12 @@ export function MenuForm({ initialData, isEdit = false }: MenuFormProps) {
     const menuData = {
       name: data.name,
       category: data.category,
-      description: data.description,
+      description: data.description ?? '',
       price: Number(data.price),
-      image: data.image,
-      origin: data.origin,
-      allergyInfo: data.allergyInfo,
-      tags: data.tags,
+      image: data.image ?? '',
+      origin: data.origin ?? '',
+      allergyInfo: data.allergyInfo ?? '',
+      tags: data.tags ?? [],
       storeId: initialData?.storeId ?? 'store_1',
       status: 'active' as const,
     };
@@ -152,18 +163,24 @@ export function MenuForm({ initialData, isEdit = false }: MenuFormProps) {
             <Input
               label="메뉴명 *"
               placeholder="메뉴명을 입력해주세요"
-              {...register('name', { required: '메뉴명을 입력해주세요.' })}
+              {...register('name')}
               error={errors.name?.message}
             />
 
             <div className="flex flex-col gap-1">
               <label className="text-sm text-gray-500">카테고리 *</label>
-              <Dropdown
-                type="select"
-                items={CATEGORY_OPTIONS}
-                value={category}
-                onChange={(value) => setValue('category', value)}
-                placeholder="카테고리를 선택해주세요"
+              <Controller
+                name="category"
+                control={control}
+                render={({ field }) => (
+                  <Dropdown
+                    type="select"
+                    items={CATEGORY_OPTIONS}
+                    value={field.value}
+                    onChange={field.onChange}
+                    placeholder="카테고리를 선택해주세요"
+                  />
+                )}
               />
               {errors.category && (
                 <p className="text-sm text-red-500">
@@ -185,14 +202,12 @@ export function MenuForm({ initialData, isEdit = false }: MenuFormProps) {
               label="가격 *"
               type="number"
               placeholder="가격을 입력해주세요"
-              {...register('price', {
-                required: '가격을 입력해주세요.',
-                min: { value: 1, message: '가격을 입력해주세요.' },
-              })}
+              {...register('price')}
               error={errors.price?.message}
             />
           </div>
         </Section>
+
         <Section variant="card" className="bg-white">
           <h2 className="mb-4 text-lg font-semibold text-gray-900">
             메뉴 이미지
@@ -269,7 +284,7 @@ export function MenuForm({ initialData, isEdit = false }: MenuFormProps) {
               추가
             </Button>
           </div>
-          {tags.length > 0 && (
+          {tags && tags.length > 0 && (
             <div className="flex flex-wrap gap-2">
               {tags.map((tag) => (
                 <span
@@ -291,8 +306,6 @@ export function MenuForm({ initialData, isEdit = false }: MenuFormProps) {
           <p className="text-xs text-gray-400">예: 인기, 시즌메뉴, 추천</p>
         </div>
       </Section>
-
-      {/* 버튼 */}
       <div className="flex justify-end gap-3">
         <Button variant="outline" color="gray" onClick={handleCancel}>
           취소
