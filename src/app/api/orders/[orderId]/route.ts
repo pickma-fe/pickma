@@ -2,7 +2,7 @@ import { ERROR_CODE } from '@/lib/errors/errorCodes';
 import { requireActiveUser } from '@/app/api/_lib/auth';
 import { isApiMockEnabled } from '@/app/api/_lib/mock';
 import { fail, routeError, success } from '@/app/api/_lib/response';
-import { mockOrderDetail } from '@/mocks/orders';
+import { mockOrderDetailsMap } from '@/mocks/orders';
 
 import { orderIdSchema } from '../_lib/schemas';
 import { expireUserOrders, getOrder } from '../_lib/service';
@@ -20,7 +20,15 @@ export async function GET(
     ]);
   }
 
-  if (isApiMockEnabled()) return success(mockOrderDetail);
+  if (isApiMockEnabled()) {
+    const mockOrderDetail = mockOrderDetailsMap[parsed.data];
+
+    if (!mockOrderDetail) {
+      return fail(ERROR_CODE.ORDER_NOT_FOUND);
+    }
+
+    return success(mockOrderDetail);
+  }
 
   try {
     const { serviceUser } = await requireActiveUser();
