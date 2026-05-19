@@ -8,12 +8,36 @@ import { mockRecentlyViewedProducts } from '@/mocks/mypage';
 
 const FALLBACK_PROFILE_IMAGE = '/images/mock/profile.jpg';
 
+function isSupabaseStorageImage(profileImage: string) {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+
+  if (!supabaseUrl) {
+    return false;
+  }
+
+  try {
+    const imageUrl = new URL(profileImage);
+    const storageUrl = new URL(supabaseUrl);
+
+    return (
+      imageUrl.protocol === 'https:' &&
+      imageUrl.hostname === storageUrl.hostname
+    );
+  } catch {
+    return false;
+  }
+}
+
 function getSafeProfileImage(profileImage?: string) {
   if (!profileImage) {
     return FALLBACK_PROFILE_IMAGE;
   }
 
   if (profileImage.startsWith('/')) {
+    return profileImage;
+  }
+
+  if (isSupabaseStorageImage(profileImage)) {
     return profileImage;
   }
 
