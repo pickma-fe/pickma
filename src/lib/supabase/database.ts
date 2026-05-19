@@ -65,35 +65,38 @@ export type Database = {
       };
       menu_items: {
         Row: {
-          category_id: string | null;
+          category_id: string;
           created_at: string;
           description: string | null;
           id: string;
           image: string | null;
           name: string;
           original_price: number;
+          status: Database['public']['Enums']['menu_item_status'];
           store_id: string;
           updated_at: string;
         };
         Insert: {
-          category_id?: string | null;
+          category_id: string;
           created_at?: string;
           description?: string | null;
           id?: string;
           image?: string | null;
           name: string;
           original_price: number;
+          status?: Database['public']['Enums']['menu_item_status'];
           store_id: string;
           updated_at?: string;
         };
         Update: {
-          category_id?: string | null;
+          category_id?: string;
           created_at?: string;
           description?: string | null;
           id?: string;
           image?: string | null;
           name?: string;
           original_price?: number;
+          status?: Database['public']['Enums']['menu_item_status'];
           store_id?: string;
           updated_at?: string;
         };
@@ -757,6 +760,7 @@ export type Database = {
       sequence_to_pickup_number: { Args: { seq: number }; Returns: string };
     };
     Enums: {
+      menu_item_status: 'active' | 'inactive';
       order_status:
         | 'payment_pending'
         | 'processing'
@@ -913,6 +917,7 @@ export const Constants = {
   },
   public: {
     Enums: {
+      menu_item_status: ['active', 'inactive'],
       order_status: [
         'payment_pending',
         'processing',

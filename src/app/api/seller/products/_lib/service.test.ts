@@ -119,6 +119,7 @@ describe('createSellerProduct', () => {
                         id: MENU_ITEM_ID,
                         store_id: STORE_ID,
                         category_id: productRow.category_id,
+                        status: 'active',
                       },
                       error: null,
                     }),
@@ -153,7 +154,7 @@ describe('createSellerProduct', () => {
     expect(result.id).toBe(PRODUCT_ID);
   });
 
-  it('menu item이 seller store 소유가 아니면 PRODUCT_NOT_FOUND를 던진다', async () => {
+  it('menu item이 seller store 소유가 아니면 MENU_ITEM_NOT_FOUND를 던진다', async () => {
     const client = {
       from: vi.fn().mockReturnValue({
         select: () => ({
@@ -176,7 +177,42 @@ describe('createSellerProduct', () => {
         pickupStartTime: '10:00:00',
         pickupEndTime: '13:30:00',
       })
-    ).rejects.toMatchObject({ code: 'PRODUCT_NOT_FOUND', statusCode: 404 });
+    ).rejects.toMatchObject({ code: 'MENU_ITEM_NOT_FOUND', statusCode: 404 });
+  });
+
+  it('menu item이 inactive이면 MENU_ITEM_INACTIVE(409)를 던진다', async () => {
+    const client = {
+      from: vi.fn().mockReturnValue({
+        select: () => ({
+          eq: () => ({
+            eq: () => ({
+              maybeSingle: () =>
+                Promise.resolve({
+                  data: {
+                    id: MENU_ITEM_ID,
+                    store_id: STORE_ID,
+                    category_id: productRow.category_id,
+                    status: 'inactive',
+                  },
+                  error: null,
+                }),
+            }),
+          }),
+        }),
+      }),
+    };
+    mockServiceClient(client);
+
+    await expect(
+      createSellerProduct(STORE_ID, {
+        menuItemId: MENU_ITEM_ID,
+        discountPrice: 7200,
+        stock: 8,
+        endAt: '2099-12-31T23:59:59.000Z',
+        pickupStartTime: '10:00:00',
+        pickupEndTime: '13:30:00',
+      })
+    ).rejects.toMatchObject({ code: 'MENU_ITEM_INACTIVE', statusCode: 409 });
   });
 });
 

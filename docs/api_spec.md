@@ -306,8 +306,8 @@ Seller menu request/response:
 export interface MenuItemResponse {
   id: string;
   storeId: string;
-  categoryId?: string;
-  categoryName?: string;
+  categoryId: string;
+  categoryName: string;
   status: 'active' | 'inactive';
   name: string;
   description?: string;
@@ -318,7 +318,7 @@ export interface MenuItemResponse {
 }
 
 export interface CreateMenuItemRequest {
-  categoryId?: string;
+  categoryId: string;
   name: string;
   description?: string;
   image?: string;
@@ -339,6 +339,7 @@ Behavior:
 
 - `GET /api/categories`는 공개 API이다.
 - seller menu API는 `requireSellerStore()`를 통과해야 한다.
+- `CreateMenuItemRequest.categoryId`는 필수이며, 존재하지 않는 category이면 `CATEGORY_NOT_FOUND` (404)를 반환한다.
 - 상품 생성 시 `menuItemId`는 seller store 소유 menu item이어야 한다.
 - 상품 생성 시 `menuItemId`는 `active` 상태여야 한다.
 - `products.category_id`는 상품 생성 시 `menu_items.category_id`를 복사한다.
@@ -425,7 +426,7 @@ Behavior:
 
 - `region`은 `stores.region` 기준으로 필터링한다.
 - `categoryId`는 `products.category_id` 기준으로 필터링한다.
-- `keyword`는 MVP에서 상품명(`menu_items.name`)과 가게명(`stores.name`) 검색을 우선 지원한다.
+- `keyword`는 상품명(`menu_items.name`) ILIKE 기준으로 필터링한다. 가게명(`stores.name`) 검색은 지원하지 않는다.
 - `sort` 기본값은 `endAt`, `order` 기본값은 `asc`이다.
 
 ### 4.2 `GET /api/products/:productId`
@@ -893,7 +894,7 @@ Seller product API는 `requireSellerStore()`를 통과해야 한다. 특정 상�
 - Response: `200 { statusCode: 200, data: null }`
 - 정책: row를 삭제하지 않고 `products.status = 'closed'`로 변경한다.
 
-Seller product API의 pickup time은 서버 schema에서 `HH:mm:ss`로 정규화해 저장한다. 소유하지 않은 menu item/product 접근은 정보 노출을 줄이기 위해 `PRODUCT_NOT_FOUND`로 반환한다.
+Seller product API의 pickup time은 서버 schema에서 `HH:mm:ss`로 정규화해 저장한다. 소유하지 않은 product 접근은 `PRODUCT_NOT_FOUND`(404)로 반환한다. 상품 생성 시 menu item이 없으면 `MENU_ITEM_NOT_FOUND`(404), 판매 중지(`inactive`) 상태이면 `MENU_ITEM_INACTIVE`(409)를 반환한다.
 
 ---
 
@@ -1033,6 +1034,9 @@ RPC에서 raise하는 예외는 아래 정책으로 API error code로 변환한�
 | `PRODUCT_NOT_FOUND`              | 404  | 상품을 찾을 수 없습니다.                       |
 | `ORDER_NOT_FOUND`                | 404  | 주문을 찾을 수 없습니다.                       |
 | `STORE_NOT_FOUND`                | 404  | 가게를 찾을 수 없습니다.                       |
+| `CATEGORY_NOT_FOUND`             | 404  | 카테고리를 찾을 수 없습니다.                   |
+| `MENU_ITEM_NOT_FOUND`            | 404  | 메뉴 아이템을 찾을 수 없습니다.                |
+| `MENU_ITEM_INACTIVE`             | 409  | 판매 중지된 메뉴 아이템입니다.                 |
 | `STORE_NOT_APPROVED`             | 403  | 승인된 가게만 사용할 수 있습니다.              |
 | `STORE_ALREADY_EXISTS`           | 409  | 이미 등록된 가게가 있습니다.                   |
 | `SELLER_APPLICATION_NOT_FOUND`   | 404  | 판매자 신청을 찾을 수 없습니다.                |
