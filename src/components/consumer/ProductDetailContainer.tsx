@@ -98,11 +98,9 @@ export function ProductDetailContainer({
   return (
     <div className="bg-white">
       <RecentProductTracker
-        product={{
-          id: product.id,
-          name: product.name,
-          imageUrl: product.image,
-        }}
+        id={product.id}
+        name={product.name}
+        imageUrl={product.image}
       />
 
       <ConsumerHeader />

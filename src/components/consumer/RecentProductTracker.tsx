@@ -6,13 +6,25 @@ import type { RecentProductInput } from '@/lib/recentProducts';
 import { addRecentProduct } from '@/lib/recentProducts';
 
 interface RecentProductTrackerProps {
-  product: RecentProductInput;
+  id: string;
+  name: string;
+  imageUrl?: string;
 }
 
-export function RecentProductTracker({ product }: RecentProductTrackerProps) {
+export function RecentProductTracker({
+  id,
+  name,
+  imageUrl,
+}: RecentProductTrackerProps) {
   useEffect(() => {
+    const product: RecentProductInput = {
+      id,
+      name,
+      imageUrl,
+    };
+
     addRecentProduct(product);
-  }, [product]);
+  }, [id, imageUrl, name]);
 
   return null;
 }
