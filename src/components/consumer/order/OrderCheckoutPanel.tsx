@@ -179,11 +179,13 @@ export function OrderCheckoutPanel({
 
         <OrderInfoBlock
           icon={<CreditCard className="size-5" aria-hidden="true" />}
-          title="결제 수단"
+          title="결제 안내"
         >
-          <p className="font-medium text-gray-900">토스페이먼츠</p>
+          <p className="font-medium text-gray-900">
+            결제하기 버튼을 눌러 결제를 진행합니다.
+          </p>
           <p className="mt-2 text-sm text-gray-500">
-            결제 수단은 추후 연동 예정입니다.
+            결제수단 선택 및 변경 기능은 추후 제공 예정입니다.
           </p>
         </OrderInfoBlock>
 
