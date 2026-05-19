@@ -3,6 +3,7 @@
 import {
   ShoppingBag,
   Clock,
+  PackageCheck,
   CheckCircle,
   XCircle,
   AlertCircle,
@@ -12,12 +13,13 @@ import { Section } from '@/components/common/Section/Section';
 import { mockOrders } from '@/mocks/orders';
 
 export function OrderManageContent() {
-  const processingCount = mockOrders.filter(
+  const reservedCount = mockOrders.filter(
     (o) => o.status === 'reserved'
   ).length;
-  const reservedCount = mockOrders.filter(
-    (o) => o.status === 'accepted' || o.status === 'ready'
+  const acceptedCount = mockOrders.filter(
+    (o) => o.status === 'accepted'
   ).length;
+  const readyCount = mockOrders.filter((o) => o.status === 'ready').length;
   const completedCount = mockOrders.filter(
     (o) => o.status === 'completed'
   ).length;
@@ -37,7 +39,7 @@ export function OrderManageContent() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-6">
         <Section variant="card" className="bg-white">
           <div className="flex items-center gap-4">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-yellow-100">
@@ -46,7 +48,7 @@ export function OrderManageContent() {
             <div>
               <p className="text-sm text-gray-500">수락 대기</p>
               <p className="text-2xl font-bold text-gray-900">
-                {processingCount}
+                {reservedCount}
                 <span className="text-base font-normal text-gray-500">건</span>
               </p>
             </div>
@@ -59,9 +61,24 @@ export function OrderManageContent() {
               <Clock className="h-6 w-6 text-blue-600" />
             </div>
             <div>
+              <p className="text-sm text-gray-500">주문 승인</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {acceptedCount}
+                <span className="text-base font-normal text-gray-500">건</span>
+              </p>
+            </div>
+          </div>
+        </Section>
+
+        <Section variant="card" className="bg-white">
+          <div className="flex items-center gap-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-indigo-100">
+              <PackageCheck className="h-6 w-6 text-indigo-600" />
+            </div>
+            <div>
               <p className="text-sm text-gray-500">픽업 대기</p>
               <p className="text-2xl font-bold text-gray-900">
-                {reservedCount}
+                {readyCount}
                 <span className="text-base font-normal text-gray-500">건</span>
               </p>
             </div>
@@ -113,6 +130,7 @@ export function OrderManageContent() {
           </div>
         </Section>
       </div>
+
       <div className="rounded-lg border border-gray-200 bg-white p-4 text-center text-gray-500">
         <p className="text-sm">필터 컴포넌트 구현 예정</p>
       </div>
