@@ -20,6 +20,7 @@ const statusDisplayMap: Record<OrderStatus, ReservationDisplayGroup> = {
   paymentPending: 'paymentPending',
   processing: 'processing',
   reserved: 'pendingPickup',
+  accepted: 'pendingPickup',
   ready: 'pendingPickup',
   completed: 'completed',
   cancelled: 'cancelled',

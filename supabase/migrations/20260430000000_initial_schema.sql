@@ -19,6 +19,7 @@ CREATE TYPE order_status AS ENUM (
   'payment_pending',
   'processing',
   'reserved',
+  'accepted',
   'ready',
   'completed',
   'cancelled',

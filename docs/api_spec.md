@@ -104,13 +104,13 @@ export interface PaginatedResult<T> {
 
 API contract의 status 값은 JSON-safe string이며, DB 저장 값과 Domain Type 값이 1:1 대응한다고 가정하지 않는다.
 
-| 대상    | API/DB 기준 값                                                                         | Domain 기준 값/파생값                                                                 |
-| ------- | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| User    | `active`, `suspended`, `deleted`                                                       | 동일                                                                                  |
-| Store   | `approved`, `inactive`                                                                 | 신규 가게는 `approved`로 생성. `canSell = role === 'seller' && status === 'approved'` |
-| Product | `active`, `closed`                                                                     | `status: active \| closed`, `isSoldOut`, `isExpired`, `displayStatus` 파생            |
-| Order   | `payment_pending`, `reserved`, `ready`, `completed`, `cancelled`, `no_show`, `expired` | `paymentPending`, `reserved`, `ready`, `completed`, `cancelled`, `noShow`, `expired`  |
-| Payment | `pending`, `paid`, `failed`, `cancelled`, `refunded`                                   | 동일                                                                                  |
+| 대상    | API/DB 기준 값                                                                                                   | Domain 기준 값/파생값                                                                                          |
+| ------- | ---------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| User    | `active`, `suspended`, `deleted`                                                                                 | 동일                                                                                                           |
+| Store   | `approved`, `inactive`                                                                                           | 신규 가게는 `approved`로 생성. `canSell = role === 'seller' && status === 'approved'`                          |
+| Product | `active`, `closed`                                                                                               | `status: active \| closed`, `isSoldOut`, `isExpired`, `displayStatus` 파생                                     |
+| Order   | `payment_pending`, `processing`, `reserved`, `accepted`, `ready`, `completed`, `cancelled`, `no_show`, `expired` | `paymentPending`, `processing`, `reserved`, `accepted`, `ready`, `completed`, `cancelled`, `noShow`, `expired` |
+| Payment | `pending`, `paid`, `failed`, `cancelled`, `refunded`                                                             | 동일                                                                                                           |
 
 Product `displayStatus` 계산 기준:
 
@@ -509,7 +509,7 @@ DB source:
 Query:
 
 ```ts
-export interface OrderListParams {
+export interface ConsumerOrderListParams {
   page: number;
   pageSize: number;
   status?:
@@ -520,6 +520,7 @@ export interface OrderListParams {
     | 'cancelled'
     | 'no_show'
     | 'expired';
+  // 'accepted', 'processing' 제외 (소비자 필터 대상 아님)
   sort: 'createdAt' | 'pickupAt';
   order: 'asc' | 'desc';
 }
@@ -540,7 +541,9 @@ export interface OrderListItemResponse {
   paymentAmount: number;
   status:
     | 'payment_pending'
+    | 'processing'
     | 'reserved'
+    | 'accepted'
     | 'ready'
     | 'completed'
     | 'cancelled'
@@ -904,10 +907,49 @@ Seller product API의 pickup time은 서버 schema에서 `HH:mm:ss`로 정규화
 | ---------- | -------------- | ------ | -------------------------------------- | ------ | -------- |
 | S-ORDER-01 | 주문 목록 조회 | GET    | `/api/seller/orders`                   | seller | P0       |
 | S-ORDER-02 | 주문 상세 조회 | GET    | `/api/seller/orders/:orderId`          | seller | P0       |
+| S-ORDER-05 | 접수 처리      | PATCH  | `/api/seller/orders/:orderId/accept`   | seller | P0       |
+| S-ORDER-06 | 준비 완료 처리 | PATCH  | `/api/seller/orders/:orderId/ready`    | seller | P0       |
 | S-ORDER-03 | 픽업 완료 처리 | PATCH  | `/api/seller/orders/:orderId/complete` | seller | P0       |
 | S-ORDER-04 | 노쇼 처리      | PATCH  | `/api/seller/orders/:orderId/no-show`  | seller | P1       |
 
 Seller order API는 `requireSellerStore()`를 통과해야 하며, 해당 주문이 seller의 store에 속하는지 검증한다.
+
+### 9.1 상태 전이 정책
+
+```
+reserved → (PATCH /accept) → accepted → (PATCH /ready) → ready → (PATCH /complete) → completed
+```
+
+- accept 허용 상태: `reserved`
+- ready 허용 상태: `accepted`
+- complete 허용 상태: `ready`
+- 허용되지 않는 현재 상태에서 전이 시도 → `INVALID_ORDER_STATUS` 409
+- 상태 전이는 update query에 `store_id`, `orderId`, `expectedStatus` 조건을 모두 포함해 원자적으로 수행한다.
+- `complete` 처리 시 `picked_up_at = now()` 함께 기록한다.
+- MVP에서 `ready` 전이는 cron/자동이 아닌 seller 수동 처리다.
+- 응답: `void` (`success(undefined)`)
+
+### 9.2 목록 query (SellerOrderListParams)
+
+```ts
+export interface SellerOrderListParams {
+  page: number;
+  pageSize: number;
+  status?:
+    | 'reserved'
+    | 'accepted'
+    | 'ready'
+    | 'completed'
+    | 'cancelled'
+    | 'no_show'
+    | 'expired';
+  // 'payment_pending', 'processing' 제외
+  sort: 'createdAt' | 'pickupAt';
+  order: 'asc' | 'desc';
+}
+```
+
+- 오류: `ORDER_NOT_FOUND` 404 (orderId 불일치 또는 타 store 주문), `INVALID_ORDER_STATUS` 409
 
 ---
 
@@ -1000,26 +1042,26 @@ Wishlist는 MVP 이후 기능으로 둔다.
 
 RPC에서 raise하는 예외는 아래 정책으로 API error code로 변환한다.
 
-| RPC 예외                      | API 변환                         | 발생 RPC                                                   |
-| ----------------------------- | -------------------------------- | ---------------------------------------------------------- |
-| `EMPTY_ITEMS`                 | `VALIDATION_ERROR` 400           | `create_order`                                             |
-| `INVALID_ITEM_FORMAT`         | `VALIDATION_ERROR` 400           | `create_order`                                             |
-| `INVALID_PICKUP_TIME`         | `VALIDATION_ERROR` 400           | `create_order`                                             |
-| `MULTIPLE_STORES_NOT_ALLOWED` | `VALIDATION_ERROR` 400           | `create_order`                                             |
-| `PRODUCT_NOT_FOUND`           | `PRODUCT_NOT_FOUND` 404          | `create_order`                                             |
-| `PRODUCT_EXPIRED`             | `PRODUCT_EXPIRED` 409            | `create_order`                                             |
-| `PRODUCT_NOT_AVAILABLE`       | `PRODUCT_NOT_AVAILABLE` 409      | `create_order`                                             |
-| `OUT_OF_STOCK`                | `OUT_OF_STOCK` 409               | `create_order`                                             |
-| `DUPLICATE_PRODUCT_IN_ORDER`  | `DUPLICATE_PRODUCT_IN_ORDER` 400 | `create_order`                                             |
-| `ORDER_NUMBER_EXHAUSTED`      | `ORDER_NUMBER_EXHAUSTED` 503     | `create_order`                                             |
-| `ORDER_NOT_FOUND`             | `ORDER_NOT_FOUND` 404            | `check_pickup_capacity`, `confirm_payment`, `expire_order` |
-| `ORDER_EXPIRED`               | `ORDER_EXPIRED` 409              | `confirm_payment`                                          |
-| `PAYMENT_AMOUNT_MISMATCH`     | `PAYMENT_AMOUNT_MISMATCH` 400    | `confirm_payment`                                          |
-| `PICKUP_NUMBER_EXHAUSTED`     | `PICKUP_NUMBER_EXHAUSTED` 409    | `confirm_payment`                                          |
-| `INVALID_ORDER_STATUS`        | `INVALID_ORDER_STATUS` 409       | `confirm_payment`, `expire_order`                          |
-| `ORDER_NOT_EXPIRED`           | `VALIDATION_ERROR` 400           | `expire_order`                                             |
-| `NOT_IMPLEMENTED`             | `NOT_IMPLEMENTED` 501            | `cancel_order`                                             |
-| `APPLICATION_NOT_PENDING`     | `VALIDATION_ERROR` 400           | `approve_seller_application`                               |
+| RPC 예외                      | API 변환                         | 발생 RPC                                                                                                                              |
+| ----------------------------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `EMPTY_ITEMS`                 | `VALIDATION_ERROR` 400           | `create_order`                                                                                                                        |
+| `INVALID_ITEM_FORMAT`         | `VALIDATION_ERROR` 400           | `create_order`                                                                                                                        |
+| `INVALID_PICKUP_TIME`         | `VALIDATION_ERROR` 400           | `create_order`                                                                                                                        |
+| `MULTIPLE_STORES_NOT_ALLOWED` | `VALIDATION_ERROR` 400           | `create_order`                                                                                                                        |
+| `PRODUCT_NOT_FOUND`           | `PRODUCT_NOT_FOUND` 404          | `create_order`                                                                                                                        |
+| `PRODUCT_EXPIRED`             | `PRODUCT_EXPIRED` 409            | `create_order`                                                                                                                        |
+| `PRODUCT_NOT_AVAILABLE`       | `PRODUCT_NOT_AVAILABLE` 409      | `create_order`                                                                                                                        |
+| `OUT_OF_STOCK`                | `OUT_OF_STOCK` 409               | `create_order`                                                                                                                        |
+| `DUPLICATE_PRODUCT_IN_ORDER`  | `DUPLICATE_PRODUCT_IN_ORDER` 400 | `create_order`                                                                                                                        |
+| `ORDER_NUMBER_EXHAUSTED`      | `ORDER_NUMBER_EXHAUSTED` 503     | `create_order`                                                                                                                        |
+| `ORDER_NOT_FOUND`             | `ORDER_NOT_FOUND` 404            | `check_pickup_capacity`, `confirm_payment`, `expire_order`, `accept_seller_order`, `mark_seller_order_ready`, `complete_seller_order` |
+| `ORDER_EXPIRED`               | `ORDER_EXPIRED` 409              | `confirm_payment`                                                                                                                     |
+| `PAYMENT_AMOUNT_MISMATCH`     | `PAYMENT_AMOUNT_MISMATCH` 400    | `confirm_payment`                                                                                                                     |
+| `PICKUP_NUMBER_EXHAUSTED`     | `PICKUP_NUMBER_EXHAUSTED` 409    | `confirm_payment`                                                                                                                     |
+| `INVALID_ORDER_STATUS`        | `INVALID_ORDER_STATUS` 409       | `confirm_payment`, `expire_order`, `accept_seller_order`, `mark_seller_order_ready`, `complete_seller_order`                          |
+| `ORDER_NOT_EXPIRED`           | `VALIDATION_ERROR` 400           | `expire_order`                                                                                                                        |
+| `NOT_IMPLEMENTED`             | `NOT_IMPLEMENTED` 501            | `cancel_order`                                                                                                                        |
+| `APPLICATION_NOT_PENDING`     | `VALIDATION_ERROR` 400           | `approve_seller_application`                                                                                                          |
 
 `create_order`의 validation 예외는 Zod 스키마 검증이 선행되므로 정상 흐름에서는 도달하지 않아야 한다.
 

@@ -2,6 +2,7 @@ import type { MenuItemResponse } from '@/contracts/menu-item';
 import type {
   OrderDetailResponse,
   OrderListItemResponse,
+  OrderListResponse,
 } from '@/contracts/order';
 import type { ProductListItemResponse } from '@/contracts/product';
 import type { SellerApplicationResponse } from '@/contracts/seller-application';
@@ -125,6 +126,14 @@ export const mockSellerCreatedProduct: ProductListItemResponse = {
 };
 
 export const mockSellerOrders: OrderListItemResponse[] = mockOrders;
+
+export const mockSellerOrderList: OrderListResponse = {
+  items: mockOrders,
+  page: 1,
+  pageSize: 20,
+  totalCount: mockOrders.length,
+  totalPages: 1,
+};
 
 export const mockSellerOrderDetail: OrderDetailResponse = mockOrderDetail;
 

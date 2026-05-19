@@ -2,12 +2,11 @@ import { ERROR_CODE } from '@/lib/errors/errorCodes';
 import { requireSellerStore } from '@/app/api/_lib/auth';
 import { isApiMockEnabled } from '@/app/api/_lib/mock';
 import { fail, routeError, success } from '@/app/api/_lib/response';
-import { mockSellerOrderDetail } from '@/mocks/seller';
 
-import { orderIdSchema } from '../_lib/schemas';
-import { getSellerOrder } from '../_lib/service';
+import { orderIdSchema } from '../../_lib/schemas';
+import { markSellerOrderReady } from '../../_lib/service';
 
-export async function GET(
+export async function PATCH(
   _request: Request,
   { params }: { params: Promise<{ orderId: string }> }
 ): Promise<Response> {
@@ -20,12 +19,12 @@ export async function GET(
     ]);
   }
 
-  if (isApiMockEnabled()) return success(mockSellerOrderDetail);
+  if (isApiMockEnabled()) return success(undefined);
 
   try {
     const { store } = await requireSellerStore();
-    const data = await getSellerOrder(store.id, parsed.data);
-    return success(data);
+    await markSellerOrderReady(store.id, parsed.data);
+    return success(undefined);
   } catch (error) {
     return routeError(error);
   }

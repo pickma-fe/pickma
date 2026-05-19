@@ -232,9 +232,10 @@
 
 - 1 주문 = 1 가게
 - 주문 생성 직후 상태는 `payment_pending`
-- 결제 성공 시 `reserved`
-- 픽업 시간 도래 시 `ready`
-- 픽업 완료 시 `completed`
+- 결제 성공 시 `reserved` (접수 대기)
+- seller가 접수 처리 시 `accepted` (준비 중)
+- seller가 준비 완료 처리 시 `ready` (픽업 가능) — MVP에서는 seller 수동 전환 (cron 없음)
+- seller가 픽업 완료 처리 시 `completed`
 - 취소 시 `cancelled`
 - 노쇼 처리 시 `no_show`
 - 결제 만료 시 `expired`
