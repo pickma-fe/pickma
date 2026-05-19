@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { act, renderHook } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { createElement } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -78,6 +78,9 @@ describe('useSellerOrders', () => {
       'list',
       { status: 'reserved' },
     ]);
+    await waitFor(() =>
+      expect(sellerOrderApi.getOrders).toHaveBeenCalledWith(params)
+    );
   });
 });
 
@@ -94,7 +97,7 @@ describe('useSellerOrder', () => {
     expect(sellerOrderApi.getOrder).not.toHaveBeenCalled();
   });
 
-  it('id가 있으면 queryKey에 id를 포함한다', () => {
+  it('id가 있으면 queryKey에 id를 포함하고 getOrder를 호출한다', async () => {
     vi.mocked(sellerOrderApi.getOrder).mockResolvedValue({} as never);
 
     const { queryClient, wrapper } = createWrapper();
@@ -107,6 +110,9 @@ describe('useSellerOrder', () => {
       'detail',
       ORDER_ID,
     ]);
+    await waitFor(() =>
+      expect(sellerOrderApi.getOrder).toHaveBeenCalledWith(ORDER_ID)
+    );
   });
 });
 
