@@ -1,6 +1,9 @@
 import { notFound } from 'next/navigation';
 
-import type { PickupTimeOption } from '@/lib/formatPickupTime';
+import {
+  createPickupTimeOptions,
+  type PickupTimeOption,
+} from '@/lib/formatPickupTime';
 import { Footer } from '@/components/common';
 import { ConsumerHeader } from '@/components/consumer/ConsumerHeader';
 import {
@@ -41,7 +44,9 @@ function parseOrderQuantity(
 
 function createInitialPickupTime(
   pickupStart: string | string[] | undefined,
-  pickupEnd: string | string[] | undefined
+  pickupEnd: string | string[] | undefined,
+  productPickupStartTime: string,
+  productPickupEndTime: string
 ): PickupTimeOption | undefined {
   const startAt = getSearchParamValue(pickupStart);
   const endAt = getSearchParamValue(pickupEnd);
@@ -50,11 +55,10 @@ function createInitialPickupTime(
     return undefined;
   }
 
-  return {
-    label: `${startAt}~${endAt}`,
-    startAt,
-    endAt,
-  };
+  return createPickupTimeOptions(
+    productPickupStartTime,
+    productPickupEndTime
+  ).find((option) => option.startAt === startAt && option.endAt === endAt);
 }
 
 export default async function OrderPage({
@@ -75,7 +79,9 @@ export default async function OrderPage({
   );
   const initialPickupTime = createInitialPickupTime(
     resolvedSearchParams.pickupStart,
-    resolvedSearchParams.pickupEnd
+    resolvedSearchParams.pickupEnd,
+    product.pickupStartTime,
+    product.pickupEndTime
   );
   const productTotalPrice = product.discountPrice * orderQuantity;
   const originalTotalPrice = product.originalPrice * orderQuantity;
