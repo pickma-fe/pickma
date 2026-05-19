@@ -1042,26 +1042,26 @@ Wishlist는 MVP 이후 기능으로 둔다.
 
 RPC에서 raise하는 예외는 아래 정책으로 API error code로 변환한다.
 
-| RPC 예외                      | API 변환                         | 발생 RPC                                                   |
-| ----------------------------- | -------------------------------- | ---------------------------------------------------------- |
-| `EMPTY_ITEMS`                 | `VALIDATION_ERROR` 400           | `create_order`                                             |
-| `INVALID_ITEM_FORMAT`         | `VALIDATION_ERROR` 400           | `create_order`                                             |
-| `INVALID_PICKUP_TIME`         | `VALIDATION_ERROR` 400           | `create_order`                                             |
-| `MULTIPLE_STORES_NOT_ALLOWED` | `VALIDATION_ERROR` 400           | `create_order`                                             |
-| `PRODUCT_NOT_FOUND`           | `PRODUCT_NOT_FOUND` 404          | `create_order`                                             |
-| `PRODUCT_EXPIRED`             | `PRODUCT_EXPIRED` 409            | `create_order`                                             |
-| `PRODUCT_NOT_AVAILABLE`       | `PRODUCT_NOT_AVAILABLE` 409      | `create_order`                                             |
-| `OUT_OF_STOCK`                | `OUT_OF_STOCK` 409               | `create_order`                                             |
-| `DUPLICATE_PRODUCT_IN_ORDER`  | `DUPLICATE_PRODUCT_IN_ORDER` 400 | `create_order`                                             |
-| `ORDER_NUMBER_EXHAUSTED`      | `ORDER_NUMBER_EXHAUSTED` 503     | `create_order`                                             |
-| `ORDER_NOT_FOUND`             | `ORDER_NOT_FOUND` 404            | `check_pickup_capacity`, `confirm_payment`, `expire_order` |
-| `ORDER_EXPIRED`               | `ORDER_EXPIRED` 409              | `confirm_payment`                                          |
-| `PAYMENT_AMOUNT_MISMATCH`     | `PAYMENT_AMOUNT_MISMATCH` 400    | `confirm_payment`                                          |
-| `PICKUP_NUMBER_EXHAUSTED`     | `PICKUP_NUMBER_EXHAUSTED` 409    | `confirm_payment`                                          |
-| `INVALID_ORDER_STATUS`        | `INVALID_ORDER_STATUS` 409       | `confirm_payment`, `expire_order`                          |
-| `ORDER_NOT_EXPIRED`           | `VALIDATION_ERROR` 400           | `expire_order`                                             |
-| `NOT_IMPLEMENTED`             | `NOT_IMPLEMENTED` 501            | `cancel_order`                                             |
-| `APPLICATION_NOT_PENDING`     | `VALIDATION_ERROR` 400           | `approve_seller_application`                               |
+| RPC 예외                      | API 변환                         | 발생 RPC                                                                                                                              |
+| ----------------------------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `EMPTY_ITEMS`                 | `VALIDATION_ERROR` 400           | `create_order`                                                                                                                        |
+| `INVALID_ITEM_FORMAT`         | `VALIDATION_ERROR` 400           | `create_order`                                                                                                                        |
+| `INVALID_PICKUP_TIME`         | `VALIDATION_ERROR` 400           | `create_order`                                                                                                                        |
+| `MULTIPLE_STORES_NOT_ALLOWED` | `VALIDATION_ERROR` 400           | `create_order`                                                                                                                        |
+| `PRODUCT_NOT_FOUND`           | `PRODUCT_NOT_FOUND` 404          | `create_order`                                                                                                                        |
+| `PRODUCT_EXPIRED`             | `PRODUCT_EXPIRED` 409            | `create_order`                                                                                                                        |
+| `PRODUCT_NOT_AVAILABLE`       | `PRODUCT_NOT_AVAILABLE` 409      | `create_order`                                                                                                                        |
+| `OUT_OF_STOCK`                | `OUT_OF_STOCK` 409               | `create_order`                                                                                                                        |
+| `DUPLICATE_PRODUCT_IN_ORDER`  | `DUPLICATE_PRODUCT_IN_ORDER` 400 | `create_order`                                                                                                                        |
+| `ORDER_NUMBER_EXHAUSTED`      | `ORDER_NUMBER_EXHAUSTED` 503     | `create_order`                                                                                                                        |
+| `ORDER_NOT_FOUND`             | `ORDER_NOT_FOUND` 404            | `check_pickup_capacity`, `confirm_payment`, `expire_order`, `accept_seller_order`, `mark_seller_order_ready`, `complete_seller_order` |
+| `ORDER_EXPIRED`               | `ORDER_EXPIRED` 409              | `confirm_payment`                                                                                                                     |
+| `PAYMENT_AMOUNT_MISMATCH`     | `PAYMENT_AMOUNT_MISMATCH` 400    | `confirm_payment`                                                                                                                     |
+| `PICKUP_NUMBER_EXHAUSTED`     | `PICKUP_NUMBER_EXHAUSTED` 409    | `confirm_payment`                                                                                                                     |
+| `INVALID_ORDER_STATUS`        | `INVALID_ORDER_STATUS` 409       | `confirm_payment`, `expire_order`, `accept_seller_order`, `mark_seller_order_ready`, `complete_seller_order`                          |
+| `ORDER_NOT_EXPIRED`           | `VALIDATION_ERROR` 400           | `expire_order`                                                                                                                        |
+| `NOT_IMPLEMENTED`             | `NOT_IMPLEMENTED` 501            | `cancel_order`                                                                                                                        |
+| `APPLICATION_NOT_PENDING`     | `VALIDATION_ERROR` 400           | `approve_seller_application`                                                                                                          |
 
 `create_order`의 validation 예외는 Zod 스키마 검증이 선행되므로 정상 흐름에서는 도달하지 않아야 한다.
 
