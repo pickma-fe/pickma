@@ -52,6 +52,7 @@ export function MenuTable({
   const handlePageSizeChange = (value: string) => {
     setPageSize(Number(value));
     onPageChange(1);
+    onSelectionChange(new Set());
   };
 
   const handleSelectAll = () => {
