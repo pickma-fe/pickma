@@ -1,6 +1,9 @@
 import { z } from 'zod';
 
-import type { CreateOrderRequest, OrderListParams } from '@/contracts/order';
+import type {
+  ConsumerOrderListParams,
+  CreateOrderRequest,
+} from '@/contracts/order';
 
 export const createOrderSchema = z.object({
   productId: z.uuid(),
@@ -26,6 +29,6 @@ export const orderListQuerySchema = z
     sort: z.enum(['createdAt', 'pickupAt']).default('createdAt'),
     order: z.enum(['asc', 'desc']).default('desc'),
   })
-  .strict() satisfies z.ZodType<OrderListParams>;
+  .strict() satisfies z.ZodType<ConsumerOrderListParams>;
 
 export const orderIdSchema = z.uuid();

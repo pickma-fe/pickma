@@ -24,8 +24,7 @@ export interface StoreResponse {
   image?: string;
   openTime?: string;
   closeTime?: string;
-  status: 'pending' | 'approved' | 'rejected' | 'inactive';
-  rejectReason?: string;
+  status: 'approved' | 'inactive';
   canSell: boolean;
   createdAt: string;
   updatedAt: string;

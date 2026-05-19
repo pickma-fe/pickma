@@ -1,4 +1,4 @@
-export type PaymentMethod = 'card' | 'easyPay' | 'transfer' | 'virtualAccount';
+export type PaymentMethod = 'card' | 'virtual_account' | 'mobile' | 'easy_pay';
 
 export type PaymentStatus =
   | 'pending'
@@ -10,8 +10,9 @@ export type PaymentStatus =
 export interface Payment {
   id: string;
   orderId: string;
-  paymentKey?: string;
+  orderNumber: string;
   method: PaymentMethod;
+  methodDetail?: string;
   amount: number;
   status: PaymentStatus;
   paidAt?: Date;
