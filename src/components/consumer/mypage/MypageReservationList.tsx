@@ -33,7 +33,7 @@ const tabStatusMap: Record<
   Exclude<ReservationTab['id'], 'all'>,
   OrderStatus[]
 > = {
-  pendingPickup: ['processing', 'reserved', 'ready'],
+  pendingPickup: ['reserved', 'ready'],
   completed: ['completed'],
   cancelled: ['cancelled', 'noShow', 'expired'],
 };

@@ -9,16 +9,16 @@ interface MypageReservationCardProps {
   reservation: MypageReservation;
 }
 
-type ReservationStatusGroup = 'pendingPickup' | 'completed' | 'cancelled';
 type ReservationDisplayGroup =
   | 'paymentPending'
+  | 'processing'
   | 'pendingPickup'
   | 'completed'
   | 'cancelled';
 
-const statusGroupMap: Record<OrderStatus, ReservationStatusGroup> = {
-  paymentPending: 'pendingPickup',
-  processing: 'pendingPickup',
+const statusDisplayMap: Record<OrderStatus, ReservationDisplayGroup> = {
+  paymentPending: 'paymentPending',
+  processing: 'processing',
   reserved: 'pendingPickup',
   ready: 'pendingPickup',
   completed: 'completed',
@@ -41,6 +41,12 @@ const statusStyles: Record<
     className: 'bg-yellow-50 text-yellow-600',
     actionLabel: '결제하기',
     actionVariant: 'filled',
+  },
+  processing: {
+    label: '처리 중',
+    className: 'bg-yellow-50 text-yellow-600',
+    actionLabel: '처리 중',
+    actionVariant: 'outline',
   },
   pendingPickup: {
     label: '픽업 대기',
@@ -65,9 +71,7 @@ const statusStyles: Record<
 export function MypageReservationCard({
   reservation,
 }: MypageReservationCardProps) {
-  const statusGroup = statusGroupMap[reservation.status];
-  const displayGroup =
-    reservation.status === 'paymentPending' ? 'paymentPending' : statusGroup;
+  const displayGroup = statusDisplayMap[reservation.status];
   const status = statusStyles[displayGroup];
   const reservationTitle = reservation.productName
     ? `${reservation.storeName} ${reservation.productName}`
