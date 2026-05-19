@@ -3,6 +3,8 @@
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
+import { ApiError } from '@/api/apiClient';
+import { useSignOut } from '@/hooks/auth/useSignOut';
 import { useMe } from '@/hooks/users/useMe';
 import { Header } from '@/components/common/Header/Header';
 import { Sidebar } from '@/components/common/Sidebar/Sidebar';
@@ -14,15 +16,32 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { data: user, isLoading, isError } = useMe();
+  const { data: user, isLoading, isError, error, refetch } = useMe();
   const router = useRouter();
+  const { mutateAsync: signOut } = useSignOut();
+
+  async function handleSignOut() {
+    await signOut();
+    router.push('/');
+  }
 
   useEffect(() => {
-    if (isLoading || isError) return;
+    if (isLoading) return;
+
+    if (isError) {
+      if (error instanceof ApiError && error.statusCode === 401) {
+        const currentPath = window.location.pathname + window.location.search;
+        router.push(`/?auth=required&next=${encodeURIComponent(currentPath)}`);
+      } else if (error instanceof ApiError && error.statusCode === 403) {
+        router.push('/');
+      }
+      return;
+    }
+
     if (user?.role !== 'admin') {
       router.push('/');
     }
-  }, [isLoading, isError, user, router]);
+  }, [isLoading, isError, error, user, router]);
 
   if (isLoading) {
     return (
@@ -33,11 +52,26 @@ export default function AdminLayout({
   }
 
   if (isError) {
+    const isAuthError =
+      error instanceof ApiError &&
+      (error.statusCode === 401 || error.statusCode === 403);
+
+    if (isAuthError) {
+      return null;
+    }
+
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="flex min-h-screen flex-col items-center justify-center gap-3">
         <span className="text-sm text-gray-500">
           오류가 발생했습니다. 잠시 후 다시 시도해주세요.
         </span>
+        <button
+          type="button"
+          onClick={() => void refetch()}
+          className="rounded-sm border border-gray-300 px-4 py-1.5 text-sm text-gray-700 hover:bg-gray-50"
+        >
+          다시 시도
+        </button>
       </div>
     );
   }
@@ -48,7 +82,17 @@ export default function AdminLayout({
 
   return (
     <div className="flex min-h-screen flex-col">
-      <Header user={user} logoHref="/admin" menuItems={[]} />
+      <Header
+        user={user}
+        logoHref="/admin"
+        menuItems={[
+          {
+            label: '로그아웃',
+            type: 'action',
+            onClick: () => void handleSignOut(),
+          },
+        ]}
+      />
       <div className="flex flex-1">
         <div className="hidden pt-4 lg:block">
           <Sidebar sections={adminSidebarSections} />

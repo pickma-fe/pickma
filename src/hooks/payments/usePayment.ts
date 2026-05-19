@@ -1,11 +1,13 @@
 'use client';
 
 import { useQueryClient } from '@tanstack/react-query';
+import { useRouter } from 'next/navigation';
 import { useRef, useState } from 'react';
 
 import { paymentApi } from '@/api/payments/paymentApi';
 
 export function usePayment() {
+  const router = useRouter();
   const queryClient = useQueryClient();
   const [isPending, setIsPending] = useState(false);
   const [error, setError] = useState<Error | null>(null);
@@ -47,13 +49,21 @@ export function usePayment() {
           if (event.data?.success === true) {
             const msgOrderNumber = (event.data as { orderNumber?: unknown })
               .orderNumber;
-            if (typeof msgOrderNumber !== 'string' || !msgOrderNumber) {
+            if (
+              typeof msgOrderNumber !== 'string' ||
+              msgOrderNumber !== orderNumber
+            ) {
+              router.push('/order/fail?reason=payment_failed');
               reject(new Error('payment_failed'));
               return;
             }
             void queryClient.invalidateQueries({ queryKey: ['orders'] });
+            router.push(
+              `/order/complete?orderNumber=${encodeURIComponent(msgOrderNumber)}`
+            );
             resolve({ orderNumber: msgOrderNumber });
           } else {
+            router.push('/order/fail?reason=payment_failed');
             reject(new Error('payment_failed'));
           }
         };
@@ -61,6 +71,7 @@ export function usePayment() {
         const timer = setInterval(() => {
           if (popup.closed) {
             cleanup();
+            router.push('/order/fail?reason=payment_cancelled');
             reject(new Error('payment_cancelled'));
           }
         }, 500);

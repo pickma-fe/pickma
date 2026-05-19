@@ -71,7 +71,6 @@ export async function requireActiveUser(): Promise<{
 type RequireSellerResult = {
   authUser: User;
   serviceUser: UserResponse;
-  store: { id: string };
 };
 
 export async function requireSeller(): Promise<RequireSellerResult> {
@@ -80,6 +79,18 @@ export async function requireSeller(): Promise<RequireSellerResult> {
   if (serviceUser.role !== 'seller') {
     throw new AppError(ERROR_CODE.FORBIDDEN, 403);
   }
+
+  return { authUser, serviceUser };
+}
+
+type RequireSellerStoreResult = {
+  authUser: User;
+  serviceUser: UserResponse;
+  store: { id: string };
+};
+
+export async function requireSellerStore(): Promise<RequireSellerStoreResult> {
+  const { authUser, serviceUser } = await requireSeller();
 
   const supabase = await createServerClient();
   const { data: store, error } = await supabase

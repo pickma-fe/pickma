@@ -11,6 +11,7 @@ const ORDER_STATUS_MAP: Record<OrderListItemResponse['status'], OrderStatus> = {
   payment_pending: 'paymentPending',
   processing: 'processing',
   reserved: 'reserved',
+  accepted: 'accepted',
   ready: 'ready',
   completed: 'completed',
   cancelled: 'cancelled',

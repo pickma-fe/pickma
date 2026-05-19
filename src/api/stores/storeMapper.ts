@@ -16,7 +16,6 @@ export function mapMyStore(dto: StoreResponse): MyStore {
     openTime: dto.openTime,
     closeTime: dto.closeTime,
     status: dto.status,
-    rejectReason: dto.rejectReason,
     canSell: dto.canSell,
     createdAt: new Date(dto.createdAt),
     updatedAt: new Date(dto.updatedAt),

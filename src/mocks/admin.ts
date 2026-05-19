@@ -22,14 +22,14 @@ export const mockAdminStores: AdminStoreResponse[] = [
     updatedAt: '2026-04-20T00:00:00.000Z',
   },
   {
-    id: 'store_pending_1',
+    id: 'store_inactive_1',
     userId: 'user_seller_2',
     name: '픽마 델리',
     businessNumber: '987-65-43210',
     phone: '02-9876-5432',
     address: '서울시 성동구 왕십리로 20',
     region: '서울 성동구',
-    status: 'pending',
+    status: 'inactive',
     createdAt: '2026-04-25T00:00:00.000Z',
     updatedAt: '2026-04-25T00:00:00.000Z',
   },
@@ -44,7 +44,7 @@ export const mockAdminStoreList: AdminStoreListResponse = {
 };
 
 const pendingStores = mockAdminStores.filter(
-  (store) => store.status === 'pending'
+  (store) => store.status === 'inactive'
 );
 
 export const mockPendingAdminStoreList: AdminStoreListResponse = {

@@ -72,7 +72,7 @@ export interface User {
 ## 3. Store
 
 ```ts
-export type StoreStatus = 'pending' | 'approved' | 'rejected' | 'inactive';
+export type StoreStatus = 'approved' | 'inactive';
 
 export interface Store {
   id: string;
@@ -88,13 +88,12 @@ export interface Store {
   openTime?: string;
   closeTime?: string;
   status: StoreStatus;
-  rejectReason?: string;
   createdAt: Date;
   updatedAt: Date;
 }
 ```
 
-새 판매자 승인 모델에서 가게 등록은 승인된 판매자만 수행한다. 신규 가게는 기본적으로 `approved` 상태로 생성한다. `pending` / `rejected`는 기존 데이터 호환 또는 후속 정책 검토 대상으로 남긴다.
+가게 등록은 승인된 판매자만 수행한다. 신규 가게는 `approved` 상태로 생성된다. `inactive`는 관리자가 비활성화한 가게에 사용한다.
 
 판매자 화면에서 자주 쓰는 내 가게 상태는 Store를 기반으로 구성한다.
 
@@ -196,19 +195,18 @@ export interface Category {
   name: string;
   icon?: string;
   sortOrder: number;
-  createdAt: Date;
 }
 
 export interface MenuItem {
   id: string;
   storeId: string;
-  categoryId?: string;
-  categoryName?: string;
-  status: 'active' | 'inactive';
+  categoryId: string;
+  categoryName: string;
   name: string;
   description?: string;
   image?: string;
   originalPrice: number;
+  status: 'active' | 'inactive';
   createdAt: Date;
   updatedAt: Date;
 }
@@ -286,7 +284,9 @@ export interface ProductDetail extends Product {
 ```ts
 export type OrderStatus =
   | 'paymentPending'
+  | 'processing'
   | 'reserved'
+  | 'accepted'
   | 'ready'
   | 'completed'
   | 'cancelled'

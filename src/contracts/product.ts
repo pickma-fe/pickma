@@ -12,6 +12,7 @@ export interface ProductListParams {
   pageSize: number;
   region?: string;
   categoryId?: string;
+  keyword?: string;
   discountOption?: ProductDiscountOption;
   sort?: 'endAt' | 'discountRate' | 'discountPrice';
   order?: 'asc' | 'desc';

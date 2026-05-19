@@ -13,12 +13,13 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 CREATE TYPE user_role AS ENUM ('customer', 'seller', 'admin');
 CREATE TYPE user_status AS ENUM ('active', 'suspended', 'deleted');
-CREATE TYPE store_status AS ENUM ('pending', 'approved', 'rejected', 'inactive');
+CREATE TYPE store_status AS ENUM ('approved', 'inactive');
 CREATE TYPE product_status AS ENUM ('active', 'closed');
 CREATE TYPE order_status AS ENUM (
   'payment_pending',
   'processing',
   'reserved',
+  'accepted',
   'ready',
   'completed',
   'cancelled',
@@ -30,6 +31,7 @@ CREATE TYPE payment_method AS ENUM ('card', 'virtual_account', 'mobile', 'easy_p
 CREATE TYPE payment_status AS ENUM ('pending', 'paid', 'failed', 'cancelled', 'refunded');
 CREATE TYPE social_provider AS ENUM ('google', 'kakao');
 CREATE TYPE seller_application_status AS ENUM ('pending', 'approved', 'rejected');
+CREATE TYPE menu_item_status AS ENUM ('active', 'inactive');
 CREATE TYPE seller_application_document_type AS ENUM ('business_license', 'id_card', 'bankbook', 'business_report');
 
 -- ============================================================
@@ -80,7 +82,6 @@ CREATE TABLE stores (
   open_time        time,
   close_time       time,
   status           store_status  NOT NULL DEFAULT 'approved',
-  reject_reason    varchar(500),
   created_at       timestamptz   NOT NULL DEFAULT now(),
   updated_at       timestamptz   NOT NULL DEFAULT now()
 );
@@ -88,11 +89,12 @@ CREATE TABLE stores (
 CREATE TABLE menu_items (
   id              uuid          PRIMARY KEY DEFAULT gen_random_uuid(),
   store_id        uuid          NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
-  category_id     uuid          REFERENCES categories(id) ON DELETE SET NULL,
+  category_id     uuid          NOT NULL REFERENCES categories(id) ON DELETE RESTRICT,
   name            varchar(100)  NOT NULL,
   description     text,
   image           varchar(500),
   original_price  int           NOT NULL,
+  status          menu_item_status  NOT NULL DEFAULT 'active',
   created_at      timestamptz   NOT NULL DEFAULT now(),
   updated_at      timestamptz   NOT NULL DEFAULT now()
 );

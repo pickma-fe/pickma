@@ -5,6 +5,7 @@ export type OrderStatusParam =
   | 'payment_pending'
   | 'processing'
   | 'reserved'
+  | 'accepted'
   | 'ready'
   | 'completed'
   | 'cancelled'
@@ -25,10 +26,18 @@ export interface CreateOrderResponse {
   expiresAt: string;
 }
 
-export interface OrderListParams {
+export interface ConsumerOrderListParams {
   page: number;
   pageSize: number;
-  status?: OrderStatusParam;
+  status?: Exclude<OrderStatusParam, 'accepted' | 'processing'>;
+  sort: 'createdAt' | 'pickupAt';
+  order: 'asc' | 'desc';
+}
+
+export interface SellerOrderListParams {
+  page: number;
+  pageSize: number;
+  status?: Exclude<OrderStatusParam, 'payment_pending' | 'processing'>;
   sort: 'createdAt' | 'pickupAt';
   order: 'asc' | 'desc';
 }
