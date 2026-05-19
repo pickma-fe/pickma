@@ -14,6 +14,8 @@ interface MenuTableProps {
   menus: MenuItemResponse[];
   currentPage: number;
   onPageChange: (page: number) => void;
+  selectedIds: Set<string>;
+  onSelectionChange: (ids: Set<string>) => void;
 }
 
 const PAGE_SIZE_OPTIONS = [
@@ -34,6 +36,8 @@ export function MenuTable({
   menus,
   currentPage,
   onPageChange,
+  selectedIds,
+  onSelectionChange,
 }: MenuTableProps) {
   const [pageSize, setPageSize] = useState(10);
 
@@ -41,9 +45,36 @@ export function MenuTable({
   const startIndex = (currentPage - 1) * pageSize;
   const paginatedMenus = menus.slice(startIndex, startIndex + pageSize);
 
+  const isAllSelected =
+    paginatedMenus.length > 0 &&
+    paginatedMenus.every((menu) => selectedIds.has(menu.id));
+
   const handlePageSizeChange = (value: string) => {
     setPageSize(Number(value));
     onPageChange(1);
+    onSelectionChange(new Set());
+  };
+
+  const handleSelectAll = () => {
+    if (isAllSelected) {
+      const next = new Set(selectedIds);
+      paginatedMenus.forEach((menu) => next.delete(menu.id));
+      onSelectionChange(next);
+    } else {
+      const next = new Set(selectedIds);
+      paginatedMenus.forEach((menu) => next.add(menu.id));
+      onSelectionChange(next);
+    }
+  };
+
+  const handleSelectOne = (id: string) => {
+    const next = new Set(selectedIds);
+    if (next.has(id)) {
+      next.delete(id);
+    } else {
+      next.add(id);
+    }
+    onSelectionChange(next);
   };
 
   if (menus.length === 0) {
@@ -68,9 +99,17 @@ export function MenuTable({
             <tr className="border-b border-gray-200 bg-gray-50">
               <th
                 scope="col"
-                className="px-4 py-3 text-left text-sm font-medium text-gray-500"
+                className="py-3 pr-4 pl-8 text-left text-sm font-medium text-gray-500"
               >
-                메뉴 정보
+                <div className="flex items-center gap-4">
+                  <input
+                    type="checkbox"
+                    checked={isAllSelected}
+                    onChange={handleSelectAll}
+                    className="text-primary-600 focus:ring-primary-500 h-4 w-4 rounded border-gray-300"
+                  />
+                  <span>메뉴 정보</span>
+                </div>
               </th>
               <th
                 scope="col"
@@ -92,7 +131,7 @@ export function MenuTable({
               </th>
               <th
                 scope="col"
-                className="px-4 py-3 text-left text-sm font-medium whitespace-nowrap text-gray-500"
+                className="py-3 pr-8 pl-4 text-left text-sm font-medium whitespace-nowrap text-gray-500"
               >
                 관리
               </th>
@@ -106,10 +145,16 @@ export function MenuTable({
                   index !== paginatedMenus.length - 1
                     ? 'border-b border-gray-100'
                     : ''
-                }`}
+                } ${selectedIds.has(menu.id) ? 'bg-primary-50/50' : ''}`}
               >
-                <td className="px-4 py-4">
-                  <div className="flex items-center gap-3">
+                <td className="py-4 pr-4 pl-8">
+                  <div className="flex items-center gap-7">
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.has(menu.id)}
+                      onChange={() => handleSelectOne(menu.id)}
+                      className="text-primary-600 focus:ring-primary-500 h-4 w-4 rounded border-gray-300"
+                    />
                     <div className="relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100">
                       {menu.image ? (
                         <Image
@@ -148,7 +193,7 @@ export function MenuTable({
                 <td className="px-4 py-4 text-sm whitespace-nowrap text-gray-500">
                   {formatDate(menu.updatedAt)}
                 </td>
-                <td className="px-4 py-4 whitespace-nowrap">
+                <td className="py-4 pr-8 pl-4 whitespace-nowrap">
                   <Link href={`/seller/menu/${menu.id}/edit`}>
                     <Button variant="outline" color="gray">
                       수정
