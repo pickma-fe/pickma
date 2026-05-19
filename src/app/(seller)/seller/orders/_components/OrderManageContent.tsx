@@ -13,10 +13,10 @@ import { mockOrders } from '@/mocks/orders';
 
 export function OrderManageContent() {
   const processingCount = mockOrders.filter(
-    (o) => o.status === 'processing'
+    (o) => o.status === 'reserved'
   ).length;
   const reservedCount = mockOrders.filter(
-    (o) => o.status === 'reserved' || o.status === 'ready'
+    (o) => o.status === 'accepted' || o.status === 'ready'
   ).length;
   const completedCount = mockOrders.filter(
     (o) => o.status === 'completed'
