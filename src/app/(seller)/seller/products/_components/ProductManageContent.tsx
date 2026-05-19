@@ -7,26 +7,27 @@ import { Section } from '@/components/common/Section/Section';
 import { mockProducts } from '@/mocks/products';
 
 import { ProductFilter } from './ProductFilter';
+import { ProductTable } from './ProductTable';
 
 export function ProductManageContent() {
+  const [products, setProducts] = useState(mockProducts);
   const [selectedStatus, setSelectedStatus] = useState('전체');
   const [selectedCategory, setSelectedCategory] = useState('전체');
   const [searchKeyword, setSearchKeyword] = useState('');
   const [sortBy, setSortBy] = useState('latest');
   const [detailFilter, setDetailFilter] = useState('전체');
+  const [currentPage, setCurrentPage] = useState(1);
 
   const categories = useMemo(() => {
     return [
       ...new Set(
-        mockProducts
-          .map((p) => p.categoryName ?? '')
-          .filter((name) => name !== '')
+        products.map((p) => p.categoryName ?? '').filter((name) => name !== '')
       ),
     ];
-  }, []);
+  }, [products]);
 
   const filteredProducts = useMemo(() => {
-    let result = [...mockProducts];
+    let result = [...products];
 
     if (selectedStatus !== '전체') {
       if (selectedStatus === '판매중') {
@@ -93,14 +94,59 @@ export function ProductManageContent() {
     }
 
     return result;
-  }, [selectedStatus, selectedCategory, searchKeyword, sortBy, detailFilter]);
+  }, [
+    products,
+    selectedStatus,
+    selectedCategory,
+    searchKeyword,
+    sortBy,
+    detailFilter,
+  ]);
 
-  const totalCount = mockProducts.length;
-  const activeCount = mockProducts.filter(
+  const totalCount = products.length;
+  const activeCount = products.filter(
     (p) => p.status === 'active' && !p.isSoldOut
   ).length;
-  const soldOutCount = mockProducts.filter((p) => p.isSoldOut).length;
-  const closedCount = mockProducts.filter((p) => p.status === 'closed').length;
+  const soldOutCount = products.filter((p) => p.isSoldOut).length;
+  const closedCount = products.filter((p) => p.status === 'closed').length;
+
+  const handleProductStatusChange = (id: string, newStatus: string) => {
+    setProducts((prev) =>
+      prev.map((p) =>
+        p.id === id
+          ? {
+              ...p,
+              status: newStatus as 'active' | 'closed',
+            }
+          : p
+      )
+    );
+  };
+
+  const handleStatusChange = (status: string) => {
+    setSelectedStatus(status);
+    setCurrentPage(1);
+  };
+
+  const handleCategoryChange = (category: string) => {
+    setSelectedCategory(category);
+    setCurrentPage(1);
+  };
+
+  const handleSearchChange = (keyword: string) => {
+    setSearchKeyword(keyword);
+    setCurrentPage(1);
+  };
+
+  const handleSortChange = (sort: string) => {
+    setSortBy(sort);
+    setCurrentPage(1);
+  };
+
+  const handleDetailFilterChange = (filter: string) => {
+    setDetailFilter(filter);
+    setCurrentPage(1);
+  };
 
   return (
     <div className="flex flex-col gap-6">
@@ -182,18 +228,19 @@ export function ProductManageContent() {
         sortBy={sortBy}
         detailFilter={detailFilter}
         categories={categories}
-        onStatusChange={setSelectedStatus}
-        onCategoryChange={setSelectedCategory}
-        onSearchChange={setSearchKeyword}
-        onSortChange={setSortBy}
-        onDetailFilterChange={setDetailFilter}
+        onStatusChange={handleStatusChange}
+        onCategoryChange={handleCategoryChange}
+        onSearchChange={handleSearchChange}
+        onSortChange={handleSortChange}
+        onDetailFilterChange={handleDetailFilterChange}
       />
 
-      {/* TODO: 테이블 영역 (이슈 3) */}
-      <div className="rounded-lg border border-gray-200 bg-white p-8 text-center text-gray-500">
-        <p>필터링된 상품: {filteredProducts.length}개</p>
-        <p className="mt-2 text-sm">테이블 컴포넌트 구현 예정 (이슈 3)</p>
-      </div>
+      <ProductTable
+        products={filteredProducts}
+        currentPage={currentPage}
+        onPageChange={setCurrentPage}
+        onStatusChange={handleProductStatusChange}
+      />
     </div>
   );
 }
