@@ -82,8 +82,7 @@ export function MypageReservationCard({
   const displayGroup = statusDisplayMap[reservation.status];
   const status = statusStyles[displayGroup];
   const isPickupCodeAvailable =
-    (reservation.status === 'reserved' || reservation.status === 'ready') &&
-    Boolean(reservation.pickupCode);
+    displayGroup === 'pendingPickup' && Boolean(reservation.pickupCode);
   const shouldShowPickupCodeButton = displayGroup === 'pendingPickup';
   const reservationTitle = reservation.productName
     ? `${reservation.storeName} ${reservation.productName}`

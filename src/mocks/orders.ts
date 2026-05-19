@@ -5,8 +5,6 @@ import type {
   OrderListResponse,
 } from '@/contracts/order';
 
-import { mockPaymentResponse } from './payments';
-
 const MOCK_ORDER_ID_1 = '00000000-0000-4000-8000-000000000701';
 const MOCK_ORDER_ID_2 = '00000000-0000-4000-8000-000000000702';
 const MOCK_ORDER_ID_3 = '00000000-0000-4000-8000-000000000703';
@@ -112,7 +110,6 @@ export const mockOrders: OrderListItemResponse[] = [
 export const mockOrderDetail: OrderDetailResponse = {
   ...mockOrders[0],
   items: mockOrderItems.filter((item) => item.orderId === mockOrders[0].id),
-  payment: mockPaymentResponse,
 };
 
 export const mockOrderDetailsMap: Record<string, OrderDetailResponse> =
@@ -122,7 +119,6 @@ export const mockOrderDetailsMap: Record<string, OrderDetailResponse> =
       {
         ...order,
         items: mockOrderItems.filter((item) => item.orderId === order.id),
-        payment: mockPaymentResponse,
       },
     ])
   );
