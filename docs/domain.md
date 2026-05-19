@@ -284,7 +284,9 @@ export interface ProductDetail extends Product {
 ```ts
 export type OrderStatus =
   | 'paymentPending'
+  | 'processing'
   | 'reserved'
+  | 'accepted'
   | 'ready'
   | 'completed'
   | 'cancelled'

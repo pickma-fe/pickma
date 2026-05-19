@@ -49,6 +49,11 @@ describe('mapOrderListItem', () => {
     const result = mapOrderListItem({ ...baseListDto, status: 'no_show' });
     expect(result.status).toBe('noShow');
   });
+
+  it('status = "accepted" → status: "accepted"', () => {
+    const result = mapOrderListItem({ ...baseListDto, status: 'accepted' });
+    expect(result.status).toBe('accepted');
+  });
 });
 
 describe('mapOrder', () => {
