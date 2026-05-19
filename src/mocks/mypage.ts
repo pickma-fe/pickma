@@ -1,7 +1,4 @@
 import { mockProducts } from './products';
-import { mockUser } from './users';
-
-export const mockMypageUser = mockUser;
 
 export const mockRecentlyViewedProducts = mockProducts
   .slice(0, 4)
