@@ -1,21 +1,22 @@
 import { describe, expect, it } from 'vitest';
 
-import type { ProductListItemResponse } from '@/contracts/product';
+import type { Product } from '@/types/product';
+import { ALL_CATEGORY_ID } from '@/lib/consumerProductFilters';
 
-import { ALL_CATEGORY_ID, useConsumerProducts } from './useConsumerProducts';
+import { useConsumerProducts } from './useConsumerProducts';
 
 const NOW = new Date('2026-05-06T09:00:00.000Z').getTime();
+const BAKERY_CATEGORY_ID = '00000000-0000-4000-8000-000000000201';
+const SALAD_CATEGORY_ID = '00000000-0000-4000-8000-000000000202';
 
-function createProduct(
-  overrides: Partial<ProductListItemResponse> & { id: string }
-): ProductListItemResponse {
+function createProduct(overrides: Partial<Product> & { id: string }): Product {
   const { id, ...productOverrides } = overrides;
 
   return {
     id,
     storeId: 'store_1',
     storeName: '테스트 매장',
-    categoryId: 'category_bakery',
+    categoryId: BAKERY_CATEGORY_ID,
     categoryName: '베이커리',
     menuItemId: `menu_${id}`,
     name: `상품 ${id}`,
@@ -28,11 +29,11 @@ function createProduct(
     isSoldOut: false,
     isExpired: false,
     displayStatus: 'available',
-    endAt: '2026-05-06T12:00:00.000Z',
+    endAt: new Date('2026-05-06T12:00:00.000Z'),
     pickupStartTime: '2026-05-06T10:00:00.000Z',
     pickupEndTime: '2026-05-06T12:00:00.000Z',
     status: 'active',
-    updatedAt: '2026-05-06T08:00:00.000Z',
+    updatedAt: new Date('2026-05-06T08:00:00.000Z'),
     ...productOverrides,
   };
 }
@@ -43,39 +44,39 @@ describe('useConsumerProducts', () => {
       createProduct({
         id: 'product_1',
         storeId: 'store_1',
-        categoryId: 'category_bakery',
+        categoryId: BAKERY_CATEGORY_ID,
         discountRate: 45,
       }),
       createProduct({
         id: 'product_2',
         storeId: 'store_2',
-        categoryId: 'category_bakery',
+        categoryId: BAKERY_CATEGORY_ID,
         discountRate: 45,
       }),
       createProduct({
         id: 'product_3',
         storeId: 'store_1',
-        categoryId: 'category_salad',
+        categoryId: SALAD_CATEGORY_ID,
         discountRate: 45,
       }),
       createProduct({
         id: 'product_4',
         storeId: 'store_1',
-        categoryId: 'category_bakery',
+        categoryId: BAKERY_CATEGORY_ID,
         discountRate: 15,
       }),
       createProduct({
         id: 'product_5',
         storeId: 'store_1',
-        categoryId: 'category_bakery',
+        categoryId: BAKERY_CATEGORY_ID,
         discountRate: 45,
-        endAt: '2026-05-06T08:59:00.000Z',
+        endAt: new Date('2026-05-06T08:59:00.000Z'),
       }),
     ];
 
     const result = useConsumerProducts({
       products,
-      selectedCategoryId: 'category_bakery',
+      selectedCategoryId: BAKERY_CATEGORY_ID,
       selectedSortOption: 'deadline',
       selectedDiscountOption: 'over-40',
       currentPage: 1,
@@ -138,11 +139,11 @@ describe('useConsumerProducts', () => {
     const products = [
       createProduct({
         id: 'product_1',
-        endAt: '2026-05-06T12:00:00.000Z',
+        endAt: new Date('2026-05-06T12:00:00.000Z'),
       }),
       createProduct({
         id: 'product_2',
-        endAt: '2026-05-06T10:00:00.000Z',
+        endAt: new Date('2026-05-06T10:00:00.000Z'),
       }),
     ];
 

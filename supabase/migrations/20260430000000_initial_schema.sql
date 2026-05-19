@@ -13,20 +13,26 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 CREATE TYPE user_role AS ENUM ('customer', 'seller', 'admin');
 CREATE TYPE user_status AS ENUM ('active', 'suspended', 'deleted');
-CREATE TYPE store_status AS ENUM ('pending', 'approved', 'rejected', 'inactive');
+CREATE TYPE store_status AS ENUM ('approved', 'inactive');
 CREATE TYPE product_status AS ENUM ('active', 'closed');
 CREATE TYPE order_status AS ENUM (
   'payment_pending',
+  'processing',
   'reserved',
+  'accepted',
   'ready',
   'completed',
   'cancelled',
   'no_show',
   'expired'
 );
+CREATE TYPE payment_provider AS ENUM ('toss', 'kakao_pay', 'naver_pay');
 CREATE TYPE payment_method AS ENUM ('card', 'virtual_account', 'mobile', 'easy_pay');
 CREATE TYPE payment_status AS ENUM ('pending', 'paid', 'failed', 'cancelled', 'refunded');
 CREATE TYPE social_provider AS ENUM ('google', 'kakao');
+CREATE TYPE seller_application_status AS ENUM ('pending', 'approved', 'rejected');
+CREATE TYPE menu_item_status AS ENUM ('active', 'inactive');
+CREATE TYPE seller_application_document_type AS ENUM ('business_license', 'id_card', 'bankbook', 'business_report');
 
 -- ============================================================
 -- Tables
@@ -75,8 +81,7 @@ CREATE TABLE stores (
   image            varchar(500),
   open_time        time,
   close_time       time,
-  status           store_status  NOT NULL DEFAULT 'pending',
-  reject_reason    varchar(500),
+  status           store_status  NOT NULL DEFAULT 'approved',
   created_at       timestamptz   NOT NULL DEFAULT now(),
   updated_at       timestamptz   NOT NULL DEFAULT now()
 );
@@ -84,11 +89,12 @@ CREATE TABLE stores (
 CREATE TABLE menu_items (
   id              uuid          PRIMARY KEY DEFAULT gen_random_uuid(),
   store_id        uuid          NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
-  category_id     uuid          REFERENCES categories(id) ON DELETE SET NULL,
+  category_id     uuid          NOT NULL REFERENCES categories(id) ON DELETE RESTRICT,
   name            varchar(100)  NOT NULL,
   description     text,
   image           varchar(500),
   original_price  int           NOT NULL,
+  status          menu_item_status  NOT NULL DEFAULT 'active',
   created_at      timestamptz   NOT NULL DEFAULT now(),
   updated_at      timestamptz   NOT NULL DEFAULT now()
 );
@@ -149,18 +155,24 @@ CREATE TABLE order_items (
 );
 
 CREATE TABLE payments (
-  id             uuid            PRIMARY KEY DEFAULT gen_random_uuid(),
-  order_id       uuid            UNIQUE NOT NULL REFERENCES orders(id) ON DELETE RESTRICT,
-  payment_key    varchar(200)    UNIQUE,
-  method         payment_method  NOT NULL,
-  amount         int             NOT NULL,
-  status         payment_status  NOT NULL,
-  paid_at        timestamptz,
-  refunded_at    timestamptz,
-  refund_reason  varchar(500),
-  pg_response    jsonb,
-  created_at     timestamptz     NOT NULL DEFAULT now(),
-  updated_at     timestamptz     NOT NULL DEFAULT now()
+  id                   uuid             PRIMARY KEY DEFAULT gen_random_uuid(),
+  order_id             uuid             UNIQUE NOT NULL REFERENCES orders(id) ON DELETE RESTRICT,
+  provider             payment_provider NOT NULL,
+  provider_payment_key varchar(200),
+  provider_order_id    varchar(200),
+  method               payment_method   NOT NULL,
+  method_detail        text,
+  amount               int              NOT NULL,
+  status               payment_status   NOT NULL,
+  paid_at              timestamptz,
+  refunded_at          timestamptz,
+  refund_reason        varchar(500),
+  pg_response          jsonb,
+  created_at           timestamptz      NOT NULL DEFAULT now(),
+  updated_at           timestamptz      NOT NULL DEFAULT now(),
+  CONSTRAINT check_provider_identifiers CHECK (
+    provider_payment_key IS NOT NULL OR provider_order_id IS NOT NULL
+  )
 );
 
 CREATE TABLE wishlists (
@@ -182,6 +194,35 @@ CREATE TABLE store_order_sequences (
   CONSTRAINT check_last_sequence_non_negative CHECK (last_sequence >= 0)
 );
 
+CREATE TABLE seller_applications (
+  id                    uuid                          PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id               uuid                          NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+  status                seller_application_status     NOT NULL DEFAULT 'pending',
+  business_number       varchar(50)                   NOT NULL,
+  company_name          varchar(100)                  NOT NULL,
+  representative_name   varchar(100)                  NOT NULL,
+  business_address      varchar(255)                  NOT NULL,
+  business_type         varchar(100)                  NOT NULL,
+  business_category     varchar(100)                  NOT NULL,
+  reject_reason         varchar(500),
+  reviewed_at           timestamptz,
+  created_at            timestamptz                   NOT NULL DEFAULT now(),
+  updated_at            timestamptz                   NOT NULL DEFAULT now()
+);
+
+CREATE TABLE seller_application_documents (
+  id                  uuid                              PRIMARY KEY DEFAULT gen_random_uuid(),
+  application_id      uuid                              NOT NULL REFERENCES seller_applications(id) ON DELETE CASCADE,
+  type                seller_application_document_type  NOT NULL,
+  storage_path        varchar(500)                      NOT NULL,
+  original_file_name  varchar(255)                      NOT NULL,
+  content_type        varchar(100)                      NOT NULL,
+  size                int                               NOT NULL,
+  created_at          timestamptz                       NOT NULL DEFAULT now(),
+  UNIQUE (application_id, type),
+  CONSTRAINT check_document_size_positive CHECK (size > 0)
+);
+
 -- ============================================================
 -- Indexes
 -- ============================================================
@@ -200,6 +241,20 @@ CREATE INDEX idx_orders_user_store_created
 
 CREATE INDEX idx_orders_store_pickup_sequence
   ON orders(store_id, pickup_service_date, store_order_sequence);
+
+-- Partial unique indexes: provider payment keys are only unique when assigned
+CREATE UNIQUE INDEX idx_payments_unique_provider_payment_key
+  ON payments(provider, provider_payment_key)
+  WHERE provider_payment_key IS NOT NULL;
+
+CREATE UNIQUE INDEX idx_payments_unique_provider_order_id
+  ON payments(provider, provider_order_id)
+  WHERE provider_order_id IS NOT NULL;
+
+-- Partial unique index: at most one pending/approved application per user
+CREATE UNIQUE INDEX idx_seller_applications_unique_active
+  ON seller_applications(user_id)
+  WHERE status IN ('pending', 'approved');
 
 -- Partial unique indexes: sequence/numbers are only unique when assigned
 CREATE UNIQUE INDEX idx_orders_unique_store_pickup_seq
@@ -251,6 +306,10 @@ CREATE TRIGGER set_payments_updated_at
 
 CREATE TRIGGER set_store_order_sequences_updated_at
   BEFORE UPDATE ON store_order_sequences
+  FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+CREATE TRIGGER set_seller_applications_updated_at
+  BEFORE UPDATE ON seller_applications
   FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
 -- ============================================================
@@ -357,6 +416,10 @@ CREATE POLICY "wishlists: owner all"
   ON wishlists USING (auth.uid() = user_id);
 CREATE POLICY "wishlists: owner insert"
   ON wishlists FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+-- seller_applications: service_role bypasses RLS; no authenticated/anon GRANT → direct access blocked
+ALTER TABLE seller_applications ENABLE ROW LEVEL SECURITY;
+ALTER TABLE seller_application_documents ENABLE ROW LEVEL SECURITY;
 
 -- ============================================================
 -- RPC helpers
@@ -597,16 +660,20 @@ GRANT  EXECUTE ON FUNCTION check_pickup_capacity(varchar) TO service_role;
 -- ============================================================
 -- RPC 3: confirm_payment
 -- Role: atomic payment confirmation + stock finalization + sequence/number issuance
--- Input: p_order_number, p_payment_key, p_method, p_amount
+-- Input: p_order_number, p_provider, p_provider_payment_key, p_provider_order_id,
+--        p_method, p_method_detail, p_amount
 -- Output: success
--- Note: p_method must be mapped from PG response by Route Handler service before calling
+-- Note: p_method must be mapped from provider response by Route Handler service before calling
 -- ============================================================
 
 CREATE OR REPLACE FUNCTION confirm_payment(
-  p_order_number varchar,
-  p_payment_key  varchar,
-  p_method       payment_method,
-  p_amount       int
+  p_order_number         varchar,
+  p_provider             payment_provider,
+  p_provider_payment_key varchar,
+  p_provider_order_id    varchar,
+  p_method               payment_method,
+  p_method_detail        text,
+  p_amount               int
 )
 RETURNS TABLE(success boolean)
 LANGUAGE plpgsql
@@ -628,7 +695,7 @@ BEGIN
     RAISE EXCEPTION 'ORDER_NOT_FOUND';
   END IF;
 
-  IF v_order.status != 'payment_pending' THEN
+  IF v_order.status != 'processing' THEN
     RAISE EXCEPTION 'INVALID_ORDER_STATUS';
   END IF;
 
@@ -665,8 +732,13 @@ BEGIN
    WHERE oi.order_id = v_order.id
      AND p.id = oi.product_id;
 
-  INSERT INTO payments (order_id, payment_key, method, amount, status, paid_at)
-    VALUES (v_order.id, p_payment_key, p_method, p_amount, 'paid', now());
+  INSERT INTO payments (
+    order_id, provider, provider_payment_key, provider_order_id,
+    method, method_detail, amount, status, paid_at
+  ) VALUES (
+    v_order.id, p_provider, p_provider_payment_key, p_provider_order_id,
+    p_method, p_method_detail, p_amount, 'paid', now()
+  );
 
   UPDATE orders
      SET status               = 'reserved',
@@ -679,8 +751,8 @@ BEGIN
 END;
 $$;
 
-REVOKE EXECUTE ON FUNCTION confirm_payment(varchar, varchar, payment_method, int) FROM PUBLIC;
-GRANT  EXECUTE ON FUNCTION confirm_payment(varchar, varchar, payment_method, int) TO service_role;
+REVOKE EXECUTE ON FUNCTION confirm_payment(varchar, payment_provider, varchar, varchar, payment_method, text, int) FROM PUBLIC;
+GRANT  EXECUTE ON FUNCTION confirm_payment(varchar, payment_provider, varchar, varchar, payment_method, text, int) TO service_role;
 
 -- ============================================================
 -- RPC 4: expire_order
@@ -734,7 +806,77 @@ REVOKE EXECUTE ON FUNCTION expire_order(uuid) FROM PUBLIC;
 GRANT  EXECUTE ON FUNCTION expire_order(uuid) TO service_role;
 
 -- ============================================================
--- RPC 5: cancel_order (contract only — SQL implementation in Phase 6)
+-- RPC 5: begin_payment_processing
+-- Role: atomically claims a payment_pending order for processing.
+--       Prevents duplicate adapter.confirm calls on concurrent requests.
+--       Flow: payment_pending → processing (claim) → reserved (confirm_payment)
+-- Input: p_order_id
+-- Output: success
+-- Errors: ORDER_NOT_FOUND | INVALID_ORDER_STATUS | ORDER_EXPIRED
+-- ============================================================
+CREATE OR REPLACE FUNCTION begin_payment_processing(p_order_id uuid)
+RETURNS TABLE(success boolean)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_order orders%ROWTYPE;
+BEGIN
+  SELECT * INTO v_order
+    FROM orders
+   WHERE id = p_order_id
+     FOR UPDATE;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'ORDER_NOT_FOUND';
+  END IF;
+
+  IF v_order.status != 'payment_pending' THEN
+    RAISE EXCEPTION 'INVALID_ORDER_STATUS';
+  END IF;
+
+  IF v_order.expires_at IS NOT NULL AND v_order.expires_at <= now() THEN
+    RAISE EXCEPTION 'ORDER_EXPIRED';
+  END IF;
+
+  UPDATE orders SET status = 'processing' WHERE id = p_order_id;
+
+  RETURN QUERY SELECT true;
+END;
+$$;
+
+REVOKE EXECUTE ON FUNCTION begin_payment_processing(uuid) FROM PUBLIC;
+GRANT  EXECUTE ON FUNCTION begin_payment_processing(uuid) TO service_role;
+
+-- ============================================================
+-- RPC 6: revert_payment_processing
+-- Role: rolls back processing → payment_pending when adapter.confirm fails.
+--       Allows the user to retry payment.
+-- Input: p_order_id
+-- Output: success
+-- ============================================================
+CREATE OR REPLACE FUNCTION revert_payment_processing(p_order_id uuid)
+RETURNS TABLE(success boolean)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  UPDATE orders
+     SET status = 'payment_pending'
+   WHERE id = p_order_id
+     AND status = 'processing';
+
+  RETURN QUERY SELECT true;
+END;
+$$;
+
+REVOKE EXECUTE ON FUNCTION revert_payment_processing(uuid) FROM PUBLIC;
+GRANT  EXECUTE ON FUNCTION revert_payment_processing(uuid) TO service_role;
+
+-- ============================================================
+-- RPC 7: cancel_order (contract only — SQL implementation in Phase 6)
 -- Role: user-initiated order cancellation + reserved stock restoration
 -- Input: p_order_id, p_reason
 -- Output: success
@@ -758,3 +900,115 @@ $$;
 
 REVOKE EXECUTE ON FUNCTION cancel_order(uuid, varchar) FROM PUBLIC;
 GRANT  EXECUTE ON FUNCTION cancel_order(uuid, varchar) TO service_role;
+
+-- ============================================================
+-- RPC 8: approve_seller_application
+-- Role: atomic seller application approval — sets status=approved and role=seller
+-- Input: application_id
+-- Output: void
+-- Errors: raises exception if no pending application found with that id
+-- ============================================================
+CREATE OR REPLACE FUNCTION approve_seller_application(application_id uuid)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_user_id uuid;
+BEGIN
+  UPDATE seller_applications
+     SET status      = 'approved',
+         reviewed_at = now()
+   WHERE id     = application_id
+     AND status = 'pending'
+  RETURNING user_id INTO v_user_id;
+
+  IF v_user_id IS NULL THEN
+    RAISE EXCEPTION 'APPLICATION_NOT_PENDING';
+  END IF;
+
+  UPDATE users SET role = 'seller' WHERE id = v_user_id;
+END;
+$$;
+
+REVOKE EXECUTE ON FUNCTION approve_seller_application(uuid) FROM PUBLIC;
+GRANT  EXECUTE ON FUNCTION approve_seller_application(uuid) TO service_role;
+
+-- ============================================================
+-- RPC 9: create_seller_application
+-- Role: atomic application + documents insert in a single transaction
+-- Input: application fields + documents as jsonb array
+-- Output: created application id (uuid)
+-- ============================================================
+CREATE OR REPLACE FUNCTION create_seller_application(
+  p_user_id             uuid,
+  p_business_number     text,
+  p_company_name        text,
+  p_representative_name text,
+  p_business_address    text,
+  p_business_type       text,
+  p_business_category   text,
+  p_documents           jsonb
+)
+RETURNS uuid
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_application_id uuid;
+  v_doc            jsonb;
+BEGIN
+  IF jsonb_typeof(p_documents) <> 'array'
+     OR jsonb_array_length(p_documents) <> 4 THEN
+    RAISE EXCEPTION 'INVALID_APPLICATION_DOCUMENTS';
+  END IF;
+
+  IF (
+    SELECT COUNT(DISTINCT (elem->>'type')::seller_application_document_type)
+    FROM jsonb_array_elements(p_documents) AS elem
+  ) <> 4 THEN
+    RAISE EXCEPTION 'INVALID_APPLICATION_DOCUMENTS';
+  END IF;
+
+  INSERT INTO seller_applications (
+    user_id, status, business_number, company_name, representative_name,
+    business_address, business_type, business_category
+  ) VALUES (
+    p_user_id, 'pending', p_business_number, p_company_name, p_representative_name,
+    p_business_address, p_business_type, p_business_category
+  )
+  RETURNING id INTO v_application_id;
+
+  FOR v_doc IN SELECT * FROM jsonb_array_elements(p_documents)
+  LOOP
+    INSERT INTO seller_application_documents (
+      application_id, type, storage_path, original_file_name, content_type, size
+    ) VALUES (
+      v_application_id,
+      (v_doc->>'type')::seller_application_document_type,
+      v_doc->>'storage_path',
+      v_doc->>'original_file_name',
+      v_doc->>'content_type',
+      (v_doc->>'size')::bigint
+    );
+  END LOOP;
+
+  RETURN v_application_id;
+END;
+$$;
+
+REVOKE EXECUTE ON FUNCTION create_seller_application(uuid, text, text, text, text, text, text, jsonb) FROM PUBLIC;
+GRANT  EXECUTE ON FUNCTION create_seller_application(uuid, text, text, text, text, text, text, jsonb) TO service_role;
+
+-- ============================================================
+-- Storage Buckets
+-- ============================================================
+
+INSERT INTO storage.buckets (id, name, public) VALUES
+  ('seller-application-documents', 'seller-application-documents', false),
+  ('store-images', 'store-images', true),
+  ('product-images', 'product-images', true),
+  ('profile-images', 'profile-images', true)
+ON CONFLICT (id) DO NOTHING;

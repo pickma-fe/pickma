@@ -1,7 +1,10 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
+import { Suspense } from 'react';
 
 import { AuthModal } from '@/components/auth/AuthModal';
+import { AuthModalRouteSync } from '@/components/auth/AuthModalRouteSync';
+import { MockUserSwitcher } from '@/components/dev/MockUserSwitcher';
 
 import { Providers } from './providers';
 import './globals.css';
@@ -35,6 +38,10 @@ export default function RootLayout({
         <Providers>
           {children}
           <AuthModal />
+          <Suspense fallback={null}>
+            <AuthModalRouteSync />
+          </Suspense>
+          {process.env.NODE_ENV === 'development' && <MockUserSwitcher />}
         </Providers>
       </body>
     </html>

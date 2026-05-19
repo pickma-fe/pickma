@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
+import type { PaymentRow } from '@/app/api/payments/_lib/mapper';
+
 import {
   buildOrderName,
   mapCreateOrderResponse,
@@ -130,6 +132,11 @@ describe('mapOrderListRow', () => {
     });
     expect(result.status).toBe('payment_pending');
   });
+
+  it('status = "accepted" → status: "accepted" (contract DTO 그대로)', () => {
+    const result = mapOrderListRow({ ...baseListRow, status: 'accepted' });
+    expect(result.status).toBe('accepted');
+  });
 });
 
 describe('mapOrderItemRow', () => {
@@ -157,6 +164,7 @@ describe('mapOrderDetailRow', () => {
       cancelled_at: null,
       picked_up_at: null,
       order_items: [baseItemRow],
+      payments: null,
     };
     const result = mapOrderDetailRow(row);
     expect(result.cancelledAt).toBeUndefined();
@@ -171,11 +179,57 @@ describe('mapOrderDetailRow', () => {
       cancelled_at: '2026-05-12T09:00:00.000Z',
       picked_up_at: '2026-05-12T10:30:00.000Z',
       order_items: [],
+      payments: null,
     };
     const result = mapOrderDetailRow(row);
     expect(result.cancelledAt).toBe('2026-05-12T09:00:00.000Z');
     expect(result.cancelReason).toBe('단순 변심');
     expect(result.pickedUpAt).toBe('2026-05-12T10:30:00.000Z');
     expect(result.items).toHaveLength(0);
+  });
+
+  it('payments null → payment undefined', () => {
+    const row: OrderDetailRow = {
+      ...baseListRow,
+      cancel_reason: null,
+      cancelled_at: null,
+      picked_up_at: null,
+      order_items: [],
+      payments: null,
+    };
+    const result = mapOrderDetailRow(row);
+    expect(result.payment).toBeUndefined();
+  });
+
+  it('payments 있음 → payment 매핑, orderNumber은 order_number 사용', () => {
+    const paymentRow: PaymentRow = {
+      id: 'payment-1',
+      order_id: baseListRow.id,
+      provider: 'toss',
+      provider_payment_key: 'ppk_test',
+      provider_order_id: 'poi_test',
+      method: 'card',
+      method_detail: null,
+      amount: 5000,
+      status: 'paid',
+      paid_at: '2026-05-12T10:00:00.000Z',
+      refunded_at: null,
+      refund_reason: null,
+      created_at: '2026-05-12T09:00:00.000Z',
+      updated_at: '2026-05-12T10:00:00.000Z',
+    };
+    const row: OrderDetailRow = {
+      ...baseListRow,
+      cancel_reason: null,
+      cancelled_at: null,
+      picked_up_at: null,
+      order_items: [],
+      payments: paymentRow,
+    };
+    const result = mapOrderDetailRow(row);
+    expect(result.payment).toBeDefined();
+    expect(result.payment?.orderNumber).toBe(baseListRow.order_number);
+    expect(result.payment?.status).toBe('paid');
+    expect(result.payment?.amount).toBe(5000);
   });
 });

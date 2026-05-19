@@ -1,4 +1,4 @@
-export type StoreStatus = 'pending' | 'approved' | 'rejected' | 'inactive';
+export type StoreStatus = 'approved' | 'inactive';
 
 export interface CreateStoreInput {
   name: string;
@@ -27,7 +27,6 @@ export interface Store {
   openTime?: string;
   closeTime?: string;
   status: StoreStatus;
-  rejectReason?: string;
   createdAt: Date;
   updatedAt: Date;
 }

@@ -1,10 +1,18 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createServerClient } from '@/lib/supabase/server';
+import { createServiceRoleClient } from '@/lib/supabase/service';
 import { getOrCreateUserByAuthUser } from '@/app/api/_lib/current-user';
 
-import { requireActiveUser, requireAdmin, requireSeller } from './auth';
+import {
+  checkApplicationEligibility,
+  requireActiveUser,
+  requireAdmin,
+  requireSeller,
+  requireSellerStore,
+} from './auth';
 
+vi.mock('@/lib/supabase/service');
 vi.mock('@/lib/supabase/server');
 vi.mock('@/app/api/_lib/current-user');
 
@@ -112,6 +120,11 @@ describe('requireSeller', () => {
   });
 
   function setupUser(role: 'customer' | 'seller' | 'admin') {
+    vi.mocked(createServerClient).mockResolvedValue(
+      makeSupabaseClient(mockAuthUser) as unknown as Awaited<
+        ReturnType<typeof createServerClient>
+      >
+    );
     vi.mocked(getOrCreateUserByAuthUser).mockResolvedValue({
       ...mockServiceUser,
       role,
@@ -119,11 +132,6 @@ describe('requireSeller', () => {
   }
 
   it('role이 customer면 FORBIDDEN을 던진다', async () => {
-    vi.mocked(createServerClient).mockResolvedValue(
-      makeSupabaseClient(mockAuthUser) as unknown as Awaited<
-        ReturnType<typeof createServerClient>
-      >
-    );
     setupUser('customer');
 
     await expect(requireSeller()).rejects.toMatchObject({
@@ -133,11 +141,6 @@ describe('requireSeller', () => {
   });
 
   it('role이 admin이면 FORBIDDEN을 던진다', async () => {
-    vi.mocked(createServerClient).mockResolvedValue(
-      makeSupabaseClient(mockAuthUser) as unknown as Awaited<
-        ReturnType<typeof createServerClient>
-      >
-    );
     setupUser('admin');
 
     await expect(requireSeller()).rejects.toMatchObject({
@@ -146,48 +149,77 @@ describe('requireSeller', () => {
     });
   });
 
-  it('seller이고 store 조회에서 PGRST116 외 에러면 INTERNAL_SERVER_ERROR를 던진다', async () => {
-    vi.mocked(createServerClient).mockResolvedValue(
-      makeSupabaseClient(mockAuthUser, {
-        data: null,
-        error: { code: '42501' },
-      }) as unknown as Awaited<ReturnType<typeof createServerClient>>
-    );
+  it('role이 seller면 authUser와 serviceUser를 반환한다', async () => {
     setupUser('seller');
 
-    await expect(requireSeller()).rejects.toMatchObject({
+    const result = await requireSeller();
+    expect(result.authUser).toBe(mockAuthUser);
+    expect(result.serviceUser.role).toBe('seller');
+  });
+});
+
+describe('requireSellerStore', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  function setupUser(
+    role: 'customer' | 'seller' | 'admin',
+    storeResult?: { data: unknown; error: unknown }
+  ) {
+    vi.mocked(createServerClient).mockResolvedValue(
+      makeSupabaseClient(mockAuthUser, storeResult) as unknown as Awaited<
+        ReturnType<typeof createServerClient>
+      >
+    );
+    vi.mocked(getOrCreateUserByAuthUser).mockResolvedValue({
+      ...mockServiceUser,
+      role,
+    });
+  }
+
+  it('role이 customer면 FORBIDDEN을 던진다', async () => {
+    setupUser('customer');
+
+    await expect(requireSellerStore()).rejects.toMatchObject({
+      code: 'FORBIDDEN',
+      statusCode: 403,
+    });
+  });
+
+  it('role이 admin이면 FORBIDDEN을 던진다', async () => {
+    setupUser('admin');
+
+    await expect(requireSellerStore()).rejects.toMatchObject({
+      code: 'FORBIDDEN',
+      statusCode: 403,
+    });
+  });
+
+  it('seller이고 store 조회에서 PGRST116 외 에러면 INTERNAL_SERVER_ERROR를 던진다', async () => {
+    setupUser('seller', { data: null, error: { code: '42501' } });
+
+    await expect(requireSellerStore()).rejects.toMatchObject({
       code: 'INTERNAL_SERVER_ERROR',
       statusCode: 500,
     });
   });
 
   it('seller이고 store가 없으면 STORE_NOT_FOUND를 던진다', async () => {
-    vi.mocked(createServerClient).mockResolvedValue(
-      makeSupabaseClient(mockAuthUser, {
-        data: null,
-        error: { code: 'PGRST116' },
-      }) as unknown as Awaited<ReturnType<typeof createServerClient>>
-    );
-    setupUser('seller');
+    setupUser('seller', { data: null, error: { code: 'PGRST116' } });
 
-    await expect(requireSeller()).rejects.toMatchObject({
+    await expect(requireSellerStore()).rejects.toMatchObject({
       code: 'STORE_NOT_FOUND',
       statusCode: 404,
     });
   });
 
-  it.each(['pending', 'rejected', 'inactive'] as const)(
+  it.each(['inactive'] as const)(
     'seller이고 store status가 %s면 STORE_NOT_APPROVED를 던진다',
     async (status) => {
-      vi.mocked(createServerClient).mockResolvedValue(
-        makeSupabaseClient(mockAuthUser, {
-          data: { id: 'store-1', status },
-          error: null,
-        }) as unknown as Awaited<ReturnType<typeof createServerClient>>
-      );
-      setupUser('seller');
+      setupUser('seller', { data: { id: 'store-1', status }, error: null });
 
-      await expect(requireSeller()).rejects.toMatchObject({
+      await expect(requireSellerStore()).rejects.toMatchObject({
         code: 'STORE_NOT_APPROVED',
         statusCode: 403,
       });
@@ -195,17 +227,67 @@ describe('requireSeller', () => {
   );
 
   it('seller이고 approved store가 있으면 결과를 반환한다', async () => {
-    vi.mocked(createServerClient).mockResolvedValue(
-      makeSupabaseClient(mockAuthUser, {
-        data: { id: 'store-1', status: 'approved' },
-        error: null,
-      }) as unknown as Awaited<ReturnType<typeof createServerClient>>
-    );
-    setupUser('seller');
+    setupUser('seller', {
+      data: { id: 'store-1', status: 'approved' },
+      error: null,
+    });
 
-    const result = await requireSeller();
+    const result = await requireSellerStore();
     expect(result.serviceUser.role).toBe('seller');
     expect(result.store).toEqual({ id: 'store-1' });
+  });
+});
+
+describe('checkApplicationEligibility', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  function setupServiceClient(applications: unknown[], error: unknown = null) {
+    vi.mocked(createServiceRoleClient).mockReturnValue({
+      from: vi.fn().mockReturnValue({
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({
+            in: vi.fn().mockReturnValue({
+              limit: vi.fn().mockResolvedValue({ data: applications, error }),
+            }),
+          }),
+        }),
+      }),
+    } as unknown as ReturnType<typeof createServiceRoleClient>);
+  }
+
+  it('role이 seller면 seller_already_registered를 반환한다', async () => {
+    const result = await checkApplicationEligibility('user-1', 'seller');
+    expect(result).toEqual({
+      eligible: false,
+      reason: 'seller_already_registered',
+    });
+  });
+
+  it('pending 신청이 있으면 application_already_submitted를 반환한다', async () => {
+    setupServiceClient([{ id: 'app-1' }]);
+    const result = await checkApplicationEligibility('user-1', 'customer');
+    expect(result).toEqual({
+      eligible: false,
+      reason: 'application_already_submitted',
+    });
+  });
+
+  it('신청이 없으면 eligible true를 반환한다', async () => {
+    setupServiceClient([]);
+    const result = await checkApplicationEligibility('user-1', 'customer');
+    expect(result).toEqual({ eligible: true });
+  });
+
+  it('DB 에러 시 INTERNAL_SERVER_ERROR를 던진다', async () => {
+    setupServiceClient([], { message: 'connection error' });
+    await expect(
+      checkApplicationEligibility('user-1', 'customer')
+    ).rejects.toMatchObject({
+      code: 'INTERNAL_SERVER_ERROR',
+      statusCode: 500,
+    });
   });
 });
 

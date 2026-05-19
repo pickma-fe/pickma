@@ -66,6 +66,3 @@ temp/*
 
 # Local dev-only pages
 src/app/**/dev-test/
-
-# Supabase CLI local state
-supabase/.temp/

@@ -11,6 +11,7 @@ const SELLER_PROTECTED = [
   '/seller/products',
   '/seller/orders',
   '/seller/store',
+  '/seller/menu',
 ];
 const ADMIN_PROTECTED = ['/admin'];
 
@@ -37,7 +38,7 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
         new URL(`/?auth=required&next=${next}`, request.url)
       );
     }
-    // Phase 4: DB role check는 Route Handler의 requireAdmin()에서 처리
+    // DB role check는 Route Handler의 requireAdmin()에서 처리
   }
 
   if (matchesAnyPrefix(pathname, SELLER_PROTECTED)) {
