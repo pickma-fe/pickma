@@ -21,8 +21,8 @@ interface MenuFormProps {
 }
 
 const menuFormSchema = z.object({
-  name: z.string().min(1, '메뉴명을 입력해주세요.'),
-  category: z.string().min(1, '카테고리를 선택해주세요.'),
+  name: z.string().trim().min(1, '메뉴명을 입력해주세요.'),
+  category: z.string().trim().min(1, '카테고리를 선택해주세요.'),
   description: z.string().optional(),
   price: z
     .string()
