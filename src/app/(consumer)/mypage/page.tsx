@@ -1,11 +1,10 @@
 import { Footer } from '@/components/common';
 import { ConsumerHeader } from '@/components/consumer/ConsumerHeader';
 import {
-  MypageReservationList,
+  MypageContent,
   MypageSidebar,
   MypageSummaryPanel,
 } from '@/components/consumer/mypage';
-import { mockMypageReservations } from '@/mocks/mypage';
 
 export default function MypagePage() {
   return (
@@ -18,7 +17,7 @@ export default function MypagePage() {
 
           <section className="px-5 py-10 lg:px-10">
             <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_360px]">
-              <MypageReservationList reservations={mockMypageReservations} />
+              <MypageContent />
               <MypageSummaryPanel />
             </div>
           </section>
