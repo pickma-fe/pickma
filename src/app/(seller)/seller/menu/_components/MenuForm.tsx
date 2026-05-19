@@ -4,6 +4,7 @@ import { Upload, X } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { useForm, useWatch } from 'react-hook-form';
 
 import { useMenuStore } from '@/stores/menuStore';
 import { Button } from '@/components/common/Button/Button';
@@ -22,7 +23,7 @@ interface MenuFormData {
   category: string;
   description: string;
   price: string;
-  image: string | null;
+  image: string;
   origin: string;
   allergyInfo: string;
   tags: string[];
@@ -44,62 +45,66 @@ export function MenuForm({ initialData, isEdit = false }: MenuFormProps) {
   const addMenu = useMenuStore((state) => state.addMenu);
   const updateMenu = useMenuStore((state) => state.updateMenu);
 
-  const [formData, setFormData] = useState<MenuFormData>({
-    name: initialData?.name ?? '',
-    category: initialData?.category ?? '',
-    description: initialData?.description ?? '',
-    price: initialData?.price?.toString() ?? '',
-    image: initialData?.image ?? null,
-    origin: initialData?.origin ?? '',
-    allergyInfo: initialData?.allergyInfo ?? '',
-    tags: initialData?.tags ?? [],
-  });
   const [tagInput, setTagInput] = useState('');
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [imageError, setImageError] = useState('');
 
-  const handleChange = (field: keyof MenuFormData, value: string | null) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-    if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: '' }));
-    }
-  };
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    control,
+    formState: { errors },
+  } = useForm<MenuFormData>({
+    defaultValues: {
+      name: initialData?.name ?? '',
+      category: initialData?.category ?? '',
+      description: initialData?.description ?? '',
+      price: initialData?.price?.toString() ?? '',
+      image: initialData?.image ?? '',
+      origin: initialData?.origin ?? '',
+      allergyInfo: initialData?.allergyInfo ?? '',
+      tags: initialData?.tags ?? [],
+    },
+  });
+
+  const image = useWatch({ control, name: 'image' });
+  const tags = useWatch({ control, name: 'tags' });
+  const category = useWatch({ control, name: 'category' });
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > MAX_FILE_SIZE) {
-        setErrors((prev) => ({
-          ...prev,
-          image: '이미지 파일은 5MB 이하만 업로드 가능합니다.',
-        }));
+        setImageError('이미지 파일은 5MB 이하만 업로드 가능합니다.');
         e.currentTarget.value = '';
         return;
       }
-      const url = URL.createObjectURL(file);
-      handleChange('image', url);
+      setImageError('');
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setValue('image', event.target?.result as string);
+      };
+      reader.readAsDataURL(file);
     }
     e.currentTarget.value = '';
   };
 
   const handleRemoveImage = () => {
-    handleChange('image', null);
+    setValue('image', '');
   };
 
   const handleAddTag = () => {
-    if (tagInput.trim() && !formData.tags.includes(tagInput.trim())) {
-      setFormData((prev) => ({
-        ...prev,
-        tags: [...prev.tags, tagInput.trim()],
-      }));
+    if (tagInput.trim() && !tags.includes(tagInput.trim())) {
+      setValue('tags', [...tags, tagInput.trim()]);
       setTagInput('');
     }
   };
 
   const handleRemoveTag = (tag: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      tags: prev.tags.filter((t) => t !== tag),
-    }));
+    setValue(
+      'tags',
+      tags.filter((t) => t !== tag)
+    );
   };
 
   const handleTagKeyDown = (e: React.KeyboardEvent) => {
@@ -109,38 +114,16 @@ export function MenuForm({ initialData, isEdit = false }: MenuFormProps) {
     }
   };
 
-  const validate = () => {
-    const newErrors: Record<string, string> = {};
-
-    if (!formData.name.trim()) {
-      newErrors.name = '메뉴명을 입력해주세요.';
-    }
-    if (!formData.category) {
-      newErrors.category = '카테고리를 선택해주세요.';
-    }
-    if (!formData.description.trim()) {
-      newErrors.description = '메뉴 설명을 입력해주세요.';
-    }
-    if (!formData.price || Number(formData.price) <= 0) {
-      newErrors.price = '가격을 입력해주세요.';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = () => {
-    if (!validate()) return;
-
+  const onSubmit = (data: MenuFormData) => {
     const menuData = {
-      name: formData.name,
-      category: formData.category,
-      description: formData.description,
-      price: Number(formData.price),
-      image: formData.image ?? '',
-      origin: formData.origin,
-      allergyInfo: formData.allergyInfo,
-      tags: formData.tags,
+      name: data.name,
+      category: data.category,
+      description: data.description,
+      price: Number(data.price),
+      image: data.image,
+      origin: data.origin,
+      allergyInfo: data.allergyInfo,
+      tags: data.tags,
       storeId: initialData?.storeId ?? 'store_1',
       status: 'active' as const,
     };
@@ -161,7 +144,6 @@ export function MenuForm({ initialData, isEdit = false }: MenuFormProps) {
   return (
     <div className="flex flex-col gap-6">
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {/* 기본 정보 */}
         <Section variant="card" className="bg-white">
           <h2 className="mb-4 text-lg font-semibold text-gray-900">
             기본 정보
@@ -170,9 +152,8 @@ export function MenuForm({ initialData, isEdit = false }: MenuFormProps) {
             <Input
               label="메뉴명 *"
               placeholder="메뉴명을 입력해주세요"
-              value={formData.name}
-              onChange={(e) => handleChange('name', e.target.value)}
-              error={errors.name}
+              {...register('name', { required: '메뉴명을 입력해주세요.' })}
+              error={errors.name?.message}
             />
 
             <div className="flex flex-col gap-1">
@@ -180,49 +161,47 @@ export function MenuForm({ initialData, isEdit = false }: MenuFormProps) {
               <Dropdown
                 type="select"
                 items={CATEGORY_OPTIONS}
-                value={formData.category}
-                onChange={(value) => handleChange('category', value)}
+                value={category}
+                onChange={(value) => setValue('category', value)}
                 placeholder="카테고리를 선택해주세요"
               />
               {errors.category && (
-                <p className="text-sm text-red-500">{errors.category}</p>
+                <p className="text-sm text-red-500">
+                  {errors.category.message}
+                </p>
               )}
             </div>
 
             <div className="flex flex-col gap-1">
-              <label className="text-sm text-gray-500">메뉴 설명 *</label>
+              <label className="text-sm text-gray-500">메뉴 설명</label>
               <textarea
-                placeholder="메뉴에 대한 설명을 입력해주세요"
-                value={formData.description}
-                onChange={(e) => handleChange('description', e.target.value)}
+                placeholder="메뉴에 대한 설명을 입력해주세요 (선택사항)"
+                {...register('description')}
                 className="focus:border-primary-500 focus:ring-primary-300 h-24 w-full resize-none rounded-md border border-gray-200 px-4 py-2 text-sm outline-none placeholder:text-gray-300 focus:ring-2"
               />
-              {errors.description && (
-                <p className="text-sm text-red-500">{errors.description}</p>
-              )}
             </div>
 
             <Input
               label="가격 *"
               type="number"
               placeholder="가격을 입력해주세요"
-              value={formData.price}
-              onChange={(e) => handleChange('price', e.target.value)}
-              error={errors.price}
+              {...register('price', {
+                required: '가격을 입력해주세요.',
+                min: { value: 1, message: '가격을 입력해주세요.' },
+              })}
+              error={errors.price?.message}
             />
           </div>
         </Section>
-
-        {/* 이미지 업로드 */}
         <Section variant="card" className="bg-white">
           <h2 className="mb-4 text-lg font-semibold text-gray-900">
             메뉴 이미지
           </h2>
           <div className="flex flex-col gap-4">
-            {formData.image ? (
+            {image ? (
               <div className="relative aspect-square w-full overflow-hidden rounded-lg bg-gray-100">
                 <Image
-                  src={formData.image}
+                  src={image}
                   alt="메뉴 이미지"
                   fill
                   sizes="(max-width: 768px) 100vw, 400px"
@@ -253,33 +232,27 @@ export function MenuForm({ initialData, isEdit = false }: MenuFormProps) {
                 />
               </label>
             )}
-            {errors.image && (
-              <p className="text-sm text-red-500">{errors.image}</p>
-            )}
+            {imageError && <p className="text-sm text-red-500">{imageError}</p>}
           </div>
         </Section>
       </div>
 
-      {/* 추가 정보 */}
       <Section variant="card" className="bg-white">
         <h2 className="mb-4 text-lg font-semibold text-gray-900">추가 정보</h2>
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           <Input
             label="원산지"
             placeholder="원산지를 입력해주세요 (선택사항)"
-            value={formData.origin}
-            onChange={(e) => handleChange('origin', e.target.value)}
+            {...register('origin')}
           />
           <Input
             label="알레르기 정보"
             placeholder="알레르기 정보를 입력해주세요 (선택사항)"
-            value={formData.allergyInfo}
-            onChange={(e) => handleChange('allergyInfo', e.target.value)}
+            {...register('allergyInfo')}
           />
         </div>
       </Section>
 
-      {/* 태그 */}
       <Section variant="card" className="bg-white">
         <h2 className="mb-4 text-lg font-semibold text-gray-900">
           태그 (선택사항)
@@ -296,9 +269,9 @@ export function MenuForm({ initialData, isEdit = false }: MenuFormProps) {
               추가
             </Button>
           </div>
-          {formData.tags.length > 0 && (
+          {tags.length > 0 && (
             <div className="flex flex-wrap gap-2">
-              {formData.tags.map((tag) => (
+              {tags.map((tag) => (
                 <span
                   key={tag}
                   className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700"
@@ -324,7 +297,7 @@ export function MenuForm({ initialData, isEdit = false }: MenuFormProps) {
         <Button variant="outline" color="gray" onClick={handleCancel}>
           취소
         </Button>
-        <Button onClick={handleSubmit}>
+        <Button onClick={handleSubmit(onSubmit)}>
           {isEdit ? '메뉴 수정' : '메뉴 등록'}
         </Button>
       </div>
