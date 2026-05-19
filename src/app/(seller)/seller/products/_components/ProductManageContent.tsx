@@ -10,6 +10,7 @@ import { ProductFilter } from './ProductFilter';
 import { ProductTable } from './ProductTable';
 
 export function ProductManageContent() {
+  const [products, setProducts] = useState(mockProducts);
   const [selectedStatus, setSelectedStatus] = useState('전체');
   const [selectedCategory, setSelectedCategory] = useState('전체');
   const [searchKeyword, setSearchKeyword] = useState('');
@@ -20,15 +21,13 @@ export function ProductManageContent() {
   const categories = useMemo(() => {
     return [
       ...new Set(
-        mockProducts
-          .map((p) => p.categoryName ?? '')
-          .filter((name) => name !== '')
+        products.map((p) => p.categoryName ?? '').filter((name) => name !== '')
       ),
     ];
-  }, []);
+  }, [products]);
 
   const filteredProducts = useMemo(() => {
-    let result = [...mockProducts];
+    let result = [...products];
 
     if (selectedStatus !== '전체') {
       if (selectedStatus === '판매중') {
@@ -95,14 +94,37 @@ export function ProductManageContent() {
     }
 
     return result;
-  }, [selectedStatus, selectedCategory, searchKeyword, sortBy, detailFilter]);
+  }, [
+    products,
+    selectedStatus,
+    selectedCategory,
+    searchKeyword,
+    sortBy,
+    detailFilter,
+  ]);
 
-  const totalCount = mockProducts.length;
-  const activeCount = mockProducts.filter(
+  const totalCount = products.length;
+  const activeCount = products.filter(
     (p) => p.status === 'active' && !p.isSoldOut
   ).length;
-  const soldOutCount = mockProducts.filter((p) => p.isSoldOut).length;
-  const closedCount = mockProducts.filter((p) => p.status === 'closed').length;
+  const soldOutCount = products.filter((p) => p.isSoldOut).length;
+  const closedCount = products.filter((p) => p.status === 'closed').length;
+
+  const handleProductStatusChange = (id: string, newStatus: string) => {
+    setProducts((prev) =>
+      prev.map((p) =>
+        p.id === id
+          ? {
+              ...p,
+              status: (newStatus === 'soldout' ? 'active' : newStatus) as
+                | 'active'
+                | 'closed',
+              isSoldOut: newStatus === 'soldout',
+            }
+          : p
+      )
+    );
+  };
 
   const handleStatusChange = (status: string) => {
     setSelectedStatus(status);
@@ -220,6 +242,7 @@ export function ProductManageContent() {
         products={filteredProducts}
         currentPage={currentPage}
         onPageChange={setCurrentPage}
+        onStatusChange={handleProductStatusChange}
       />
     </div>
   );

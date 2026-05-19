@@ -12,6 +12,7 @@ interface ProductTableProps {
   products: ProductListItemResponse[];
   currentPage: number;
   onPageChange: (page: number) => void;
+  onStatusChange: (id: string, status: string) => void;
 }
 
 const PAGE_SIZE_OPTIONS = [
@@ -49,6 +50,7 @@ export function ProductTable({
   products,
   currentPage,
   onPageChange,
+  onStatusChange,
 }: ProductTableProps) {
   const [pageSize, setPageSize] = useState(10);
 
@@ -210,9 +212,7 @@ export function ProductTable({
                         { label: '판매중지', value: 'closed' },
                       ]}
                       value={product.isSoldOut ? 'soldout' : product.status}
-                      onChange={() => {
-                        // TODO: 상태 변경 API 연결
-                      }}
+                      onChange={(value) => onStatusChange(product.id, value)}
                       placeholder="관리"
                     />
                   </td>
