@@ -1,9 +1,10 @@
 'use client';
 
 import { Package, ShoppingBag, PackageX } from 'lucide-react';
+import Link from 'next/link';
 import { useState } from 'react';
 
-import { useSellerMenus } from '@/hooks/seller/menus/useSellerMenus';
+import { useMenuStore } from '@/stores/menuStore';
 import { Button } from '@/components/common/Button/Button';
 import { Section } from '@/components/common/Section/Section';
 
@@ -11,12 +12,10 @@ import { MenuFilter } from './MenuFilter';
 import { MenuTable } from './MenuTable';
 
 export function MenuManageContent() {
-  const { data, isLoading, isError } = useSellerMenus();
+  const menus = useMenuStore((state) => state.menus);
   const [selectedCategory, setSelectedCategory] = useState('전체');
   const [searchKeyword, setSearchKeyword] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-
-  const menus = data?.items ?? [];
 
   const categories = ['전체', ...new Set(menus.map((menu) => menu.category))];
 
@@ -46,25 +45,6 @@ export function MenuManageContent() {
     setSearchKeyword(keyword);
     setCurrentPage(1);
   };
-
-  const handleAddMenu = () => {
-    // TODO: 메뉴 등록 페이지 이동
-  };
-
-  if (isLoading) {
-    return <div className="p-8 text-center text-gray-500">로딩 중...</div>;
-  }
-
-  if (isError) {
-    return (
-      <div className="p-8 text-center">
-        <p className="text-sm text-red-600">
-          메뉴 목록을 불러오는데 실패했습니다.
-        </p>
-        <p className="mt-2 text-xs text-gray-500">잠시 후 다시 시도해주세요.</p>
-      </div>
-    );
-  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -128,7 +108,9 @@ export function MenuManageContent() {
           onCategoryChange={handleCategoryChange}
           onSearchChange={handleSearchChange}
         />
-        <Button onClick={handleAddMenu}>+ 메뉴 등록</Button>
+        <Link href="/seller/menu/new">
+          <Button>+ 메뉴 등록</Button>
+        </Link>
       </div>
 
       <MenuTable

@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import Link from 'next/link';
 import { useState } from 'react';
 
 import { Badge } from '@/components/common/Badge/Badge';
@@ -148,15 +149,11 @@ export function MenuTable({
                   {formatDate(menu.updatedAt)}
                 </td>
                 <td className="px-4 py-4 whitespace-nowrap">
-                  <Button
-                    variant="outline"
-                    color="gray"
-                    onClick={() => {
-                      // TODO: 메뉴 수정 모달 또는 페이지
-                    }}
-                  >
-                    수정
-                  </Button>
+                  <Link href={`/seller/menu/${menu.id}/edit`}>
+                    <Button variant="outline" color="gray">
+                      수정
+                    </Button>
+                  </Link>
                 </td>
               </tr>
             ))}
