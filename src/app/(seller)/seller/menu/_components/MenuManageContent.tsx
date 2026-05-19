@@ -2,7 +2,7 @@
 
 import { Package, ShoppingBag, PackageX } from 'lucide-react';
 import Link from 'next/link';
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 
 import { useMenuStore } from '@/stores/menuStore';
 import { Button } from '@/components/common/Button/Button';
@@ -12,38 +12,47 @@ import { MenuFilter } from './MenuFilter';
 import { MenuTable } from './MenuTable';
 
 export function MenuManageContent() {
-  const { menus, deleteMenu } = useMenuStore();
+  const menus = useMenuStore((state) => state.menus);
+  const deleteMenu = useMenuStore((state) => state.deleteMenu);
   const [selectedCategory, setSelectedCategory] = useState('전체');
   const [searchKeyword, setSearchKeyword] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
-  const categories = useMemo(() => {
-    const uniqueCategories = [...new Set(menus.map((menu) => menu.category))];
-    return ['전체', ...uniqueCategories];
-  }, [menus]);
+  const categories = ['전체', ...new Set(menus.map((menu) => menu.category))];
 
-  const filteredMenus = useMemo(() => {
-    return menus.filter((menu) => {
-      const matchCategory =
-        selectedCategory === '전체' || menu.category === selectedCategory;
+  const filteredMenus = menus.filter((menu) => {
+    const matchCategory =
+      selectedCategory === '전체' || menu.category === selectedCategory;
 
-      const matchSearch =
-        searchKeyword === '' ||
-        menu.name.toLowerCase().includes(searchKeyword.toLowerCase());
+    const matchSearch =
+      searchKeyword === '' ||
+      menu.name.toLowerCase().includes(searchKeyword.toLowerCase());
 
-      return matchCategory && matchSearch;
-    });
-  }, [menus, selectedCategory, searchKeyword]);
+    return matchCategory && matchSearch;
+  });
 
   const totalCount = menus.length;
-  const activeCount = totalCount;
-  const inactiveCount = 0;
+  const activeCount = menus.filter((menu) => menu.status === 'active').length;
+  const inactiveCount = menus.filter(
+    (menu) => menu.status === 'inactive'
+  ).length;
+
+  const handleCategoryChange = (category: string) => {
+    setSelectedCategory(category);
+    setCurrentPage(1);
+  };
+
+  const handleSearchChange = (keyword: string) => {
+    setSearchKeyword(keyword);
+    setCurrentPage(1);
+  };
 
   const handleRegisterProducts = () => {
     if (selectedIds.size === 0) return;
     // eslint-disable-next-line no-alert
     alert(`${selectedIds.size}개 메뉴를 판매 등록했습니다.`);
-    setSelectedIds(new Set()); // 선택 해제
+    setSelectedIds(new Set());
   };
 
   const handleDeleteSelected = () => {
@@ -114,8 +123,8 @@ export function MenuManageContent() {
           categories={categories}
           selectedCategory={selectedCategory}
           searchKeyword={searchKeyword}
-          onCategoryChange={setSelectedCategory}
-          onSearchChange={setSearchKeyword}
+          onCategoryChange={handleCategoryChange}
+          onSearchChange={handleSearchChange}
         />
         <Link href="/seller/menu/new">
           <Button>+ 메뉴 등록</Button>
@@ -124,11 +133,12 @@ export function MenuManageContent() {
 
       <MenuTable
         menus={filteredMenus}
+        currentPage={currentPage}
+        onPageChange={setCurrentPage}
         selectedIds={selectedIds}
         onSelectionChange={setSelectedIds}
       />
 
-      {/* 선택 시 하단 액션 바 */}
       {selectedIds.size > 0 && (
         <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-white px-4 py-3">
           <span className="text-sm text-gray-700">

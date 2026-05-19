@@ -1,19 +1,40 @@
 import type { Order, OrderItem, OrderStatus } from '@/types/order';
+import type { Payment } from '@/types/payment';
 import type {
   OrderDetailResponse,
   OrderItemResponse,
   OrderListItemResponse,
 } from '@/contracts/order';
+import type { PaymentResponse } from '@/contracts/payment';
 
 const ORDER_STATUS_MAP: Record<OrderListItemResponse['status'], OrderStatus> = {
   payment_pending: 'paymentPending',
+  processing: 'processing',
   reserved: 'reserved',
+  accepted: 'accepted',
   ready: 'ready',
   completed: 'completed',
   cancelled: 'cancelled',
   no_show: 'noShow',
   expired: 'expired',
 };
+
+function mapPayment(dto: PaymentResponse): Payment {
+  return {
+    id: dto.id,
+    orderId: dto.orderId,
+    orderNumber: dto.orderNumber,
+    method: dto.method,
+    methodDetail: dto.methodDetail,
+    amount: dto.amount,
+    status: dto.status,
+    paidAt: dto.paidAt ? new Date(dto.paidAt) : undefined,
+    refundedAt: dto.refundedAt ? new Date(dto.refundedAt) : undefined,
+    refundReason: dto.refundReason,
+    createdAt: new Date(dto.createdAt),
+    updatedAt: new Date(dto.updatedAt),
+  };
+}
 
 function mapOrderItem(dto: OrderItemResponse): OrderItem {
   return {
@@ -48,6 +69,7 @@ export function mapOrder(dto: OrderDetailResponse): Order {
     cancelledAt: dto.cancelledAt ? new Date(dto.cancelledAt) : undefined,
     cancelReason: dto.cancelReason,
     items: dto.items.map(mapOrderItem),
+    payment: dto.payment ? mapPayment(dto.payment) : undefined,
     createdAt: new Date(dto.createdAt),
     updatedAt: new Date(dto.updatedAt),
   };

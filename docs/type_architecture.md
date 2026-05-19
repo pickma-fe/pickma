@@ -227,7 +227,8 @@ Order
 
 - 주문 생성과 결제 승인은 분리한다.
 - `POST /api/orders`는 주문과 재고 임시 예약을 만든다.
-- `POST /api/payments/confirm`은 Toss 결제 승인과 주문 확정을 담당한다.
+- `POST /api/payments/prepare`는 `PAYMENT_MOCK` 환경변수에 따라 mock redirectUrl 또는 Toss checkout URL을 반환한다.
+- `POST /api/payments/confirm`은 Toss confirm API(`toss.ts`)를 서버에서 직접 호출한 후 `confirm_payment` DB RPC로 주문을 확정한다.
 
 ---
 

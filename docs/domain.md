@@ -72,7 +72,7 @@ export interface User {
 ## 3. Store
 
 ```ts
-export type StoreStatus = 'pending' | 'approved' | 'rejected' | 'inactive';
+export type StoreStatus = 'approved' | 'inactive';
 
 export interface Store {
   id: string;
@@ -88,11 +88,12 @@ export interface Store {
   openTime?: string;
   closeTime?: string;
   status: StoreStatus;
-  rejectReason?: string;
   createdAt: Date;
   updatedAt: Date;
 }
 ```
+
+가게 등록은 승인된 판매자만 수행한다. 신규 가게는 `approved` 상태로 생성된다. `inactive`는 관리자가 비활성화한 가게에 사용한다.
 
 판매자 화면에서 자주 쓰는 내 가게 상태는 Store를 기반으로 구성한다.
 
@@ -104,7 +105,87 @@ export interface MyStore extends Store {
 
 ---
 
-## 4. Catalog
+## 4. Seller Application
+
+판매자 신청은 가게 등록과 분리된 심사 도메인이다. 사업자 정보와 제출 문서 이력을 저장하고, 승인 완료 시 사용자 role을 `seller`로 전환한다.
+
+```ts
+export type SellerApplicationStatus = 'pending' | 'approved' | 'rejected';
+
+export type SellerApplicationDocumentType =
+  | 'business_license'
+  | 'id_card'
+  | 'bankbook'
+  | 'business_report';
+
+export interface SellerApplicationDocument {
+  id: string;
+  applicationId: string;
+  type: SellerApplicationDocumentType;
+  storagePath: string;
+  originalFileName: string;
+  contentType: string;
+  size: number;
+  createdAt: Date;
+}
+
+export interface SellerApplication {
+  id: string;
+  userId: string;
+  status: SellerApplicationStatus;
+  businessNumber: string;
+  companyName: string;
+  representativeName: string;
+  businessAddress: string;
+  businessType: string;
+  businessCategory: string;
+  rejectReason?: string;
+  reviewedAt?: Date;
+  documents: SellerApplicationDocument[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export type SellerApplicationStatusForOnboarding =
+  | 'none'
+  | SellerApplicationStatus;
+
+export interface SellerOnboardingStatus {
+  role: UserRole;
+  applicationStatus: SellerApplicationStatusForOnboarding;
+  hasStore: boolean;
+  latestRejectReason?: string;
+}
+```
+
+신청자 기본 정보(`email`, `name`, `phone`)는 `users`를 join해 조회한다. `seller_applications`에는 심사 시점의 사업자 정보 snapshot만 저장한다. `reviewed_by`는 저장하지 않으며, 관리자 작업자 추적은 후속 감사 로그 도메인에서 다룬다.
+
+---
+
+## 5. File Upload
+
+파일 업로드는 공통 upload URL API와 client helper를 통해 처리한다. 도메인 hook은 새 파일을 먼저 업로드하고, 반환된 `storagePath`를 도메인 input에 반영한 뒤 최종 API를 호출한다.
+
+```ts
+export type FileUploadPurpose =
+  | 'seller_application_document'
+  | 'store_image'
+  | 'seller_product_image'
+  | 'profile_image';
+
+export interface FileUploadResult {
+  storagePath: string;
+  originalFileName: string;
+  contentType: string;
+  size: number;
+}
+```
+
+판매자 신청 문서는 private bucket에 저장하고, 관리자 조회 시 signed read URL로 접근한다. 가게/상품/프로필 이미지는 public bucket을 사용한다.
+
+---
+
+## 6. Catalog
 
 Catalog는 Category, MenuItem, Product로 구성한다.
 
@@ -114,17 +195,18 @@ export interface Category {
   name: string;
   icon?: string;
   sortOrder: number;
-  createdAt: Date;
 }
 
 export interface MenuItem {
   id: string;
   storeId: string;
-  categoryId?: string;
+  categoryId: string;
+  categoryName: string;
   name: string;
   description?: string;
   image?: string;
   originalPrice: number;
+  status: 'active' | 'inactive';
   createdAt: Date;
   updatedAt: Date;
 }
@@ -132,7 +214,7 @@ export interface MenuItem {
 
 ---
 
-## 5. Product
+## 7. Product
 
 Product는 특정 시점에 판매되는 실제 판매 단위이다.
 
@@ -195,14 +277,16 @@ export interface ProductDetail extends Product {
 
 ---
 
-## 6. Order
+## 8. Order
 
 주문은 결제 전 대기, 예약 확정, 픽업 완료, 취소, 노쇼 흐름을 가진다. 실제 DB/API 상태값은 구현 중 조정될 수 있으며, Domain은 화면과 비즈니스 로직에서 필요한 상태를 표현한다.
 
 ```ts
 export type OrderStatus =
   | 'paymentPending'
+  | 'processing'
   | 'reserved'
+  | 'accepted'
   | 'ready'
   | 'completed'
   | 'cancelled'
@@ -267,10 +351,13 @@ export interface CreatedOrderPaymentInfo {
 
 ---
 
-## 7. Payment
+## 9. Payment
+
+- method: 사용자가 선택한 결제 수단 (`card | virtual_account | mobile | easy_pay`)
+- provider 정보(Toss paymentKey, orderId 등)는 DB `payments` 테이블에만 저장하며 Domain 타입에는 노출하지 않는다.
 
 ```ts
-export type PaymentMethod = 'card' | 'easyPay' | 'transfer' | 'virtualAccount';
+export type PaymentMethod = 'card' | 'virtual_account' | 'mobile' | 'easy_pay';
 
 export type PaymentStatus =
   | 'pending'
@@ -282,8 +369,9 @@ export type PaymentStatus =
 export interface Payment {
   id: string;
   orderId: string;
-  paymentKey?: string;
+  orderNumber: string;
   method: PaymentMethod;
+  methodDetail?: string;
   amount: number;
   status: PaymentStatus;
   paidAt?: Date;
@@ -296,7 +384,7 @@ export interface Payment {
 
 ---
 
-## 8. Wishlist
+## 10. Wishlist
 
 Wishlist는 MVP 이후 기능으로 둔다.
 
@@ -314,7 +402,7 @@ export interface WishlistItem {
 
 ---
 
-## 9. Admin View Models
+## 11. Admin View Models
 
 관리자 화면은 일반 Domain을 기반으로 필요한 통계/목록 모델을 별도로 둔다.
 
@@ -339,7 +427,7 @@ export interface DailyAdminMetric {
 
 ---
 
-## 10. Mapper 주의사항
+## 12. Mapper 주의사항
 
 - Contract DTO의 ISO string 날짜는 client mapper에서 `Date`로 변환한다.
 - `Product.availableStock`, `Product.discountRate`, `Product.isSoldOut`, `Product.isExpired`, `Product.displayStatus`는 mapper에서 계산한다.

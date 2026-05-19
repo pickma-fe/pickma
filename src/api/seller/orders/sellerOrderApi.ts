@@ -1,23 +1,38 @@
+import type { PaginatedResult } from '@/types/common';
 import type { Order } from '@/types/order';
 import type {
   OrderDetailResponse,
-  OrderListItemResponse,
+  OrderListResponse,
+  SellerOrderListParams,
 } from '@/contracts/order';
 import { apiClient } from '@/api/apiClient';
 
 import { mapSellerOrder, mapSellerOrderListItem } from './sellerOrderMapper';
 
 export const sellerOrderApi = {
-  getOrders(): Promise<Omit<Order, 'items' | 'payment'>[]> {
+  getOrders(
+    params?: Partial<SellerOrderListParams>
+  ): Promise<PaginatedResult<Omit<Order, 'items' | 'payment'>>> {
     return apiClient
-      .get<OrderListItemResponse[]>('/api/seller/orders')
-      .then((items) => items.map(mapSellerOrderListItem));
+      .get<OrderListResponse>('/api/seller/orders', params)
+      .then((res) => ({
+        ...res,
+        items: res.items.map(mapSellerOrderListItem),
+      }));
   },
 
   getOrder(id: string): Promise<Order> {
     return apiClient
       .get<OrderDetailResponse>(`/api/seller/orders/${id}`)
       .then(mapSellerOrder);
+  },
+
+  acceptOrder(id: string): Promise<void> {
+    return apiClient.patch<void>(`/api/seller/orders/${id}/accept`);
+  },
+
+  markOrderReady(id: string): Promise<void> {
+    return apiClient.patch<void>(`/api/seller/orders/${id}/ready`);
   },
 
   completeOrder(id: string): Promise<void> {

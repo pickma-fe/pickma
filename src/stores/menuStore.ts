@@ -1,5 +1,3 @@
-// src/stores/menuStore.ts
-
 import { create } from 'zustand';
 
 import { mockMenus, type MenuItemResponse } from '@/mocks/menus';
@@ -9,7 +7,12 @@ interface MenuStore {
   addMenu: (
     menu: Omit<MenuItemResponse, 'id' | 'createdAt' | 'updatedAt'>
   ) => void;
-  updateMenu: (id: string, data: Partial<MenuItemResponse>) => void;
+  updateMenu: (
+    id: string,
+    data: Partial<
+      Omit<MenuItemResponse, 'id' | 'createdAt' | 'updatedAt' | 'storeId'>
+    >
+  ) => void;
   deleteMenu: (id: string) => void;
 }
 

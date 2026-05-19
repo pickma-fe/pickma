@@ -12,6 +12,8 @@ import type { MenuItemResponse } from '@/mocks/menus';
 
 interface MenuTableProps {
   menus: MenuItemResponse[];
+  currentPage: number;
+  onPageChange: (page: number) => void;
   selectedIds: Set<string>;
   onSelectionChange: (ids: Set<string>) => void;
 }
@@ -22,12 +24,21 @@ const PAGE_SIZE_OPTIONS = [
   { label: '20개씩 보기', value: '20' },
 ];
 
+const formatPrice = (price: number) => {
+  return price.toLocaleString('ko-KR') + '원';
+};
+
+const formatDate = (dateString: string) => {
+  return new Date(dateString).toLocaleDateString('ko-KR');
+};
+
 export function MenuTable({
   menus,
+  currentPage,
+  onPageChange,
   selectedIds,
   onSelectionChange,
 }: MenuTableProps) {
-  const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
   const totalPages = Math.ceil(menus.length / pageSize);
@@ -40,7 +51,7 @@ export function MenuTable({
 
   const handlePageSizeChange = (value: string) => {
     setPageSize(Number(value));
-    setCurrentPage(1);
+    onPageChange(1);
   };
 
   const handleSelectAll = () => {
@@ -65,14 +76,6 @@ export function MenuTable({
     onSelectionChange(next);
   };
 
-  const formatPrice = (price: number) => {
-    return price.toLocaleString('ko-KR') + '원';
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('ko-KR');
-  };
-
   if (menus.length === 0) {
     return (
       <div className="flex min-h-[300px] items-center justify-center rounded-lg border border-gray-200 bg-white">
@@ -90,9 +93,13 @@ export function MenuTable({
     <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
       <div className="overflow-x-auto">
         <table className="w-full">
+          <caption className="sr-only">메뉴 목록</caption>
           <thead>
             <tr className="border-b border-gray-200 bg-gray-50">
-              <th className="py-3 pr-4 pl-8 text-left text-sm font-medium text-gray-500">
+              <th
+                scope="col"
+                className="py-3 pr-4 pl-8 text-left text-sm font-medium text-gray-500"
+              >
                 <div className="flex items-center gap-4">
                   <input
                     type="checkbox"
@@ -103,16 +110,28 @@ export function MenuTable({
                   <span>메뉴 정보</span>
                 </div>
               </th>
-              <th className="px-4 py-3 text-left text-sm font-medium whitespace-nowrap text-gray-500">
+              <th
+                scope="col"
+                className="px-4 py-3 text-left text-sm font-medium whitespace-nowrap text-gray-500"
+              >
                 카테고리
               </th>
-              <th className="px-4 py-3 text-left text-sm font-medium whitespace-nowrap text-gray-500">
+              <th
+                scope="col"
+                className="px-4 py-3 text-left text-sm font-medium whitespace-nowrap text-gray-500"
+              >
                 가격
               </th>
-              <th className="px-4 py-3 text-left text-sm font-medium whitespace-nowrap text-gray-500">
+              <th
+                scope="col"
+                className="px-4 py-3 text-left text-sm font-medium whitespace-nowrap text-gray-500"
+              >
                 수정일
               </th>
-              <th className="py-3 pr-8 pl-4 text-left text-sm font-medium whitespace-nowrap text-gray-500">
+              <th
+                scope="col"
+                className="py-3 pr-8 pl-4 text-left text-sm font-medium whitespace-nowrap text-gray-500"
+              >
                 관리
               </th>
             </tr>
@@ -190,7 +209,7 @@ export function MenuTable({
         <Pagination
           totalPages={totalPages}
           currentPage={currentPage}
-          onPageChange={setCurrentPage}
+          onPageChange={onPageChange}
         />
         <div className="absolute right-4">
           <Dropdown

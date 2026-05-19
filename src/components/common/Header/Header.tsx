@@ -115,7 +115,7 @@ function UserMenu({
           <ChevronDownIcon className="h-4 w-4 group-data-active:hidden" />
           <ChevronUpIcon className="hidden h-4 w-4 group-data-active:block" />
         </MenuButton>
-        <MenuItems className="absolute right-0 mt-2 w-48 rounded border border-gray-200 bg-white shadow-lg focus:outline-none">
+        <MenuItems className="absolute right-0 z-50 mt-2 w-48 rounded border border-gray-200 bg-white shadow-lg focus:outline-none">
           {menuItems.map((item) =>
             item.type === 'link' ? (
               <MenuItem

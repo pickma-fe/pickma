@@ -10,20 +10,20 @@ export const mockMyStore: StoreResponse = {
   address: '서울시 마포구 월드컵북로 12',
   addressDetail: '1층',
   region: '서울 마포구',
-  image: '/images/mock/store-bakery.jpg',
-  openTime: '2026-04-29T00:00:00.000Z',
-  closeTime: '2026-04-29T13:30:00.000Z',
+  image: '/images/mock/stores/bakery.png',
+  openTime: '09:00:00',
+  closeTime: '22:00:00',
   status: 'approved',
   canSell: true,
   createdAt: '2026-04-01T00:00:00.000Z',
   updatedAt: '2026-04-20T00:00:00.000Z',
 };
 
-export const mockPendingStore: StoreResponse = {
+export const mockApprovedStore: StoreResponse = {
   ...mockMyStore,
-  id: 'store_pending_1',
+  id: 'store_approved_1',
   userId: 'user_seller_2',
   name: '픽마 델리',
-  status: 'pending',
-  canSell: false,
+  status: 'approved',
+  canSell: true,
 };
