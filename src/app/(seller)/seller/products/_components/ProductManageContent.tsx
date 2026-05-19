@@ -116,10 +116,7 @@ export function ProductManageContent() {
         p.id === id
           ? {
               ...p,
-              status: (newStatus === 'soldout' ? 'active' : newStatus) as
-                | 'active'
-                | 'closed',
-              isSoldOut: newStatus === 'soldout',
+              status: newStatus as 'active' | 'closed',
             }
           : p
       )

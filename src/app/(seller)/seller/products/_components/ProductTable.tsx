@@ -208,10 +208,9 @@ export function ProductTable({
                       type="select"
                       items={[
                         { label: '판매중', value: 'active' },
-                        { label: '품절', value: 'soldout' },
                         { label: '판매중지', value: 'closed' },
                       ]}
-                      value={product.isSoldOut ? 'soldout' : product.status}
+                      value={product.status}
                       onChange={(value) => onStatusChange(product.id, value)}
                       placeholder="관리"
                     />
