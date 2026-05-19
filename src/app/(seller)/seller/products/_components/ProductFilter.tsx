@@ -23,6 +23,7 @@ const STATUS_OPTIONS = [
   { label: '전체 상태', value: '전체' },
   { label: '판매중', value: '판매중' },
   { label: '품절', value: '품절' },
+  { label: '판매중지', value: '판매중지' },
 ];
 
 const SORT_OPTIONS = [
@@ -86,7 +87,6 @@ export function ProductFilter({
           />
         </div>
 
-        {/* 상세 필터 드롭다운 */}
         <Dropdown
           type="select"
           items={DETAIL_FILTER_OPTIONS}

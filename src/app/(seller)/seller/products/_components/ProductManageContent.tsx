@@ -29,20 +29,22 @@ export function ProductManageContent() {
     let result = [...mockProducts];
 
     if (selectedStatus !== '전체') {
-      const statusMap: Record<string, string> = {
-        판매중: 'active',
-        품절: 'soldout',
-      };
-      result = result.filter((p) => p.status === statusMap[selectedStatus]);
+      if (selectedStatus === '판매중') {
+        result = result.filter((p) => p.status === 'active' && !p.isSoldOut);
+      } else if (selectedStatus === '품절') {
+        result = result.filter((p) => p.isSoldOut);
+      } else if (selectedStatus === '판매중지') {
+        result = result.filter((p) => p.status === 'closed');
+      }
     }
 
     if (selectedCategory !== '전체') {
       result = result.filter((p) => p.categoryName === selectedCategory);
     }
 
-    if (searchKeyword) {
+    if (searchKeyword.trim()) {
       result = result.filter((p) =>
-        p.name.toLowerCase().includes(searchKeyword.toLowerCase())
+        p.name.toLowerCase().includes(searchKeyword.trim().toLowerCase())
       );
     }
 
@@ -94,7 +96,9 @@ export function ProductManageContent() {
   }, [selectedStatus, selectedCategory, searchKeyword, sortBy, detailFilter]);
 
   const totalCount = mockProducts.length;
-  const activeCount = mockProducts.filter((p) => p.status === 'active').length;
+  const activeCount = mockProducts.filter(
+    (p) => p.status === 'active' && !p.isSoldOut
+  ).length;
   const soldOutCount = mockProducts.filter((p) => p.isSoldOut).length;
   const closedCount = mockProducts.filter((p) => p.status === 'closed').length;
 
@@ -188,7 +192,7 @@ export function ProductManageContent() {
       {/* TODO: 테이블 영역 (이슈 3) */}
       <div className="rounded-lg border border-gray-200 bg-white p-8 text-center text-gray-500">
         <p>필터링된 상품: {filteredProducts.length}개</p>
-        <p className="mt-2 text-sm">테이블 컴포넌트 구현 예정</p>
+        <p className="mt-2 text-sm">테이블 컴포넌트 구현 예정 (이슈 3)</p>
       </div>
     </div>
   );
