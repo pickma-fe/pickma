@@ -28,7 +28,6 @@ export function OrderManageContent() {
 
   return (
     <div className="flex flex-col gap-6">
-      {/* 헤더 */}
       <div>
         <h1 className="text-xl font-bold text-gray-900 lg:text-2xl">
           주문 관리
@@ -38,7 +37,6 @@ export function OrderManageContent() {
         </p>
       </div>
 
-      {/* 통계 카드 */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
         <Section variant="card" className="bg-white">
           <div className="flex items-center gap-4">
