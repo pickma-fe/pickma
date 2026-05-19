@@ -2,8 +2,8 @@
 
 import { useQuery } from '@tanstack/react-query';
 
+import type { PaginatedResult } from '@/types/common';
 import type { Order } from '@/types/order';
-import type { PaginatedResult } from '@/contracts/common';
 import type { SellerOrderListParams } from '@/contracts/order';
 import { sellerOrderApi } from '@/api/seller/orders/sellerOrderApi';
 

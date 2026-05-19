@@ -26,7 +26,7 @@ const tabStatusMap: Record<
   Exclude<ReservationTab['id'], 'all'>,
   MockMypageReservation['status'][]
 > = {
-  pendingPickup: ['processing', 'reserved', 'accepted', 'ready'],
+  pendingPickup: ['reserved', 'accepted', 'ready'],
   completed: ['completed'],
   cancelled: ['cancelled', 'no_show', 'expired'],
 };

@@ -1,5 +1,5 @@
+import type { PaginatedResult } from '@/types/common';
 import type { Order } from '@/types/order';
-import type { PaginatedResult } from '@/contracts/common';
 import type {
   OrderDetailResponse,
   OrderListResponse,
