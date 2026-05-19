@@ -24,23 +24,16 @@ export function OrderProductSummary({
 }: OrderProductSummaryProps) {
   return (
     <section className="rounded-lg border border-gray-200 bg-white p-8">
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-3 flex items-center justify-between">
         <h2 className="text-xl font-bold text-gray-900">주문 상품</h2>
-        <button
-          type="button"
-          aria-label="상품 제거"
-          className="rounded-full bg-gray-100 p-1 text-gray-500"
-        >
-          <span aria-hidden="true">×</span>
-        </button>
       </div>
 
-      <p className="mb-5 text-base font-bold text-gray-900">
+      <p className="mb-5 text-lg font-bold text-gray-900">
         {product.store.name}
       </p>
 
       <div className="grid gap-6 md:grid-cols-[180px_minmax(0,1fr)] xl:grid-cols-[180px_minmax(0,1fr)_132px_120px] xl:items-center">
-        <div className="relative aspect-[4/3] overflow-hidden rounded-md bg-gray-100">
+        <div className="relative aspect-4/3 overflow-hidden rounded-md bg-gray-100">
           <Image
             src={product.image || FALLBACK_PRODUCT_IMAGE}
             alt={product.name}
@@ -56,68 +49,72 @@ export function OrderProductSummary({
             {product.description ?? '픽업 가능한 마감 할인 상품입니다.'}
           </p>
           <div className="mt-4 flex flex-wrap items-center gap-3">
-            <strong className="text-primary-500 text-xl font-bold">
+            <strong className="text-primary-500 text-2xl font-bold">
               {product.discountPrice.toLocaleString()}원
             </strong>
-            <span className="text-sm text-gray-400 line-through">
+            <span className="text-base text-gray-400 line-through">
               {product.originalPrice.toLocaleString()}원
             </span>
-            <span className="text-primary-500 text-sm font-bold">
+            <span className="text-primary-500 text-base font-bold">
               {product.discountRate}%
             </span>
           </div>
         </div>
 
+        {/* TODO: 주문 생성 플로우에서 수량 상태와 금액 재계산 로직을 연결하면 활성화합니다. */}
         <div className="flex w-fit overflow-hidden rounded-md border border-gray-200">
           <button
             type="button"
             aria-label="수량 감소"
             disabled
-            className="flex size-10 items-center justify-center text-gray-300"
+            className="flex size-10 items-center justify-center text-gray-300 disabled:cursor-not-allowed"
           >
             <Minus className="size-4" aria-hidden="true" />
           </button>
-          <span className="flex size-10 items-center justify-center border-x border-gray-200 text-sm font-medium text-gray-900">
+          <output
+            aria-label={`수량 ${quantity}개`}
+            className="flex size-10 items-center justify-center border-x border-gray-200 text-sm font-medium text-gray-900"
+          >
             {quantity}
-          </span>
+          </output>
           <button
             type="button"
             aria-label="수량 증가"
             disabled
-            className="flex size-10 items-center justify-center text-gray-300"
+            className="flex size-10 items-center justify-center text-gray-300 disabled:cursor-not-allowed"
           >
             <Plus className="size-4" aria-hidden="true" />
           </button>
         </div>
 
-        <strong className="text-right text-lg font-bold text-gray-900">
+        <strong className="text-right text-xl font-bold text-gray-900">
           {productTotalPrice.toLocaleString()}원
         </strong>
       </div>
 
       <div className="mt-8 border-t border-gray-200 pt-6">
-        <dl className="space-y-4 text-sm">
+        <dl className="space-y-1">
           <div className="flex justify-between gap-4">
-            <dt className="text-gray-600">상품 금액</dt>
-            <dd className="font-medium text-gray-900">
-              {product.originalPrice.toLocaleString()}원
+            <dt className="text-base text-gray-600">상품 금액</dt>
+            <dd className="text-lg font-medium text-gray-900">
+              {(product.originalPrice * quantity).toLocaleString()}원
             </dd>
           </div>
           <div className="flex justify-between gap-4">
-            <dt className="text-gray-600">픽마 안심 서비스</dt>
-            <dd className="font-medium text-gray-900">
+            <dt className="text-base text-gray-600">픽마 안심 서비스</dt>
+            <dd className="text-lg font-medium text-gray-900">
               {serviceFee.toLocaleString()}원
             </dd>
           </div>
           <div className="flex justify-between gap-4">
-            <dt className="text-primary-500">할인 금액</dt>
-            <dd className="text-primary-500 font-medium">
+            <dt className="text-primary-500 text-base">할인 금액</dt>
+            <dd className="text-primary-500 text-lg font-medium">
               -{discountAmount.toLocaleString()}원
             </dd>
           </div>
           <div className="flex justify-between gap-4 border-t border-gray-200 pt-5">
             <dt className="text-xl font-bold text-gray-900">총 결제 금액</dt>
-            <dd className="text-primary-500 text-xl font-bold">
+            <dd className="text-primary-500 text-2xl font-bold">
               {finalPaymentPrice.toLocaleString()}원
             </dd>
           </div>

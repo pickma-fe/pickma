@@ -1,6 +1,6 @@
 'use client';
 
-import { Package, ShoppingBag, PackageX } from 'lucide-react';
+import { Package, ShoppingBag, PackageX, EyeOff } from 'lucide-react';
 import { useState, useMemo } from 'react';
 
 import { Section } from '@/components/common/Section/Section';
@@ -31,20 +31,22 @@ export function ProductManageContent() {
     let result = [...mockProducts];
 
     if (selectedStatus !== '전체') {
-      const statusMap: Record<string, string> = {
-        판매중: 'active',
-        품절: 'soldout',
-      };
-      result = result.filter((p) => p.status === statusMap[selectedStatus]);
+      if (selectedStatus === '판매중') {
+        result = result.filter((p) => p.status === 'active' && !p.isSoldOut);
+      } else if (selectedStatus === '품절') {
+        result = result.filter((p) => p.isSoldOut);
+      } else if (selectedStatus === '판매중지') {
+        result = result.filter((p) => p.status === 'closed');
+      }
     }
 
     if (selectedCategory !== '전체') {
       result = result.filter((p) => p.categoryName === selectedCategory);
     }
 
-    if (searchKeyword) {
+    if (searchKeyword.trim()) {
       result = result.filter((p) =>
-        p.name.toLowerCase().includes(searchKeyword.toLowerCase())
+        p.name.toLowerCase().includes(searchKeyword.trim().toLowerCase())
       );
     }
 
@@ -96,8 +98,11 @@ export function ProductManageContent() {
   }, [selectedStatus, selectedCategory, searchKeyword, sortBy, detailFilter]);
 
   const totalCount = mockProducts.length;
-  const activeCount = mockProducts.filter((p) => p.status === 'active').length;
+  const activeCount = mockProducts.filter(
+    (p) => p.status === 'active' && !p.isSoldOut
+  ).length;
   const soldOutCount = mockProducts.filter((p) => p.isSoldOut).length;
+  const closedCount = mockProducts.filter((p) => p.status === 'closed').length;
 
   const handleStatusChange = (status: string) => {
     setSelectedStatus(status);
@@ -135,7 +140,7 @@ export function ProductManageContent() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Section variant="card" className="bg-white">
           <div className="flex items-center gap-4">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100">
@@ -175,6 +180,21 @@ export function ProductManageContent() {
               <p className="text-sm text-gray-500">품절</p>
               <p className="text-2xl font-bold text-gray-900">
                 {soldOutCount}
+                <span className="text-base font-normal text-gray-500">개</span>
+              </p>
+            </div>
+          </div>
+        </Section>
+
+        <Section variant="card" className="bg-white">
+          <div className="flex items-center gap-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100">
+              <EyeOff className="h-6 w-6 text-gray-600" />
+            </div>
+            <div>
+              <p className="text-sm text-gray-500">판매중지</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {closedCount}
                 <span className="text-base font-normal text-gray-500">개</span>
               </p>
             </div>

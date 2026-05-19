@@ -2,6 +2,9 @@
 .branches
 .temp
 
+# Local auth seed (실제 계정 정보 포함, 커밋 금지)
+seeds/*.local.sql
+
 # dotenvx
 .env.keys
 .env.local

@@ -12,6 +12,7 @@ import { useMemo, useState } from 'react';
 import { Button } from '@/components/common';
 
 interface ProductReservationPanelProps {
+  productId: string;
   price: number;
   availableStock: number;
   pickupStartTime: string;
@@ -118,6 +119,7 @@ function isPastTimeSlot(slotValue: string, pickupDateTime: string, now: Date) {
 }
 
 export function ProductReservationPanel({
+  productId,
   price,
   availableStock,
   pickupStartTime,
@@ -157,7 +159,8 @@ export function ProductReservationPanel({
       return;
     }
 
-    // TODO: 주문/결제 플로우 연동 시 선택한 픽업 시간과 수량을 전달합니다.
+    // TODO: 주문/결제 플로우 연동 시 productId, 선택한 픽업 시간, 수량을 전달합니다.
+    void productId;
   };
   const isDecreaseDisabled = quantity <= 1;
   const isIncreaseDisabled = quantity >= availableStock;

@@ -1,14 +1,14 @@
 import type { ReactNode } from 'react';
 
-import type { ProductDetailResponse } from '@/contracts/product';
+import type { ProductDetail } from '@/types/product';
 import { formatPickupTime } from '@/lib/formatPickupTime';
 import { Badge } from '@/components/common';
 
 interface ProductDetailInfoProps {
-  product: ProductDetailResponse;
+  product: ProductDetail;
 }
 
-function getProductStatus(product: ProductDetailResponse) {
+function getProductStatus(product: ProductDetail) {
   if (
     product.isExpired ||
     product.displayStatus === 'expired' ||

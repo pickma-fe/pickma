@@ -30,6 +30,19 @@ const STATUS_BADGE: Record<
 > = {
   active: { label: '판매중', color: 'success' },
   soldout: { label: '품절', color: 'danger' },
+  closed: { label: '판매중지', color: 'gray' },
+};
+
+const getStatusBadge = (product: ProductListItemResponse) => {
+  if (product.isSoldOut) {
+    return STATUS_BADGE['soldout'];
+  }
+  return (
+    STATUS_BADGE[product.status] ?? {
+      label: product.status,
+      color: 'gray' as const,
+    }
+  );
 };
 
 export function ProductTable({
@@ -114,10 +127,7 @@ export function ProductTable({
           </thead>
           <tbody>
             {paginatedProducts.map((product, index) => {
-              const badge = STATUS_BADGE[product.status] ?? {
-                label: product.status,
-                color: 'gray' as const,
-              };
+              const badge = getStatusBadge(product);
 
               return (
                 <tr
@@ -197,8 +207,9 @@ export function ProductTable({
                       items={[
                         { label: '판매중', value: 'active' },
                         { label: '품절', value: 'soldout' },
+                        { label: '판매중지', value: 'closed' },
                       ]}
-                      value={product.status}
+                      value={product.isSoldOut ? 'soldout' : product.status}
                       onChange={() => {
                         // TODO: 상태 변경 API 연결
                       }}

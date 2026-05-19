@@ -5,6 +5,7 @@ import type {
   OrderListItemResponse,
   OrderStatusParam,
 } from '@/contracts/order';
+import { type PaymentRow, mapPaymentRow } from '@/app/api/payments/_lib/mapper';
 
 interface OrderItemSnapshot {
   product_name: string;
@@ -69,6 +70,7 @@ export interface OrderDetailRow extends OrderListRow {
   cancelled_at: string | null;
   picked_up_at: string | null;
   order_items: OrderItemRow[];
+  payments: PaymentRow | null;
 }
 
 export function mapOrderListRow(row: OrderListRow): OrderListItemResponse {
@@ -112,5 +114,8 @@ export function mapOrderDetailRow(row: OrderDetailRow): OrderDetailResponse {
     cancelReason: row.cancel_reason ?? undefined,
     pickedUpAt: row.picked_up_at ?? undefined,
     items: row.order_items.map(mapOrderItemRow),
+    payment: row.payments
+      ? mapPaymentRow(row.payments, row.order_number)
+      : undefined,
   };
 }

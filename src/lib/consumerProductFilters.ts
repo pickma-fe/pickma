@@ -4,6 +4,7 @@ export type ProductFilterCategory = {
   icon?: string;
 };
 
+export const ALL_CATEGORY_ID = 'category-all';
 export const DEFAULT_SORT_OPTION_ID = 'deadline';
 export const DEFAULT_DISCOUNT_OPTION_ID = 'all';
 

@@ -19,8 +19,7 @@ const baseRow: StoresRow = {
   image: null,
   open_time: null,
   close_time: null,
-  status: 'pending',
-  reject_reason: null,
+  status: 'approved' as const,
   created_at: '2026-01-01T00:00:00Z',
   updated_at: '2026-01-01T00:00:00Z',
 };
@@ -40,8 +39,7 @@ describe('mapStoreRow', () => {
       image: undefined,
       openTime: undefined,
       closeTime: undefined,
-      status: 'pending',
-      rejectReason: undefined,
+      status: 'approved',
       canSell: false,
       createdAt: '2026-01-01T00:00:00Z',
       updatedAt: '2026-01-01T00:00:00Z',
@@ -55,7 +53,6 @@ describe('mapStoreRow', () => {
     expect(result.image).toBeUndefined();
     expect(result.openTime).toBeUndefined();
     expect(result.closeTime).toBeUndefined();
-    expect(result.rejectReason).toBeUndefined();
   });
 
   it('null이 아닌 선택 필드는 그대로 반환한다', () => {
@@ -67,7 +64,6 @@ describe('mapStoreRow', () => {
         image: 'https://example.com/store.jpg',
         open_time: '09:00:00',
         close_time: '21:00:00',
-        reject_reason: '서류 미비',
       },
       false
     );
@@ -76,7 +72,6 @@ describe('mapStoreRow', () => {
     expect(result.image).toBe('https://example.com/store.jpg');
     expect(result.openTime).toBe('09:00:00');
     expect(result.closeTime).toBe('21:00:00');
-    expect(result.rejectReason).toBe('서류 미비');
   });
 
   it('canSell 파라미터를 DTO에 그대로 반영한다', () => {

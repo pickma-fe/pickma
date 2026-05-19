@@ -1,10 +1,10 @@
 import type { PaginatedResult } from '@/types/common';
 import type { CreatedOrderPaymentInfo, Order } from '@/types/order';
 import type {
+  ConsumerOrderListParams,
   CreateOrderRequest,
   CreateOrderResponse,
   OrderDetailResponse,
-  OrderListParams,
   OrderListResponse,
 } from '@/contracts/order';
 
@@ -25,7 +25,7 @@ export const orderApi = {
   },
 
   getOrders(
-    params: OrderListParams
+    params: ConsumerOrderListParams
   ): Promise<PaginatedResult<Omit<Order, 'items' | 'payment'>>> {
     return apiClient
       .get<OrderListResponse>('/api/orders', params)
