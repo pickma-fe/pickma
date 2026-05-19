@@ -1,6 +1,6 @@
 'use client';
 
-import { Package, ShoppingBag, PackageX } from 'lucide-react';
+import { Package, ShoppingBag, PackageX, EyeOff } from 'lucide-react';
 
 import { Section } from '@/components/common/Section/Section';
 
@@ -8,7 +8,8 @@ export function ProductManageContent() {
   // TODO: API 연동 시 실제 데이터로 교체
   const totalCount = 32;
   const activeCount = 28;
-  const soldOutCount = 4;
+  const soldOutCount = 3;
+  const closedCount = 1;
 
   return (
     <div className="flex flex-col gap-6">
@@ -22,7 +23,7 @@ export function ProductManageContent() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Section variant="card" className="bg-white">
           <div className="flex items-center gap-4">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100">
@@ -62,6 +63,21 @@ export function ProductManageContent() {
               <p className="text-sm text-gray-500">품절</p>
               <p className="text-2xl font-bold text-gray-900">
                 {soldOutCount}
+                <span className="text-base font-normal text-gray-500">개</span>
+              </p>
+            </div>
+          </div>
+        </Section>
+
+        <Section variant="card" className="bg-white">
+          <div className="flex items-center gap-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100">
+              <EyeOff className="h-6 w-6 text-gray-600" />
+            </div>
+            <div>
+              <p className="text-sm text-gray-500">판매중지</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {closedCount}
                 <span className="text-base font-normal text-gray-500">개</span>
               </p>
             </div>
