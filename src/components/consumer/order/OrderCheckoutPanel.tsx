@@ -9,13 +9,17 @@ import {
   formatPickupTime,
   type PickupTimeOption,
 } from '@/lib/formatPickupTime';
+import { useCreateOrder } from '@/hooks/orders/useCreateOrder';
+import { usePayment } from '@/hooks/payments/usePayment';
 import { Button } from '@/components/common';
 
 import { PickupTimeChangeModal } from './PickupTimeChangeModal';
 
 interface OrderCheckoutPanelProps {
   product: ProductDetailResponse;
+  quantity: number;
   finalPaymentPrice: number;
+  initialPickupTime?: PickupTimeOption;
 }
 
 type OrderInfoBlockProps =
@@ -54,27 +58,100 @@ function createDefaultPickupTimeOption(
   };
 }
 
+function createPickupAt(
+  pickupBaseDateTime: string,
+  pickupTime: PickupTimeOption
+) {
+  const [hour, minute] = pickupTime.startAt.split(':').map(Number);
+
+  if (
+    Number.isNaN(hour) ||
+    Number.isNaN(minute) ||
+    hour < 0 ||
+    hour > 23 ||
+    minute < 0 ||
+    minute > 59
+  ) {
+    return null;
+  }
+
+  const baseDate = pickupBaseDateTime.includes('T')
+    ? new Date(pickupBaseDateTime)
+    : new Date();
+
+  if (Number.isNaN(baseDate.getTime())) {
+    return null;
+  }
+
+  const pickupAt = new Date(
+    baseDate.getFullYear(),
+    baseDate.getMonth(),
+    baseDate.getDate(),
+    hour,
+    minute,
+    0,
+    0
+  );
+
+  return pickupAt.toISOString();
+}
+
 export function OrderCheckoutPanel({
   product,
+  quantity,
   finalPaymentPrice,
+  initialPickupTime,
 }: OrderCheckoutPanelProps) {
+  const createOrderMutation = useCreateOrder();
+  const {
+    openPayment,
+    isPending: isPaymentPending,
+    error: paymentError,
+  } = usePayment();
   const pickupPlace = getPickupPlace(product);
   const [referenceNow, setReferenceNow] = useState(() => new Date());
   const pickupDateLabel = formatPickupDateLabel(
     product.pickupStartTime,
     referenceNow
   );
-  const [pickupTime, setPickupTime] = useState(() =>
-    createDefaultPickupTimeOption(
-      product.pickupStartTime,
-      product.pickupEndTime
-    )
+  const [pickupTime, setPickupTime] = useState(
+    () =>
+      initialPickupTime ??
+      createDefaultPickupTimeOption(
+        product.pickupStartTime,
+        product.pickupEndTime
+      )
   );
   const [isPickupTimeModalOpen, setIsPickupTimeModalOpen] = useState(false);
   const handleOpenPickupTimeModal = () => {
     setReferenceNow(new Date());
     setIsPickupTimeModalOpen(true);
   };
+  const handlePaymentButtonClick = async () => {
+    const pickupAt = createPickupAt(product.pickupStartTime, pickupTime);
+
+    if (pickupAt === null) {
+      return;
+    }
+
+    try {
+      const order = await createOrderMutation.mutateAsync({
+        productId: product.id,
+        quantity,
+        pickupAt,
+      });
+
+      await openPayment({
+        orderNumber: order.orderNumber,
+        orderName: order.orderName,
+      });
+    } catch {
+      // 에러 상태는 useCreateOrder/usePayment에서 노출한다.
+    }
+  };
+  const isSubmitting = createOrderMutation.isPending || isPaymentPending;
+  const paymentErrorMessage =
+    createOrderMutation.error?.message ?? paymentError?.message;
 
   return (
     <>
@@ -118,10 +195,21 @@ export function OrderCheckoutPanel({
             </strong>
           </div>
 
-          {/* TODO: 주문 생성 API 호출 후 토스페이먼츠 결제 위젯을 연결합니다. */}
-          <Button className="w-full py-4 text-lg font-bold">
-            {finalPaymentPrice.toLocaleString()}원 결제하기
+          <Button
+            disabled={isSubmitting}
+            className="w-full py-4 text-lg font-bold"
+            onClick={handlePaymentButtonClick}
+          >
+            {isSubmitting
+              ? '결제 준비 중'
+              : `${finalPaymentPrice.toLocaleString()}원 결제하기`}
           </Button>
+
+          {paymentErrorMessage ? (
+            <p role="alert" className="mt-3 text-center text-sm text-red-500">
+              결제를 시작하지 못했습니다. 다시 시도해 주세요.
+            </p>
+          ) : null}
 
           <p className="mt-5 text-center text-xs leading-5 text-gray-500">
             결제 버튼을 누르면 픽마의 이용약관과 개인정보 처리방침에 동의하게

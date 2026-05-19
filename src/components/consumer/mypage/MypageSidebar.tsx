@@ -84,7 +84,6 @@ function SidebarMenuItem({ item }: { item: SidebarItem }) {
     <button type="button" disabled aria-disabled="true" className={className}>
       {item.icon}
       <span>{item.label}</span>
-      <span className="ml-auto text-xs font-medium text-gray-400">준비중</span>
     </button>
   );
 }
