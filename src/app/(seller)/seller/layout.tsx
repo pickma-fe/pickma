@@ -1,9 +1,6 @@
 'use client';
 
-import { useQueryClient } from '@tanstack/react-query';
-import { useRouter } from 'next/navigation';
-
-import { authApi } from '@/api/auth/authApi';
+import { useSignOut } from '@/hooks/auth/useSignOut';
 import { useMe } from '@/hooks/users/useMe';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { useAuthModal } from '@/components/auth/useAuthModal';
@@ -19,14 +16,7 @@ export default function SellerLayout({
 }) {
   const { data: user } = useMe();
   const { openAuthModal } = useAuthModal();
-  const router = useRouter();
-  const queryClient = useQueryClient();
-
-  const handleSignOut = async () => {
-    await authApi.signOut();
-    await queryClient.invalidateQueries({ queryKey: ['me'] });
-    router.refresh();
-  };
+  const { mutate: signOut } = useSignOut();
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -44,9 +34,7 @@ export default function SellerLayout({
                 {
                   label: '로그아웃',
                   type: 'action',
-                  onClick: () => {
-                    void handleSignOut();
-                  },
+                  onClick: () => signOut(),
                   className: 'text-red-500',
                 },
               ]
