@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { useState } from 'react';
 
 import type { OrderStatus } from '@/types/order';
+import { usePayment } from '@/hooks/payments/usePayment';
 import { Button } from '@/components/common';
 
 import { MypageReservationDetailModal } from './MypageReservationDetailModal';
@@ -77,6 +78,7 @@ const statusStyles: Record<
 export function MypageReservationCard({
   reservation,
 }: MypageReservationCardProps) {
+  const { openPayment, isPending: isPaymentPending } = usePayment();
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isPickupCodeModalOpen, setIsPickupCodeModalOpen] = useState(false);
   const displayGroup = statusDisplayMap[reservation.status];
@@ -84,6 +86,7 @@ export function MypageReservationCard({
   const isPickupCodeAvailable =
     displayGroup === 'pendingPickup' && Boolean(reservation.pickupCode);
   const shouldShowPickupCodeButton = displayGroup === 'pendingPickup';
+  const shouldShowPaymentButton = displayGroup === 'paymentPending';
   const reservationTitle = reservation.productName
     ? `${reservation.storeName} ${reservation.productName}`
     : reservation.storeName;
@@ -106,6 +109,13 @@ export function MypageReservationCard({
 
   const handleClosePickupCodeModal = () => {
     setIsPickupCodeModalOpen(false);
+  };
+
+  const handleOpenPayment = async () => {
+    await openPayment({
+      orderNumber: reservation.orderNumber,
+      orderName: reservationTitle,
+    });
   };
 
   return (
@@ -175,6 +185,16 @@ export function MypageReservationCard({
                 {reservation.pickupCode
                   ? '픽업 코드 보기'
                   : '픽업 코드 발급 전'}
+              </Button>
+            ) : null}
+            {shouldShowPaymentButton ? (
+              <Button
+                color="primary"
+                disabled={isPaymentPending}
+                className="h-12 min-w-32 px-5 text-sm"
+                onClick={() => void handleOpenPayment()}
+              >
+                {isPaymentPending ? '결제 준비 중' : '결제하기'}
               </Button>
             ) : null}
           </div>
