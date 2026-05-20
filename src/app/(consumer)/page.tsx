@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import {
   ALL_CATEGORY_ID,
@@ -12,6 +12,7 @@ import {
   type ProductDiscountOptionId,
   type ProductSortOptionId,
 } from '@/lib/consumerProductFilters';
+import { useCategories } from '@/hooks/categories/useCategories';
 import { useProducts } from '@/hooks/products/useProducts';
 import { Button, Footer } from '@/components/common';
 import { ConsumerHeader } from '@/components/consumer/ConsumerHeader';
@@ -19,7 +20,6 @@ import { ConsumerHeaderSearch } from '@/components/consumer/ConsumerHeaderSearch
 import { ConsumerProductList } from '@/components/consumer/ConsumerProductList';
 import { ProductFilterSidebar } from '@/components/consumer/ProductFilterSidebar';
 import { PromotionCarousel } from '@/components/consumer/PromotionCarousel';
-import { mockConsumerProductCategories } from '@/mocks/consumerProductCategories';
 
 const regionItems = [
   { label: '서울 강남구 역삼동', value: '서울 강남구' },
@@ -29,6 +29,13 @@ const regionItems = [
 
 const PRODUCTS_PER_PAGE = 10;
 const PRODUCT_LIST_REFRESH_INTERVAL_MS = 60_000;
+const categoryIconMap: Record<string, string> = {
+  bread: '🥖',
+  coffee: '☕',
+  box: '🍱',
+  salad: '🥗',
+  food: '🍚',
+};
 
 function getProductSortQuery(sortOption: ProductSortOptionId) {
   if (sortOption === 'discount-rate') {
@@ -53,6 +60,20 @@ export default function ConsumerPage() {
   const [keyword, setKeyword] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const productSortQuery = getProductSortQuery(selectedSortOption);
+  const { data: categories = [] } = useCategories();
+  const productCategories = useMemo(
+    () => [
+      { id: ALL_CATEGORY_ID, name: '전체', icon: '🔲' },
+      ...categories.map((category) => ({
+        id: category.id,
+        name: category.name,
+        icon: category.icon
+          ? (categoryIconMap[category.icon] ?? category.icon)
+          : undefined,
+      })),
+    ],
+    [categories]
+  );
   const {
     data: productList,
     isError: isProductsError,
@@ -241,7 +262,7 @@ export default function ConsumerPage() {
       <main className="min-h-screen bg-white">
         <div className="mx-auto grid max-w-450 grid-cols-1 lg:grid-cols-[220px_1fr]">
           <ProductFilterSidebar
-            categories={mockConsumerProductCategories}
+            categories={productCategories}
             selectedCategoryId={selectedCategoryId}
             selectedSortOption={selectedSortOption}
             selectedDiscountOption={selectedDiscountOption}

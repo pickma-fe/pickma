@@ -7,6 +7,7 @@ import {
   Plus,
   ShieldCheck,
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
 
 import { Button } from '@/components/common';
@@ -125,6 +126,7 @@ export function ProductReservationPanel({
   pickupStartTime,
   pickupEndTime,
 }: ProductReservationPanelProps) {
+  const router = useRouter();
   const [now] = useState(() => new Date());
   const timeSlots = useMemo(
     () => createPickupTimeSlots(pickupStartTime, pickupEndTime),
@@ -159,8 +161,14 @@ export function ProductReservationPanel({
       return;
     }
 
-    // TODO: 주문/결제 플로우 연동 시 productId, 선택한 픽업 시간, 수량을 전달합니다.
-    void productId;
+    const [pickupStart, pickupEnd] = activeTimeSlot.split('-');
+    const searchParams = new URLSearchParams({
+      quantity: String(quantity),
+      pickupStart,
+      pickupEnd,
+    });
+
+    router.push(`/order/${productId}?${searchParams.toString()}`);
   };
   const isDecreaseDisabled = quantity <= 1;
   const isIncreaseDisabled = quantity >= availableStock;
