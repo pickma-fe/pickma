@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { useState } from 'react';
 
 import type { OrderStatus } from '@/types/order';
+import { usePayment } from '@/hooks/payments/usePayment';
 import { Button } from '@/components/common';
 
 import { MypageReservationDetailModal } from './MypageReservationDetailModal';
@@ -77,13 +78,16 @@ const statusStyles: Record<
 export function MypageReservationCard({
   reservation,
 }: MypageReservationCardProps) {
+  const { openPayment, isPending: isPaymentPending } = usePayment();
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isPickupCodeModalOpen, setIsPickupCodeModalOpen] = useState(false);
+  const [paymentErrorMessage, setPaymentErrorMessage] = useState('');
   const displayGroup = statusDisplayMap[reservation.status];
   const status = statusStyles[displayGroup];
   const isPickupCodeAvailable =
     displayGroup === 'pendingPickup' && Boolean(reservation.pickupCode);
   const shouldShowPickupCodeButton = displayGroup === 'pendingPickup';
+  const shouldShowPaymentButton = displayGroup === 'paymentPending';
   const reservationTitle = reservation.productName
     ? `${reservation.storeName} ${reservation.productName}`
     : reservation.storeName;
@@ -106,6 +110,19 @@ export function MypageReservationCard({
 
   const handleClosePickupCodeModal = () => {
     setIsPickupCodeModalOpen(false);
+  };
+
+  const handleOpenPayment = async () => {
+    setPaymentErrorMessage('');
+
+    try {
+      await openPayment({
+        orderNumber: reservation.orderNumber,
+        orderName: reservationTitle,
+      });
+    } catch {
+      setPaymentErrorMessage('결제를 시작하지 못했습니다. 다시 시도해 주세요.');
+    }
   };
 
   return (
@@ -177,8 +194,23 @@ export function MypageReservationCard({
                   : '픽업 코드 발급 전'}
               </Button>
             ) : null}
+            {shouldShowPaymentButton ? (
+              <Button
+                color="primary"
+                disabled={isPaymentPending}
+                className="h-12 min-w-32 px-5 text-sm"
+                onClick={handleOpenPayment}
+              >
+                {isPaymentPending ? '결제 준비 중' : '결제하기'}
+              </Button>
+            ) : null}
           </div>
         </div>
+        {paymentErrorMessage ? (
+          <p role="alert" className="mt-3 text-right text-sm text-red-500">
+            {paymentErrorMessage}
+          </p>
+        ) : null}
       </article>
 
       <MypageReservationDetailModal

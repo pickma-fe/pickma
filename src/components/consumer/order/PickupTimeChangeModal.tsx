@@ -11,7 +11,7 @@ import { Button, Modal } from '@/components/common';
 
 interface PickupTimeChangeModalProps {
   isOpen: boolean;
-  selectedPickupTime: PickupTimeOption;
+  selectedPickupTime: PickupTimeOption | null;
   pickupStartTime: string;
   pickupEndTime: string;
   referenceNow: Date;
@@ -33,6 +33,7 @@ export function PickupTimeChangeModal({
     pickupEndTime
   );
   const initialDraftPickupTime =
+    selectedPickupTime !== null &&
     pickupTimeOptions.find(
       (option) => option.startAt === selectedPickupTime.startAt
     ) &&

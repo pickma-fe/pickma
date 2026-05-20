@@ -10,6 +10,11 @@ import {
 import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
 
+import {
+  createPickupTimeOptions,
+  formatPickupDateLabel,
+  isPastPickupTimeSlot,
+} from '@/lib/formatPickupTime';
 import { Button } from '@/components/common';
 
 interface ProductReservationPanelProps {
@@ -18,105 +23,6 @@ interface ProductReservationPanelProps {
   availableStock: number;
   pickupStartTime: string;
   pickupEndTime: string;
-}
-
-function formatPickupDate(value: string) {
-  if (!value.includes('T')) {
-    return '오늘';
-  }
-
-  const date = new Date(value);
-
-  if (Number.isNaN(date.getTime())) {
-    return '오늘';
-  }
-
-  return new Intl.DateTimeFormat('ko-KR', {
-    month: 'numeric',
-    day: 'numeric',
-    weekday: 'short',
-  }).format(date);
-}
-
-function createPickupTimeSlots(startTime: string, endTime: string) {
-  const start = parseTimeToMinutes(startTime);
-  const end = parseTimeToMinutes(endTime);
-  const slots: { label: string; value: string }[] = [];
-
-  if (start === null || end === null || start >= end) {
-    return slots;
-  }
-
-  for (let current = start; current + 30 <= end; current += 30) {
-    const next = current + 30;
-    slots.push({
-      value: `${formatMinutesToTime(current)}-${formatMinutesToTime(next)}`,
-      label: `${formatMinutesToTime(current)}~${formatMinutesToTime(next)}`,
-    });
-  }
-
-  return slots;
-}
-
-function parseTimeToMinutes(value: string) {
-  const time = value.includes('T') ? value.split('T')[1] : value;
-  const [hour, minute] = time.split(':').map(Number);
-
-  if (
-    Number.isNaN(hour) ||
-    Number.isNaN(minute) ||
-    hour < 0 ||
-    hour > 23 ||
-    minute < 0 ||
-    minute > 59
-  ) {
-    return null;
-  }
-
-  return hour * 60 + minute;
-}
-
-function formatMinutesToTime(totalMinutes: number) {
-  const hour = Math.floor(totalMinutes / 60);
-  const minute = totalMinutes % 60;
-
-  return `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
-}
-
-function isPastTimeSlot(slotValue: string, pickupDateTime: string, now: Date) {
-  const [startTime] = slotValue.split('-');
-  const slotStartMinutes = parseTimeToMinutes(startTime);
-
-  if (slotStartMinutes === null) {
-    return true;
-  }
-
-  if (pickupDateTime.includes('T')) {
-    const pickupDate = new Date(pickupDateTime);
-
-    if (Number.isNaN(pickupDate.getTime())) {
-      return true;
-    }
-
-    const pickupDateOnly = new Date(
-      pickupDate.getFullYear(),
-      pickupDate.getMonth(),
-      pickupDate.getDate()
-    );
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-
-    if (pickupDateOnly.getTime() > today.getTime()) {
-      return false;
-    }
-
-    if (pickupDateOnly.getTime() < today.getTime()) {
-      return true;
-    }
-  }
-
-  const nowMinutes = now.getHours() * 60 + now.getMinutes();
-
-  return slotStartMinutes <= nowMinutes;
 }
 
 export function ProductReservationPanel({
@@ -129,18 +35,19 @@ export function ProductReservationPanel({
   const router = useRouter();
   const [now] = useState(() => new Date());
   const timeSlots = useMemo(
-    () => createPickupTimeSlots(pickupStartTime, pickupEndTime),
+    () => createPickupTimeOptions(pickupStartTime, pickupEndTime),
     [pickupStartTime, pickupEndTime]
   );
   const [selectedTimeSlot, setSelectedTimeSlot] = useState('');
 
   const selectedSlot = timeSlots.find(
-    (slot) => slot.value === selectedTimeSlot
+    (slot) => slot.startAt === selectedTimeSlot
   );
   const activeTimeSlot =
-    selectedSlot && !isPastTimeSlot(selectedSlot.value, pickupStartTime, now)
-      ? selectedSlot.value
-      : '';
+    selectedSlot &&
+    !isPastPickupTimeSlot(selectedSlot.startAt, pickupStartTime, now)
+      ? selectedSlot
+      : null;
 
   const [quantity, setQuantity] = useState(() => (availableStock > 0 ? 1 : 0));
 
@@ -152,20 +59,19 @@ export function ProductReservationPanel({
   };
   const handleAddButtonClick = () => {
     if (
-      activeTimeSlot === '' ||
+      activeTimeSlot === null ||
       availableStock <= 0 ||
       quantity <= 0 ||
-      isPastTimeSlot(activeTimeSlot, pickupStartTime, new Date())
+      isPastPickupTimeSlot(activeTimeSlot.startAt, pickupStartTime, new Date())
     ) {
       setSelectedTimeSlot('');
       return;
     }
 
-    const [pickupStart, pickupEnd] = activeTimeSlot.split('-');
     const searchParams = new URLSearchParams({
       quantity: String(quantity),
-      pickupStart,
-      pickupEnd,
+      pickupStart: activeTimeSlot.startAt,
+      pickupEnd: activeTimeSlot.endAt,
     });
 
     router.push(`/order/${productId}?${searchParams.toString()}`);
@@ -173,7 +79,7 @@ export function ProductReservationPanel({
   const isDecreaseDisabled = quantity <= 1;
   const isIncreaseDisabled = quantity >= availableStock;
   const isAddButtonDisabled =
-    activeTimeSlot === '' || availableStock <= 0 || quantity <= 0;
+    activeTimeSlot === null || availableStock <= 0 || quantity <= 0;
 
   return (
     <div className="rounded-lg border border-gray-200 bg-white p-6">
@@ -191,7 +97,7 @@ export function ProductReservationPanel({
         </button>
 
         <span className="text-base font-semibold text-gray-900">
-          {formatPickupDate(pickupStartTime)}
+          {formatPickupDateLabel(pickupStartTime, now) ?? '-'}
         </span>
 
         <button
@@ -206,12 +112,16 @@ export function ProductReservationPanel({
 
       <div className="mt-3 mb-6 grid max-h-42 grid-cols-3 gap-2 overflow-y-auto pr-1">
         {timeSlots.map((slot) => {
-          const isSelected = activeTimeSlot === slot.value;
-          const isDisabled = isPastTimeSlot(slot.value, pickupStartTime, now);
+          const isSelected = activeTimeSlot?.startAt === slot.startAt;
+          const isDisabled = isPastPickupTimeSlot(
+            slot.startAt,
+            pickupStartTime,
+            now
+          );
 
           return (
             <Button
-              key={slot.value}
+              key={slot.startAt}
               type="button"
               variant="outline"
               color={isSelected ? 'primary' : 'gray'}
@@ -222,7 +132,7 @@ export function ProductReservationPanel({
                 isSelected && !isDisabled ? 'bg-primary-50' : 'bg-white',
                 isDisabled ? 'text-gray-300' : '',
               ].join(' ')}
-              onClick={() => setSelectedTimeSlot(slot.value)}
+              onClick={() => setSelectedTimeSlot(slot.startAt)}
             >
               {slot.label}
             </Button>

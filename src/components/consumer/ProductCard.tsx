@@ -14,6 +14,8 @@ type ProductCardProps = {
   product: Product;
 };
 
+const FALLBACK_PRODUCT_IMAGE = '/images/products/noimage.png';
+
 // 마감 시간
 function formatRemainingTime(endAt: Date, now: number) {
   const remainingSeconds = Math.max(
@@ -50,7 +52,7 @@ export function ProductCard({ product }: ProductCardProps) {
 
       <div className="relative aspect-video">
         <Image
-          src={product.image ?? '/images/products/bread.jpg'}
+          src={product.image || FALLBACK_PRODUCT_IMAGE}
           alt={product.name}
           fill
           sizes="(min-width:1280px) 25vw, (min-width:768px) 33vw, 100vw"
