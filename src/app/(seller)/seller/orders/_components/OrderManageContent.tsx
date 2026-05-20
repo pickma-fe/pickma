@@ -7,26 +7,119 @@ import {
   CheckCircle,
   XCircle,
   AlertCircle,
+  Package,
 } from 'lucide-react';
+import { useState } from 'react';
 
+import type { SellerOrderListParams } from '@/contracts/order';
 import { Section } from '@/components/common/Section/Section';
 import { mockOrders } from '@/mocks/orders';
 
+import { OrderFilter } from './OrderFilter';
+
+type SellerOrderFilterStatus =
+  | Exclude<SellerOrderListParams['status'], undefined>
+  | '전체';
+
+const SELLER_BASE_STATUSES: Exclude<
+  SellerOrderListParams['status'],
+  undefined
+>[] = ['reserved', 'accepted', 'ready', 'completed', 'cancelled', 'no_show'];
+
+const baseOrders = mockOrders.filter((o) =>
+  SELLER_BASE_STATUSES.includes(
+    o.status as Exclude<SellerOrderListParams['status'], undefined>
+  )
+);
+
+const STAT_CARDS: {
+  label: string;
+  value: SellerOrderFilterStatus;
+  icon: React.ElementType;
+  bgColor: string;
+  iconColor: string;
+}[] = [
+  {
+    label: '전체',
+    value: '전체',
+    icon: Package,
+    bgColor: 'bg-gray-100',
+    iconColor: 'text-gray-600',
+  },
+  {
+    label: '수락 대기',
+    value: 'reserved',
+    icon: ShoppingBag,
+    bgColor: 'bg-yellow-100',
+    iconColor: 'text-yellow-600',
+  },
+  {
+    label: '주문 승인',
+    value: 'accepted',
+    icon: Clock,
+    bgColor: 'bg-blue-100',
+    iconColor: 'text-blue-600',
+  },
+  {
+    label: '픽업 대기',
+    value: 'ready',
+    icon: PackageCheck,
+    bgColor: 'bg-indigo-100',
+    iconColor: 'text-indigo-600',
+  },
+  {
+    label: '픽업 완료',
+    value: 'completed',
+    icon: CheckCircle,
+    bgColor: 'bg-green-100',
+    iconColor: 'text-green-600',
+  },
+  {
+    label: '취소/환불',
+    value: 'cancelled',
+    icon: XCircle,
+    bgColor: 'bg-red-100',
+    iconColor: 'text-red-600',
+  },
+  {
+    label: '미수령',
+    value: 'no_show',
+    icon: AlertCircle,
+    bgColor: 'bg-gray-100',
+    iconColor: 'text-gray-600',
+  },
+];
+
 export function OrderManageContent() {
-  const reservedCount = mockOrders.filter(
-    (o) => o.status === 'reserved'
-  ).length;
-  const acceptedCount = mockOrders.filter(
-    (o) => o.status === 'accepted'
-  ).length;
-  const readyCount = mockOrders.filter((o) => o.status === 'ready').length;
-  const completedCount = mockOrders.filter(
-    (o) => o.status === 'completed'
-  ).length;
-  const cancelledCount = mockOrders.filter(
-    (o) => o.status === 'cancelled'
-  ).length;
-  const noShowCount = mockOrders.filter((o) => o.status === 'no_show').length;
+  const [selectedStatus, setSelectedStatus] =
+    useState<SellerOrderFilterStatus>('전체');
+  const [searchKeyword, setSearchKeyword] = useState('');
+
+  const getCount = (value: SellerOrderFilterStatus) => {
+    if (value === '전체') return baseOrders.length;
+    return baseOrders.filter((o) => o.status === value).length;
+  };
+
+  const filteredOrders = baseOrders.filter((order) => {
+    const matchStatus =
+      selectedStatus === '전체' || order.status === selectedStatus;
+
+    const matchSearch =
+      searchKeyword.trim() === '' ||
+      order.orderNumber
+        .toLowerCase()
+        .includes(searchKeyword.trim().toLowerCase());
+
+    return matchStatus && matchSearch;
+  });
+
+  const handleStatusChange = (status: string) => {
+    setSelectedStatus(status as SellerOrderFilterStatus);
+  };
+
+  const handleSearchChange = (keyword: string) => {
+    setSearchKeyword(keyword);
+  };
 
   return (
     <div className="flex flex-col gap-6">
@@ -39,103 +132,57 @@ export function OrderManageContent() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-6">
-        <Section variant="card" className="bg-white">
-          <div className="flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-yellow-100">
-              <ShoppingBag className="h-6 w-6 text-yellow-600" />
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">수락 대기</p>
-              <p className="text-2xl font-bold text-gray-900">
-                {reservedCount}
-                <span className="text-base font-normal text-gray-500">건</span>
-              </p>
-            </div>
-          </div>
-        </Section>
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-7">
+        {STAT_CARDS.map((card) => {
+          const Icon = card.icon;
+          const isSelected = selectedStatus === card.value;
 
-        <Section variant="card" className="bg-white">
-          <div className="flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100">
-              <Clock className="h-6 w-6 text-blue-600" />
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">주문 승인</p>
-              <p className="text-2xl font-bold text-gray-900">
-                {acceptedCount}
-                <span className="text-base font-normal text-gray-500">건</span>
-              </p>
-            </div>
-          </div>
-        </Section>
-
-        <Section variant="card" className="bg-white">
-          <div className="flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-indigo-100">
-              <PackageCheck className="h-6 w-6 text-indigo-600" />
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">픽업 대기</p>
-              <p className="text-2xl font-bold text-gray-900">
-                {readyCount}
-                <span className="text-base font-normal text-gray-500">건</span>
-              </p>
-            </div>
-          </div>
-        </Section>
-
-        <Section variant="card" className="bg-white">
-          <div className="flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
-              <CheckCircle className="h-6 w-6 text-green-600" />
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">픽업 완료</p>
-              <p className="text-2xl font-bold text-gray-900">
-                {completedCount}
-                <span className="text-base font-normal text-gray-500">건</span>
-              </p>
-            </div>
-          </div>
-        </Section>
-
-        <Section variant="card" className="bg-white">
-          <div className="flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
-              <XCircle className="h-6 w-6 text-red-600" />
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">취소/환불</p>
-              <p className="text-2xl font-bold text-gray-900">
-                {cancelledCount}
-                <span className="text-base font-normal text-gray-500">건</span>
-              </p>
-            </div>
-          </div>
-        </Section>
-
-        <Section variant="card" className="bg-white">
-          <div className="flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100">
-              <AlertCircle className="h-6 w-6 text-gray-600" />
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">미수령</p>
-              <p className="text-2xl font-bold text-gray-900">
-                {noShowCount}
-                <span className="text-base font-normal text-gray-500">건</span>
-              </p>
-            </div>
-          </div>
-        </Section>
+          return (
+            <button
+              key={card.value}
+              onClick={() => setSelectedStatus(card.value)}
+              className="text-left"
+            >
+              <Section
+                variant="card"
+                className={`bg-white transition-all ${
+                  isSelected
+                    ? 'ring-primary-500 ring-2'
+                    : 'hover:ring-1 hover:ring-gray-300'
+                }`}
+              >
+                <div className="flex flex-col gap-3">
+                  <div
+                    className={`flex h-10 w-10 items-center justify-center rounded-full ${card.bgColor}`}
+                  >
+                    <Icon className={`h-5 w-5 ${card.iconColor}`} />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">{card.label}</p>
+                    <p className="text-2xl font-bold text-gray-900">
+                      {getCount(card.value)}
+                      <span className="text-base font-normal text-gray-500">
+                        건
+                      </span>
+                    </p>
+                  </div>
+                </div>
+              </Section>
+            </button>
+          );
+        })}
       </div>
 
-      <div className="rounded-lg border border-gray-200 bg-white p-4 text-center text-gray-500">
-        <p className="text-sm">필터 컴포넌트 구현 예정</p>
-      </div>
+      <OrderFilter
+        selectedStatus={selectedStatus}
+        searchKeyword={searchKeyword}
+        onStatusChange={handleStatusChange}
+        onSearchChange={handleSearchChange}
+      />
+
       <div className="rounded-lg border border-gray-200 bg-white p-8 text-center text-gray-500">
-        <p className="text-sm">테이블 컴포넌트 구현 예정</p>
+        <p>필터링된 주문: {filteredOrders.length}건</p>
+        <p className="mt-2 text-sm">테이블 컴포넌트 구현 예정</p>
       </div>
     </div>
   );
