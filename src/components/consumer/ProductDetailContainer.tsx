@@ -138,7 +138,6 @@ export function ProductDetailContainer({
               productId={product.id}
               price={product.discountPrice}
               availableStock={product.availableStock}
-              pickupDateTime={product.endAt.toISOString()}
               pickupStartTime={product.pickupStartTime}
               pickupEndTime={product.pickupEndTime}
             />
