@@ -214,9 +214,10 @@ export function MenuManageContent() {
         </div>
       )}
 
-      {showProductModal && (
-        <ProductRegistrationModal onClose={() => setShowProductModal(false)} />
-      )}
+      <ProductRegistrationModal
+        isOpen={showProductModal}
+        onClose={() => setShowProductModal(false)}
+      />
 
       {toastMessage && (
         <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-lg bg-gray-900 px-4 py-2 text-sm text-white shadow-lg">
