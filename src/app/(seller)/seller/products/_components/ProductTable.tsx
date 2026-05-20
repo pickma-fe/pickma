@@ -3,16 +3,15 @@
 import Image from 'next/image';
 import { useState } from 'react';
 
-import type { ProductListItemResponse } from '@/contracts/product';
+import type { Product } from '@/types/product';
 import { Badge } from '@/components/common/Badge/Badge';
 import { Dropdown } from '@/components/common/Dropdown/Dropdown';
 import { Pagination } from '@/components/common/Pagination/Pagination';
 
 interface ProductTableProps {
-  products: ProductListItemResponse[];
+  products: Product[];
   currentPage: number;
   onPageChange: (page: number) => void;
-  onStatusChange: (id: string, status: string) => void;
 }
 
 const PAGE_SIZE_OPTIONS = [
@@ -22,8 +21,8 @@ const PAGE_SIZE_OPTIONS = [
 ];
 
 const formatPrice = (price: number) => price.toLocaleString('ko-KR') + '원';
-const formatDate = (dateString: string) =>
-  new Date(dateString).toLocaleDateString('ko-KR');
+const formatDate = (date: Date | undefined) =>
+  (date ?? new Date()).toLocaleDateString('ko-KR');
 
 const STATUS_BADGE: Record<
   string,
@@ -34,7 +33,7 @@ const STATUS_BADGE: Record<
   closed: { label: '판매중지', color: 'gray' },
 };
 
-const getStatusBadge = (product: ProductListItemResponse) => {
+const getStatusBadge = (product: Product) => {
   if (product.isSoldOut) {
     return STATUS_BADGE['soldout'];
   }
@@ -50,7 +49,6 @@ export function ProductTable({
   products,
   currentPage,
   onPageChange,
-  onStatusChange,
 }: ProductTableProps) {
   const [pageSize, setPageSize] = useState(10);
 
@@ -211,8 +209,9 @@ export function ProductTable({
                         { label: '판매중지', value: 'closed' },
                       ]}
                       value={product.status}
-                      onChange={(value) => onStatusChange(product.id, value)}
+                      onChange={() => undefined}
                       placeholder="관리"
+                      disabled
                     />
                   </td>
                 </tr>

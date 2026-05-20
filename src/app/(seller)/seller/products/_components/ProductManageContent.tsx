@@ -3,14 +3,15 @@
 import { Package, ShoppingBag, PackageX, EyeOff } from 'lucide-react';
 import { useState, useMemo } from 'react';
 
+import { useSellerProducts } from '@/hooks/seller/products/useSellerProducts';
 import { Section } from '@/components/common/Section/Section';
-import { mockProducts } from '@/mocks/products';
 
 import { ProductFilter } from './ProductFilter';
 import { ProductTable } from './ProductTable';
 
 export function ProductManageContent() {
-  const [products, setProducts] = useState(mockProducts);
+  const { data: productsData, isLoading, isError } = useSellerProducts();
+  const products = useMemo(() => productsData ?? [], [productsData]);
   const [selectedStatus, setSelectedStatus] = useState('전체');
   const [selectedCategory, setSelectedCategory] = useState('전체');
   const [searchKeyword, setSearchKeyword] = useState('');
@@ -58,12 +59,11 @@ export function ProductManageContent() {
           (p) => p.availableStock > 0 && p.availableStock <= 5
         );
         break;
-      case 'today-end':
+      case 'today-end': {
         const today = new Date().toDateString();
-        result = result.filter(
-          (p) => new Date(p.endAt).toDateString() === today
-        );
+        result = result.filter((p) => p.endAt.toDateString() === today);
         break;
+      }
       case 'high-discount':
         result = result.filter((p) => p.discountRate >= 30);
         break;
@@ -73,13 +73,15 @@ export function ProductManageContent() {
       case 'latest':
         result.sort(
           (a, b) =>
-            new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+            (b.updatedAt ?? new Date(0)).getTime() -
+            (a.updatedAt ?? new Date(0)).getTime()
         );
         break;
       case 'oldest':
         result.sort(
           (a, b) =>
-            new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime()
+            (a.updatedAt ?? new Date(0)).getTime() -
+            (b.updatedAt ?? new Date(0)).getTime()
         );
         break;
       case 'price-high':
@@ -110,19 +112,6 @@ export function ProductManageContent() {
   const soldOutCount = products.filter((p) => p.isSoldOut).length;
   const closedCount = products.filter((p) => p.status === 'closed').length;
 
-  const handleProductStatusChange = (id: string, newStatus: string) => {
-    setProducts((prev) =>
-      prev.map((p) =>
-        p.id === id
-          ? {
-              ...p,
-              status: newStatus as 'active' | 'closed',
-            }
-          : p
-      )
-    );
-  };
-
   const handleStatusChange = (status: string) => {
     setSelectedStatus(status);
     setCurrentPage(1);
@@ -147,6 +136,22 @@ export function ProductManageContent() {
     setDetailFilter(filter);
     setCurrentPage(1);
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-80 items-center justify-center text-sm text-gray-500">
+        상품을 불러오는 중입니다.
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="flex min-h-80 items-center justify-center text-sm text-red-500">
+        상품을 불러오지 못했습니다.
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -239,7 +244,6 @@ export function ProductManageContent() {
         products={filteredProducts}
         currentPage={currentPage}
         onPageChange={setCurrentPage}
-        onStatusChange={handleProductStatusChange}
       />
     </div>
   );
