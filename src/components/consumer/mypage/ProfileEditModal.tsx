@@ -1,9 +1,10 @@
 'use client';
 
 import Image from 'next/image';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import type { User } from '@/types/user';
+import { getSafeProfileImage } from '@/lib/image';
 import { useUpdateMe } from '@/hooks/users/useUpdateMe';
 import { Button } from '@/components/common/Button/Button';
 import { Input } from '@/components/common/Input/Input';
@@ -15,8 +16,6 @@ interface ProfileEditModalProps {
   onClose: () => void;
 }
 
-const FALLBACK_PROFILE_IMAGE = '/images/mock/profile.jpg';
-
 export function ProfileEditModal({
   isOpen,
   user,
@@ -24,12 +23,20 @@ export function ProfileEditModal({
 }: ProfileEditModalProps) {
   const { mutate: updateMe, isPending } = useUpdateMe();
   const [name, setName] = useState(user.name);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(
-    user.profileImage ?? null
+  const [previewUrl, setPreviewUrl] = useState<string>(() =>
+    getSafeProfileImage(user.profileImage)
   );
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    return () => {
+      if (previewUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -39,13 +46,17 @@ export function ProfileEditModal({
       e.currentTarget.value = '';
       return;
     }
-    if (previewUrl?.startsWith('blob:')) {
-      URL.revokeObjectURL(previewUrl);
-    }
     setPreviewUrl(URL.createObjectURL(file));
     setSelectedFile(file);
     setError(null);
     e.currentTarget.value = '';
+  };
+
+  const handleClose = () => {
+    if (previewUrl.startsWith('blob:')) {
+      URL.revokeObjectURL(previewUrl);
+    }
+    onClose();
   };
 
   const handleSubmit = () => {
@@ -57,9 +68,6 @@ export function ProfileEditModal({
       { name: name.trim(), imageFile: selectedFile ?? undefined },
       {
         onSuccess: () => {
-          if (previewUrl?.startsWith('blob:')) {
-            URL.revokeObjectURL(previewUrl);
-          }
           onClose();
         },
         onError: () => {
@@ -69,10 +77,8 @@ export function ProfileEditModal({
     );
   };
 
-  const displayImage = previewUrl ?? FALLBACK_PROFILE_IMAGE;
-
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="프로필 수정" size="sm">
+    <Modal isOpen={isOpen} onClose={handleClose} title="프로필 수정" size="sm">
       <div className="flex flex-col gap-6">
         {error && (
           <div className="rounded-md bg-red-50 p-3 text-sm text-red-600">
@@ -82,7 +88,7 @@ export function ProfileEditModal({
 
         <div className="flex flex-col items-center gap-3">
           <div className="relative size-20 overflow-hidden rounded-full bg-gray-100">
-            {previewUrl?.startsWith('blob:') ? (
+            {previewUrl.startsWith('blob:') ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={previewUrl}
@@ -91,7 +97,7 @@ export function ProfileEditModal({
               />
             ) : (
               <Image
-                src={displayImage}
+                src={previewUrl}
                 alt="프로필 이미지"
                 fill
                 sizes="80px"
@@ -127,7 +133,7 @@ export function ProfileEditModal({
         />
 
         <div className="flex justify-end gap-2">
-          <Button variant="outline" color="gray" onClick={onClose}>
+          <Button variant="outline" color="gray" onClick={handleClose}>
             취소
           </Button>
           <Button onClick={handleSubmit} disabled={isPending}>

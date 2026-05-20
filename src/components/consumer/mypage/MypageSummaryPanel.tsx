@@ -5,49 +5,13 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
 
+import { getSafeProfileImage } from '@/lib/image';
 import { useRecentProducts } from '@/hooks/products/useRecentProducts';
 import { useMe } from '@/hooks/users/useMe';
 
 import { ProfileEditModal } from './ProfileEditModal';
 
-const FALLBACK_PROFILE_IMAGE = '/images/mock/profile.jpg';
 const FALLBACK_RECENT_PRODUCT_IMAGE = '/images/products/noimage.png';
-
-function isSupabaseStorageImage(profileImage: string) {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-
-  if (!supabaseUrl) {
-    return false;
-  }
-
-  try {
-    const imageUrl = new URL(profileImage);
-    const storageUrl = new URL(supabaseUrl);
-
-    return (
-      imageUrl.protocol === 'https:' &&
-      imageUrl.hostname === storageUrl.hostname
-    );
-  } catch {
-    return false;
-  }
-}
-
-function getSafeProfileImage(profileImage?: string) {
-  if (!profileImage) {
-    return FALLBACK_PROFILE_IMAGE;
-  }
-
-  if (profileImage.startsWith('/')) {
-    return profileImage;
-  }
-
-  if (isSupabaseStorageImage(profileImage)) {
-    return profileImage;
-  }
-
-  return FALLBACK_PROFILE_IMAGE;
-}
 
 function getSafeProductImage(imageUrl?: string) {
   if (!imageUrl) {
@@ -193,6 +157,7 @@ export function MypageSummaryPanel() {
 
       {user && (
         <ProfileEditModal
+          key={isEditModalOpen ? 'open' : 'closed'}
           isOpen={isEditModalOpen}
           user={user}
           onClose={() => setIsEditModalOpen(false)}
