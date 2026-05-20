@@ -25,6 +25,11 @@ type SellerOrderFilterStatus =
   | Exclude<SellerOrderListParams['status'], undefined>
   | '전체';
 
+type OrderActionStatus = Extract<
+  OrderStatusParam,
+  'accepted' | 'ready' | 'completed' | 'cancelled'
+>;
+
 const SELLER_BASE_STATUSES: Exclude<
   SellerOrderListParams['status'],
   undefined
@@ -119,14 +124,13 @@ export function OrderManageContent() {
     return matchStatus && matchSearch;
   });
 
-  const handleOrderAction = (orderId: string, newStatus: string) => {
+  const handleOrderAction = (orderId: string, newStatus: OrderActionStatus) => {
     setOrders((prev) =>
       prev.map((order) =>
-        order.id === orderId
-          ? { ...order, status: newStatus as OrderStatusParam }
-          : order
+        order.id === orderId ? { ...order, status: newStatus } : order
       )
     );
+    setCurrentPage(1);
   };
 
   const handleStatusChange = (status: string) => {

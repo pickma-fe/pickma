@@ -2,17 +2,25 @@
 
 import { useState } from 'react';
 
-import type { OrderListItemResponse } from '@/contracts/order';
+import type {
+  OrderListItemResponse,
+  OrderStatusParam,
+} from '@/contracts/order';
 import { Badge } from '@/components/common/Badge/Badge';
 import { Button } from '@/components/common/Button/Button';
 import { Dropdown } from '@/components/common/Dropdown/Dropdown';
 import { Pagination } from '@/components/common/Pagination/Pagination';
 
+type OrderActionStatus = Extract<
+  OrderStatusParam,
+  'accepted' | 'ready' | 'completed' | 'cancelled'
+>;
+
 interface OrderTableProps {
   orders: OrderListItemResponse[];
   currentPage: number;
   onPageChange: (page: number) => void;
-  onOrderAction: (orderId: string, newStatus: string) => void;
+  onOrderAction: (orderId: string, newStatus: OrderActionStatus) => void;
 }
 
 const PAGE_SIZE_OPTIONS = [
@@ -63,7 +71,7 @@ function OrderActionButtons({
   onOrderAction,
 }: {
   order: OrderListItemResponse;
-  onOrderAction: (orderId: string, newStatus: string) => void;
+  onOrderAction: (orderId: string, newStatus: OrderActionStatus) => void;
 }) {
   switch (order.status) {
     case 'reserved':
