@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="src/assets/logo.svg" alt="PICKMA 로고" width="160" />
+  <img src="public/images/banners/readme-banner.png" alt="PICKMA 서비스 이미지" width="100%" />
 </p>
 
 # PICKMA
@@ -9,12 +9,6 @@
 PICKMA는 영업 종료 전 남을 가능성이 있는 음식을 소비자가 할인된 가격으로 예약하고, 지정한 시간에 매장에서 픽업할 수 있도록 돕는 서비스입니다.
 
 판매자는 폐기될 수 있는 재고를 판매로 전환하고, 소비자는 주변 매장의 마감 임박 상품을 합리적인 가격에 구매할 수 있습니다. 서비스의 핵심 목표는 단순 할인 판매가 아니라 **음식물 폐기 감소와 소상공인 재고 회전율 개선**을 함께 해결하는 것입니다.
-
-## 서비스 이미지
-
-<p align="center">
-  <img src="public/images/banners/readme-banner.png" alt="PICKMA 서비스 이미지" width="100%" />
-</p>
 
 ## PICKMA FE Developers
 
