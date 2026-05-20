@@ -29,6 +29,8 @@ export function RegisterContent() {
     documentFiles,
     termsAgreed,
     isAuthCompleted,
+    isApplicationPending,
+    applicationError,
     handleTermsComplete,
     handleBusinessInfoComplete,
     handleDocumentComplete,
@@ -72,8 +74,7 @@ export function RegisterContent() {
   };
 
   const onDocumentComplete = (files: Record<string, File | null>) => {
-    handleDocumentComplete(files);
-    handleCloseModal();
+    handleDocumentComplete(files, handleCloseModal);
   };
 
   const onStoreInfoComplete = (data: StoreInfoData) => {
@@ -188,6 +189,8 @@ export function RegisterContent() {
           onSubmit={onDocumentComplete}
           savedFiles={documentFiles}
           isViewMode={isViewMode}
+          isPending={isApplicationPending}
+          errorMessage={applicationError?.message}
         />
       </StepModal>
 

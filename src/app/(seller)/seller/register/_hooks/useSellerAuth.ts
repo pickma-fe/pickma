@@ -27,7 +27,11 @@ export function useSellerAuth() {
   const [businessInfoSubmitted, setBusinessInfoSubmitted] = useState(false);
   const [documentsSubmitted, setDocumentsSubmitted] = useState(false);
 
-  const { mutate: createSellerApplication } = useCreateSellerApplication();
+  const {
+    mutate: createSellerApplication,
+    isPending: isApplicationPending,
+    error: applicationError,
+  } = useCreateSellerApplication();
 
   const { data: onboardingStatus } = useQuery<SellerOnboardingStatus>({
     queryKey: ['sellers', 'onboarding-status'],
@@ -77,19 +81,31 @@ export function useSellerAuth() {
     setBusinessInfoSubmitted(true);
   };
 
-  const handleDocumentComplete = (files: Record<string, File | null>) => {
+  const handleDocumentComplete = (
+    files: Record<string, File | null>,
+    onClose: () => void
+  ) => {
     if (!termsSubmitted || !businessInfoSubmitted || !businessInfo) return;
 
     const { businessLicense, idCard, bankbook, businessReport } = files;
     if (!businessLicense || !idCard || !bankbook || !businessReport) return;
 
-    setDocumentFiles(files);
-    setDocumentsSubmitted(true);
-
-    createSellerApplication({
-      ...businessInfo,
-      documents: { businessLicense, idCard, bankbook, businessReport },
-    });
+    createSellerApplication(
+      {
+        ...businessInfo,
+        documents: { businessLicense, idCard, bankbook, businessReport },
+      },
+      {
+        onSuccess: () => {
+          setDocumentFiles(files);
+          setDocumentsSubmitted(true);
+          onClose();
+        },
+        onError: () => {
+          setDocumentFiles(null);
+        },
+      }
+    );
   };
 
   return {
@@ -98,6 +114,8 @@ export function useSellerAuth() {
     documentFiles,
     termsAgreed,
     isAuthCompleted,
+    isApplicationPending,
+    applicationError,
     handleTermsComplete,
     handleBusinessInfoComplete,
     handleDocumentComplete,
