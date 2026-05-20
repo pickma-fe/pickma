@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { StoreResponse } from '@/contracts/store';
 import { AppError } from '@/lib/errors/appError';
 import { ERROR_CODE } from '@/lib/errors/errorCodes';
-import { requireActiveUser } from '@/app/api/_lib/auth';
+import { requireSellerStore } from '@/app/api/_lib/auth';
 import { isApiMockEnabled } from '@/app/api/_lib/mock';
 
 import { GET, PATCH } from './route';
@@ -14,7 +14,7 @@ vi.mock('@/app/api/_lib/mock', () => ({
 }));
 
 vi.mock('@/app/api/_lib/auth', () => ({
-  requireActiveUser: vi.fn(),
+  requireSellerStore: vi.fn(),
 }));
 
 vi.mock('../_lib/service', () => ({
@@ -30,6 +30,12 @@ const mockServiceUser = {
   status: 'active' as const,
   createdAt: '2026-01-01T00:00:00Z',
   updatedAt: '2026-01-01T00:00:00Z',
+};
+
+const mockRequireSellerStore = {
+  authUser: {} as Awaited<ReturnType<typeof requireSellerStore>>['authUser'],
+  serviceUser: mockServiceUser,
+  store: { id: 'store-1' },
 };
 
 describe('GET /api/stores/me', () => {
@@ -54,12 +60,7 @@ describe('GET /api/stores/me', () => {
   describe('real 모드', () => {
     beforeEach(() => {
       vi.mocked(isApiMockEnabled).mockReturnValue(false);
-      vi.mocked(requireActiveUser).mockResolvedValue({
-        authUser: {} as Awaited<
-          ReturnType<typeof requireActiveUser>
-        >['authUser'],
-        serviceUser: mockServiceUser,
-      });
+      vi.mocked(requireSellerStore).mockResolvedValue(mockRequireSellerStore);
     });
 
     it('service가 가게를 반환하면 200을 반환한다', async () => {
@@ -78,14 +79,14 @@ describe('GET /api/stores/me', () => {
       expect(body.error.code).toBe('STORE_NOT_FOUND');
     });
 
-    it('UNAUTHORIZED throw 시 401을 반환한다', async () => {
-      vi.mocked(requireActiveUser).mockRejectedValue(
-        new AppError(ERROR_CODE.UNAUTHORIZED, 401)
+    it('FORBIDDEN throw 시 403을 반환한다', async () => {
+      vi.mocked(requireSellerStore).mockRejectedValue(
+        new AppError(ERROR_CODE.FORBIDDEN, 403)
       );
       const res = await GET();
-      expect(res.status).toBe(401);
+      expect(res.status).toBe(403);
       const body = (await res.json()) as { error: { code: string } };
-      expect(body.error.code).toBe('UNAUTHORIZED');
+      expect(body.error.code).toBe('FORBIDDEN');
     });
   });
 });
@@ -114,18 +115,20 @@ describe('PATCH /api/stores/me', () => {
   describe('real 모드', () => {
     beforeEach(() => {
       vi.mocked(isApiMockEnabled).mockReturnValue(false);
-      vi.mocked(requireActiveUser).mockResolvedValue({
-        authUser: {} as Awaited<
-          ReturnType<typeof requireActiveUser>
-        >['authUser'],
-        serviceUser: mockServiceUser,
-      });
+      vi.mocked(requireSellerStore).mockResolvedValue(mockRequireSellerStore);
     });
 
     it('service가 가게를 반환하면 200을 반환한다', async () => {
       vi.mocked(updateMyStore).mockResolvedValue({} as StoreResponse);
       const res = await PATCH(makeRequest({ name: '수정된 가게' }));
       expect(res.status).toBe(200);
+    });
+
+    it('빈 body 요청 시 400을 반환한다', async () => {
+      const res = await PATCH(makeRequest({}));
+      expect(res.status).toBe(400);
+      const body = (await res.json()) as { error: { code: string } };
+      expect(body.error.code).toBe('VALIDATION_ERROR');
     });
 
     it('STORE_NOT_FOUND throw 시 404를 반환한다', async () => {
