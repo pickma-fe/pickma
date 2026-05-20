@@ -33,19 +33,17 @@ const STATUS_BADGE: Record<
   string,
   { label: string; color: 'warning' | 'info' | 'success' | 'danger' | 'gray' }
 > = {
-  processing: { label: '접수 대기', color: 'warning' },
-  reserved: { label: '준비 중', color: 'info' },
-  ready: { label: '준비 완료', color: 'info' },
+  reserved: { label: '수락 대기', color: 'warning' },
+  accepted: { label: '주문 승인', color: 'info' },
+  ready: { label: '픽업 대기', color: 'info' },
   completed: { label: '픽업 완료', color: 'success' },
   cancelled: { label: '취소/환불', color: 'danger' },
   no_show: { label: '미수령', color: 'gray' },
-  payment_pending: { label: '결제 대기', color: 'warning' },
-  expired: { label: '만료', color: 'gray' },
 };
 
 const STATUS_DESCRIPTION: Record<string, string> = {
-  processing: '주문이 접수되었습니다.',
-  reserved: '주문 상품을 준비해주세요.',
+  reserved: '주문을 수락하거나 취소해주세요.',
+  accepted: '주문 상품을 준비해주세요.',
   ready: '고객 픽업을 기다리고 있습니다.',
   completed: '픽업이 완료되었습니다.',
   cancelled: '주문이 취소/환불되었습니다.',
@@ -54,7 +52,7 @@ const STATUS_DESCRIPTION: Record<string, string> = {
 
 function OrderActionButtons({ order }: { order: OrderListItemResponse }) {
   switch (order.status) {
-    case 'processing':
+    case 'reserved':
       return (
         <div className="flex w-fit flex-col gap-2">
           <Button
@@ -77,7 +75,7 @@ function OrderActionButtons({ order }: { order: OrderListItemResponse }) {
           </Button>
         </div>
       );
-    case 'reserved':
+    case 'accepted':
       return (
         <div className="flex w-fit flex-col gap-2">
           <Button

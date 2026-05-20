@@ -4,6 +4,7 @@ export type OrderStatus =
   | 'paymentPending'
   | 'processing'
   | 'reserved'
+  | 'accepted'
   | 'ready'
   | 'completed'
   | 'cancelled'
@@ -47,10 +48,10 @@ export interface Order {
   updatedAt: Date;
 }
 
-export interface OrderListQuery {
+export interface ConsumerOrderListQuery {
   page: number;
   pageSize: number;
-  status?: OrderStatus;
+  status?: Exclude<OrderStatus, 'accepted' | 'processing'>;
   sort: 'createdAt' | 'pickupAt';
   order: 'asc' | 'desc';
 }

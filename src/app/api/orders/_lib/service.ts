@@ -1,9 +1,9 @@
 import type { ValidationIssue } from '@/contracts/common';
 import type {
+  ConsumerOrderListParams,
   CreateOrderRequest,
   CreateOrderResponse,
   OrderDetailResponse,
-  OrderListParams,
   OrderListResponse,
 } from '@/contracts/order';
 import { AppError } from '@/lib/errors/appError';
@@ -52,7 +52,7 @@ function mapRpcError(message: string): AppError {
 
 export async function getOrders(
   userId: string,
-  params: OrderListParams
+  params: ConsumerOrderListParams
 ): Promise<OrderListResponse> {
   const supabase = createServiceRoleClient();
   const offset = (params.page - 1) * params.pageSize;

@@ -3,20 +3,42 @@
 import {
   ShoppingBag,
   Clock,
+  PackageCheck,
   CheckCircle,
   XCircle,
   Package,
-  UtensilsCrossed,
 } from 'lucide-react';
 import { useState } from 'react';
 
+import type { SellerOrderListParams } from '@/contracts/order';
 import { Section } from '@/components/common/Section/Section';
 import { mockOrders } from '@/mocks/orders';
 
 import { OrderFilter } from './OrderFilter';
 import { OrderTable } from './OrderTable';
 
-const STAT_CARDS = [
+type SellerOrderFilterStatus =
+  | Exclude<SellerOrderListParams['status'], undefined>
+  | '전체';
+
+const SELLER_BASE_STATUSES: Exclude<
+  SellerOrderListParams['status'],
+  undefined
+>[] = ['reserved', 'accepted', 'ready', 'completed', 'cancelled', 'no_show'];
+
+const baseOrders = mockOrders.filter((o) =>
+  SELLER_BASE_STATUSES.includes(
+    o.status as Exclude<SellerOrderListParams['status'], undefined>
+  )
+);
+
+const STAT_CARDS: {
+  label: string;
+  value: SellerOrderFilterStatus;
+  icon: React.ElementType;
+  bgColor: string;
+  iconColor: string;
+}[] = [
   {
     label: '전체',
     value: '전체',
@@ -25,25 +47,25 @@ const STAT_CARDS = [
     iconColor: 'text-gray-600',
   },
   {
-    label: '접수 대기',
-    value: 'processing',
+    label: '수락 대기',
+    value: 'reserved',
     icon: ShoppingBag,
     bgColor: 'bg-yellow-100',
     iconColor: 'text-yellow-600',
   },
   {
-    label: '준비 중',
-    value: 'reserved',
-    icon: UtensilsCrossed,
+    label: '주문 승인',
+    value: 'accepted',
+    icon: Clock,
     bgColor: 'bg-blue-100',
     iconColor: 'text-blue-600',
   },
   {
-    label: '준비 완료',
+    label: '픽업 대기',
     value: 'ready',
-    icon: Clock,
-    bgColor: 'bg-primary-100',
-    iconColor: 'text-primary-600',
+    icon: PackageCheck,
+    bgColor: 'bg-indigo-100',
+    iconColor: 'text-indigo-600',
   },
   {
     label: '픽업 완료',
@@ -62,28 +84,31 @@ const STAT_CARDS = [
 ];
 
 export function OrderManageContent() {
-  const [selectedStatus, setSelectedStatus] = useState('전체');
+  const [selectedStatus, setSelectedStatus] =
+    useState<SellerOrderFilterStatus>('전체');
   const [searchKeyword, setSearchKeyword] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
 
-  const getCount = (value: string) => {
-    if (value === '전체') return mockOrders.length;
-    return mockOrders.filter((o) => o.status === value).length;
+  const getCount = (value: SellerOrderFilterStatus) => {
+    if (value === '전체') return baseOrders.length;
+    return baseOrders.filter((o) => o.status === value).length;
   };
 
-  const filteredOrders = mockOrders.filter((order) => {
+  const filteredOrders = baseOrders.filter((order) => {
     const matchStatus =
       selectedStatus === '전체' || order.status === selectedStatus;
 
     const matchSearch =
-      searchKeyword === '' ||
-      order.storeName.toLowerCase().includes(searchKeyword.toLowerCase());
+      searchKeyword.trim() === '' ||
+      order.orderNumber
+        .toLowerCase()
+        .includes(searchKeyword.trim().toLowerCase());
 
     return matchStatus && matchSearch;
   });
 
   const handleStatusChange = (status: string) => {
-    setSelectedStatus(status);
+    setSelectedStatus(status as SellerOrderFilterStatus);
     setCurrentPage(1);
   };
 
@@ -103,7 +128,7 @@ export function OrderManageContent() {
         </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-7">
         {STAT_CARDS.map((card) => {
           const Icon = card.icon;
           const isSelected = selectedStatus === card.value;

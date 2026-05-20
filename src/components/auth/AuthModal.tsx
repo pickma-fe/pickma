@@ -4,11 +4,15 @@ import { Dialog, DialogPanel, DialogTitle } from '@headlessui/react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { XIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
-import { authApi } from '@/api/auth/authApi';
+import { getAuthErrorMessage } from '@/lib/errors/authErrorMessage';
+import { useEmailLogin } from '@/hooks/auth/useEmailLogin';
+import { useEmailSignup } from '@/hooks/auth/useEmailSignup';
+import { useOAuthLogin } from '@/hooks/auth/useOAuthLogin';
+import { useResetPassword } from '@/hooks/auth/useResetPassword';
 import { Button, Input } from '@/components/common';
 
 import { type AuthModalView, useAuthModal } from './useAuthModal';
@@ -22,33 +26,6 @@ function getSafeNextPath(next?: string): string {
   } catch {
     return '/';
   }
-}
-
-function mapAuthError(error: unknown): string {
-  const msg = error instanceof Error ? error.message.toLowerCase() : '';
-
-  if (
-    msg.includes('invalid login credentials') ||
-    msg.includes('invalid email or password')
-  ) {
-    return '이메일 또는 비밀번호가 올바르지 않습니다.';
-  }
-  if (
-    msg.includes('user already registered') ||
-    msg.includes('already been registered')
-  ) {
-    return '이미 가입된 이메일입니다. 로그인해 주세요.';
-  }
-  if (msg.includes('email not confirmed')) {
-    return '이메일 확인 후 다시 로그인해 주세요.';
-  }
-  if (
-    msg.includes('password should be at least') ||
-    msg.includes('weak password')
-  ) {
-    return '비밀번호는 8자 이상으로 입력해 주세요.';
-  }
-  return '요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.';
 }
 
 const trimmedEmail = z
@@ -79,8 +56,6 @@ const resetSchema = z.object({
   email: trimmedEmail,
 });
 type ResetFields = z.infer<typeof resetSchema>;
-
-type OAuthProvider = 'google' | 'kakao';
 
 // TODO: 디자인 확정 후 스타일 교체
 // TODO: AuthModal.stories.tsx 작성
@@ -130,9 +105,12 @@ interface LoginFormProps {
 
 function LoginForm({ next, onClose, onChangeView }: LoginFormProps) {
   const router = useRouter();
-  const [pendingProvider, setPendingProvider] = useState<OAuthProvider | null>(
-    null
-  );
+  const { mutateAsync: emailLogin } = useEmailLogin();
+  const {
+    signInWithOAuth,
+    pendingProvider,
+    error: oauthError,
+  } = useOAuthLogin();
   const {
     register,
     handleSubmit: handleSubmitRH,
@@ -140,31 +118,29 @@ function LoginForm({ next, onClose, onChangeView }: LoginFormProps) {
     formState: { errors, isSubmitting },
   } = useForm<LoginFields>({ resolver: zodResolver(loginSchema) });
 
+  useEffect(() => {
+    if (oauthError) {
+      setError('root', { message: getAuthErrorMessage(oauthError) });
+    }
+  }, [oauthError, setError]);
+
   async function handleSubmit(data: LoginFields) {
     try {
-      const result = await authApi.signInWithEmail(data);
+      const result = await emailLogin(data);
       if (result.session) {
         onClose();
         router.push(getSafeNextPath(next));
       }
     } catch (err) {
-      setError('root', { message: mapAuthError(err) });
+      setError('root', { message: getAuthErrorMessage(err) });
     }
   }
 
-  async function handleOAuthLogin(provider: OAuthProvider) {
-    setPendingProvider(provider);
-    try {
-      if (provider === 'google') {
-        await authApi.signInWithGoogle(next);
-      } else {
-        await authApi.signInWithKakao(next);
-      }
-    } catch (err) {
-      setPendingProvider(null);
-      setError('root', { message: mapAuthError(err) });
-    }
+  function handleOAuthLogin(provider: 'google' | 'kakao') {
+    signInWithOAuth(provider, next);
   }
+
+  const isOAuthPending = pendingProvider !== null;
 
   return (
     <div className="space-y-4">
@@ -201,7 +177,7 @@ function LoginForm({ next, onClose, onChangeView }: LoginFormProps) {
           type="button"
           variant="outline"
           color="gray"
-          disabled={isSubmitting || pendingProvider !== null}
+          disabled={isSubmitting || isOAuthPending}
           onClick={() => handleOAuthLogin('google')}
           className="w-full text-sm"
         >
@@ -209,7 +185,7 @@ function LoginForm({ next, onClose, onChangeView }: LoginFormProps) {
         </Button>
         <button
           type="button"
-          disabled={isSubmitting || pendingProvider !== null}
+          disabled={isSubmitting || isOAuthPending}
           onClick={() => handleOAuthLogin('kakao')}
           className="w-full rounded-sm bg-yellow-300 py-2 text-sm disabled:cursor-not-allowed disabled:bg-gray-200"
         >
@@ -248,6 +224,7 @@ interface SignupFormProps {
 
 function SignupForm({ next, onClose, onChangeView }: SignupFormProps) {
   const router = useRouter();
+  const { mutateAsync: emailSignup } = useEmailSignup();
   const [isEmailSent, setIsEmailSent] = useState(false);
   const [sentEmail, setSentEmail] = useState('');
   const {
@@ -259,7 +236,7 @@ function SignupForm({ next, onClose, onChangeView }: SignupFormProps) {
 
   async function handleSubmit(data: SignupFields) {
     try {
-      const result = await authApi.signUpWithEmail({
+      const result = await emailSignup({
         email: data.email,
         password: data.password,
         name: data.name,
@@ -273,7 +250,7 @@ function SignupForm({ next, onClose, onChangeView }: SignupFormProps) {
         setIsEmailSent(true);
       }
     } catch (err) {
-      setError('root', { message: mapAuthError(err) });
+      setError('root', { message: getAuthErrorMessage(err) });
     }
   }
 
@@ -351,6 +328,7 @@ interface ResetFormProps {
 }
 
 function ResetForm({ onChangeView }: ResetFormProps) {
+  const { mutateAsync: resetPassword } = useResetPassword();
   const [isSent, setIsSent] = useState(false);
   const [sentEmail, setSentEmail] = useState('');
   const {
@@ -362,11 +340,11 @@ function ResetForm({ onChangeView }: ResetFormProps) {
 
   async function handleSubmit(data: ResetFields) {
     try {
-      await authApi.resetPasswordForEmail({ email: data.email });
+      await resetPassword({ email: data.email });
       setSentEmail(data.email);
       setIsSent(true);
     } catch (err) {
-      setError('root', { message: mapAuthError(err) });
+      setError('root', { message: getAuthErrorMessage(err) });
     }
   }
 

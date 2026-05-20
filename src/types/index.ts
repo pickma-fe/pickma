@@ -1,5 +1,6 @@
 export type { AuthProvider, AuthResult, AuthSession, AuthUser } from './auth';
 export type {
+  ConsumerOrderListQuery,
   CreatedOrderPaymentInfo,
   Order,
   OrderItem,

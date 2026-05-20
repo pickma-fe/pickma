@@ -6,6 +6,9 @@ export interface MenuItemResponse {
   category: string;
   price: number;
   image?: string;
+  origin?: string;
+  allergyInfo?: string;
+  tags?: string[];
   status: 'active' | 'inactive';
   createdAt: string;
   updatedAt: string;

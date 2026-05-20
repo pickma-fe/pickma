@@ -38,7 +38,7 @@ export async function getProducts(
   supabase: SupabaseClient<Database>,
   params: ProductListParams
 ): Promise<ProductListResponse> {
-  const { region, categoryId } = params;
+  const { region, categoryId, keyword } = params;
   const shouldUseExtendedList =
     isDiscountFilterOption(params.discountOption) ||
     params.sort === 'discountRate';
@@ -57,6 +57,10 @@ export async function getProducts(
 
   if (categoryId) {
     query = query.eq('category_id', categoryId);
+  }
+
+  if (keyword) {
+    query = query.ilike('menu_items.name', `%${escapeILikePattern(keyword)}%`);
   }
 
   if (params.availableOnly) {
@@ -107,7 +111,7 @@ export function buildProductListResponse(
   params: ProductListParams,
   getRegion?: (product: ProductListItemResponse) => string | undefined
 ): ProductListResponse {
-  const { page, pageSize, region, categoryId } = params;
+  const { page, pageSize, region, categoryId, keyword } = params;
   const discountOption = normalizeDiscountOptionId(
     params.discountOption ?? 'all'
   );
@@ -117,6 +121,10 @@ export function buildProductListResponse(
     .filter((product) => !params.availableOnly || isAvailableProduct(product))
     .filter((product) => !region || getRegion?.(product) === region)
     .filter((product) => !categoryId || product.categoryId === categoryId)
+    .filter(
+      (product) =>
+        !keyword || product.name.toLowerCase().includes(keyword.toLowerCase())
+    )
     .filter((product) => matchesDiscountOption(product, discountOption));
   const sortedProducts = [...filteredProducts].sort((a, b) =>
     compareProducts(a, b, params)
@@ -194,6 +202,10 @@ function compareProducts(
 
 function getSortOrder(params: ProductListParams) {
   return params.order ?? 'asc';
+}
+
+function escapeILikePattern(pattern: string): string {
+  return pattern.replace(/[%_]/g, '\\$&');
 }
 
 export async function getProductById(

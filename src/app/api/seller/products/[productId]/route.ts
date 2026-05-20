@@ -1,7 +1,7 @@
 import type { NextRequest } from 'next/server';
 
 import { ERROR_CODE } from '@/lib/errors/errorCodes';
-import { requireSeller } from '@/app/api/_lib/auth';
+import { requireSellerStore } from '@/app/api/_lib/auth';
 import { isApiMockEnabled } from '@/app/api/_lib/mock';
 import { fail, routeError, success } from '@/app/api/_lib/response';
 import { validateBody } from '@/app/api/_lib/validation';
@@ -47,7 +47,7 @@ export async function PATCH(
       return success(mockSellerCreatedProduct);
     }
 
-    const { store } = await requireSeller();
+    const { store } = await requireSellerStore();
     const data = await updateSellerProduct(
       store.id,
       parsedProductId.productId,
@@ -72,7 +72,7 @@ export async function DELETE(
   }
 
   try {
-    const { store } = await requireSeller();
+    const { store } = await requireSellerStore();
     const data = await deleteSellerProduct(store.id, parsedProductId.productId);
     return success(data);
   } catch (error) {

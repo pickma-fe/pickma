@@ -14,7 +14,6 @@ export function mapAdminStore(dto: AdminStoreResponse): Store {
     region: dto.region,
     image: dto.image,
     status: dto.status,
-    rejectReason: dto.rejectReason,
     createdAt: new Date(dto.createdAt),
     updatedAt: new Date(dto.updatedAt),
   };

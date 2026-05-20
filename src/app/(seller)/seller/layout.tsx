@@ -1,5 +1,6 @@
 'use client';
 
+import { useSignOut } from '@/hooks/auth/useSignOut';
 import { useMe } from '@/hooks/users/useMe';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { useAuthModal } from '@/components/auth/useAuthModal';
@@ -15,6 +16,7 @@ export default function SellerLayout({
 }) {
   const { data: user } = useMe();
   const { openAuthModal } = useAuthModal();
+  const { mutate: signOut } = useSignOut();
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -23,7 +25,19 @@ export default function SellerLayout({
         logoHref="/seller"
         menuItems={
           user
-            ? []
+            ? [
+                {
+                  label: '소비자 센터',
+                  type: 'link',
+                  href: '/',
+                },
+                {
+                  label: '로그아웃',
+                  type: 'action',
+                  onClick: () => signOut(),
+                  className: 'text-red-500',
+                },
+              ]
             : [
                 {
                   label: '로그인',
