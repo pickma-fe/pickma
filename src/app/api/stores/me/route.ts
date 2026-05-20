@@ -1,6 +1,6 @@
 import type { NextRequest } from 'next/server';
 
-import { requireActiveUser } from '@/app/api/_lib/auth';
+import { requireSellerStore } from '@/app/api/_lib/auth';
 import { isApiMockEnabled } from '@/app/api/_lib/mock';
 import { routeError, success } from '@/app/api/_lib/response';
 import { validateBody } from '@/app/api/_lib/validation';
@@ -14,7 +14,7 @@ export async function GET(): Promise<Response> {
     if (isApiMockEnabled()) {
       return success(mockMyStore);
     }
-    const { serviceUser } = await requireActiveUser();
+    const { serviceUser } = await requireSellerStore();
     const store = await getMyStore(serviceUser.id, serviceUser.role);
     return success(store);
   } catch (error) {
@@ -30,7 +30,7 @@ export async function PATCH(request: NextRequest): Promise<Response> {
       return success({ ...mockMyStore, ...body });
     }
 
-    const { serviceUser } = await requireActiveUser();
+    const { serviceUser } = await requireSellerStore();
     const store = await updateMyStore(serviceUser.id, serviceUser.role, body);
     return success(store);
   } catch (error) {
