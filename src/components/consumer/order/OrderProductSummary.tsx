@@ -1,10 +1,10 @@
 import { Minus, Plus, ShieldCheck } from 'lucide-react';
 import Image from 'next/image';
 
-import type { ProductDetailResponse } from '@/contracts/product';
+import type { ProductDetail } from '@/types/product';
 
 interface OrderProductSummaryProps {
-  product: ProductDetailResponse;
+  product: ProductDetail;
   quantity: number;
   serviceFee: number;
   productTotalPrice: number;

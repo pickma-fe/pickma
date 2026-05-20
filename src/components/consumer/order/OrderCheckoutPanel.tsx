@@ -3,7 +3,7 @@
 import { Clock, CreditCard, MapPin } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
 
-import type { ProductDetailResponse } from '@/contracts/product';
+import type { ProductDetail } from '@/types/product';
 import {
   formatPickupDateLabel,
   formatPickupTime,
@@ -16,7 +16,7 @@ import { Button } from '@/components/common';
 import { PickupTimeChangeModal } from './PickupTimeChangeModal';
 
 interface OrderCheckoutPanelProps {
-  product: ProductDetailResponse;
+  product: ProductDetail;
   quantity: number;
   finalPaymentPrice: number;
   initialPickupTime?: PickupTimeOption;
@@ -38,7 +38,7 @@ type OrderInfoBlockProps =
       children: ReactNode;
     };
 
-function getPickupPlace(product: ProductDetailResponse) {
+function getPickupPlace(product: ProductDetail) {
   return product.store.addressDetail
     ? `${product.store.address} ${product.store.addressDetail}`
     : product.store.address;
