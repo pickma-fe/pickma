@@ -65,35 +65,38 @@ export type Database = {
       };
       menu_items: {
         Row: {
-          category_id: string | null;
+          category_id: string;
           created_at: string;
           description: string | null;
           id: string;
           image: string | null;
           name: string;
           original_price: number;
+          status: Database['public']['Enums']['menu_item_status'];
           store_id: string;
           updated_at: string;
         };
         Insert: {
-          category_id?: string | null;
+          category_id: string;
           created_at?: string;
           description?: string | null;
           id?: string;
           image?: string | null;
           name: string;
           original_price: number;
+          status?: Database['public']['Enums']['menu_item_status'];
           store_id: string;
           updated_at?: string;
         };
         Update: {
-          category_id?: string | null;
+          category_id?: string;
           created_at?: string;
           description?: string | null;
           id?: string;
           image?: string | null;
           name?: string;
           original_price?: number;
+          status?: Database['public']['Enums']['menu_item_status'];
           store_id?: string;
           updated_at?: string;
         };
@@ -553,7 +556,6 @@ export type Database = {
           open_time: string | null;
           phone: string;
           region: string;
-          reject_reason: string | null;
           status: Database['public']['Enums']['store_status'];
           updated_at: string;
           user_id: string;
@@ -571,7 +573,6 @@ export type Database = {
           open_time?: string | null;
           phone: string;
           region: string;
-          reject_reason?: string | null;
           status?: Database['public']['Enums']['store_status'];
           updated_at?: string;
           user_id: string;
@@ -589,7 +590,6 @@ export type Database = {
           open_time?: string | null;
           phone?: string;
           region?: string;
-          reject_reason?: string | null;
           status?: Database['public']['Enums']['store_status'];
           updated_at?: string;
           user_id?: string;
@@ -760,10 +760,12 @@ export type Database = {
       sequence_to_pickup_number: { Args: { seq: number }; Returns: string };
     };
     Enums: {
+      menu_item_status: 'active' | 'inactive';
       order_status:
         | 'payment_pending'
         | 'processing'
         | 'reserved'
+        | 'accepted'
         | 'ready'
         | 'completed'
         | 'cancelled'
@@ -780,7 +782,7 @@ export type Database = {
         | 'business_report';
       seller_application_status: 'pending' | 'approved' | 'rejected';
       social_provider: 'google' | 'kakao';
-      store_status: 'pending' | 'approved' | 'rejected' | 'inactive';
+      store_status: 'approved' | 'inactive';
       user_role: 'customer' | 'seller' | 'admin';
       user_status: 'active' | 'suspended' | 'deleted';
     };
@@ -916,10 +918,12 @@ export const Constants = {
   },
   public: {
     Enums: {
+      menu_item_status: ['active', 'inactive'],
       order_status: [
         'payment_pending',
         'processing',
         'reserved',
+        'accepted',
         'ready',
         'completed',
         'cancelled',
@@ -938,7 +942,7 @@ export const Constants = {
       ],
       seller_application_status: ['pending', 'approved', 'rejected'],
       social_provider: ['google', 'kakao'],
-      store_status: ['pending', 'approved', 'rejected', 'inactive'],
+      store_status: ['approved', 'inactive'],
       user_role: ['customer', 'seller', 'admin'],
       user_status: ['active', 'suspended', 'deleted'],
     },

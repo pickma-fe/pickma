@@ -3,14 +3,14 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ProductListItemResponse } from '@/contracts/product';
 import { AppError } from '@/lib/errors/appError';
 import { ERROR_CODE } from '@/lib/errors/errorCodes';
-import { requireSeller } from '@/app/api/_lib/auth';
+import { requireSellerStore } from '@/app/api/_lib/auth';
 import { isApiMockEnabled } from '@/app/api/_lib/mock';
 
 import { createSellerProduct, getSellerProducts } from './_lib/service';
 import { GET, POST } from './route';
 
 vi.mock('@/app/api/_lib/auth', () => ({
-  requireSeller: vi.fn(),
+  requireSellerStore: vi.fn(),
 }));
 
 vi.mock('@/app/api/_lib/mock', () => ({
@@ -29,7 +29,7 @@ const sellerResult = {
   authUser: {},
   serviceUser: {},
   store: { id: STORE_ID },
-} as Awaited<ReturnType<typeof requireSeller>>;
+} as Awaited<ReturnType<typeof requireSellerStore>>;
 
 function makeRequest(body: unknown): Request {
   return new Request('http://localhost/api/seller/products', {
@@ -50,12 +50,12 @@ describe('GET /api/seller/products', () => {
     const res = await GET();
 
     expect(res.status).toBe(200);
-    expect(requireSeller).not.toHaveBeenCalled();
+    expect(requireSellerStore).not.toHaveBeenCalled();
   });
 
-  it('real 모드에서는 requireSeller store id로 service를 호출한다', async () => {
+  it('real 모드에서는 requireSellerStore store id로 service를 호출한다', async () => {
     vi.mocked(isApiMockEnabled).mockReturnValue(false);
-    vi.mocked(requireSeller).mockResolvedValue(sellerResult);
+    vi.mocked(requireSellerStore).mockResolvedValue(sellerResult);
     vi.mocked(getSellerProducts).mockResolvedValue([product]);
 
     const res = await GET();
@@ -64,9 +64,9 @@ describe('GET /api/seller/products', () => {
     expect(getSellerProducts).toHaveBeenCalledWith(STORE_ID);
   });
 
-  it('requireSeller가 실패하면 error envelope를 반환한다', async () => {
+  it('requireSellerStore가 실패하면 error envelope를 반환한다', async () => {
     vi.mocked(isApiMockEnabled).mockReturnValue(false);
-    vi.mocked(requireSeller).mockRejectedValue(
+    vi.mocked(requireSellerStore).mockRejectedValue(
       new AppError(ERROR_CODE.STORE_NOT_APPROVED, 403)
     );
 
@@ -98,7 +98,7 @@ describe('POST /api/seller/products', () => {
     const res = await POST(makeRequest(validBody) as never);
 
     expect(res.status).toBe(201);
-    expect(requireSeller).not.toHaveBeenCalled();
+    expect(requireSellerStore).not.toHaveBeenCalled();
   });
 
   it('validation 실패 시 400을 반환한다', async () => {
@@ -113,9 +113,9 @@ describe('POST /api/seller/products', () => {
     expect(body.error.code).toBe('VALIDATION_ERROR');
   });
 
-  it('real 모드에서는 requireSeller store id로 service를 호출한다', async () => {
+  it('real 모드에서는 requireSellerStore store id로 service를 호출한다', async () => {
     vi.mocked(isApiMockEnabled).mockReturnValue(false);
-    vi.mocked(requireSeller).mockResolvedValue(sellerResult);
+    vi.mocked(requireSellerStore).mockResolvedValue(sellerResult);
     vi.mocked(createSellerProduct).mockResolvedValue(product);
 
     const res = await POST(makeRequest(validBody) as never);

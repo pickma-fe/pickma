@@ -3,6 +3,7 @@
 import {
   ShoppingBag,
   Clock,
+  PackageCheck,
   CheckCircle,
   XCircle,
   AlertCircle,
@@ -25,17 +26,24 @@ const STAT_CARDS = [
   },
   {
     label: '수락 대기',
-    value: 'processing',
+    value: 'reserved',
     icon: ShoppingBag,
     bgColor: 'bg-yellow-100',
     iconColor: 'text-yellow-600',
   },
   {
-    label: '픽업 대기',
-    value: 'reserved',
+    label: '주문 승인',
+    value: 'accepted',
     icon: Clock,
     bgColor: 'bg-blue-100',
     iconColor: 'text-blue-600',
+  },
+  {
+    label: '픽업 대기',
+    value: 'ready',
+    icon: PackageCheck,
+    bgColor: 'bg-indigo-100',
+    iconColor: 'text-indigo-600',
   },
   {
     label: '픽업 완료',
@@ -66,19 +74,12 @@ export function OrderManageContent() {
 
   const getCount = (value: string) => {
     if (value === '전체') return mockOrders.length;
-    if (value === 'reserved')
-      return mockOrders.filter(
-        (o) => o.status === 'reserved' || o.status === 'ready'
-      ).length;
     return mockOrders.filter((o) => o.status === value).length;
   };
 
   const filteredOrders = mockOrders.filter((order) => {
     const matchStatus =
-      selectedStatus === '전체' ||
-      (selectedStatus === 'reserved'
-        ? order.status === 'reserved' || order.status === 'ready'
-        : order.status === selectedStatus);
+      selectedStatus === '전체' || order.status === selectedStatus;
 
     const matchSearch =
       searchKeyword === '' ||
@@ -106,7 +107,7 @@ export function OrderManageContent() {
         </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-7">
         {STAT_CARDS.map((card) => {
           const Icon = card.icon;
           const isSelected = selectedStatus === card.value;

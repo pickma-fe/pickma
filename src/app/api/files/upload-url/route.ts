@@ -6,7 +6,9 @@ import {
   checkApplicationEligibility,
   requireActiveUser,
   requireSeller,
+  requireSellerStore,
 } from '@/app/api/_lib/auth';
+import { isApiMockEnabled } from '@/app/api/_lib/mock';
 import { routeError, success } from '@/app/api/_lib/response';
 import { validateBody } from '@/app/api/_lib/validation';
 
@@ -16,6 +18,16 @@ import { createFileUploadUrl } from './_lib/service';
 export async function POST(request: NextRequest): Promise<Response> {
   try {
     const body = await validateBody(createFileUploadUrlSchema, request);
+
+    if (isApiMockEnabled()) {
+      return success(
+        {
+          signedUrl: '/api/mock/upload',
+          storagePath: `mock/${body.purpose}/mock-file`,
+        },
+        201
+      );
+    }
 
     let userId: string;
     let storeId: string | undefined;
@@ -40,14 +52,11 @@ export async function POST(request: NextRequest): Promise<Response> {
       }
       userId = authUser.id;
     } else if (body.purpose === 'store_image') {
-      const { authUser, serviceUser } = await requireActiveUser();
-      if (serviceUser.role !== 'seller') {
-        throw new AppError(ERROR_CODE.FILE_UPLOAD_NOT_ALLOWED, 403);
-      }
+      const { authUser } = await requireSeller();
       userId = authUser.id;
     } else {
       // seller_product_image
-      const { authUser, store } = await requireSeller();
+      const { authUser, store } = await requireSellerStore();
       userId = authUser.id;
       storeId = store.id;
     }

@@ -1,6 +1,6 @@
 import type { NextRequest } from 'next/server';
 
-import { requireSeller } from '@/app/api/_lib/auth';
+import { requireSellerStore } from '@/app/api/_lib/auth';
 import { isApiMockEnabled } from '@/app/api/_lib/mock';
 import { routeError, success } from '@/app/api/_lib/response';
 import { validateBody } from '@/app/api/_lib/validation';
@@ -13,7 +13,7 @@ export async function GET(): Promise<Response> {
   if (isApiMockEnabled()) return success(mockSellerProducts);
 
   try {
-    const { store } = await requireSeller();
+    const { store } = await requireSellerStore();
     const data = await getSellerProducts(store.id);
     return success(data);
   } catch (error) {
@@ -29,7 +29,7 @@ export async function POST(request: NextRequest): Promise<Response> {
       return success(mockSellerCreatedProduct, 201);
     }
 
-    const { store } = await requireSeller();
+    const { store } = await requireSellerStore();
     const data = await createSellerProduct(store.id, body);
     return success(data, 201);
   } catch (error) {

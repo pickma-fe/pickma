@@ -132,6 +132,11 @@ describe('mapOrderListRow', () => {
     });
     expect(result.status).toBe('payment_pending');
   });
+
+  it('status = "accepted" → status: "accepted" (contract DTO 그대로)', () => {
+    const result = mapOrderListRow({ ...baseListRow, status: 'accepted' });
+    expect(result.status).toBe('accepted');
+  });
 });
 
 describe('mapOrderItemRow', () => {

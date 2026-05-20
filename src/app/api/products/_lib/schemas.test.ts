@@ -27,10 +27,14 @@ describe('productListSchema', () => {
     expect(result.data?.categoryId).toBe('abc');
   });
 
-  it('아직 지원하지 않는 P1 파라미터 전달 시 validation error를 반환한다', () => {
-    expect(productListSchema.safeParse({ keyword: 'coffee' }).success).toBe(
-      false
-    );
+  it('keyword 파라미터를 허용한다', () => {
+    const result = productListSchema.safeParse({ keyword: '크루아상' });
+    expect(result.success).toBe(true);
+    expect(result.data?.keyword).toBe('크루아상');
+  });
+
+  it('keyword가 공백만 있으면 validation error를 반환한다', () => {
+    expect(productListSchema.safeParse({ keyword: '   ' }).success).toBe(false);
   });
 
   it('정렬/할인 파라미터를 허용한다', () => {

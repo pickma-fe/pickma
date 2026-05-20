@@ -36,6 +36,7 @@ export async function createStore(
       image: body.image ?? null,
       open_time: body.openTime ? body.openTime.slice(0, 8) : null,
       close_time: body.closeTime ? body.closeTime.slice(0, 8) : null,
+      status: 'approved' as const,
     })
     .select('*')
     .single();
@@ -48,7 +49,7 @@ export async function createStore(
   }
   if (!row) throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
 
-  return mapStoreRow(row, false);
+  return mapStoreRow(row, true);
 }
 
 export async function getMyStore(
