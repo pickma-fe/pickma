@@ -4,7 +4,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
 
-import type { CreateSellerProductRequest } from '@/contracts/product';
 import { useSellerMenuItems } from '@/hooks/seller/menu-items/useSellerMenuItems';
 import { useCreateSellerProduct } from '@/hooks/seller/products/useCreateSellerProduct';
 import { Button } from '@/components/common/Button/Button';
@@ -70,15 +69,17 @@ export function ProductRegistrationModal({
   });
 
   const onSubmit = (data: ProductFormData) => {
-    const body: CreateSellerProductRequest = {
-      menuItemId: data.menuItemId,
-      discountPrice: Number(data.discountPrice),
-      stock: Number(data.stock),
-      endAt: new Date(data.endAt).toISOString(),
-      pickupStartTime: data.pickupStartTime,
-      pickupEndTime: data.pickupEndTime,
-    };
-    createProduct(body, { onSuccess: onClose });
+    createProduct(
+      {
+        menuItemId: data.menuItemId,
+        discountPrice: Number(data.discountPrice),
+        stock: Number(data.stock),
+        endAt: new Date(data.endAt),
+        pickupStartTime: data.pickupStartTime,
+        pickupEndTime: data.pickupEndTime,
+      },
+      { onSuccess: onClose }
+    );
   };
 
   return (
