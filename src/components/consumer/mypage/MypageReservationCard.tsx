@@ -81,6 +81,7 @@ export function MypageReservationCard({
   const { openPayment, isPending: isPaymentPending } = usePayment();
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isPickupCodeModalOpen, setIsPickupCodeModalOpen] = useState(false);
+  const [paymentErrorMessage, setPaymentErrorMessage] = useState('');
   const displayGroup = statusDisplayMap[reservation.status];
   const status = statusStyles[displayGroup];
   const isPickupCodeAvailable =
@@ -112,10 +113,16 @@ export function MypageReservationCard({
   };
 
   const handleOpenPayment = async () => {
-    await openPayment({
-      orderNumber: reservation.orderNumber,
-      orderName: reservationTitle,
-    });
+    setPaymentErrorMessage('');
+
+    try {
+      await openPayment({
+        orderNumber: reservation.orderNumber,
+        orderName: reservationTitle,
+      });
+    } catch {
+      setPaymentErrorMessage('결제를 시작하지 못했습니다. 다시 시도해 주세요.');
+    }
   };
 
   return (
@@ -192,13 +199,18 @@ export function MypageReservationCard({
                 color="primary"
                 disabled={isPaymentPending}
                 className="h-12 min-w-32 px-5 text-sm"
-                onClick={() => void handleOpenPayment()}
+                onClick={handleOpenPayment}
               >
                 {isPaymentPending ? '결제 준비 중' : '결제하기'}
               </Button>
             ) : null}
           </div>
         </div>
+        {paymentErrorMessage ? (
+          <p role="alert" className="mt-3 text-right text-sm text-red-500">
+            {paymentErrorMessage}
+          </p>
+        ) : null}
       </article>
 
       <MypageReservationDetailModal

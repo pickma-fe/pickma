@@ -1,9 +1,7 @@
 'use client';
 
-import type { PickupTimeOption } from '@/lib/formatPickupTime';
 import {
   createPickupTimeOptions,
-  formatPickupTime,
   isPastPickupTimeSlot,
 } from '@/lib/formatPickupTime';
 import { useProduct } from '@/hooks/products/useProduct';
@@ -43,20 +41,6 @@ function getInitialQuantity(value: string | undefined, availableStock: number) {
   return Math.min(quantity, availableStock);
 }
 
-function getDefaultPickupTimeOption(
-  pickupStartTime: string,
-  pickupEndTime: string
-): PickupTimeOption {
-  const startAt = formatPickupTime(pickupStartTime);
-  const endAt = formatPickupTime(pickupEndTime);
-
-  return {
-    label: `${startAt}~${endAt}`,
-    startAt,
-    endAt,
-  };
-}
-
 function getInitialPickupTime({
   pickupStartTime,
   pickupEndTime,
@@ -84,14 +68,7 @@ function getInitialPickupTime({
     return matchedPickupTime;
   }
 
-  const firstAvailablePickupTime = pickupTimeOptions.find(
-    (option) => !isPastPickupTimeSlot(option.startAt, pickupStartTime, now)
-  );
-
-  return (
-    firstAvailablePickupTime ??
-    getDefaultPickupTimeOption(pickupStartTime, pickupEndTime)
-  );
+  return null;
 }
 
 export function OrderPageContainer({

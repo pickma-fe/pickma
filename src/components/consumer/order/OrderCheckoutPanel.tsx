@@ -6,7 +6,7 @@ import { useState, type ReactNode } from 'react';
 import type { ProductDetail } from '@/types/product';
 import {
   formatPickupDateLabel,
-  formatPickupTime,
+  isPastPickupTimeSlot,
   type PickupTimeOption,
 } from '@/lib/formatPickupTime';
 import { useCreateOrder } from '@/hooks/orders/useCreateOrder';
@@ -19,7 +19,7 @@ interface OrderCheckoutPanelProps {
   product: ProductDetail;
   quantity: number;
   finalPaymentPrice: number;
-  initialPickupTime?: PickupTimeOption;
+  initialPickupTime: PickupTimeOption | null;
 }
 
 type OrderInfoBlockProps =
@@ -42,20 +42,6 @@ function getPickupPlace(product: ProductDetail) {
   return product.store.addressDetail
     ? `${product.store.address} ${product.store.addressDetail}`
     : product.store.address;
-}
-
-function createDefaultPickupTimeOption(
-  pickupStartTime: string,
-  pickupEndTime: string
-): PickupTimeOption {
-  const startAt = formatPickupTime(pickupStartTime);
-  const endAt = formatPickupTime(pickupEndTime);
-
-  return {
-    label: `${startAt}~${endAt}`,
-    startAt,
-    endAt,
-  };
 }
 
 function createPickupAt(
@@ -114,20 +100,41 @@ export function OrderCheckoutPanel({
     product.pickupStartTime,
     referenceNow
   );
-  const [pickupTime, setPickupTime] = useState(
-    () =>
-      initialPickupTime ??
-      createDefaultPickupTimeOption(
-        product.pickupStartTime,
-        product.pickupEndTime
-      )
+  const [pickupTime, setPickupTime] = useState<PickupTimeOption | null>(
+    initialPickupTime
   );
+  const [validationErrorMessage, setValidationErrorMessage] = useState('');
   const [isPickupTimeModalOpen, setIsPickupTimeModalOpen] = useState(false);
   const handleOpenPickupTimeModal = () => {
     setReferenceNow(new Date());
     setIsPickupTimeModalOpen(true);
   };
   const handlePaymentButtonClick = async () => {
+    setValidationErrorMessage('');
+
+    if (quantity <= 0) {
+      setValidationErrorMessage('결제 가능한 수량이 없습니다.');
+      return;
+    }
+
+    if (pickupTime === null) {
+      setValidationErrorMessage('픽업 시간을 선택해 주세요.');
+      return;
+    }
+
+    if (
+      isPastPickupTimeSlot(
+        pickupTime.startAt,
+        product.pickupStartTime,
+        new Date()
+      )
+    ) {
+      setValidationErrorMessage(
+        '이미 지난 픽업 시간입니다. 다시 선택해 주세요.'
+      );
+      return;
+    }
+
     const pickupAt = createPickupAt(product.pickupStartTime, pickupTime);
 
     if (pickupAt === null) {
@@ -150,8 +157,12 @@ export function OrderCheckoutPanel({
     }
   };
   const isSubmitting = createOrderMutation.isPending || isPaymentPending;
+  const isPaymentButtonDisabled =
+    isSubmitting || quantity <= 0 || pickupTime === null;
   const paymentErrorMessage =
-    createOrderMutation.error?.message ?? paymentError?.message;
+    validationErrorMessage ||
+    createOrderMutation.error?.message ||
+    paymentError?.message;
 
   return (
     <>
@@ -173,8 +184,15 @@ export function OrderCheckoutPanel({
           onAction={handleOpenPickupTimeModal}
         >
           <p className="font-medium text-gray-900">
-            {pickupDateLabel ? `${pickupDateLabel} ${pickupTime.label}` : '-'}
+            {pickupDateLabel && pickupTime
+              ? `${pickupDateLabel} ${pickupTime.label}`
+              : '픽업 시간을 선택해 주세요.'}
           </p>
+          {pickupTime === null ? (
+            <p className="mt-2 text-sm text-red-500">
+              선택 가능한 픽업 시간을 다시 선택해 주세요.
+            </p>
+          ) : null}
         </OrderInfoBlock>
 
         <OrderInfoBlock
@@ -195,7 +213,7 @@ export function OrderCheckoutPanel({
           </div>
 
           <Button
-            disabled={isSubmitting}
+            disabled={isPaymentButtonDisabled}
             className="w-full py-4 text-lg font-bold"
             onClick={handlePaymentButtonClick}
           >
@@ -206,7 +224,7 @@ export function OrderCheckoutPanel({
 
           {paymentErrorMessage ? (
             <p role="alert" className="mt-3 text-center text-sm text-red-500">
-              결제를 시작하지 못했습니다. 다시 시도해 주세요.
+              {paymentErrorMessage}
             </p>
           ) : null}
 
