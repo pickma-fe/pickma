@@ -19,11 +19,11 @@ export const mockMyStore: StoreResponse = {
   updatedAt: '2026-04-20T00:00:00.000Z',
 };
 
-export const mockPendingStore: StoreResponse = {
+export const mockApprovedStore: StoreResponse = {
   ...mockMyStore,
-  id: 'store_pending_1',
+  id: 'store_approved_1',
   userId: 'user_seller_2',
   name: '픽마 델리',
-  status: 'pending',
-  canSell: false,
+  status: 'approved',
+  canSell: true,
 };

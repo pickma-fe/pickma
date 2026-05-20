@@ -2,12 +2,12 @@
 
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
 
-import type { ProductDetailResponse } from '@/contracts/product';
+import type { ProductDetail } from '@/types/product';
 
 type ProductDetailTabId = 'detail' | 'review' | 'store';
 
 interface ProductDetailTabsProps {
-  product: ProductDetailResponse;
+  product: ProductDetail;
 }
 
 interface ProductDetailTab {

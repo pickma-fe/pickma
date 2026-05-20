@@ -22,31 +22,36 @@ const PAGE_SIZE_OPTIONS = [
 ];
 
 const formatPrice = (price: number) => price.toLocaleString('ko-KR') + '원';
-const formatDate = (dateString: string) =>
-  new Date(dateString).toLocaleDateString('ko-KR');
-const formatTime = (dateString: string) =>
-  new Date(dateString).toLocaleTimeString('ko-KR', {
-    hour: '2-digit',
-    minute: '2-digit',
-  });
+
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString);
+  return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`;
+};
+
+const formatTime = (dateString: string) => {
+  const date = new Date(dateString);
+  const hours = date.getHours();
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const period = hours >= 12 ? '오후' : '오전';
+  const displayHours = String(hours % 12 || 12).padStart(2, '0');
+  return `${period} ${displayHours}:${minutes}`;
+};
 
 const STATUS_BADGE: Record<
   string,
   { label: string; color: 'warning' | 'info' | 'success' | 'danger' | 'gray' }
 > = {
-  processing: { label: '접수 대기', color: 'warning' },
-  reserved: { label: '준비 중', color: 'info' },
-  ready: { label: '준비 완료', color: 'info' },
+  reserved: { label: '수락 대기', color: 'warning' },
+  accepted: { label: '주문 승인', color: 'info' },
+  ready: { label: '픽업 대기', color: 'info' },
   completed: { label: '픽업 완료', color: 'success' },
   cancelled: { label: '취소/환불', color: 'danger' },
   no_show: { label: '미수령', color: 'gray' },
-  payment_pending: { label: '결제 대기', color: 'warning' },
-  expired: { label: '만료', color: 'gray' },
 };
 
 const STATUS_DESCRIPTION: Record<string, string> = {
-  processing: '주문이 접수되었습니다.',
-  reserved: '주문 상품을 준비해주세요.',
+  reserved: '주문을 수락하거나 취소해주세요.',
+  accepted: '주문 상품을 준비해주세요.',
   ready: '고객 픽업을 기다리고 있습니다.',
   completed: '픽업이 완료되었습니다.',
   cancelled: '주문이 취소/환불되었습니다.',
@@ -61,12 +66,12 @@ function OrderActionButtons({
   onOrderAction: (orderId: string, newStatus: string) => void;
 }) {
   switch (order.status) {
-    case 'processing':
+    case 'reserved':
       return (
         <div className="flex w-fit flex-col gap-2">
           <Button
             className="w-fit px-2 py-0.5 text-sm"
-            onClick={() => onOrderAction(order.id, 'reserved')}
+            onClick={() => onOrderAction(order.id, 'accepted')}
           >
             주문 접수
           </Button>
@@ -80,7 +85,7 @@ function OrderActionButtons({
           </Button>
         </div>
       );
-    case 'reserved':
+    case 'accepted':
       return (
         <div className="flex w-fit flex-col gap-2">
           <Button

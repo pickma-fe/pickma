@@ -31,7 +31,7 @@ INSERT INTO auth.users (
    'seller2@pickma-seed.local', '',
    now(), '{"provider":"email","providers":["email"]}', '{}',
    now(), now()),
-  -- seller3: pending 가게 등록 상태 시뮬레이션
+  -- seller3: 가게 등록 완료 seller
   ('00000000-0000-4000-8000-000000000023',
    '00000000-0000-4000-8000-000000000000',
    'authenticated', 'authenticated',
@@ -52,7 +52,7 @@ INSERT INTO public.users (id, email, name, role, status) VALUES
   ('00000000-0000-4000-8000-000000000023', 'seller3@pickma-seed.local', '씨드 판매자3', 'seller', 'active'),
   ('00000000-0000-4000-8000-000000000024', 'customer1@pickma-seed.local', '씨드 고객1', 'customer', 'active');
 
--- Stores: 1 approved, 1 inactive, 1 pending (RLS 및 가게 등록 흐름 검증용)
+-- Stores: 2 approved, 1 inactive
 INSERT INTO public.stores (id, user_id, name, description, business_number, phone, address, address_detail, region, status) VALUES
   ('00000000-0000-4000-8000-000000000031',
    '00000000-0000-4000-8000-000000000021',
@@ -66,13 +66,12 @@ INSERT INTO public.stores (id, user_id, name, description, business_number, phon
    '0987654321', '02-9876-5432',
    '서울시 서초구 강남대로 100', NULL,
    '서울 서초구', 'inactive'),
-  -- pending: 가게 등록 신청 직후 상태 시뮬레이션
   ('00000000-0000-4000-8000-000000000033',
    '00000000-0000-4000-8000-000000000023',
-   '씨드 델리', '등록 심사 중인 가게입니다.',
+   '씨드 델리', '가게 등록 후 바로 판매 가능한 상태입니다.',
    '1111111111', '02-1111-2222',
    '서울시 강남구 테헤란로 50', NULL,
-   '서울 강남구', 'pending');
+   '서울 강남구', 'approved');
 
 -- Menu items
 INSERT INTO public.menu_items (id, store_id, category_id, name, description, original_price) VALUES

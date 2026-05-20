@@ -43,18 +43,7 @@ export const sellerSidebarSections: SidebarSection[] = [
         id: 'products',
         label: '상품 관리',
         icon: Package,
-        children: [
-          {
-            id: 'product-list',
-            label: '상품 목록',
-            href: '/seller/products',
-          },
-          {
-            id: 'product-new',
-            label: '상품 등록',
-            href: '/seller/products/new',
-          },
-        ],
+        href: '/seller/products',
       },
     ],
   },

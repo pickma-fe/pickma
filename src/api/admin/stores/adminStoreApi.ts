@@ -1,9 +1,6 @@
 import type { PaginatedResult } from '@/types/common';
 import type { Store } from '@/types/store';
-import type {
-  AdminStoreListResponse,
-  RejectStoreRequest,
-} from '@/contracts/admin';
+import type { AdminStoreListResponse } from '@/contracts/admin';
 import { apiClient } from '@/api/apiClient';
 
 import { mapAdminStore } from './adminStoreMapper';
@@ -13,19 +10,5 @@ export const adminStoreApi = {
     return apiClient
       .get<AdminStoreListResponse>('/api/admin/stores')
       .then((res) => ({ ...res, items: res.items.map(mapAdminStore) }));
-  },
-
-  getPendingStores(): Promise<PaginatedResult<Store>> {
-    return apiClient
-      .get<AdminStoreListResponse>('/api/admin/stores/pending')
-      .then((res) => ({ ...res, items: res.items.map(mapAdminStore) }));
-  },
-
-  approveStore(id: string): Promise<void> {
-    return apiClient.patch<void>(`/api/admin/stores/${id}/approve`);
-  },
-
-  rejectStore(id: string, body: RejectStoreRequest): Promise<void> {
-    return apiClient.patch<void>(`/api/admin/stores/${id}/reject`, body);
   },
 };
