@@ -39,7 +39,7 @@ export function OrderFilter({
       />
       <div className="min-w-[200px] flex-1">
         <Input
-          placeholder="상품명을 검색하세요"
+          placeholder="주문번호를 검색하세요"
           value={searchKeyword}
           onChange={(e) => onSearchChange(e.target.value)}
           startIcon={<Search className="h-4 w-4" />}
