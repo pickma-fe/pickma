@@ -16,17 +16,14 @@ interface ConsumerHeaderProps {
 export function ConsumerHeader({ slot }: ConsumerHeaderProps) {
   const router = useRouter();
   const { openAuthModal } = useAuthModal();
-  const signOutMutation = useSignOut();
+  const { mutateAsync: signOut, isPending: isSignOutPending } = useSignOut();
   const { data: user = null } = useMe();
 
-  const handleSignOut = () => {
-    signOutMutation.mutate(undefined, {
-      onSuccess: () => {
-        router.push('/');
-        router.refresh();
-      },
-    });
-  };
+  async function handleSignOut() {
+    await signOut();
+    router.push('/');
+    router.refresh();
+  }
 
   const guestMenuItems = [
     {
@@ -55,9 +52,9 @@ export function ConsumerHeader({ slot }: ConsumerHeaderProps) {
       href: '/mypage',
     },
     {
-      label: signOutMutation.isPending ? '로그아웃 중' : '로그아웃',
+      label: isSignOutPending ? '로그아웃 중' : '로그아웃',
       type: 'action' as const,
-      onClick: handleSignOut,
+      onClick: () => void handleSignOut(),
       className: 'text-red-500 hover:bg-red-50 data-focus:bg-red-50',
     },
   ];
