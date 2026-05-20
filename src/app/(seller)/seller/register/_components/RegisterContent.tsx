@@ -34,7 +34,9 @@ export function RegisterContent() {
     handleDocumentComplete,
   } = useSellerAuth();
 
-  const { storeState, storeInfo, handleStoreInfoComplete } = useStoreRegister();
+  const { storeState, storeInfo, handleStoreInfoComplete } = useStoreRegister(
+    businessInfo?.businessNumber ?? ''
+  );
 
   const handleCloseModal = () => {
     setActiveModal(null);
