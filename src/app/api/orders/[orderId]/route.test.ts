@@ -5,6 +5,7 @@ import { AppError } from '@/lib/errors/appError';
 import { ERROR_CODE } from '@/lib/errors/errorCodes';
 import { requireActiveUser } from '@/app/api/_lib/auth';
 import { isApiMockEnabled } from '@/app/api/_lib/mock';
+import { mockOrders } from '@/mocks/orders';
 
 import { GET } from './route';
 import { expireUserOrders, getOrder } from '../_lib/service';
@@ -22,7 +23,7 @@ vi.mock('../_lib/service', () => ({
   getOrder: vi.fn(),
 }));
 
-const VALID_UUID = 'f47ac10b-58cc-4372-a567-0e02b2c3d479';
+const VALID_UUID = mockOrders[0].id;
 const INVALID_ID = 'not-a-uuid';
 
 const mockServiceUser = {

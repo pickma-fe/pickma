@@ -1,6 +1,7 @@
 import type { NextRequest } from 'next/server';
 
 import { requireAdmin } from '@/app/api/_lib/auth';
+import { isApiMockEnabled } from '@/app/api/_lib/mock';
 import { routeError, success } from '@/app/api/_lib/response';
 import { validateBody } from '@/app/api/_lib/validation';
 
@@ -14,9 +15,12 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ): Promise<Response> {
+  const { id } = paramsIdSchema.parse(await params);
+
+  if (isApiMockEnabled()) return success(null);
+
   try {
     await requireAdmin();
-    const { id } = paramsIdSchema.parse(await params);
     const body = await validateBody(rejectSellerApplicationSchema, request);
     await rejectSellerApplication(id, body.reason);
     return success(null);

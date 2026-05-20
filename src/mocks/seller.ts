@@ -5,7 +5,10 @@ import type {
   OrderListResponse,
 } from '@/contracts/order';
 import type { ProductListItemResponse } from '@/contracts/product';
-import type { SellerApplicationResponse } from '@/contracts/seller-application';
+import type {
+  SellerApplicationResponse,
+  SellerOnboardingStatusResponse,
+} from '@/contracts/seller-application';
 
 import { mockOrderDetail, mockOrders } from './orders';
 import { mockProducts } from './products';
@@ -209,4 +212,10 @@ export const mockStoreRegisterCompleted: MockStoreStepState = {
   storeInfoSubmitted: true,
   reviewStatus: 'completed',
   storeStatus: 'approved',
+};
+
+export const mockSellerOnboardingStatus: SellerOnboardingStatusResponse = {
+  role: 'customer',
+  applicationStatus: 'pending',
+  hasStore: false,
 };
