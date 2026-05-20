@@ -22,6 +22,7 @@ interface PickupTimeChangeModalProps {
 export function PickupTimeChangeModal({
   isOpen,
   selectedPickupTime,
+  pickupDateTime,
   pickupStartTime,
   pickupEndTime,
   referenceNow,
@@ -39,7 +40,7 @@ export function PickupTimeChangeModal({
     ) &&
     !isPastPickupTimeSlot(
       selectedPickupTime.startAt,
-      pickupStartTime,
+      pickupDateTime,
       referenceNow
     )
       ? selectedPickupTime
@@ -47,19 +48,15 @@ export function PickupTimeChangeModal({
   const [draftPickupTime, setDraftPickupTime] = useState(
     initialDraftPickupTime
   );
-  const pickupDateLabel = formatPickupDateLabel(pickupStartTime, referenceNow);
+  const pickupDateLabel = formatPickupDateLabel(pickupDateTime, referenceNow);
   const hasValidPickupDate = pickupDateLabel !== null;
   const isDraftPickupTimePast =
     draftPickupTime !== null &&
-    isPastPickupTimeSlot(
-      draftPickupTime.startAt,
-      pickupStartTime,
-      referenceNow
-    );
+    isPastPickupTimeSlot(draftPickupTime.startAt, pickupDateTime, referenceNow);
   const hasAvailablePickupTime = pickupTimeOptions.some(
     (option) =>
       hasValidPickupDate &&
-      !isPastPickupTimeSlot(option.startAt, pickupStartTime, referenceNow)
+      !isPastPickupTimeSlot(option.startAt, pickupDateTime, referenceNow)
   );
   const handleSelectPickupTime = (pickupTime: PickupTimeOption) => {
     setDraftPickupTime(pickupTime);
@@ -116,7 +113,7 @@ export function PickupTimeChangeModal({
               const isSelected = option.startAt === draftPickupTime?.startAt;
               const isDisabled = isPastPickupTimeSlot(
                 option.startAt,
-                pickupStartTime,
+                pickupDateTime,
                 referenceNow
               );
 
