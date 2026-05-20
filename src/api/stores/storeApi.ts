@@ -1,5 +1,9 @@
 import type { MyStore } from '@/types/store';
-import type { CreateStoreRequest, StoreResponse } from '@/contracts/store';
+import type {
+  CreateStoreRequest,
+  StoreResponse,
+  UpdateStoreRequest,
+} from '@/contracts/store';
 
 import { ApiError, apiClient } from '../apiClient';
 import { mapMyStore } from './storeMapper';
@@ -7,6 +11,12 @@ import { mapMyStore } from './storeMapper';
 export const storeApi = {
   createStore(body: CreateStoreRequest): Promise<MyStore> {
     return apiClient.post<StoreResponse>('/api/stores', body).then(mapMyStore);
+  },
+
+  updateStore(body: UpdateStoreRequest): Promise<MyStore> {
+    return apiClient
+      .patch<StoreResponse>('/api/stores/me', body)
+      .then(mapMyStore);
   },
 
   async getMyStore(): Promise<MyStore | null> {

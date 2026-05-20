@@ -7,7 +7,7 @@ import { requireActiveUser } from '@/app/api/_lib/auth';
 import { isApiMockEnabled } from '@/app/api/_lib/mock';
 
 import { GET, PATCH } from './route';
-import { getMyStore } from '../_lib/service';
+import { getMyStore, updateMyStore } from '../_lib/service';
 
 vi.mock('@/app/api/_lib/mock', () => ({
   isApiMockEnabled: vi.fn(),
@@ -19,6 +19,7 @@ vi.mock('@/app/api/_lib/auth', () => ({
 
 vi.mock('../_lib/service', () => ({
   getMyStore: vi.fn(),
+  updateMyStore: vi.fn(),
 }));
 
 const mockServiceUser = {
@@ -90,10 +91,51 @@ describe('GET /api/stores/me', () => {
 });
 
 describe('PATCH /api/stores/me', () => {
-  it('NOT_IMPLEMENTED(501)을 반환한다', async () => {
-    const res = await PATCH();
-    expect(res.status).toBe(501);
-    const body = (await res.json()) as { error: { code: string } };
-    expect(body.error.code).toBe('NOT_IMPLEMENTED');
+  const makeRequest = (body: object) =>
+    new Request('http://localhost/api/stores/me', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    }) as unknown as Parameters<typeof PATCH>[0];
+
+  describe('mock 모드', () => {
+    it('업데이트된 가게 정보를 200으로 반환한다', async () => {
+      vi.mocked(isApiMockEnabled).mockReturnValue(true);
+      const res = await PATCH(makeRequest({ name: '수정된 가게' }));
+      expect(res.status).toBe(200);
+      const body = (await res.json()) as {
+        statusCode: number;
+        data: StoreResponse;
+      };
+      expect(body.statusCode).toBe(200);
+    });
+  });
+
+  describe('real 모드', () => {
+    beforeEach(() => {
+      vi.mocked(isApiMockEnabled).mockReturnValue(false);
+      vi.mocked(requireActiveUser).mockResolvedValue({
+        authUser: {} as Awaited<
+          ReturnType<typeof requireActiveUser>
+        >['authUser'],
+        serviceUser: mockServiceUser,
+      });
+    });
+
+    it('service가 가게를 반환하면 200을 반환한다', async () => {
+      vi.mocked(updateMyStore).mockResolvedValue({} as StoreResponse);
+      const res = await PATCH(makeRequest({ name: '수정된 가게' }));
+      expect(res.status).toBe(200);
+    });
+
+    it('STORE_NOT_FOUND throw 시 404를 반환한다', async () => {
+      vi.mocked(updateMyStore).mockRejectedValue(
+        new AppError(ERROR_CODE.STORE_NOT_FOUND, 404)
+      );
+      const res = await PATCH(makeRequest({ name: '수정된 가게' }));
+      expect(res.status).toBe(404);
+      const body = (await res.json()) as { error: { code: string } };
+      expect(body.error.code).toBe('STORE_NOT_FOUND');
+    });
   });
 });

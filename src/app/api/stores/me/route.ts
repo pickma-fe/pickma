@@ -1,10 +1,13 @@
-import { ERROR_CODE } from '@/lib/errors/errorCodes';
+import type { NextRequest } from 'next/server';
+
 import { requireActiveUser } from '@/app/api/_lib/auth';
 import { isApiMockEnabled } from '@/app/api/_lib/mock';
-import { fail, routeError, success } from '@/app/api/_lib/response';
+import { routeError, success } from '@/app/api/_lib/response';
+import { validateBody } from '@/app/api/_lib/validation';
 import { mockMyStore } from '@/mocks/stores';
 
-import { getMyStore } from '../_lib/service';
+import { updateStoreSchema } from '../_lib/schemas';
+import { getMyStore, updateMyStore } from '../_lib/service';
 
 export async function GET(): Promise<Response> {
   try {
@@ -19,6 +22,18 @@ export async function GET(): Promise<Response> {
   }
 }
 
-export async function PATCH(): Promise<Response> {
-  return fail(ERROR_CODE.NOT_IMPLEMENTED);
+export async function PATCH(request: NextRequest): Promise<Response> {
+  try {
+    const body = await validateBody(updateStoreSchema, request);
+
+    if (isApiMockEnabled()) {
+      return success({ ...mockMyStore, ...body });
+    }
+
+    const { serviceUser } = await requireActiveUser();
+    const store = await updateMyStore(serviceUser.id, serviceUser.role, body);
+    return success(store);
+  } catch (error) {
+    return routeError(error);
+  }
 }
