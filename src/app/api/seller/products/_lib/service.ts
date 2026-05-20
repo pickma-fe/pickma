@@ -134,6 +134,7 @@ export async function updateSellerProduct(
       ...(body.pickupEndTime !== undefined && {
         pickup_end_time: body.pickupEndTime,
       }),
+      ...(body.status !== undefined && { status: body.status }),
     })
     .eq('id', productId)
     .eq('store_id', storeId)

@@ -75,4 +75,5 @@ export interface UpdateSellerProductRequest {
   endAt?: string;
   pickupStartTime?: string;
   pickupEndTime?: string;
+  status?: 'active' | 'closed';
 }

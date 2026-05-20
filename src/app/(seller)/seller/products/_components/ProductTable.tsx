@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { useState } from 'react';
 
 import type { Product } from '@/types/product';
+import { useUpdateSellerProduct } from '@/hooks/seller/products/useUpdateSellerProduct';
 import { Badge } from '@/components/common/Badge/Badge';
 import { Dropdown } from '@/components/common/Dropdown/Dropdown';
 import { Pagination } from '@/components/common/Pagination/Pagination';
@@ -51,6 +52,7 @@ export function ProductTable({
   onPageChange,
 }: ProductTableProps) {
   const [pageSize, setPageSize] = useState(10);
+  const { mutate: updateProduct } = useUpdateSellerProduct();
 
   const totalPages = Math.ceil(products.length / pageSize);
   const startIndex = (currentPage - 1) * pageSize;
@@ -209,9 +211,13 @@ export function ProductTable({
                         { label: '판매중지', value: 'closed' },
                       ]}
                       value={product.status}
-                      onChange={() => undefined}
+                      onChange={(value) =>
+                        updateProduct({
+                          id: product.id,
+                          body: { status: value as 'active' | 'closed' },
+                        })
+                      }
                       placeholder="관리"
-                      disabled
                     />
                   </td>
                 </tr>
