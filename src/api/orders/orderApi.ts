@@ -37,4 +37,8 @@ export const orderApi = {
       .get<OrderDetailResponse>(`/api/orders/${id}`)
       .then(mapOrder);
   },
+
+  cancelOrder(id: string): Promise<void> {
+    return apiClient.patch<void>(`/api/orders/${id}/cancel`);
+  },
 };

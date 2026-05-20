@@ -12,4 +12,8 @@ export const userApi = {
   updateMe(data: UpdateMeRequest): Promise<User> {
     return apiClient.patch<UserResponse>('/api/users/me', data).then(mapUser);
   },
+
+  deleteMe(): Promise<void> {
+    return apiClient.delete<void>('/api/users/me').then(() => undefined);
+  },
 };
