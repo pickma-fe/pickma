@@ -2,7 +2,7 @@
 
 import { use } from 'react';
 
-import { useMenuStore } from '@/stores/menuStore';
+import { useSellerMenuItems } from '@/hooks/seller/menu-items/useSellerMenuItems';
 
 import { MenuForm } from '../../_components/MenuForm';
 
@@ -12,9 +12,17 @@ interface MenuEditPageProps {
 
 export default function MenuEditPage({ params }: MenuEditPageProps) {
   const { menuId } = use(params);
-  const { menus } = useMenuStore();
+  const { data: menuItems, isLoading } = useSellerMenuItems();
 
-  const menu = menus.find((m) => m.id === menuId);
+  if (isLoading) {
+    return (
+      <div className="flex min-h-80 items-center justify-center text-sm text-gray-500">
+        메뉴를 불러오는 중입니다.
+      </div>
+    );
+  }
+
+  const menu = (menuItems ?? []).find((m) => m.id === menuId);
 
   if (!menu) {
     return (

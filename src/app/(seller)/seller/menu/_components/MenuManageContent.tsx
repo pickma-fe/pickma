@@ -1,45 +1,52 @@
 'use client';
 
-import { Package, ShoppingBag, PackageX } from 'lucide-react';
+import { Package, PackageX, ShoppingBag } from 'lucide-react';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
-import { useMenuStore } from '@/stores/menuStore';
+import { useDeleteSellerMenuItem } from '@/hooks/seller/menu-items/useDeleteSellerMenuItem';
+import { useSellerMenuItems } from '@/hooks/seller/menu-items/useSellerMenuItems';
 import { Button } from '@/components/common/Button/Button';
 import { Section } from '@/components/common/Section/Section';
 
 import { MenuFilter } from './MenuFilter';
 import { MenuTable } from './MenuTable';
+import { ProductRegistrationModal } from './ProductRegistrationModal';
 
 export function MenuManageContent() {
-  const menus = useMenuStore((state) => state.menus);
-  const deleteMenu = useMenuStore((state) => state.deleteMenu);
-  const updateMenu = useMenuStore((state) => state.updateMenu);
+  const { data: menuItemsData, isLoading, isError } = useSellerMenuItems();
+  const menuItems = useMemo(() => menuItemsData ?? [], [menuItemsData]);
+  const { mutateAsync: deleteMenuItem } = useDeleteSellerMenuItem();
+
   const [selectedCategory, setSelectedCategory] = useState('전체');
   const [searchKeyword, setSearchKeyword] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showProductModal, setShowProductModal] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
 
-  const categories = ['전체', ...new Set(menus.map((menu) => menu.category))];
+  const categories = useMemo(
+    () => ['전체', ...new Set(menuItems.map((m) => m.categoryName))],
+    [menuItems]
+  );
 
-  const filteredMenus = menus.filter((menu) => {
-    const matchCategory =
-      selectedCategory === '전체' || menu.category === selectedCategory;
+  const filteredMenus = useMemo(
+    () =>
+      menuItems.filter((menu) => {
+        const matchCategory =
+          selectedCategory === '전체' || menu.categoryName === selectedCategory;
+        const matchSearch =
+          searchKeyword === '' ||
+          menu.name.toLowerCase().includes(searchKeyword.toLowerCase());
+        return matchCategory && matchSearch;
+      }),
+    [menuItems, selectedCategory, searchKeyword]
+  );
 
-    const matchSearch =
-      searchKeyword === '' ||
-      menu.name.toLowerCase().includes(searchKeyword.toLowerCase());
-
-    return matchCategory && matchSearch;
-  });
-
-  const totalCount = menus.length;
-  const activeCount = menus.filter((menu) => menu.status === 'active').length;
-  const inactiveCount = menus.filter(
-    (menu) => menu.status === 'inactive'
-  ).length;
+  const totalCount = menuItems.length;
+  const activeCount = menuItems.filter((m) => m.status === 'active').length;
+  const inactiveCount = menuItems.filter((m) => m.status === 'inactive').length;
 
   const showToast = (message: string) => {
     setToastMessage(message);
@@ -58,25 +65,40 @@ export function MenuManageContent() {
     setSelectedIds(new Set());
   };
 
-  const handleRegisterProducts = () => {
-    if (selectedIds.size === 0) return;
-    selectedIds.forEach((id) => updateMenu(id, { status: 'active' }));
-    showToast(`${selectedIds.size}개 메뉴를 판매 등록했습니다.`);
-    setSelectedIds(new Set());
-  };
-
   const handleDeleteSelected = () => {
     if (selectedIds.size === 0) return;
     setShowDeleteConfirm(true);
   };
 
-  const handleConfirmDelete = () => {
-    const count = selectedIds.size;
-    selectedIds.forEach((id) => deleteMenu(id));
-    setSelectedIds(new Set());
-    setShowDeleteConfirm(false);
-    showToast(`${count}개 메뉴를 삭제했습니다.`);
+  const handleConfirmDelete = async () => {
+    const ids = [...selectedIds];
+    const count = ids.length;
+    try {
+      await Promise.all(ids.map((id) => deleteMenuItem(id)));
+      setSelectedIds(new Set());
+      setShowDeleteConfirm(false);
+      showToast(`${count}개 메뉴를 삭제했습니다.`);
+    } catch {
+      showToast('삭제 중 오류가 발생했습니다.');
+      setShowDeleteConfirm(false);
+    }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-80 items-center justify-center text-sm text-gray-500">
+        메뉴를 불러오는 중입니다.
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="flex min-h-80 items-center justify-center text-sm text-red-500">
+        메뉴를 불러오지 못했습니다.
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -138,9 +160,14 @@ export function MenuManageContent() {
           onCategoryChange={handleCategoryChange}
           onSearchChange={handleSearchChange}
         />
-        <Link href="/seller/menu/new">
-          <Button>+ 메뉴 등록</Button>
-        </Link>
+        <div className="flex gap-2">
+          <Button onClick={() => setShowProductModal(true)}>판매 등록</Button>
+          <Link href="/seller/menu/new">
+            <Button variant="outline" color="gray">
+              + 메뉴 등록
+            </Button>
+          </Link>
+        </div>
       </div>
       <MenuTable
         menus={filteredMenus}
@@ -154,19 +181,16 @@ export function MenuManageContent() {
           <span className="text-sm text-gray-700">
             {selectedIds.size}개 선택됨
           </span>
-          <div className="flex gap-2">
-            <Button onClick={handleRegisterProducts}>판매 등록</Button>
-            <Button
-              variant="outline"
-              color="danger"
-              onClick={handleDeleteSelected}
-            >
-              삭제
-            </Button>
-          </div>
+          <Button
+            variant="outline"
+            color="danger"
+            onClick={handleDeleteSelected}
+          >
+            삭제
+          </Button>
         </div>
       )}
-      {/* 삭제 확인 모달 */}
+
       {showDeleteConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="w-full max-w-sm rounded-lg bg-white p-6 shadow-lg">
@@ -188,6 +212,10 @@ export function MenuManageContent() {
             </div>
           </div>
         </div>
+      )}
+
+      {showProductModal && (
+        <ProductRegistrationModal onClose={() => setShowProductModal(false)} />
       )}
 
       {toastMessage && (

@@ -1,1 +1,1 @@
-export * from './menuStore';
+export {};
