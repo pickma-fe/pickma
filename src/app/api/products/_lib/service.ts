@@ -2,14 +2,11 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 
 import type {
   ProductDetailResponse,
+  ProductDiscountOption,
   ProductListItemResponse,
   ProductListParams,
   ProductListResponse,
 } from '@/contracts/product';
-import {
-  normalizeDiscountOptionId,
-  type ProductDiscountOptionId,
-} from '@/lib/consumerProductFilters';
 import { AppError } from '@/lib/errors/appError';
 import { ERROR_CODE } from '@/lib/errors/errorCodes';
 import type { Database } from '@/lib/supabase/database';
@@ -112,9 +109,7 @@ export function buildProductListResponse(
   getRegion?: (product: ProductListItemResponse) => string | undefined
 ): ProductListResponse {
   const { page, pageSize, region, categoryId, keyword } = params;
-  const discountOption = normalizeDiscountOptionId(
-    params.discountOption ?? 'all'
-  );
+  const discountOption = params.discountOption ?? 'all';
   const from = (page - 1) * pageSize;
   const to = from + pageSize;
   const filteredProducts = products
@@ -150,7 +145,7 @@ function isAvailableProduct(product: ProductListItemResponse) {
 
 function matchesDiscountOption(
   product: ProductListItemResponse,
-  discountOption: ProductDiscountOptionId
+  discountOption: ProductDiscountOption
 ) {
   if (discountOption === 'all') {
     return true;
