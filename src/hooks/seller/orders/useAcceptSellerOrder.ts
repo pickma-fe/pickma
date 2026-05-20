@@ -9,11 +9,8 @@ export function useAcceptSellerOrder() {
 
   return useMutation<void, Error, string>({
     mutationFn: (id) => sellerOrderApi.acceptOrder(id),
-    onSuccess: (_, id) => {
+    onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['seller', 'orders'] });
-      void queryClient.invalidateQueries({
-        queryKey: ['seller', 'orders', 'detail', id],
-      });
     },
   });
 }

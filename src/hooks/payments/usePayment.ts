@@ -57,7 +57,9 @@ export function usePayment() {
               reject(new Error('payment_failed'));
               return;
             }
-            void queryClient.invalidateQueries({ queryKey: ['orders'] });
+            void queryClient.invalidateQueries({
+              queryKey: ['orders', 'list'],
+            });
             router.push(
               `/order/complete?orderNumber=${encodeURIComponent(msgOrderNumber)}`
             );
