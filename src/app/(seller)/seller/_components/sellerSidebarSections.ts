@@ -51,7 +51,7 @@ export const sellerSidebarSections: SidebarSection[] = [
     id: 'order',
     items: [
       {
-        id: 'orders',
+        id: 'order-list',
         label: '주문 관리',
         icon: ClipboardList,
         href: '/seller/orders',
