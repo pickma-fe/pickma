@@ -2,11 +2,12 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
-import { authApi } from '@/api/auth/authApi';
+import { useAuthSession } from '@/hooks/auth/useAuthSession';
+import { useUpdatePassword } from '@/hooks/auth/useUpdatePassword';
 import { Button, Input } from '@/components/common';
 
 const resetPasswordSchema = z
@@ -24,7 +25,8 @@ type ResetPasswordFields = z.infer<typeof resetPasswordSchema>;
 // TODO: 디자인 확정 후 reset password 화면 스타일 교체
 export default function ResetPasswordPage() {
   const router = useRouter();
-  const [isSessionReady, setIsSessionReady] = useState(false);
+  const { data: session, isLoading, isError } = useAuthSession();
+  const { mutateAsync: updatePassword } = useUpdatePassword();
   const {
     register,
     handleSubmit,
@@ -34,30 +36,26 @@ export default function ResetPasswordPage() {
     resolver: zodResolver(resetPasswordSchema),
   });
 
+  const isSessionReady = !isLoading && !isError && !!session;
+
+  useEffect(() => {
+    if (isError) {
+      setError('root', {
+        message: '비밀번호를 변경하지 못했습니다. 다시 시도해 주세요.',
+      });
+    }
+  }, [isError, setError]);
+
   useEffect(() => {
     const code = new URLSearchParams(window.location.search).get('code');
-
-    authApi
-      .getSession()
-      .then((session) => {
-        if (!session) {
-          throw new Error('Missing password recovery session');
-        }
-        if (code) {
-          window.history.replaceState(null, '', '/auth/reset-password');
-        }
-        setIsSessionReady(true);
-      })
-      .catch(() => {
-        setError('root', {
-          message: '비밀번호를 변경하지 못했습니다. 다시 시도해 주세요.',
-        });
-      });
-  }, [setError]);
+    if (isSessionReady && code) {
+      window.history.replaceState(null, '', '/auth/reset-password');
+    }
+  }, [isSessionReady]);
 
   async function onSubmit(data: ResetPasswordFields): Promise<void> {
     try {
-      await authApi.updatePassword({ password: data.password });
+      await updatePassword({ password: data.password });
       router.push('/');
     } catch {
       setError('root', {
