@@ -1,11 +1,7 @@
 'use client';
 
-import { notFound, useSearchParams } from 'next/navigation';
+import { notFound, useRouter, useSearchParams } from 'next/navigation';
 
-import {
-  createPickupTimeOptions,
-  type PickupTimeOption,
-} from '@/lib/formatPickupTime';
 import { useProduct } from '@/hooks/products/useProduct';
 import {
   OrderCheckoutPanel,
@@ -30,27 +26,10 @@ function parseOrderQuantity(value: string | null, availableStock: number) {
   return Math.min(rawQuantity, Math.max(availableStock, 1));
 }
 
-function createInitialPickupTime(
-  pickupStart: string | null,
-  pickupEnd: string | null,
-  productPickupStartTime: string,
-  productPickupEndTime: string
-): PickupTimeOption | undefined {
-  if (!pickupStart || !pickupEnd) {
-    return undefined;
-  }
-
-  return createPickupTimeOptions(
-    productPickupStartTime,
-    productPickupEndTime
-  ).find(
-    (option) => option.startAt === pickupStart && option.endAt === pickupEnd
-  );
-}
-
 export function OrderPageContent({ productId }: OrderPageContentProps) {
   const { data: product, isLoading, isError } = useProduct(productId);
   const searchParams = useSearchParams();
+  const router = useRouter();
 
   if (isLoading) {
     return (
@@ -68,12 +47,25 @@ export function OrderPageContent({ productId }: OrderPageContentProps) {
     searchParams.get('quantity'),
     product.availableStock
   );
-  const initialPickupTime = createInitialPickupTime(
-    searchParams.get('pickupStart'),
-    searchParams.get('pickupEnd'),
-    product.pickupStartTime,
-    product.pickupEndTime
-  );
+  const pickupAt =
+    searchParams.get('pickupAt') ??
+    [searchParams.get('pickupStart'), searchParams.get('pickupEnd')]
+      .filter(Boolean)
+      .join('-');
+
+  const handleQuantityChange = (newQuantity: number) => {
+    const clamped = Math.max(1, Math.min(product.availableStock, newQuantity));
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('quantity', String(clamped));
+    router.replace(`/order/${productId}?${params.toString()}`);
+  };
+
+  const handlePickupAtChange = (newPickupAt: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('pickupAt', newPickupAt);
+    router.replace(`/order/${productId}?${params.toString()}`);
+  };
+
   const productTotalPrice = product.discountPrice * quantity;
   const originalTotalPrice = product.originalPrice * quantity;
   const discountAmount = originalTotalPrice - productTotalPrice;
@@ -91,6 +83,7 @@ export function OrderPageContent({ productId }: OrderPageContentProps) {
           productTotalPrice={productTotalPrice}
           discountAmount={discountAmount}
           finalPaymentPrice={finalPaymentPrice}
+          onQuantityChange={handleQuantityChange}
         />
       </div>
 
@@ -99,7 +92,8 @@ export function OrderPageContent({ productId }: OrderPageContentProps) {
           product={product}
           quantity={quantity}
           finalPaymentPrice={finalPaymentPrice}
-          initialPickupTime={initialPickupTime}
+          pickupAt={pickupAt}
+          onPickupAtChange={handlePickupAtChange}
         />
       </aside>
     </div>

@@ -1,3 +1,5 @@
+'use client';
+
 import { Minus, Plus, ShieldCheck } from 'lucide-react';
 import Image from 'next/image';
 
@@ -10,6 +12,7 @@ interface OrderProductSummaryProps {
   productTotalPrice: number;
   discountAmount: number;
   finalPaymentPrice: number;
+  onQuantityChange: (quantity: number) => void;
 }
 
 const FALLBACK_PRODUCT_IMAGE = '/images/products/bread.jpg';
@@ -21,6 +24,7 @@ export function OrderProductSummary({
   productTotalPrice,
   discountAmount,
   finalPaymentPrice,
+  onQuantityChange,
 }: OrderProductSummaryProps) {
   return (
     <section className="rounded-lg border border-gray-200 bg-white p-8">
@@ -61,13 +65,13 @@ export function OrderProductSummary({
           </div>
         </div>
 
-        {/* TODO: 주문 생성 플로우에서 수량 상태와 금액 재계산 로직을 연결하면 활성화합니다. */}
         <div className="flex w-fit overflow-hidden rounded-md border border-gray-200">
           <button
             type="button"
             aria-label="수량 감소"
-            disabled
-            className="flex size-10 items-center justify-center text-gray-300 disabled:cursor-not-allowed"
+            disabled={quantity <= 1}
+            onClick={() => onQuantityChange(quantity - 1)}
+            className="flex size-10 items-center justify-center text-gray-600 disabled:cursor-not-allowed disabled:text-gray-300"
           >
             <Minus className="size-4" aria-hidden="true" />
           </button>
@@ -80,8 +84,9 @@ export function OrderProductSummary({
           <button
             type="button"
             aria-label="수량 증가"
-            disabled
-            className="flex size-10 items-center justify-center text-gray-300 disabled:cursor-not-allowed"
+            disabled={quantity >= product.availableStock}
+            onClick={() => onQuantityChange(quantity + 1)}
+            className="flex size-10 items-center justify-center text-gray-600 disabled:cursor-not-allowed disabled:text-gray-300"
           >
             <Plus className="size-4" aria-hidden="true" />
           </button>
