@@ -10,6 +10,12 @@ PICKMA는 영업 종료 전 남을 가능성이 있는 음식을 소비자가 �
 
 판매자는 폐기될 수 있는 재고를 판매로 전환하고, 소비자는 주변 매장의 마감 임박 상품을 합리적인 가격에 구매할 수 있습니다. 서비스의 핵심 목표는 단순 할인 판매가 아니라 **음식물 폐기 감소와 소상공인 재고 회전율 개선**을 함께 해결하는 것입니다.
 
+## 서비스 이미지
+
+<p align="center">
+  <img src="public/images/banners/readme-banner.png" alt="PICKMA 서비스 이미지" width="100%" />
+</p>
+
 ## PICKMA FE Developers
 
 <table>
@@ -53,6 +59,38 @@ PICKMA는 영업 종료 전 남을 가능성이 있는 음식을 소비자가 �
 | Payment             | Toss Payments SDK                                |
 | Test                | Vitest, Playwright, Storybook                    |
 | Quality             | ESLint, Prettier, Husky, lint-staged, Commitlint |
+
+## 설치 및 실행
+
+### 설치
+
+```bash
+npm install
+```
+
+### 환경 변수 설정
+
+```bash
+cp .env.example .env.local
+```
+
+`.env.local`에 Supabase, Toss Payments 등 로컬 실행에 필요한 값을 설정합니다.
+
+### 개발 서버 실행
+
+```bash
+npm run dev
+```
+
+[http://localhost:3000](http://localhost:3000)에서 확인할 수 있습니다.
+
+### 품질 확인
+
+```bash
+npm run lint
+npm run test
+npm run storybook
+```
 
 ## 시스템 구조
 
