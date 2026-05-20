@@ -16,7 +16,7 @@ export function useUpdateSellerProductStock() {
     mutationFn: ({ id, stock }) => sellerProductApi.updateStock(id, stock),
     onSuccess: () => {
       void queryClient.invalidateQueries({
-        queryKey: ['seller', 'products'],
+        queryKey: ['products', 'seller', 'list'],
       });
     },
   });
