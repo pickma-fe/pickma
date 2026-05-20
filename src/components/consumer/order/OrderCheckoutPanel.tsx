@@ -184,9 +184,6 @@ export function OrderCheckoutPanel({
           <p className="font-medium text-gray-900">
             결제하기 버튼을 눌러 결제를 진행합니다.
           </p>
-          <p className="mt-2 text-sm text-gray-500">
-            결제수단 선택 및 변경 기능은 추후 제공 예정입니다.
-          </p>
         </OrderInfoBlock>
 
         <div className="mt-8 border-t border-gray-200 pt-7">
