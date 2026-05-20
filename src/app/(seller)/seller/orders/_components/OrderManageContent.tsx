@@ -7,6 +7,7 @@ import {
   CheckCircle,
   XCircle,
   Package,
+  AlertCircle,
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -80,6 +81,13 @@ const STAT_CARDS: {
     icon: XCircle,
     bgColor: 'bg-red-100',
     iconColor: 'text-red-600',
+  },
+  {
+    label: '미수령',
+    value: 'no_show',
+    icon: AlertCircle,
+    bgColor: 'bg-gray-100',
+    iconColor: 'text-gray-600',
   },
 ];
 
