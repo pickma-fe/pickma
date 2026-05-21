@@ -11,7 +11,10 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 
-import type { SellerOrderListParams } from '@/contracts/order';
+import type {
+  OrderStatusParam,
+  SellerOrderListParams,
+} from '@/contracts/order';
 import { Section } from '@/components/common/Section/Section';
 import { mockOrders } from '@/mocks/orders';
 
@@ -22,16 +25,15 @@ type SellerOrderFilterStatus =
   | Exclude<SellerOrderListParams['status'], undefined>
   | '전체';
 
+type OrderActionStatus = Extract<
+  OrderStatusParam,
+  'accepted' | 'ready' | 'completed' | 'cancelled'
+>;
+
 const SELLER_BASE_STATUSES: Exclude<
   SellerOrderListParams['status'],
   undefined
 >[] = ['reserved', 'accepted', 'ready', 'completed', 'cancelled', 'no_show'];
-
-const baseOrders = mockOrders.filter((o) =>
-  SELLER_BASE_STATUSES.includes(
-    o.status as Exclude<SellerOrderListParams['status'], undefined>
-  )
-);
 
 const STAT_CARDS: {
   label: string;
@@ -92,17 +94,24 @@ const STAT_CARDS: {
 ];
 
 export function OrderManageContent() {
+  const [orders, setOrders] = useState(
+    mockOrders.filter((o) =>
+      SELLER_BASE_STATUSES.includes(
+        o.status as Exclude<SellerOrderListParams['status'], undefined>
+      )
+    )
+  );
   const [selectedStatus, setSelectedStatus] =
     useState<SellerOrderFilterStatus>('전체');
   const [searchKeyword, setSearchKeyword] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
 
   const getCount = (value: SellerOrderFilterStatus) => {
-    if (value === '전체') return baseOrders.length;
-    return baseOrders.filter((o) => o.status === value).length;
+    if (value === '전체') return orders.length;
+    return orders.filter((o) => o.status === value).length;
   };
 
-  const filteredOrders = baseOrders.filter((order) => {
+  const filteredOrders = orders.filter((order) => {
     const matchStatus =
       selectedStatus === '전체' || order.status === selectedStatus;
 
@@ -114,6 +123,15 @@ export function OrderManageContent() {
 
     return matchStatus && matchSearch;
   });
+
+  const handleOrderAction = (orderId: string, newStatus: OrderActionStatus) => {
+    setOrders((prev) =>
+      prev.map((order) =>
+        order.id === orderId ? { ...order, status: newStatus } : order
+      )
+    );
+    setCurrentPage(1);
+  };
 
   const handleStatusChange = (status: string) => {
     setSelectedStatus(status as SellerOrderFilterStatus);
@@ -188,6 +206,7 @@ export function OrderManageContent() {
         orders={filteredOrders}
         currentPage={currentPage}
         onPageChange={setCurrentPage}
+        onOrderAction={handleOrderAction}
       />
     </div>
   );

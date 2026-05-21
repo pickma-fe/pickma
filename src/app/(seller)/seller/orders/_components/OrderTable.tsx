@@ -2,16 +2,25 @@
 
 import { useState } from 'react';
 
-import type { OrderListItemResponse } from '@/contracts/order';
+import type {
+  OrderListItemResponse,
+  OrderStatusParam,
+} from '@/contracts/order';
 import { Badge } from '@/components/common/Badge/Badge';
 import { Button } from '@/components/common/Button/Button';
 import { Dropdown } from '@/components/common/Dropdown/Dropdown';
 import { Pagination } from '@/components/common/Pagination/Pagination';
 
+type OrderActionStatus = Extract<
+  OrderStatusParam,
+  'accepted' | 'ready' | 'completed' | 'cancelled'
+>;
+
 interface OrderTableProps {
   orders: OrderListItemResponse[];
   currentPage: number;
   onPageChange: (page: number) => void;
+  onOrderAction: (orderId: string, newStatus: OrderActionStatus) => void;
 }
 
 const PAGE_SIZE_OPTIONS = [
@@ -21,13 +30,20 @@ const PAGE_SIZE_OPTIONS = [
 ];
 
 const formatPrice = (price: number) => price.toLocaleString('ko-KR') + '원';
-const formatDate = (dateString: string) =>
-  new Date(dateString).toLocaleDateString('ko-KR');
-const formatTime = (dateString: string) =>
-  new Date(dateString).toLocaleTimeString('ko-KR', {
-    hour: '2-digit',
-    minute: '2-digit',
-  });
+
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString);
+  return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`;
+};
+
+const formatTime = (dateString: string) => {
+  const date = new Date(dateString);
+  const hours = date.getHours();
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const period = hours >= 12 ? '오후' : '오전';
+  const displayHours = String(hours % 12 || 12).padStart(2, '0');
+  return `${period} ${displayHours}:${minutes}`;
+};
 
 const STATUS_BADGE: Record<
   string,
@@ -50,16 +66,20 @@ const STATUS_DESCRIPTION: Record<string, string> = {
   no_show: '고객이 미수령하였습니다.',
 };
 
-function OrderActionButtons({ order }: { order: OrderListItemResponse }) {
+function OrderActionButtons({
+  order,
+  onOrderAction,
+}: {
+  order: OrderListItemResponse;
+  onOrderAction: (orderId: string, newStatus: OrderActionStatus) => void;
+}) {
   switch (order.status) {
     case 'reserved':
       return (
         <div className="flex w-fit flex-col gap-2">
           <Button
             className="w-fit px-2 py-0.5 text-sm"
-            onClick={() => {
-              // TODO: 주문 접수 API 연결
-            }}
+            onClick={() => onOrderAction(order.id, 'accepted')}
           >
             주문 접수
           </Button>
@@ -67,9 +87,7 @@ function OrderActionButtons({ order }: { order: OrderListItemResponse }) {
             className="w-fit px-2 py-0.5 text-sm"
             variant="outline"
             color="danger"
-            onClick={() => {
-              // TODO: 주문 취소 API 연결
-            }}
+            onClick={() => onOrderAction(order.id, 'cancelled')}
           >
             주문 취소
           </Button>
@@ -80,9 +98,7 @@ function OrderActionButtons({ order }: { order: OrderListItemResponse }) {
         <div className="flex w-fit flex-col gap-2">
           <Button
             className="w-fit px-2 py-0.5 text-sm"
-            onClick={() => {
-              // TODO: 준비 완료 API 연결
-            }}
+            onClick={() => onOrderAction(order.id, 'ready')}
           >
             준비 완료
           </Button>
@@ -90,9 +106,7 @@ function OrderActionButtons({ order }: { order: OrderListItemResponse }) {
             className="w-fit px-2 py-0.5 text-sm"
             variant="outline"
             color="danger"
-            onClick={() => {
-              // TODO: 주문 취소 API 연결
-            }}
+            onClick={() => onOrderAction(order.id, 'cancelled')}
           >
             주문 취소
           </Button>
@@ -102,9 +116,7 @@ function OrderActionButtons({ order }: { order: OrderListItemResponse }) {
       return (
         <Button
           className="w-fit px-2 py-0.5 text-sm"
-          onClick={() => {
-            // TODO: 픽업 완료 API 연결
-          }}
+          onClick={() => onOrderAction(order.id, 'completed')}
         >
           픽업 완료
         </Button>
@@ -122,6 +134,7 @@ export function OrderTable({
   orders,
   currentPage,
   onPageChange,
+  onOrderAction,
 }: OrderTableProps) {
   const [pageSize, setPageSize] = useState(10);
 
@@ -258,7 +271,10 @@ export function OrderTable({
                     </div>
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap">
-                    <OrderActionButtons order={order} />
+                    <OrderActionButtons
+                      order={order}
+                      onOrderAction={onOrderAction}
+                    />
                   </td>
                 </tr>
               );
