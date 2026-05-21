@@ -9,6 +9,10 @@ labels: refactor
 
 - 어떤 부분을 개선하는지
 
+## 🧭 Task 연결
+
+Task ID:
+
 ## 🎯 목적
 
 - 왜 리팩토링이 필요한지

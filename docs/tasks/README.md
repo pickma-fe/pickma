@@ -1,0 +1,75 @@
+# PickMa Task Board
+
+PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 계획, 리뷰, 체크포인트용 임시 공간이므로 팀원이 참고해야 하는 task 원본은 이 디렉터리에서 관리한다.
+
+## 사용 원칙
+
+- Task ID는 영구 ID로 사용하며 파일명이나 제목이 바뀌어도 ID는 재사용하지 않는다.
+- 개별 task의 상태는 `진행 전`, `진행 중`, `완료`, `변경됨` 중 하나만 사용한다.
+- GitHub Issue는 번호만 기록한다. 아직 없으면 `확인 필요`로 둔다.
+- 작업자는 보통 본인이 issue를 만들고 assignee로 지정한 뒤 task 문서의 `GitHub Issue`를 갱신한다.
+- `temp/`에 생성하는 task 관련 산출물은 task ID를 파일명 맨 앞에 둔다. 예: `temp/T02-plan.md`, `temp/T02-code-review.md`, `temp/T02-checkpoint.md`.
+- task 실행 전에는 개별 task 문서와 관련 architecture/docs를 함께 확인한다.
+- task 완료 전에는 관련 `docs/*` 최신화 필요 여부를 확인한다. 문서 수정이 필요하지만 해당 task 범위를 넘으면 후속 task 또는 `확인 필요`로 남긴다.
+
+## 우선순위
+
+| 우선순위 | 의미                           |
+| -------- | ------------------------------ |
+| P0       | 심화 프로젝트 전에 반드시 처리 |
+| P1       | 심화 프로젝트 초반 필수        |
+| P2       | 심화 프로젝트 중 진행          |
+| P3       | 이후 확장 단계 고려            |
+
+## Task Breakdown
+
+| ID  | Task                                              | 우선순위 | 상태    | GitHub Issue | 직접 선행 task     | 파일                                                                                                     |
+| --- | ------------------------------------------------- | -------- | ------- | ------------ | ------------------ | -------------------------------------------------------------------------------------------------------- |
+| T01 | 결제 confirm 보상 정책 확정                       | P0       | 진행 전 | 확인 필요    | 없음               | [T01_payment_confirm_compensation_policy.md](T01_payment_confirm_compensation_policy.md)                 |
+| T02 | 판매자 주문 관리 real API 연결                    | P0       | 진행 전 | 확인 필요    | 없음               | [T02_seller_orders_real_api.md](T02_seller_orders_real_api.md)                                           |
+| T03 | 관리자 판매자 승인 화면 구현                      | P0       | 진행 전 | 확인 필요    | 없음               | [T03_admin_seller_approval_page.md](T03_admin_seller_approval_page.md)                                   |
+| T04 | 관리자 가게 목록 real endpoint 및 화면 구현       | P0       | 진행 전 | 확인 필요    | T07                | [T04_admin_stores_real_endpoint_page.md](T04_admin_stores_real_endpoint_page.md)                         |
+| T05 | 상품 목록 할인율 필터/정렬 DB pagination 복구     | P0       | 진행 전 | 확인 필요    | T08                | [T05_product_discount_sort_db_pagination.md](T05_product_discount_sort_db_pagination.md)                 |
+| T06 | Storage orphan 및 개인정보 cleanup 정책 확정      | P0       | 진행 전 | 확인 필요    | 없음               | [T06_storage_orphan_privacy_cleanup_policy.md](T06_storage_orphan_privacy_cleanup_policy.md)             |
+| T07 | service role 사용 기준 및 owner scope 테스트 수립 | P0       | 진행 전 | 확인 필요    | 없음               | [T07_service_role_owner_scope_tests.md](T07_service_role_owner_scope_tests.md)                           |
+| T08 | incremental migration 전환 결정                   | P0       | 진행 전 | 확인 필요    | 없음               | [T08_incremental_migration_policy.md](T08_incremental_migration_policy.md)                               |
+| T09 | 501 API 및 UI 노출 목록 정리                      | P0       | 진행 전 | 확인 필요    | 없음               | [T09_api_501_ui_exposure_inventory.md](T09_api_501_ui_exposure_inventory.md)                             |
+| T10 | 판매자 운영 상태 정책 및 구현                     | P1       | 진행 전 | 확인 필요    | T08                | [T10_seller_operation_status.md](T10_seller_operation_status.md)                                         |
+| T11 | 결제 outbox/webhook/idempotency 설계              | P1       | 진행 전 | 확인 필요    | T01                | [T11_payment_outbox_webhook_idempotency.md](T11_payment_outbox_webhook_idempotency.md)                   |
+| T12 | 공개 상품 목록 Server Component 초기 데이터 전환  | P1       | 진행 전 | 확인 필요    | T05                | [T12_public_product_list_server_initial_data.md](T12_public_product_list_server_initial_data.md)         |
+| T13 | 상품 상세 Server Component 초기 데이터 전환       | P1       | 진행 전 | 확인 필요    | 없음               | [T13_product_detail_server_initial_data.md](T13_product_detail_server_initial_data.md)                   |
+| T14 | seller/admin role-aware route guard 개선          | P1       | 진행 전 | 확인 필요    | T07                | [T14_role_aware_route_guard.md](T14_role_aware_route_guard.md)                                           |
+| T15 | TanStack Query key 및 invalidation factory 도입   | P1       | 진행 전 | 확인 필요    | T02                | [T15_tanstack_query_key_invalidation_factory.md](T15_tanstack_query_key_invalidation_factory.md)         |
+| T16 | upload URL purpose별 권한 정책 강화               | P1       | 진행 전 | 확인 필요    | T07                | [T16_upload_url_purpose_permission_policy.md](T16_upload_url_purpose_permission_policy.md)               |
+| T17 | dev-test route 제거 또는 dev-only guard           | P1       | 진행 전 | 확인 필요    | 없음               | [T17_dev_test_route_guard.md](T17_dev_test_route_guard.md)                                               |
+| T18 | mock import 금지 기준 정리                        | P1       | 진행 전 | 확인 필요    | T02                | [T18_mock_import_policy.md](T18_mock_import_policy.md)                                                   |
+| T19 | 문서 baseline 정합성 및 지속 갱신 규칙 정리       | P0       | 진행 전 | 확인 필요    | 없음               | [T19_documentation_consistency_update.md](T19_documentation_consistency_update.md)                       |
+| T20 | Route Handler `_lib` 횡단 import 정리             | P1       | 진행 전 | 확인 필요    | 없음               | [T20_route_handler_lib_import_cleanup.md](T20_route_handler_lib_import_cleanup.md)                       |
+| T21 | 지도 기반 조회 및 거리순 정렬                     | P2       | 진행 전 | 확인 필요    | T08, T05           | [T21_map_based_search_distance_sort.md](T21_map_based_search_distance_sort.md)                           |
+| T22 | 실시간 알림 기반 설계 및 1차 구현                 | P2       | 진행 전 | 확인 필요    | T01, T11           | [T22_realtime_notification_foundation.md](T22_realtime_notification_foundation.md)                       |
+| T23 | E2E 테스트 및 결제 팝업 모킹 전략                 | P2       | 진행 전 | 확인 필요    | T02, T03, T04, T01 | [T23_e2e_payment_popup_mocking_strategy.md](T23_e2e_payment_popup_mocking_strategy.md)                   |
+| T24 | CI 기본 파이프라인 구축                           | P1       | 진행 전 | 확인 필요    | 없음               | [T24_ci_lint_test_pipeline.md](T24_ci_lint_test_pipeline.md)                                             |
+| T25 | hook input Domain/UI 타입 분리                    | P2       | 진행 전 | 확인 필요    | T15                | [T25_hook_input_domain_ui_type_split.md](T25_hook_input_domain_ui_type_split.md)                         |
+| T26 | 운영 화면 summary/list API 분리                   | P2       | 진행 전 | 확인 필요    | T04                | [T26_admin_seller_summary_list_api_split.md](T26_admin_seller_summary_list_api_split.md)                 |
+| T27 | Auth 이메일/Supabase SMTP/rate limit 정책 정리    | P0       | 진행 전 | 확인 필요    | 없음               | [T27_auth_email_smtp_rate_limit_policy.md](T27_auth_email_smtp_rate_limit_policy.md)                     |
+| T28 | 판매자 상품 수정 진입점 결정 및 구현              | P2       | 진행 전 | 확인 필요    | T02                | [T28_seller_product_edit_entrypoint.md](T28_seller_product_edit_entrypoint.md)                           |
+| T29 | 판매자 제출 문서 확인 UX 개선                     | P2       | 진행 전 | 확인 필요    | T06                | [T29_seller_document_review_ux.md](T29_seller_document_review_ux.md)                                     |
+| T30 | AI 추천 1차 설계                                  | P2       | 진행 전 | 확인 필요    | T25, T05           | [T30_ai_recommendation_first_design.md](T30_ai_recommendation_first_design.md)                           |
+| T31 | 주문 취소/환불 API 구현                           | P3       | 진행 전 | 확인 필요    | T01, T11           | [T31_order_cancel_refund_api.md](T31_order_cancel_refund_api.md)                                         |
+| T32 | 정산/수수료 시스템 설계                           | P3       | 진행 전 | 확인 필요    | T01, T31           | [T32_settlement_fee_system_design.md](T32_settlement_fee_system_design.md)                               |
+| T33 | 네이티브 앱 결제 방식 재검토                      | P3       | 진행 전 | 확인 필요    | T01                | [T33_native_app_payment_review.md](T33_native_app_payment_review.md)                                     |
+| T34 | 리뷰/평점 도메인 설계                             | P3       | 진행 전 | 확인 필요    | 없음               | [T34_review_rating_domain_design.md](T34_review_rating_domain_design.md)                                 |
+| T35 | AppError 객체 인수 리팩터링                       | P3       | 진행 전 | 확인 필요    | 없음               | [T35_apperror_object_argument_refactor.md](T35_apperror_object_argument_refactor.md)                     |
+| T36 | 판매자 신청 서류 수정/재업로드 정책               | P3       | 진행 전 | 확인 필요    | T06                | [T36_seller_application_document_reupload_policy.md](T36_seller_application_document_reupload_policy.md) |
+| T37 | 운영 CS/모니터링/관리자 권한 정책 정리            | P3       | 진행 전 | 확인 필요    | T01, T06           | [T37_ops_cs_monitoring_admin_permission_policy.md](T37_ops_cs_monitoring_admin_permission_policy.md)     |
+| T38 | 판매자 랜딩/온보딩 CTA 정리                       | P2       | 진행 전 | 확인 필요    | T10                | [T38_seller_landing_onboarding_cta.md](T38_seller_landing_onboarding_cta.md)                             |
+| T39 | public 이미지 자산 구조 및 Footer badge 크기 정리 | P1       | 진행 전 | 확인 필요    | T18                | [T39_public_image_asset_footer_badge_cleanup.md](T39_public_image_asset_footer_badge_cleanup.md)         |
+
+## 추천 진행 흐름
+
+1. 운영 정책과 기준 문서 확정: T01, T06, T07, T08, T19, T27
+2. 운영 차단 요소 제거: T09, T02, T03, T04, T05
+3. 기본 개발 하네스와 자산 정리: T24, T17, T20, T39
+4. 심화 초반 구조 안정화: T10, T11, T12, T13, T14, T15, T16, T18
+5. 심화 기능 구현: T21, T22, T23, T25, T26, T28, T29, T30, T38
+6. 확장 단계 검토: T31, T32, T33, T34, T35, T36, T37
