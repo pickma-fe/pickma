@@ -1,4 +1,8 @@
-import type { StoreResponse, CreateStoreRequest } from '@/contracts/store';
+import type {
+  StoreResponse,
+  CreateStoreRequest,
+  UpdateStoreRequest,
+} from '@/contracts/store';
 import type { UserResponse } from '@/contracts/user';
 import { AppError } from '@/lib/errors/appError';
 import { ERROR_CODE } from '@/lib/errors/errorCodes';
@@ -50,6 +54,43 @@ export async function createStore(
   if (!row) throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
 
   return mapStoreRow(row, true);
+}
+
+export async function updateMyStore(
+  userId: string,
+  userRole: UserResponse['role'],
+  body: UpdateStoreRequest
+): Promise<StoreResponse> {
+  const supabase = await createServerClient();
+
+  const { data: row, error } = await supabase
+    .from('stores')
+    .update({
+      ...(body.name !== undefined && { name: body.name }),
+      ...(body.description !== undefined && { description: body.description }),
+      ...(body.phone !== undefined && { phone: body.phone }),
+      ...(body.address !== undefined && { address: body.address }),
+      ...(body.addressDetail !== undefined && {
+        address_detail: body.addressDetail,
+      }),
+      ...(body.region !== undefined && { region: body.region }),
+      ...(body.image !== undefined && { image: body.image }),
+      ...(body.openTime !== undefined && {
+        open_time: body.openTime.slice(0, 8),
+      }),
+      ...(body.closeTime !== undefined && {
+        close_time: body.closeTime.slice(0, 8),
+      }),
+    })
+    .eq('user_id', userId)
+    .select('*')
+    .single();
+
+  if (error) throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
+  if (!row) throw new AppError(ERROR_CODE.STORE_NOT_FOUND, 404);
+
+  const canSell = userRole === 'seller' && row.status === 'approved';
+  return mapStoreRow(row, canSell);
 }
 
 export async function getMyStore(

@@ -35,4 +35,10 @@ export const sellerProductApi = {
       .delete<null>(`/api/seller/products/${id}`)
       .then(() => undefined);
   },
+
+  updateStock(id: string, stock: number): Promise<void> {
+    return apiClient
+      .patch<void>(`/api/seller/products/${id}/stock`, { stock })
+      .then(() => undefined);
+  },
 };

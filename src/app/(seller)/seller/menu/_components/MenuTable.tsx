@@ -4,14 +4,14 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
 
+import type { MenuItem } from '@/types/menu-item';
 import { Badge } from '@/components/common/Badge/Badge';
 import { Button } from '@/components/common/Button/Button';
 import { Dropdown } from '@/components/common/Dropdown/Dropdown';
 import { Pagination } from '@/components/common/Pagination/Pagination';
-import type { MenuItemResponse } from '@/mocks/menus';
 
 interface MenuTableProps {
-  menus: MenuItemResponse[];
+  menus: MenuItem[];
   currentPage: number;
   onPageChange: (page: number) => void;
   selectedIds: Set<string>;
@@ -24,13 +24,8 @@ const PAGE_SIZE_OPTIONS = [
   { label: '20개씩 보기', value: '20' },
 ];
 
-const formatPrice = (price: number) => {
-  return price.toLocaleString('ko-KR') + '원';
-};
-
-const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString('ko-KR');
-};
+const formatPrice = (price: number) => price.toLocaleString('ko-KR') + '원';
+const formatDate = (date: Date) => date.toLocaleDateString('ko-KR');
 
 export function MenuTable({
   menus,
@@ -155,7 +150,7 @@ export function MenuTable({
                       onChange={() => handleSelectOne(menu.id)}
                       className="text-primary-600 focus:ring-primary-500 h-4 w-4 rounded border-gray-300"
                     />
-                    <div className="relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100">
+                    <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-gray-100">
                       {menu.image ? (
                         <Image
                           src={menu.image}
@@ -184,11 +179,11 @@ export function MenuTable({
                 </td>
                 <td className="px-4 py-4 whitespace-nowrap">
                   <Badge variant="soft" color="gray">
-                    {menu.category}
+                    {menu.categoryName}
                   </Badge>
                 </td>
                 <td className="px-4 py-4 text-sm font-medium whitespace-nowrap text-gray-900">
-                  {formatPrice(menu.price)}
+                  {formatPrice(menu.originalPrice)}
                 </td>
                 <td className="px-4 py-4 text-sm whitespace-nowrap text-gray-500">
                   {formatDate(menu.updatedAt)}

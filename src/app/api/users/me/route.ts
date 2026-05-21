@@ -1,8 +1,9 @@
 import type { NextRequest } from 'next/server';
 
+import { ERROR_CODE } from '@/lib/errors/errorCodes';
 import { requireActiveUser } from '@/app/api/_lib/auth';
 import { isApiMockEnabled } from '@/app/api/_lib/mock';
-import { routeError, success } from '@/app/api/_lib/response';
+import { fail, routeError, success } from '@/app/api/_lib/response';
 import { validateBody } from '@/app/api/_lib/validation';
 import { mockAdminUser, mockUser } from '@/mocks/users';
 
@@ -23,6 +24,17 @@ export async function GET(request: NextRequest): Promise<Response> {
   try {
     const { serviceUser } = await requireActiveUser();
     return success(serviceUser);
+  } catch (e) {
+    return routeError(e);
+  }
+}
+
+export async function DELETE(): Promise<Response> {
+  if (isApiMockEnabled()) return success(null);
+
+  try {
+    await requireActiveUser();
+    return fail(ERROR_CODE.NOT_IMPLEMENTED);
   } catch (e) {
     return routeError(e);
   }

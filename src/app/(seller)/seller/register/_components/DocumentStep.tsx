@@ -10,6 +10,8 @@ interface DocumentStepProps {
   onSubmit: (files: Record<string, File | null>) => void;
   savedFiles?: Record<string, File | null> | null;
   isViewMode?: boolean;
+  isPending?: boolean;
+  errorMessage?: string;
 }
 
 const DOCUMENTS = [
@@ -65,6 +67,8 @@ export function DocumentStep({
   onSubmit,
   savedFiles,
   isViewMode = false,
+  isPending = false,
+  errorMessage,
 }: DocumentStepProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [files, setFiles] = useState<Record<string, File | null>>(
@@ -286,14 +290,20 @@ export function DocumentStep({
         </ul>
       </div>
 
+      {errorMessage && (
+        <p role="alert" className="text-sm text-red-500">
+          {errorMessage}
+        </p>
+      )}
+
       <div className="flex justify-end gap-2">
         {isEditing && (
           <Button variant="outline" color="gray" onClick={handleCancel}>
             취소
           </Button>
         )}
-        <Button onClick={handleSubmit} disabled={!isAllUploaded}>
-          서류 제출하기
+        <Button onClick={handleSubmit} disabled={!isAllUploaded || isPending}>
+          {isPending ? '제출 중...' : '서류 제출하기'}
         </Button>
       </div>
     </div>

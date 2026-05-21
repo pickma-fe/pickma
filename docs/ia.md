@@ -36,8 +36,10 @@
 | 📝 판매자 신청 | -         | `/seller/register`           | 사업자 정보 + 서류 제출     | 로그인      |
 | ⏳ 심사 대기   | -         | `/seller/pending`            | 판매자 심사 상태 확인       | 신청자      |
 | 📊 대시보드    | -         | `/seller/dashboard`          | 오늘의 주문 현황            | 판매자+가게 |
+| 🍽️ 메뉴 관리   | -         | `/seller/menu`               | 메뉴 목록, 판매 등록        | 판매자+가게 |
+|                | 메뉴 등록 | `/seller/menu/new`           | 새 메뉴 등록                | 판매자+가게 |
+|                | 메뉴 수정 | `/seller/menu/[menuId]/edit` | 메뉴 정보 수정              | 판매자+가게 |
 | 📦 상품 관리   | -         | `/seller/products`           | 상품 목록                   | 판매자+가게 |
-|                | 상품 등록 | `/seller/products/new`       | 새 상품 등록                | 판매자+가게 |
 |                | 상품 수정 | `/seller/products/[id]/edit` | 상품 정보 수정              | 판매자+가게 |
 | 📋 주문 관리   | -         | `/seller/orders`             | 주문 목록                   | 판매자+가게 |
 |                | 주문 상세 | `/seller/orders/[id]`        | 주문 상세, 픽업 처리        | 판매자+가게 |
@@ -80,12 +82,12 @@
 ## 3.3 판매자 - 상품 등록 플로우
 
 ```
-[대시보드] → [상품 관리] → [상품 등록] → [등록 완료]
+[대시보드] → [메뉴 관리] → [판매 등록 모달] → [등록 완료]
 │
-├── 상품명
-├── 원가 / 할인가
+├── 메뉴 선택
+├── 판매가
 ├── 수량
-├── 마감 시간
+├── 판매 마감 일시
 └── 픽업 시간대
 ```
 
@@ -162,8 +164,10 @@
 /seller/register ............. 판매자 신청
 /seller/pending .............. 심사 대기
 /seller/dashboard ............ 대시보드
+/seller/menu ................. 메뉴 목록, 판매 등록
+/seller/menu/new ............. 메뉴 등록
+/seller/menu/[menuId]/edit ... 메뉴 수정
 /seller/products ............. 상품 목록
-/seller/products/new ......... 상품 등록
 /seller/products/[id]/edit ... 상품 수정
 /seller/orders ............... 주문 목록
 /seller/orders/[id] .......... 주문 상세
@@ -303,9 +307,15 @@ flowchart TB
           subgraph S_DASHBOARD["📊 판매자 대시보드 (가게 등록 후)"]
               S_DASH["대시보드 메인"]
 
+              subgraph S_MENU["🍽️ 메뉴 관리"]
+                  S_MENU_LIST["메뉴 목록"]
+                  S_MENU_ADD["메뉴 등록"]
+                  S_MENU_EDIT["메뉴 수정"]
+                  S_PRODUCT_REGISTER["판매 등록 모달"]
+              end
+
               subgraph S_PRODUCT["📦 상품 관리"]
                   S_PROD_LIST["상품 목록"]
-                  S_PROD_ADD["상품 등록"]
                   S_PROD_EDIT["상품 수정"]
               end
 

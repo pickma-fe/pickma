@@ -137,7 +137,7 @@ describe('usePayment', () => {
 
     await expect(promise).resolves.toEqual({ orderNumber: 'PM2026TEST' });
     expect(mockInvalidateQueries).toHaveBeenCalledWith({
-      queryKey: ['orders'],
+      queryKey: ['orders', 'list'],
     });
     expect(mockRouterPush).toHaveBeenCalledWith(
       '/order/complete?orderNumber=PM2026TEST'

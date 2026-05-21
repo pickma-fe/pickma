@@ -89,9 +89,9 @@ describe('useSellerOrder', () => {
     vi.clearAllMocks();
   });
 
-  it('id가 없으면 queryFn을 실행하지 않는다', () => {
+  it('id가 빈 문자열이면 queryFn을 실행하지 않는다', () => {
     const { wrapper } = createWrapper();
-    const { result } = renderHook(() => useSellerOrder(undefined), { wrapper });
+    const { result } = renderHook(() => useSellerOrder(''), { wrapper });
 
     expect(result.current.fetchStatus).toBe('idle');
     expect(sellerOrderApi.getOrder).not.toHaveBeenCalled();
@@ -121,7 +121,7 @@ describe('useAcceptSellerOrder', () => {
     vi.clearAllMocks();
   });
 
-  it('성공 시 seller orders 목록과 detail queryKey를 invalidate한다', async () => {
+  it('성공 시 seller orders prefix queryKey를 invalidate한다', async () => {
     vi.mocked(sellerOrderApi.acceptOrder).mockResolvedValue(undefined);
 
     const { queryClient, wrapper } = createWrapper();
@@ -133,11 +133,9 @@ describe('useAcceptSellerOrder', () => {
     });
 
     expect(sellerOrderApi.acceptOrder).toHaveBeenCalledWith(ORDER_ID);
+    expect(invalidateSpy).toHaveBeenCalledTimes(1);
     expect(invalidateSpy).toHaveBeenCalledWith({
       queryKey: ['seller', 'orders'],
-    });
-    expect(invalidateSpy).toHaveBeenCalledWith({
-      queryKey: ['seller', 'orders', 'detail', ORDER_ID],
     });
   });
 });
@@ -147,7 +145,7 @@ describe('useMarkSellerOrderReady', () => {
     vi.clearAllMocks();
   });
 
-  it('성공 시 seller orders 목록과 detail queryKey를 invalidate한다', async () => {
+  it('성공 시 seller orders prefix queryKey를 invalidate한다', async () => {
     vi.mocked(sellerOrderApi.markOrderReady).mockResolvedValue(undefined);
 
     const { queryClient, wrapper } = createWrapper();
@@ -159,11 +157,9 @@ describe('useMarkSellerOrderReady', () => {
     });
 
     expect(sellerOrderApi.markOrderReady).toHaveBeenCalledWith(ORDER_ID);
+    expect(invalidateSpy).toHaveBeenCalledTimes(1);
     expect(invalidateSpy).toHaveBeenCalledWith({
       queryKey: ['seller', 'orders'],
-    });
-    expect(invalidateSpy).toHaveBeenCalledWith({
-      queryKey: ['seller', 'orders', 'detail', ORDER_ID],
     });
   });
 });
@@ -173,7 +169,7 @@ describe('useCompleteSellerOrder', () => {
     vi.clearAllMocks();
   });
 
-  it('성공 시 seller orders 목록과 detail queryKey를 invalidate한다', async () => {
+  it('성공 시 seller orders prefix queryKey를 invalidate한다', async () => {
     vi.mocked(sellerOrderApi.completeOrder).mockResolvedValue(undefined);
 
     const { queryClient, wrapper } = createWrapper();
@@ -185,11 +181,9 @@ describe('useCompleteSellerOrder', () => {
     });
 
     expect(sellerOrderApi.completeOrder).toHaveBeenCalledWith(ORDER_ID);
+    expect(invalidateSpy).toHaveBeenCalledTimes(1);
     expect(invalidateSpy).toHaveBeenCalledWith({
       queryKey: ['seller', 'orders'],
-    });
-    expect(invalidateSpy).toHaveBeenCalledWith({
-      queryKey: ['seller', 'orders', 'detail', ORDER_ID],
     });
   });
 });

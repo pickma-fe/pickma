@@ -2,6 +2,15 @@ import type { Store } from './store';
 
 export type ProductStatus = 'active' | 'closed';
 
+export interface CreateSellerProductInput {
+  menuItemId: string;
+  discountPrice: number;
+  stock: number;
+  endAt: Date;
+  pickupStartTime: string;
+  pickupEndTime: string;
+}
+
 export type ProductDisplayStatus =
   | 'available'
   | 'soldOut'

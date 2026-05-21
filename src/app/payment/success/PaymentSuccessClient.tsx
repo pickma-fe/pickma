@@ -3,10 +3,11 @@
 import { useSearchParams } from 'next/navigation';
 import { useEffect } from 'react';
 
-import { paymentApi } from '@/api/payments/paymentApi';
+import { useConfirmPayment } from '@/hooks/payments/useConfirmPayment';
 
 export function PaymentSuccessClient() {
   const searchParams = useSearchParams();
+  const { mutateAsync } = useConfirmPayment();
 
   useEffect(() => {
     const paymentKey = searchParams.get('paymentKey');
@@ -25,12 +26,7 @@ export function PaymentSuccessClient() {
       return;
     }
 
-    paymentApi
-      .confirmPayment({
-        paymentKey,
-        orderNumber: orderId,
-        amount: parsedAmount,
-      })
+    mutateAsync({ paymentKey, orderNumber: orderId, amount: parsedAmount })
       .then(() => {
         window.opener?.postMessage(
           { success: true, orderNumber: orderId },
@@ -43,7 +39,7 @@ export function PaymentSuccessClient() {
       .finally(() => {
         window.close();
       });
-  }, [searchParams]);
+  }, [searchParams, mutateAsync]);
 
   return null;
 }

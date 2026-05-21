@@ -1,3 +1,15 @@
+export interface UpdateStoreRequest {
+  name?: string;
+  description?: string;
+  phone?: string;
+  address?: string;
+  addressDetail?: string;
+  region?: string;
+  image?: string;
+  openTime?: string;
+  closeTime?: string;
+}
+
 export interface CreateStoreRequest {
   name: string;
   description?: string;

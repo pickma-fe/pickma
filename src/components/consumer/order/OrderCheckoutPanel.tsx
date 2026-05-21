@@ -105,6 +105,7 @@ export function OrderCheckoutPanel({
   );
   const [validationErrorMessage, setValidationErrorMessage] = useState('');
   const [isPickupTimeModalOpen, setIsPickupTimeModalOpen] = useState(false);
+
   const handleOpenPickupTimeModal = () => {
     setReferenceNow(new Date());
     setIsPickupTimeModalOpen(true);

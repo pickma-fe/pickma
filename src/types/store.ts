@@ -1,5 +1,17 @@
 export type StoreStatus = 'approved' | 'inactive';
 
+export interface UpdateStoreInput {
+  name?: string;
+  description?: string;
+  phone?: string;
+  address?: string;
+  addressDetail?: string;
+  region?: string;
+  image?: string;
+  openTime?: string;
+  closeTime?: string;
+}
+
 export interface CreateStoreInput {
   name: string;
   description?: string;

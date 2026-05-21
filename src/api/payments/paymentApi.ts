@@ -16,4 +16,10 @@ export const paymentApi = {
   confirmPayment(body: ConfirmPaymentRequest): Promise<void> {
     return apiClient.post<void>('/api/payments/confirm', body);
   },
+
+  cancelPayment(paymentId: string): Promise<void> {
+    return apiClient
+      .post<void>(`/api/payments/${paymentId}/cancel`)
+      .then(() => undefined);
+  },
 };

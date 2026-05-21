@@ -8,23 +8,25 @@ import { useState } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod';
 
-import { useMenuStore } from '@/stores/menuStore';
+import type { MenuItem } from '@/types/menu-item';
+import { useCategories } from '@/hooks/categories/useCategories';
+import { useCreateSellerMenuItem } from '@/hooks/seller/menu-items/useCreateSellerMenuItem';
+import { useUpdateSellerMenuItem } from '@/hooks/seller/menu-items/useUpdateSellerMenuItem';
 import { Button } from '@/components/common/Button/Button';
 import { Dropdown } from '@/components/common/Dropdown/Dropdown';
 import { Input } from '@/components/common/Input/Input';
 import { Section } from '@/components/common/Section/Section';
-import type { MenuItemResponse } from '@/mocks/menus';
 
 interface MenuFormProps {
-  initialData?: MenuItemResponse;
+  initialData?: MenuItem;
   isEdit?: boolean;
 }
 
 const menuFormSchema = z.object({
+  categoryId: z.string().min(1, '카테고리를 선택해주세요.'),
   name: z.string().trim().min(1, '메뉴명을 입력해주세요.'),
-  category: z.string().trim().min(1, '카테고리를 선택해주세요.'),
   description: z.string().optional(),
-  price: z
+  originalPrice: z
     .string()
     .min(1, '가격을 입력해주세요.')
     .refine(
@@ -33,31 +35,26 @@ const menuFormSchema = z.object({
     )
     .refine((value) => Number(value) >= 1, '가격을 입력해주세요.'),
   image: z.string().optional(),
-  origin: z.string().optional(),
-  allergyInfo: z.string().optional(),
-  tags: z.array(z.string()),
 });
 
 type MenuFormData = z.infer<typeof menuFormSchema>;
-
-const CATEGORY_OPTIONS = [
-  { label: '카테고리를 선택해주세요', value: '' },
-  { label: '샌드위치', value: '샌드위치' },
-  { label: '샐러드', value: '샐러드' },
-  { label: '음료', value: '음료' },
-  { label: '디저트', value: '디저트' },
-  { label: '스프', value: '스프' },
-];
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
 export function MenuForm({ initialData, isEdit = false }: MenuFormProps) {
   const router = useRouter();
-  const addMenu = useMenuStore((state) => state.addMenu);
-  const updateMenu = useMenuStore((state) => state.updateMenu);
+  const { data: categoriesData } = useCategories();
+  const { mutate: createMenuItem, isPending: isCreating } =
+    useCreateSellerMenuItem();
+  const { mutate: updateMenuItem, isPending: isUpdating } =
+    useUpdateSellerMenuItem();
 
-  const [tagInput, setTagInput] = useState('');
   const [imageError, setImageError] = useState('');
+
+  const categoryOptions = [
+    { label: '카테고리를 선택해주세요', value: '' },
+    ...(categoriesData ?? []).map((c) => ({ label: c.name, value: c.id })),
+  ];
 
   const {
     register,
@@ -68,19 +65,15 @@ export function MenuForm({ initialData, isEdit = false }: MenuFormProps) {
   } = useForm<MenuFormData>({
     resolver: zodResolver(menuFormSchema),
     defaultValues: {
+      categoryId: initialData?.categoryId ?? '',
       name: initialData?.name ?? '',
-      category: initialData?.category ?? '',
       description: initialData?.description ?? '',
-      price: initialData?.price?.toString() ?? '',
+      originalPrice: initialData?.originalPrice?.toString() ?? '',
       image: initialData?.image ?? '',
-      origin: initialData?.origin ?? '',
-      allergyInfo: initialData?.allergyInfo ?? '',
-      tags: initialData?.tags ?? [],
     },
   });
 
   const image = useWatch({ control, name: 'image' });
-  const tags = useWatch({ control, name: 'tags' });
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -104,53 +97,34 @@ export function MenuForm({ initialData, isEdit = false }: MenuFormProps) {
     setValue('image', '');
   };
 
-  const handleAddTag = () => {
-    if (tagInput.trim() && !tags?.includes(tagInput.trim())) {
-      setValue('tags', [...(tags ?? []), tagInput.trim()]);
-      setTagInput('');
-    }
-  };
-
-  const handleRemoveTag = (tag: string) => {
-    setValue(
-      'tags',
-      (tags ?? []).filter((t) => t !== tag)
-    );
-  };
-
-  const handleTagKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      handleAddTag();
-    }
-  };
-
   const onSubmit = (data: MenuFormData) => {
-    const menuData = {
+    const body = {
+      categoryId: data.categoryId,
       name: data.name,
-      category: data.category,
-      description: data.description ?? '',
-      price: Number(data.price),
-      image: data.image ?? '',
-      origin: data.origin ?? '',
-      allergyInfo: data.allergyInfo ?? '',
-      tags: data.tags ?? [],
-      storeId: initialData?.storeId ?? 'store_1',
-      status: 'active' as const,
+      description: data.description || undefined,
+      image: data.image || undefined,
+      originalPrice: Number(data.originalPrice),
     };
 
     if (isEdit && initialData) {
-      updateMenu(initialData.id, menuData);
+      updateMenuItem(
+        { id: initialData.id, body },
+        { onSuccess: () => router.push('/seller/menu') }
+      );
     } else {
-      addMenu(menuData);
+      createMenuItem(body, {
+        onSuccess: () => router.push('/seller/menu'),
+      });
     }
-
-    router.push('/seller/menu');
   };
 
   const handleCancel = () => {
     router.push('/seller/menu');
   };
+
+  const isPending = isCreating || isUpdating;
+  const baseLabel = isEdit ? '메뉴 수정' : '메뉴 등록';
+  const submitLabel = isPending ? '저장 중...' : baseLabel;
 
   return (
     <div className="flex flex-col gap-6">
@@ -170,21 +144,21 @@ export function MenuForm({ initialData, isEdit = false }: MenuFormProps) {
             <div className="flex flex-col gap-1">
               <label className="text-sm text-gray-500">카테고리 *</label>
               <Controller
-                name="category"
+                name="categoryId"
                 control={control}
                 render={({ field }) => (
                   <Dropdown
                     type="select"
-                    items={CATEGORY_OPTIONS}
+                    items={categoryOptions}
                     value={field.value}
                     onChange={field.onChange}
                     placeholder="카테고리를 선택해주세요"
                   />
                 )}
               />
-              {errors.category && (
+              {errors.categoryId && (
                 <p className="text-sm text-red-500">
-                  {errors.category.message}
+                  {errors.categoryId.message}
                 </p>
               )}
             </div>
@@ -202,8 +176,8 @@ export function MenuForm({ initialData, isEdit = false }: MenuFormProps) {
               label="가격 *"
               type="number"
               placeholder="가격을 입력해주세요"
-              {...register('price')}
-              error={errors.price?.message}
+              {...register('originalPrice')}
+              error={errors.originalPrice?.message}
             />
           </div>
         </Section>
@@ -252,66 +226,17 @@ export function MenuForm({ initialData, isEdit = false }: MenuFormProps) {
         </Section>
       </div>
 
-      <Section variant="card" className="bg-white">
-        <h2 className="mb-4 text-lg font-semibold text-gray-900">추가 정보</h2>
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-          <Input
-            label="원산지"
-            placeholder="원산지를 입력해주세요 (선택사항)"
-            {...register('origin')}
-          />
-          <Input
-            label="알레르기 정보"
-            placeholder="알레르기 정보를 입력해주세요 (선택사항)"
-            {...register('allergyInfo')}
-          />
-        </div>
-      </Section>
-
-      <Section variant="card" className="bg-white">
-        <h2 className="mb-4 text-lg font-semibold text-gray-900">
-          태그 (선택사항)
-        </h2>
-        <div className="flex flex-col gap-3">
-          <div className="flex gap-2">
-            <Input
-              placeholder="태그를 입력하고 Enter를 눌러주세요"
-              value={tagInput}
-              onChange={(e) => setTagInput(e.target.value)}
-              onKeyDown={handleTagKeyDown}
-            />
-            <Button variant="outline" color="gray" onClick={handleAddTag}>
-              추가
-            </Button>
-          </div>
-          {tags && tags.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700"
-                >
-                  {tag}
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveTag(tag)}
-                    className="text-gray-400 hover:text-gray-600"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </span>
-              ))}
-            </div>
-          )}
-          <p className="text-xs text-gray-400">예: 인기, 시즌메뉴, 추천</p>
-        </div>
-      </Section>
       <div className="flex justify-end gap-3">
-        <Button variant="outline" color="gray" onClick={handleCancel}>
+        <Button
+          variant="outline"
+          color="gray"
+          onClick={handleCancel}
+          disabled={isPending}
+        >
           취소
         </Button>
-        <Button onClick={handleSubmit(onSubmit)}>
-          {isEdit ? '메뉴 수정' : '메뉴 등록'}
+        <Button onClick={handleSubmit(onSubmit)} disabled={isPending}>
+          {submitLabel}
         </Button>
       </div>
     </div>

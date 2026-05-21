@@ -1,22 +1,20 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
 
+import type { SellerOnboardingStatus } from '@/types/seller-application';
 import type { BusinessInfoData } from '@/types/store';
+import { sellerOnboardingApi } from '@/api/seller/onboarding/sellerOnboardingApi';
+import { useCreateSellerApplication } from '@/hooks/seller/applications/useCreateSellerApplication';
 
 import type { AuthStepState } from '../_components/types';
 
-const INITIAL_AUTH_STATE: AuthStepState = {
-  termsAgreed: false,
-  businessInfoSubmitted: false,
-  documentsSubmitted: false,
-  reviewStatus: 'pending',
-  certificationStatus: 'waiting',
-  rejectionReason: undefined,
-};
-
 export function useSellerAuth() {
-  const [authState, setAuthState] = useState<AuthStepState>(INITIAL_AUTH_STATE);
+  const [termsAgreed, setTermsAgreed] = useState<Record<
+    string,
+    boolean
+  > | null>(null);
   const [businessInfo, setBusinessInfo] = useState<BusinessInfoData | null>(
     null
   );
@@ -24,63 +22,91 @@ export function useSellerAuth() {
     string,
     File | null
   > | null>(null);
-  const [termsAgreed, setTermsAgreed] = useState<Record<
-    string,
-    boolean
-  > | null>(null);
-  const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
-  useEffect(() => {
-    return () => {
-      timersRef.current.forEach((timer) => clearTimeout(timer));
-    };
-  }, []);
+  const [termsSubmitted, setTermsSubmitted] = useState(false);
+  const [businessInfoSubmitted, setBusinessInfoSubmitted] = useState(false);
+  const [documentsSubmitted, setDocumentsSubmitted] = useState(false);
 
-  const clearTimers = () => {
-    timersRef.current.forEach((timer) => clearTimeout(timer));
-    timersRef.current = [];
+  const {
+    mutate: createSellerApplication,
+    isPending: isApplicationPending,
+    error: applicationError,
+  } = useCreateSellerApplication();
+
+  const { data: onboardingStatus } = useQuery<SellerOnboardingStatus>({
+    queryKey: ['sellers', 'onboarding-status'],
+    queryFn: () => sellerOnboardingApi.getSellerOnboardingStatus(),
+    staleTime: 30 * 1000,
+    enabled: documentsSubmitted,
+    refetchInterval: documentsSubmitted ? 5000 : false,
+  });
+
+  const applicationStatus = onboardingStatus?.applicationStatus;
+
+  let reviewStatus: AuthStepState['reviewStatus'] = 'pending';
+  let certificationStatus: AuthStepState['certificationStatus'] = 'waiting';
+  let rejectionReason: string | undefined;
+
+  if (documentsSubmitted) {
+    reviewStatus = 'reviewing';
+    if (applicationStatus === 'approved') {
+      reviewStatus = 'completed';
+      certificationStatus = 'approved';
+    } else if (applicationStatus === 'rejected') {
+      reviewStatus = 'completed';
+      certificationStatus = 'rejected';
+      rejectionReason = onboardingStatus?.latestRejectReason;
+    }
+  }
+
+  const authState: AuthStepState = {
+    termsAgreed: termsSubmitted,
+    businessInfoSubmitted,
+    documentsSubmitted,
+    reviewStatus,
+    certificationStatus,
+    rejectionReason,
   };
+
+  const isAuthCompleted = certificationStatus === 'approved';
 
   const handleTermsComplete = (agreed: Record<string, boolean>) => {
     setTermsAgreed(agreed);
-    setAuthState((prev) => ({ ...prev, termsAgreed: true }));
+    setTermsSubmitted(true);
   };
 
   const handleBusinessInfoComplete = (data: BusinessInfoData) => {
-    if (!authState.termsAgreed) return;
+    if (!termsSubmitted) return;
     setBusinessInfo(data);
-    setAuthState((prev) => ({ ...prev, businessInfoSubmitted: true }));
+    setBusinessInfoSubmitted(true);
   };
 
-  const handleDocumentComplete = (files: Record<string, File | null>) => {
-    if (!authState.termsAgreed || !authState.businessInfoSubmitted) return;
-    setDocumentFiles(files);
-    setAuthState((prev) => ({
-      ...prev,
-      documentsSubmitted: true,
-      reviewStatus: 'pending',
-      certificationStatus: 'waiting',
-      rejectionReason: undefined,
-    }));
+  const handleDocumentComplete = (
+    files: Record<string, File | null>,
+    onClose: () => void
+  ) => {
+    if (!termsSubmitted || !businessInfoSubmitted || !businessInfo) return;
 
-    clearTimers();
+    const { businessLicense, idCard, bankbook, businessReport } = files;
+    if (!businessLicense || !idCard || !bankbook || !businessReport) return;
 
-    const timer1 = setTimeout(() => {
-      setAuthState((prev) => ({ ...prev, reviewStatus: 'reviewing' }));
-    }, 3000);
-
-    const timer2 = setTimeout(() => {
-      setAuthState((prev) => ({ ...prev, reviewStatus: 'completed' }));
-    }, 6000);
-
-    const timer3 = setTimeout(() => {
-      setAuthState((prev) => ({ ...prev, certificationStatus: 'approved' }));
-    }, 9000);
-
-    timersRef.current = [timer1, timer2, timer3];
+    createSellerApplication(
+      {
+        ...businessInfo,
+        documents: { businessLicense, idCard, bankbook, businessReport },
+      },
+      {
+        onSuccess: () => {
+          setDocumentFiles(files);
+          setDocumentsSubmitted(true);
+          onClose();
+        },
+        onError: () => {
+          setDocumentFiles(null);
+        },
+      }
+    );
   };
-
-  const isAuthCompleted = authState.certificationStatus === 'approved';
 
   return {
     authState,
@@ -88,6 +114,8 @@ export function useSellerAuth() {
     documentFiles,
     termsAgreed,
     isAuthCompleted,
+    isApplicationPending,
+    applicationError,
     handleTermsComplete,
     handleBusinessInfoComplete,
     handleDocumentComplete,

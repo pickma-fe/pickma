@@ -28,6 +28,7 @@ export const updateSellerProductSchema = z
     endAt: z.iso.datetime().optional(),
     pickupStartTime: timeStringSchema.optional(),
     pickupEndTime: timeStringSchema.optional(),
+    status: z.enum(['active', 'closed']).optional(),
   })
   .strict()
   .refine((body) => Object.values(body).some((value) => value !== undefined), {

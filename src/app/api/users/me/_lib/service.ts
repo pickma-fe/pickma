@@ -14,7 +14,12 @@ export async function updateUser(
 
   const { data: updated, error } = await supabase
     .from('users')
-    .update(data)
+    .update({
+      ...(data.name !== undefined && { name: data.name }),
+      ...(data.profileImage !== undefined && {
+        profile_image: data.profileImage,
+      }),
+    })
     .eq('id', userId)
     .select('*')
     .single();

@@ -1,12 +1,12 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
+
 import {
   createPickupTimeOptions,
   isPastPickupTimeSlot,
 } from '@/lib/formatPickupTime';
 import { useProduct } from '@/hooks/products/useProduct';
-import { Footer } from '@/components/common';
-import { ConsumerHeader } from '@/components/consumer/ConsumerHeader';
 
 import { OrderCheckoutPanel } from './OrderCheckoutPanel';
 import { OrderProductSummary } from './OrderProductSummary';
@@ -75,40 +75,25 @@ export function OrderPageContainer({
   productId,
   searchParams,
 }: OrderPageContainerProps) {
+  const router = useRouter();
   const { data: product, isError, isLoading } = useProduct(productId);
 
   if (isLoading) {
     return (
-      <div className="bg-white">
-        <ConsumerHeader />
-        <main className="flex min-h-screen items-center justify-center bg-white">
-          <p
-            role="status"
-            aria-live="polite"
-            className="text-sm font-medium text-gray-500"
-          >
-            주문 정보를 불러오는 중입니다.
-          </p>
-        </main>
-        <Footer />
+      <div className="flex min-h-80 items-center justify-center text-sm text-gray-500">
+        <p role="status" aria-live="polite">
+          주문 정보를 불러오는 중입니다.
+        </p>
       </div>
     );
   }
 
   if (isError || !product) {
     return (
-      <div className="bg-white">
-        <ConsumerHeader />
-        <main className="flex min-h-screen items-center justify-center bg-white">
-          <p
-            role="alert"
-            aria-live="assertive"
-            className="text-sm font-medium text-gray-500"
-          >
-            주문할 상품 정보를 불러오지 못했습니다.
-          </p>
-        </main>
-        <Footer />
+      <div className="flex min-h-80 items-center justify-center text-sm text-gray-500">
+        <p role="alert" aria-live="assertive">
+          주문할 상품 정보를 불러오지 못했습니다.
+        </p>
       </div>
     );
   }
@@ -128,41 +113,41 @@ export function OrderPageContainer({
   const discountAmount = originalTotalPrice - productTotalPrice;
   const finalPaymentPrice = productTotalPrice + SERVICE_FEE;
 
+  const handleQuantityChange = (newQuantity: number) => {
+    const clamped = Math.max(1, Math.min(product.availableStock, newQuantity));
+    const params = new URLSearchParams();
+    params.set('quantity', String(clamped));
+    const pickupStart = getSearchParamValue(searchParams.pickupStart);
+    const pickupEnd = getSearchParamValue(searchParams.pickupEnd);
+    if (pickupStart) params.set('pickupStart', pickupStart);
+    if (pickupEnd) params.set('pickupEnd', pickupEnd);
+    router.replace(`/order/${productId}?${params.toString()}`);
+  };
+
   return (
-    <div className="bg-white">
-      <ConsumerHeader />
+    <div className="mt-10 grid gap-10 lg:grid-cols-[minmax(0,1fr)_440px]">
+      <div className="space-y-8">
+        <OrderProgressSteps currentStep="order" />
 
-      <main className="min-h-screen bg-white">
-        <section className="mx-auto max-w-450 px-6 py-10">
-          <h1 className="text-3xl font-bold text-gray-900">주문/결제</h1>
+        <OrderProductSummary
+          product={product}
+          quantity={quantity}
+          serviceFee={SERVICE_FEE}
+          productTotalPrice={productTotalPrice}
+          discountAmount={discountAmount}
+          finalPaymentPrice={finalPaymentPrice}
+          onQuantityChange={handleQuantityChange}
+        />
+      </div>
 
-          <div className="mt-10 grid gap-10 lg:grid-cols-[minmax(0,1fr)_440px]">
-            <div className="space-y-8">
-              <OrderProgressSteps currentStep="order" />
-
-              <OrderProductSummary
-                product={product}
-                quantity={quantity}
-                serviceFee={SERVICE_FEE}
-                productTotalPrice={productTotalPrice}
-                discountAmount={discountAmount}
-                finalPaymentPrice={finalPaymentPrice}
-              />
-            </div>
-
-            <aside className="lg:sticky lg:top-24 lg:self-start">
-              <OrderCheckoutPanel
-                product={product}
-                quantity={quantity}
-                finalPaymentPrice={finalPaymentPrice}
-                initialPickupTime={initialPickupTime}
-              />
-            </aside>
-          </div>
-        </section>
-      </main>
-
-      <Footer />
+      <aside className="lg:sticky lg:top-24 lg:self-start">
+        <OrderCheckoutPanel
+          product={product}
+          quantity={quantity}
+          finalPaymentPrice={finalPaymentPrice}
+          initialPickupTime={initialPickupTime}
+        />
+      </aside>
     </div>
   );
 }

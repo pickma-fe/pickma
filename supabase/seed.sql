@@ -5,11 +5,13 @@
 
 -- Categories
 INSERT INTO public.categories (id, name, icon, sort_order) VALUES
-  ('00000000-0000-4000-8000-000000000011', '베이커리',  'bread',  1),
-  ('00000000-0000-4000-8000-000000000012', '카페/음료', 'coffee', 2),
-  ('00000000-0000-4000-8000-000000000013', '도시락',    'box',    3),
-  ('00000000-0000-4000-8000-000000000014', '샐러드',    'salad',  4),
-  ('00000000-0000-4000-8000-000000000015', '분식',      'food',   5);
+  ('00000000-0000-4000-8000-000000000011', '베이커리',  '🥖', 1),
+  ('00000000-0000-4000-8000-000000000012', '카페/음료', '☕', 2),
+  ('00000000-0000-4000-8000-000000000013', '도시락',    '🍱', 3),
+  ('00000000-0000-4000-8000-000000000014', '샐러드',    '🥗', 4),
+  ('00000000-0000-4000-8000-000000000015', '분식',      '🍚', 5),
+  ('00000000-0000-4000-8000-000000000016', '디저트',    '🍰', 6),
+  ('00000000-0000-4000-8000-000000000017', '샌드위치',  '🥪', 7);
 
 -- Seed accounts (local/dev only)
 -- encrypted_password is intentionally empty: these accounts exist for DB state simulation,
@@ -44,15 +46,36 @@ INSERT INTO auth.users (
    'authenticated', 'authenticated',
    'customer1@pickma-seed.local', '',
    now(), '{"provider":"email","providers":["email"]}', '{}',
+   now(), now()),
+  ('00000000-0000-4000-8000-000000000025',
+   '00000000-0000-4000-8000-000000000000',
+   'authenticated', 'authenticated',
+   'seller4@pickma-seed.local', '',
+   now(), '{"provider":"email","providers":["email"]}', '{}',
+   now(), now()),
+  ('00000000-0000-4000-8000-000000000026',
+   '00000000-0000-4000-8000-000000000000',
+   'authenticated', 'authenticated',
+   'seller5@pickma-seed.local', '',
+   now(), '{"provider":"email","providers":["email"]}', '{}',
+   now(), now()),
+  ('00000000-0000-4000-8000-000000000027',
+   '00000000-0000-4000-8000-000000000000',
+   'authenticated', 'authenticated',
+   'seller6@pickma-seed.local', '',
+   now(), '{"provider":"email","providers":["email"]}', '{}',
    now(), now());
 
 INSERT INTO public.users (id, email, name, role, status) VALUES
   ('00000000-0000-4000-8000-000000000021', 'seller1@pickma-seed.local', '씨드 판매자1', 'seller', 'active'),
   ('00000000-0000-4000-8000-000000000022', 'seller2@pickma-seed.local', '씨드 판매자2', 'seller', 'active'),
   ('00000000-0000-4000-8000-000000000023', 'seller3@pickma-seed.local', '씨드 판매자3', 'seller', 'active'),
-  ('00000000-0000-4000-8000-000000000024', 'customer1@pickma-seed.local', '씨드 고객1', 'customer', 'active');
+  ('00000000-0000-4000-8000-000000000024', 'customer1@pickma-seed.local', '씨드 고객1', 'customer', 'active'),
+  ('00000000-0000-4000-8000-000000000025', 'seller4@pickma-seed.local', '씨드 판매자4', 'seller', 'active'),
+  ('00000000-0000-4000-8000-000000000026', 'seller5@pickma-seed.local', '씨드 판매자5', 'seller', 'active'),
+  ('00000000-0000-4000-8000-000000000027', 'seller6@pickma-seed.local', '씨드 판매자6', 'seller', 'active');
 
--- Stores: 2 approved, 1 inactive
+-- Stores: 5 approved, 1 inactive
 INSERT INTO public.stores (id, user_id, name, description, business_number, phone, address, address_detail, region, status) VALUES
   ('00000000-0000-4000-8000-000000000031',
    '00000000-0000-4000-8000-000000000021',
@@ -71,38 +94,211 @@ INSERT INTO public.stores (id, user_id, name, description, business_number, phon
    '씨드 델리', '가게 등록 후 바로 판매 가능한 상태입니다.',
    '1111111111', '02-1111-2222',
    '서울시 강남구 테헤란로 50', NULL,
-   '서울 강남구', 'approved');
+   '서울 강남구', 'approved'),
+  ('00000000-0000-4000-8000-000000000034',
+   '00000000-0000-4000-8000-000000000025',
+   '한낮 도시락', '든든한 점심 도시락과 반찬을 준비합니다.',
+   '2222222222', '02-2222-3333',
+   '서울시 송파구 올림픽로 240', '지하 1층',
+   '서울 송파구', 'approved'),
+  ('00000000-0000-4000-8000-000000000035',
+   '00000000-0000-4000-8000-000000000026',
+   '그린볼 샐러드', '신선한 채소와 샌드위치를 당일 조리합니다.',
+   '3333333333', '02-3333-4444',
+   '서울시 성동구 왕십리로 88', '2층',
+   '서울 성동구', 'approved'),
+  ('00000000-0000-4000-8000-000000000036',
+   '00000000-0000-4000-8000-000000000027',
+   '달콤한 오후', '케이크와 쿠키를 소량 생산하는 디저트 숍입니다.',
+   '4444444444', '02-4444-5555',
+   '서울시 용산구 한강대로 120', NULL,
+   '서울 용산구', 'approved');
 
 -- Menu items
-INSERT INTO public.menu_items (id, store_id, category_id, name, description, original_price) VALUES
+INSERT INTO public.menu_items (id, store_id, category_id, name, description, image, original_price) VALUES
   ('00000000-0000-4000-8000-000000000041',
    '00000000-0000-4000-8000-000000000031',
    '00000000-0000-4000-8000-000000000011',
    '마감 할인 크루아상 세트',
    '당일 생산 후 남은 크루아상과 페이스트리를 담은 세트입니다.',
+   '/images/mock/products/product-croissant.jpg',
    12000),
   ('00000000-0000-4000-8000-000000000042',
    '00000000-0000-4000-8000-000000000031',
    '00000000-0000-4000-8000-000000000011',
    '페이스트리 박스',
    '갓 구운 페이스트리 모음 박스입니다.',
+   '/images/products/bread.jpg',
    9000),
   ('00000000-0000-4000-8000-000000000043',
    '00000000-0000-4000-8000-000000000032',
    '00000000-0000-4000-8000-000000000012',
    '아메리카노 세트',
    '아메리카노 2잔 세트입니다.',
-   8000);
+   '/images/mock/products/product-americano.jpg',
+   8000),
+  ('00000000-0000-4000-8000-000000000044',
+   '00000000-0000-4000-8000-000000000033',
+   '00000000-0000-4000-8000-000000000017',
+   '치킨 샌드위치 박스',
+   '닭가슴살 샌드위치와 작은 샐러드를 함께 담았습니다.',
+   '/images/mock/products/product-sandwich.jpg',
+   11000),
+  ('00000000-0000-4000-8000-000000000045',
+   '00000000-0000-4000-8000-000000000033',
+   '00000000-0000-4000-8000-000000000014',
+   '리코타 샐러드 볼',
+   '리코타 치즈와 제철 채소를 담은 샐러드입니다.',
+   '/images/mock/products/product-salad.jpg',
+   9800),
+  ('00000000-0000-4000-8000-000000000046',
+   '00000000-0000-4000-8000-000000000034',
+   '00000000-0000-4000-8000-000000000013',
+   '제육 도시락',
+   '제육볶음과 반찬 3종을 담은 도시락입니다.',
+   '/images/mock/products/product-dosirak.jpg',
+   10500),
+  ('00000000-0000-4000-8000-000000000047',
+   '00000000-0000-4000-8000-000000000034',
+   '00000000-0000-4000-8000-000000000015',
+   '꼬마 김밥 세트',
+   '한입 크기 김밥과 떡볶이 소스를 곁들인 세트입니다.',
+   '/images/mock/products/product-gimbap.jpg',
+   8500),
+  ('00000000-0000-4000-8000-000000000048',
+   '00000000-0000-4000-8000-000000000035',
+   '00000000-0000-4000-8000-000000000014',
+   '닭가슴살 샐러드',
+   '구운 닭가슴살과 채소, 견과류를 담았습니다.',
+   '/images/mock/products/product-chicken-salad.jpg',
+   11500),
+  ('00000000-0000-4000-8000-000000000049',
+   '00000000-0000-4000-8000-000000000035',
+   '00000000-0000-4000-8000-000000000012',
+   '콜드브루와 쿠키',
+   '콜드브루 한 병과 수제 쿠키 세트입니다.',
+   '/images/mock/products/product-americano.jpg',
+   9000),
+  ('00000000-0000-4000-8000-00000000004a',
+   '00000000-0000-4000-8000-000000000036',
+   '00000000-0000-4000-8000-000000000016',
+   '티라미수 컵 세트',
+   '마스카포네 크림을 올린 컵 티라미수 2개 세트입니다.',
+   '/images/mock/products/product-tiramisu.jpg',
+   12800),
+  ('00000000-0000-4000-8000-00000000004b',
+   '00000000-0000-4000-8000-000000000036',
+   '00000000-0000-4000-8000-000000000016',
+   '브라우니 조각 박스',
+   '진한 초콜릿 브라우니 조각을 담은 박스입니다.',
+   '/images/mock/products/product-brownie.jpg',
+   10000),
+  ('00000000-0000-4000-8000-00000000004c',
+   '00000000-0000-4000-8000-000000000031',
+   '00000000-0000-4000-8000-000000000011',
+   '비공개 검증 크루아상',
+   'closed 상태 필터 확인용 베이커리 메뉴입니다.',
+   '/images/mock/products/product-croissant.jpg',
+   10000),
+  ('00000000-0000-4000-8000-00000000004d',
+   '00000000-0000-4000-8000-000000000032',
+   '00000000-0000-4000-8000-000000000012',
+   '비활성 매장 아메리카노',
+   'inactive store 필터 확인용 카페 메뉴입니다.',
+   '/images/mock/products/product-americano.jpg',
+   8000),
+  ('00000000-0000-4000-8000-00000000004e',
+   '00000000-0000-4000-8000-000000000034',
+   '00000000-0000-4000-8000-000000000013',
+   '만료 검증 도시락',
+   'expired 상태 필터 확인용 도시락 메뉴입니다.',
+   '/images/mock/products/product-dosirak.jpg',
+   9500),
+  ('00000000-0000-4000-8000-00000000004f',
+   '00000000-0000-4000-8000-000000000036',
+   '00000000-0000-4000-8000-000000000016',
+   '비공개 검증 브라우니',
+   'closed 상태 필터 확인용 디저트 메뉴입니다.',
+   '/images/mock/products/product-brownie.jpg',
+   9000),
+  ('00000000-0000-4000-8000-000000000050',
+   '00000000-0000-4000-8000-000000000032',
+   '00000000-0000-4000-8000-000000000012',
+   '비활성 매장 콜드브루',
+   'inactive store 필터 확인용 음료 메뉴입니다.',
+   '/images/mock/products/product-americano.jpg',
+   8500);
 
--- Products
--- 공개 조건 충족: active + approved store → GET /api/products 에 노출
+-- 지역 필터 UI 확인용 추가 메뉴
+-- 각 approved store(region)마다 공개 상품명이 반복되지 않도록 메뉴를 함께 보강한다.
+INSERT INTO public.menu_items (
+  id,
+  store_id,
+  category_id,
+  name,
+  description,
+  image,
+  original_price
+)
+SELECT
+  ('00000000-0000-4000-8000-' || lpad((seed.product_number + 1000)::text, 12, '0'))::uuid,
+  seed.store_id::uuid,
+  seed.category_id::uuid,
+  seed.region_label || ' ' || seed.product_label || ' ' || lpad(seed.offset_number::text, 2, '0'),
+  seed.region_label || ' 지역 필터 확인용 마감 할인 메뉴입니다.',
+  seed.image,
+  seed.base_original_price + (seed.offset_number % 6) * 500
+FROM (
+  SELECT
+    region_seed.*,
+    product_series.product_number,
+    product_series.product_number - region_seed.start_number + 1 AS offset_number,
+    CASE
+      WHEN product_series.product_number % 2 = 0 THEN region_seed.primary_category_id
+      ELSE region_seed.secondary_category_id
+    END AS category_id,
+    CASE
+      WHEN product_series.product_number % 2 = 0 THEN region_seed.primary_image
+      ELSE region_seed.secondary_image
+    END AS image,
+    CASE
+      WHEN product_series.product_number % 2 = 0 THEN region_seed.primary_product_label
+      ELSE region_seed.secondary_product_label
+    END AS product_label
+  FROM (
+    VALUES
+      (60, 77, '마포', '00000000-0000-4000-8000-000000000031', '00000000-0000-4000-8000-000000000011', '00000000-0000-4000-8000-000000000011', '베이커리 박스', '페이스트리 세트', '/images/mock/products/product-croissant.jpg', '/images/products/bread.jpg', 9000),
+      (80, 97, '강남', '00000000-0000-4000-8000-000000000033', '00000000-0000-4000-8000-000000000017', '00000000-0000-4000-8000-000000000014', '샌드위치 팩', '샐러드 볼', '/images/mock/products/product-sandwich.jpg', '/images/mock/products/product-salad.jpg', 10000),
+      (100, 117, '송파', '00000000-0000-4000-8000-000000000034', '00000000-0000-4000-8000-000000000013', '00000000-0000-4000-8000-000000000015', '도시락 세트', '꼬마 김밥', '/images/mock/products/product-dosirak.jpg', '/images/mock/products/product-gimbap.jpg', 9500),
+      (120, 137, '성동', '00000000-0000-4000-8000-000000000035', '00000000-0000-4000-8000-000000000014', '00000000-0000-4000-8000-000000000012', '샐러드 컵', '콜드브루 세트', '/images/mock/products/product-chicken-salad.jpg', '/images/mock/products/product-americano.jpg', 9800),
+      (140, 157, '용산', '00000000-0000-4000-8000-000000000036', '00000000-0000-4000-8000-000000000016', '00000000-0000-4000-8000-000000000016', '티라미수 컵', '브라우니 박스', '/images/mock/products/product-tiramisu.jpg', '/images/mock/products/product-brownie.jpg', 10800)
+  ) AS region_seed(
+    start_number,
+    end_number,
+    region_label,
+    store_id,
+    primary_category_id,
+    secondary_category_id,
+    primary_product_label,
+    secondary_product_label,
+    primary_image,
+    secondary_image,
+    base_original_price
+  )
+  CROSS JOIN LATERAL generate_series(region_seed.start_number, region_seed.end_number) AS product_series(product_number)
+) AS seed;
+
+-- Products: base public samples and visibility filter samples
+-- 000000000053, 00000000005e: closed approved-store products
+-- 000000000054, 00000000005f: active inactive-store products
+-- 00000000005d: expired approved-store product
 INSERT INTO public.products (id, store_id, menu_item_id, category_id, discount_price, stock, reserved_stock, end_at, pickup_start_time, pickup_end_time, status) VALUES
   ('00000000-0000-4000-8000-000000000051',
    '00000000-0000-4000-8000-000000000031',
    '00000000-0000-4000-8000-000000000041',
    '00000000-0000-4000-8000-000000000011',
    7200, 8, 2,
-   NOW() + INTERVAL '3 hours',
+   (((now() AT TIME ZONE 'Asia/Seoul')::date + TIME '13:30:00') AT TIME ZONE 'Asia/Seoul'),
    '10:00:00', '13:30:00',
    'active'),
   ('00000000-0000-4000-8000-000000000052',
@@ -110,24 +306,169 @@ INSERT INTO public.products (id, store_id, menu_item_id, category_id, discount_p
    '00000000-0000-4000-8000-000000000042',
    '00000000-0000-4000-8000-000000000011',
    5400, 5, 1,
-   NOW() + INTERVAL '5 hours',
+   (((now() AT TIME ZONE 'Asia/Seoul')::date + TIME '15:00:00') AT TIME ZONE 'Asia/Seoul'),
    '11:00:00', '15:00:00',
    'active'),
-  -- closed 상품 (approved store) — 공개 목록 미노출 검증
   ('00000000-0000-4000-8000-000000000053',
    '00000000-0000-4000-8000-000000000031',
-   '00000000-0000-4000-8000-000000000041',
+   '00000000-0000-4000-8000-00000000004c',
    '00000000-0000-4000-8000-000000000011',
    6000, 10, 0,
-   NOW() + INTERVAL '2 hours',
+   (((now() AT TIME ZONE 'Asia/Seoul')::date + TIME '12:00:00') AT TIME ZONE 'Asia/Seoul'),
    '09:00:00', '12:00:00',
    'closed'),
-  -- active 상품 (inactive store) — 공개 목록 미노출 검증
   ('00000000-0000-4000-8000-000000000054',
    '00000000-0000-4000-8000-000000000032',
-   '00000000-0000-4000-8000-000000000043',
+   '00000000-0000-4000-8000-00000000004d',
    '00000000-0000-4000-8000-000000000012',
    4800, 10, 0,
-   NOW() + INTERVAL '4 hours',
+   (((now() AT TIME ZONE 'Asia/Seoul')::date + TIME '16:00:00') AT TIME ZONE 'Asia/Seoul'),
    '12:00:00', '16:00:00',
+   'active'),
+  ('00000000-0000-4000-8000-000000000055',
+   '00000000-0000-4000-8000-000000000033',
+   '00000000-0000-4000-8000-000000000044',
+   '00000000-0000-4000-8000-000000000017',
+   6900, 12, 3,
+   (((now() AT TIME ZONE 'Asia/Seoul')::date + TIME '18:00:00') AT TIME ZONE 'Asia/Seoul'),
+   '14:00:00', '18:00:00',
+   'active'),
+  ('00000000-0000-4000-8000-000000000056',
+   '00000000-0000-4000-8000-000000000033',
+   '00000000-0000-4000-8000-000000000045',
+   '00000000-0000-4000-8000-000000000014',
+   5900, 6, 0,
+   (((now() AT TIME ZONE 'Asia/Seoul')::date + TIME '19:00:00') AT TIME ZONE 'Asia/Seoul'),
+   '15:00:00', '19:00:00',
+   'active'),
+  ('00000000-0000-4000-8000-000000000057',
+   '00000000-0000-4000-8000-000000000034',
+   '00000000-0000-4000-8000-000000000046',
+   '00000000-0000-4000-8000-000000000013',
+   6500, 9, 4,
+   (((now() AT TIME ZONE 'Asia/Seoul')::date + TIME '14:30:00') AT TIME ZONE 'Asia/Seoul'),
+   '12:00:00', '14:30:00',
+   'active'),
+  ('00000000-0000-4000-8000-000000000058',
+   '00000000-0000-4000-8000-000000000034',
+   '00000000-0000-4000-8000-000000000047',
+   '00000000-0000-4000-8000-000000000015',
+   5100, 15, 5,
+   (((now() AT TIME ZONE 'Asia/Seoul')::date + TIME '20:00:00') AT TIME ZONE 'Asia/Seoul'),
+   '16:00:00', '20:00:00',
+   'active'),
+  ('00000000-0000-4000-8000-000000000059',
+   '00000000-0000-4000-8000-000000000035',
+   '00000000-0000-4000-8000-000000000048',
+   '00000000-0000-4000-8000-000000000014',
+   7600, 7, 1,
+   (((now() AT TIME ZONE 'Asia/Seoul')::date + TIME '17:00:00') AT TIME ZONE 'Asia/Seoul'),
+   '13:00:00', '17:00:00',
+   'active'),
+  ('00000000-0000-4000-8000-00000000005a',
+   '00000000-0000-4000-8000-000000000035',
+   '00000000-0000-4000-8000-000000000049',
+   '00000000-0000-4000-8000-000000000012',
+   5600, 4, 4,
+   (((now() AT TIME ZONE 'Asia/Seoul')::date + TIME '15:30:00') AT TIME ZONE 'Asia/Seoul'),
+   '11:30:00', '15:30:00',
+   'active'),
+  ('00000000-0000-4000-8000-00000000005b',
+   '00000000-0000-4000-8000-000000000036',
+   '00000000-0000-4000-8000-00000000004a',
+   '00000000-0000-4000-8000-000000000016',
+   7900, 5, 2,
+   (((now() AT TIME ZONE 'Asia/Seoul')::date + TIME '23:59:00') AT TIME ZONE 'Asia/Seoul'),
+   '18:00:00', '23:59:00',
+   'active'),
+  ('00000000-0000-4000-8000-00000000005c',
+   '00000000-0000-4000-8000-000000000036',
+   '00000000-0000-4000-8000-00000000004b',
+   '00000000-0000-4000-8000-000000000016',
+   6200, 0, 0,
+   (((now() AT TIME ZONE 'Asia/Seoul')::date + TIME '19:00:00') AT TIME ZONE 'Asia/Seoul'),
+   '15:00:00', '19:00:00',
+   'active'),
+  ('00000000-0000-4000-8000-00000000005d',
+   '00000000-0000-4000-8000-000000000034',
+   '00000000-0000-4000-8000-00000000004e',
+   '00000000-0000-4000-8000-000000000013',
+   5800, 6, 0,
+   (((now() AT TIME ZONE 'Asia/Seoul')::date - 1 + TIME '13:00:00') AT TIME ZONE 'Asia/Seoul'),
+   '10:00:00', '13:00:00',
+   'active'),
+  ('00000000-0000-4000-8000-00000000005e',
+   '00000000-0000-4000-8000-000000000036',
+   '00000000-0000-4000-8000-00000000004f',
+   '00000000-0000-4000-8000-000000000016',
+   5500, 8, 0,
+   (((now() AT TIME ZONE 'Asia/Seoul')::date + TIME '18:00:00') AT TIME ZONE 'Asia/Seoul'),
+   '14:00:00', '18:00:00',
+   'closed'),
+  ('00000000-0000-4000-8000-00000000005f',
+   '00000000-0000-4000-8000-000000000032',
+   '00000000-0000-4000-8000-000000000050',
+   '00000000-0000-4000-8000-000000000012',
+   4300, 12, 0,
+   (((now() AT TIME ZONE 'Asia/Seoul')::date + TIME '17:00:00') AT TIME ZONE 'Asia/Seoul'),
+   '13:00:00', '17:00:00',
    'active');
+
+-- Products: region filter volume samples
+-- 각 approved store(region)마다 공개 상품이 약 20개가 되도록 active 상품을 보강한다.
+INSERT INTO public.products (
+  id,
+  store_id,
+  menu_item_id,
+  category_id,
+  discount_price,
+  stock,
+  reserved_stock,
+  end_at,
+  pickup_start_time,
+  pickup_end_time,
+  status
+)
+SELECT
+  ('00000000-0000-4000-8000-' || lpad(seed.product_number::text, 12, '0'))::uuid,
+  seed.store_id::uuid,
+  ('00000000-0000-4000-8000-' || lpad((seed.product_number + 1000)::text, 12, '0'))::uuid,
+  seed.category_id::uuid,
+  seed.base_discount_price + (seed.offset_number % 6) * 400,
+  6 + (seed.offset_number % 8),
+  seed.offset_number % 4,
+  (
+    (
+      (now() AT TIME ZONE 'Asia/Seoul')::date
+      + (TIME '18:00:00' + (seed.offset_number % 6) * INTERVAL '1 hour')::time
+    ) AT TIME ZONE 'Asia/Seoul'
+  ),
+  (TIME '14:00:00' + (seed.offset_number % 6) * INTERVAL '1 hour')::time,
+  (TIME '18:00:00' + (seed.offset_number % 6) * INTERVAL '1 hour')::time,
+  'active'::product_status
+FROM (
+  SELECT
+    region_seed.*,
+    product_series.product_number,
+    product_series.product_number - region_seed.start_number AS offset_number,
+    CASE
+      WHEN product_series.product_number % 2 = 0 THEN region_seed.primary_category_id
+      ELSE region_seed.secondary_category_id
+    END AS category_id
+  FROM (
+    VALUES
+      (60, 77, '00000000-0000-4000-8000-000000000031', '00000000-0000-4000-8000-000000000011', '00000000-0000-4000-8000-000000000011', 4800),
+      (80, 97, '00000000-0000-4000-8000-000000000033', '00000000-0000-4000-8000-000000000017', '00000000-0000-4000-8000-000000000014', 5200),
+      (100, 117, '00000000-0000-4000-8000-000000000034', '00000000-0000-4000-8000-000000000013', '00000000-0000-4000-8000-000000000015', 5000),
+      (120, 137, '00000000-0000-4000-8000-000000000035', '00000000-0000-4000-8000-000000000014', '00000000-0000-4000-8000-000000000012', 5600),
+      (140, 157, '00000000-0000-4000-8000-000000000036', '00000000-0000-4000-8000-000000000016', '00000000-0000-4000-8000-000000000016', 5800)
+  ) AS region_seed(
+    start_number,
+    end_number,
+    store_id,
+    primary_category_id,
+    secondary_category_id,
+    base_discount_price
+  )
+  CROSS JOIN LATERAL generate_series(region_seed.start_number, region_seed.end_number) AS product_series(product_number)
+) AS seed;

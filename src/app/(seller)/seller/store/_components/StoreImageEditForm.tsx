@@ -8,7 +8,7 @@ import { Button } from '@/components/common/Button/Button';
 interface StoreImageEditFormProps {
   currentImage?: string;
   storeName: string;
-  onSubmit: (imageUrl: string) => void;
+  onSubmit: (imageUrl: string, file?: File) => void;
   onCancel: () => void;
 }
 
@@ -21,6 +21,7 @@ export function StoreImageEditForm({
   const [previewUrl, setPreviewUrl] = useState<string | null>(
     currentImage ?? null
   );
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const isSubmittedRef = useRef(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -48,6 +49,7 @@ export function StoreImageEditForm({
       }
       const url = URL.createObjectURL(file);
       setPreviewUrl(url);
+      setSelectedFile(file);
       setError(null);
     }
     e.currentTarget.value = '';
@@ -60,7 +62,7 @@ export function StoreImageEditForm({
   const handleSubmit = () => {
     if (previewUrl) {
       isSubmittedRef.current = true;
-      onSubmit(previewUrl);
+      onSubmit(previewUrl, selectedFile ?? undefined);
     }
   };
 

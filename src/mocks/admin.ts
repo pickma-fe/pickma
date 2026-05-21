@@ -1,7 +1,41 @@
 import type {
+  AdminPendingSellerApplicationListResponse,
+  AdminPendingSellerApplicationResponse,
   AdminStoreListResponse,
   AdminStoreResponse,
 } from '@/contracts/admin';
+import type { SellerApplicationDocumentReadUrlResponse } from '@/contracts/seller-application';
+
+export const mockAdminPendingSellerApplication: AdminPendingSellerApplicationResponse =
+  {
+    id: 'application_mock_1',
+    userId: 'user_mock_1',
+    applicantEmail: 'seller@example.com',
+    applicantName: '테스트 대표',
+    status: 'pending',
+    businessNumber: '000-00-00001',
+    companyName: '테스트 회사',
+    representativeName: '테스트 대표',
+    businessAddress: '서울시 테스트구 테스트로 1',
+    businessType: '식품',
+    businessCategory: '베이커리',
+    documents: [],
+    createdAt: '2026-05-18T00:00:00.000Z',
+    updatedAt: '2026-05-18T00:00:00.000Z',
+  };
+
+export const mockAdminPendingSellerApplicationList: AdminPendingSellerApplicationListResponse =
+  {
+    items: [mockAdminPendingSellerApplication],
+    page: 1,
+    pageSize: 20,
+    totalCount: 1,
+    totalPages: 1,
+  };
+
+export const mockDocumentReadUrl: SellerApplicationDocumentReadUrlResponse = {
+  signedUrl: 'https://example.com/mock-signed-document-url',
+};
 
 const PAGE_SIZE = 20;
 

@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 
-import type { MyStore } from '@/types/store';
 import { useMyStore } from '@/hooks/stores/useMyStore';
+import { useUpdateStore } from '@/hooks/stores/useUpdateStore';
 import { Badge } from '@/components/common/Badge/Badge';
 import { Button } from '@/components/common/Button/Button';
 import { Modal } from '@/components/common/Modal/Modal';
@@ -72,17 +72,13 @@ const REGISTER_CERTS = [
 ];
 
 export function StoreInfoContent() {
-  const { data: initialStoreInfo, isLoading, isError } = useMyStore();
-  const [editedStore, setEditedStore] = useState<Partial<MyStore> | null>(null);
+  const { data: storeInfo, isLoading, isError } = useMyStore();
+  const { mutate: updateStore } = useUpdateStore();
   const [activeModal, setActiveModal] = useState<ModalType>(null);
   const [selectedCertification, setSelectedCertification] = useState<
     string | null
   >(null);
   const [certifications, setCertifications] = useState(INITIAL_CERTIFICATIONS);
-
-  const storeInfo = editedStore
-    ? ({ ...initialStoreInfo, ...editedStore } as MyStore)
-    : initialStoreInfo;
 
   const certificationStatus = {
     businessLicense: certifications.businessLicense.status,
@@ -108,25 +104,25 @@ export function StoreInfoContent() {
   };
 
   const handleStoreEdit = (data: StoreEditData) => {
-    setEditedStore({
-      ...editedStore,
+    updateStore({
       name: data.name,
       phone: data.phone,
       address: data.address,
-      addressDetail: data.addressDetail,
+      addressDetail: data.addressDetail || undefined,
       region: data.region,
-      description: data.description,
+      description: data.description || undefined,
       openTime: `${data.openTime}:00`,
       closeTime: `${data.closeTime}:00`,
     });
     handleCloseModal();
   };
 
-  const handleImageEdit = (imageUrl: string) => {
-    setEditedStore({
-      ...editedStore,
-      image: imageUrl,
-    });
+  const handleImageEdit = (imageUrl: string, file?: File) => {
+    if (file) {
+      updateStore({ imageFile: file });
+    } else {
+      updateStore({ image: imageUrl });
+    }
     handleCloseModal();
   };
 

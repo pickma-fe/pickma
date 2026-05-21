@@ -38,4 +38,8 @@ export const sellerOrderApi = {
   completeOrder(id: string): Promise<void> {
     return apiClient.patch<void>(`/api/seller/orders/${id}/complete`);
   },
+
+  noShowOrder(id: string): Promise<void> {
+    return apiClient.patch<void>(`/api/seller/orders/${id}/no-show`);
+  },
 };
