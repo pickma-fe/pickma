@@ -110,6 +110,7 @@ const eslintConfig = defineConfig([
               target: './contracts',
               from: [
                 './lib',
+                './mocks',
                 './api',
                 './stores',
                 './hooks',
@@ -120,6 +121,18 @@ const eslintConfig = defineConfig([
             {
               target: './lib',
               from: ['./api', './stores', './hooks', './components', './app'],
+            },
+            {
+              target: './mocks',
+              from: [
+                './types',
+                './lib',
+                './api',
+                './stores',
+                './hooks',
+                './components',
+                './app',
+              ],
             },
             {
               target: './api',

@@ -1,2 +1,2 @@
-npx tsc --noEmit
+npm run typecheck
 npx lint-staged

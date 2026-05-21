@@ -9,6 +9,10 @@ labels: docs
 
 - 어떤 문서를 작성/수정하는지
 
+## 🧭 Task 연결
+
+Task ID:
+
 ## ✏️ 변경 사항
 
 - [ ] README 수정

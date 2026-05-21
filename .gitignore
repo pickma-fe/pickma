@@ -50,15 +50,13 @@ node_modules/
 *storybook.log
 storybook-static
 
-# AI agent files and directories
-.claude/*
+# AI agent 로컬 파일
+.claude/settings.local.json
 .vscode/*
 !.vscode/settings.json
 !.vscode/extensions.json
-.codex/*
-.agents/*
-AGENTS.md
 AGENTS.override.md
+CLAUDE.local.md
 .cursorrules
 
 # Temporal files and directory

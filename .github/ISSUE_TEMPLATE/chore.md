@@ -9,6 +9,10 @@ labels: chore
 
 - 어떤 작업인지 설명
 
+## 🧭 Task 연결
+
+Task ID:
+
 ## 🛠 상세 작업
 
 - [ ] 설정 변경
