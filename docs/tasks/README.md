@@ -66,7 +66,7 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 | T39 | public 이미지 자산 구조 및 Footer badge 크기 정리 | P1       | 진행 전 | 확인 필요    | T18                | [T39_public_image_asset_footer_badge_cleanup.md](T39_public_image_asset_footer_badge_cleanup.md)         |
 | T40 | Storage orphan cleanup API 및 hook 통합           | P1       | 진행 전 | 확인 필요    | T06                | [T40_storage_orphan_cleanup_api_hook.md](T40_storage_orphan_cleanup_api_hook.md)                         |
 | T41 | Storage lifecycle 주기적 orphan scanner           | P2       | 진행 전 | 확인 필요    | T06, T40           | [T41_storage_lifecycle_cron.md](T41_storage_lifecycle_cron.md)                                           |
-| T42 | 법적 고지 페이지 및 동의 흐름 구현                | P1       | 진행 전 | 확인 필요    | 없음               | [T42_legal_compliance_pages.md](T42_legal_compliance_pages.md)                                           |
+| T42 | 법적 고지 페이지 및 동의 흐름 구현                | P1       | 진행 전 | 161          | 없음               | [T42_legal_compliance_pages.md](T42_legal_compliance_pages.md)                                           |
 
 ## 추천 진행 흐름
 
