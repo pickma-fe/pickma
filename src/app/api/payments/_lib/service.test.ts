@@ -494,4 +494,118 @@ describe('confirmPayment', () => {
       })
     ).rejects.toMatchObject({ code: ERROR_CODE.PAYMENT_CONFIRM_FAILED });
   });
+
+  describe('confirm_payment RPC 실패 시 Option B 보상', () => {
+    it('PAYMENT_MOCK=false + cancel 성공 → revert_payment_processing 호출 후 PAYMENT_CONFIRM_FAILED', async () => {
+      vi.stubEnv('PAYMENT_MOCK', 'false');
+      const { callTossConfirm, callTossCancel } = await import('./toss');
+      vi.mocked(callTossConfirm).mockResolvedValue(mockTossResult);
+      vi.mocked(callTossCancel).mockResolvedValue(undefined);
+      const client = makeClient({
+        rpcErrors: { confirm_payment: { message: 'unknown error' } },
+      });
+      vi.mocked(createServiceRoleClient).mockReturnValue(
+        client as unknown as ReturnType<typeof createServiceRoleClient>
+      );
+
+      await expect(
+        confirmPayment(mockUserId, {
+          paymentKey: 'toss_pk_test',
+          orderNumber: 'PM2026TEST',
+          amount: 5000,
+        })
+      ).rejects.toMatchObject({ code: ERROR_CODE.PAYMENT_CONFIRM_FAILED });
+
+      expect(callTossCancel).toHaveBeenCalledWith(
+        expect.objectContaining({
+          orderNumber: 'PM2026TEST',
+          paymentKey: mockTossResult.providerPaymentKey,
+          cancelAmount: 5000,
+        })
+      );
+      expect(client.rpc).toHaveBeenCalledWith('revert_payment_processing', {
+        p_order_id: 'order-uuid-1',
+      });
+    });
+
+    it('PAYMENT_MOCK=false + cancel 실패 → revert_payment_processing 미호출 후 PAYMENT_CONFIRM_FAILED', async () => {
+      vi.stubEnv('PAYMENT_MOCK', 'false');
+      const { callTossConfirm, callTossCancel } = await import('./toss');
+      vi.mocked(callTossConfirm).mockResolvedValue(mockTossResult);
+      const { AppError } = await import('@/lib/errors/appError');
+      vi.mocked(callTossCancel).mockRejectedValueOnce(
+        new AppError(ERROR_CODE.PAYMENT_CONFIRM_FAILED, 500)
+      );
+      const client = makeClient({
+        rpcErrors: { confirm_payment: { message: 'unknown error' } },
+      });
+      vi.mocked(createServiceRoleClient).mockReturnValue(
+        client as unknown as ReturnType<typeof createServiceRoleClient>
+      );
+
+      await expect(
+        confirmPayment(mockUserId, {
+          paymentKey: 'toss_pk_test',
+          orderNumber: 'PM2026TEST',
+          amount: 5000,
+        })
+      ).rejects.toMatchObject({ code: ERROR_CODE.PAYMENT_CONFIRM_FAILED });
+
+      expect(client.rpc).not.toHaveBeenCalledWith(
+        'revert_payment_processing',
+        expect.anything()
+      );
+    });
+
+    it('PAYMENT_MOCK=false + cancel 성공 + revert 실패 → PAYMENT_CONFIRM_FAILED', async () => {
+      vi.stubEnv('PAYMENT_MOCK', 'false');
+      const { callTossConfirm, callTossCancel } = await import('./toss');
+      vi.mocked(callTossConfirm).mockResolvedValue(mockTossResult);
+      vi.mocked(callTossCancel).mockResolvedValue(undefined);
+      const client = makeClient({
+        rpcErrors: {
+          confirm_payment: { message: 'unknown error' },
+          revert_payment_processing: { message: 'db error' },
+        },
+      });
+      vi.mocked(createServiceRoleClient).mockReturnValue(
+        client as unknown as ReturnType<typeof createServiceRoleClient>
+      );
+
+      await expect(
+        confirmPayment(mockUserId, {
+          paymentKey: 'toss_pk_test',
+          orderNumber: 'PM2026TEST',
+          amount: 5000,
+        })
+      ).rejects.toMatchObject({ code: ERROR_CODE.PAYMENT_CONFIRM_FAILED });
+
+      expect(client.rpc).toHaveBeenCalledWith('revert_payment_processing', {
+        p_order_id: 'order-uuid-1',
+      });
+    });
+
+    it('PAYMENT_MOCK=true + confirm_payment 실패 → cancel 미호출, revert_payment_processing 호출', async () => {
+      const { callTossCancel } = await import('./toss');
+      const client = makeClient({
+        rpcErrors: { confirm_payment: { message: 'unknown error' } },
+      });
+      vi.mocked(createServiceRoleClient).mockReturnValue(
+        client as unknown as ReturnType<typeof createServiceRoleClient>
+      );
+
+      await expect(
+        confirmPayment(mockUserId, {
+          paymentKey: 'mock_pk_test',
+          orderNumber: 'PM2026TEST',
+          amount: 5000,
+        })
+      ).rejects.toMatchObject({ code: ERROR_CODE.PAYMENT_CONFIRM_FAILED });
+
+      expect(callTossCancel).not.toHaveBeenCalled();
+      expect(client.rpc).toHaveBeenCalledWith('revert_payment_processing', {
+        p_order_id: 'order-uuid-1',
+      });
+    });
+  });
 });

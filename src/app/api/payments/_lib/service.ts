@@ -9,6 +9,7 @@ import { createServiceRoleClient } from '@/lib/supabase/service';
 
 import {
   buildTossCheckoutUrl,
+  callTossCancel,
   callTossConfirm,
   type TossConfirmResult,
 } from './toss';
@@ -176,5 +177,24 @@ export async function confirmPayment(
     p_amount: order.payment_amount,
   });
 
-  if (rpcError) throw mapConfirmRpcError(rpcError.message);
+  if (rpcError) {
+    const shouldCancelToss = process.env.PAYMENT_MOCK !== 'true';
+    if (shouldCancelToss) {
+      try {
+        await callTossCancel({
+          orderNumber: body.orderNumber,
+          paymentKey: confirmed.providerPaymentKey,
+          cancelReason: 'PickMa order confirmation failed',
+          cancelAmount: order.payment_amount,
+        });
+      } catch {
+        // cancel 실패: 결제 승인 + processing 잔류 — 30분 알람 대상
+        throw mapConfirmRpcError(rpcError.message);
+      }
+    }
+    // cancel 성공(또는 MOCK): revert 시도
+    await supabase.rpc('revert_payment_processing', { p_order_id: order.id });
+    // revert 실패도 허용: 결제는 취소됐지만 processing 잔류 — 30분 알람 대상
+    throw mapConfirmRpcError(rpcError.message);
+  }
 }
