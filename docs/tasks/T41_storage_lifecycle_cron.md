@@ -34,12 +34,12 @@
   - `GET /api/cron/storage-cleanup` Vercel Cron 전용 endpoint 구현.
   - 인증: `Authorization: Bearer ${CRON_SECRET}` 확인, 실패 시 401 반환. `CRON_SECRET`은 서버 전용 환경 변수로 관리.
   - bucket 파일 목록과 DB `seller_application_documents.storage_path`를 비교, 30일 초과 orphan 파일 삭제 (service role client 사용).
-  - `vercel.json` 또는 `vercel.ts`에 Cron 스케줄 등록.
+  - `vercel.json`에 Cron 스케줄 등록 (Vercel 배포 설정 task 생성 후 해당 task와 연계).
 
 - 관련 파일/영역:
   - `src/app/api/cron/storage-cleanup/route.ts` (신규)
   - `src/app/api/cron/storage-cleanup/_lib/service.ts` (신규)
-  - `vercel.json` 또는 `vercel.ts`
+  - `vercel.json` (신규 생성 필요 — Vercel 배포 설정 task 생성 후 해당 task 참조로 업데이트 예정)
 
 - 예상 난이도:
   높음

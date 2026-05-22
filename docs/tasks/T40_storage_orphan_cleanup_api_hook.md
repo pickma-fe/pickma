@@ -39,7 +39,7 @@
   - `src/app/api/files/route.ts` (신규)
   - `src/app/api/files/_lib/service.ts` (신규 또는 수정)
   - `src/hooks/seller/applications/useCreateSellerApplication.ts`
-  - `src/app/api/admin/sellers/[sellerId]/reject/route.ts` (또는 관련 Route Handler)
+  - `src/app/api/admin/sellers/[id]/reject/route.ts`
 
 - 예상 난이도:
   중간
