@@ -1,7 +1,7 @@
 # T06. Storage orphan 및 개인정보 cleanup 정책 확정
 
 - 상태:
-  진행 전
+  완료
 
 - GitHub Issue:
   확인 필요
@@ -48,3 +48,7 @@
   - Storage cleanup 책임과 타이밍이 결정된다.
   - 개인정보 보관/삭제 정책이 문서화된다.
   - 구현 작업 목록이 API/job/UI 단위로 분해된다.
+
+- 구현 결과:
+  - `docs/system_architecture.md` "13. Storage lifecycle 정책" 섹션 추가. orphan cleanup hybrid 방식, bucket 민감도, 보관 기간 정책, 삭제 트리거 및 주체 기록.
+  - 후속 구현 task 2개 분해: T40 (P1, cleanup API+hook), T41 (P2, Vercel Cron orphan scanner).
