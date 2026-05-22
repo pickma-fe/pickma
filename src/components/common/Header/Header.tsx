@@ -109,7 +109,7 @@ function UserMenu({
   return (
     <div className="relative">
       <Menu>
-        <MenuButton className="group headlessui-focus-visible:ring-2 headlessui-focus-visible:ring-primary-500 headlessui-focus-visible:ring-offset-2 flex items-center gap-2 rounded-sm px-4 py-2 focus:outline-none">
+        <MenuButton className="group focus-visible:ring-primary-500 flex items-center gap-2 rounded-sm px-4 py-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2">
           <ProfileAvatar user={user} />
           {user.name}
           <ChevronDownIcon className="h-4 w-4 group-data-active:hidden" />
