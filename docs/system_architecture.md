@@ -522,7 +522,7 @@ src/
 **서버 (Vercel Cron, P2)**
 
 - bucket 파일 목록과 DB `seller_application_documents.storage_path`를 비교한다.
-- DB에 없거나 30일 이상 경과한 orphan 파일을 주기적으로 삭제한다.
+- DB에 없고 생성 후 30일을 초과한 orphan 파일을 주기적으로 삭제한다 (클라이언트 best-effort cleanup 실패분의 safety net).
 - endpoint: `GET /api/cron/storage-cleanup`
 - 인증: `Authorization: Bearer ${CRON_SECRET}` (서버 전용 환경 변수, client bundle 미노출). 인증 실패 시 401 반환.
 
