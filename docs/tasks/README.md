@@ -66,12 +66,13 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 | T39 | public 이미지 자산 구조 및 Footer badge 크기 정리 | P1       | 진행 전 | 확인 필요    | T18                | [T39_public_image_asset_footer_badge_cleanup.md](T39_public_image_asset_footer_badge_cleanup.md)         |
 | T40 | Storage orphan cleanup API 및 hook 통합           | P1       | 진행 전 | 확인 필요    | T06                | [T40_storage_orphan_cleanup_api_hook.md](T40_storage_orphan_cleanup_api_hook.md)                         |
 | T41 | Storage lifecycle 주기적 orphan scanner           | P2       | 진행 전 | 확인 필요    | T06, T40           | [T41_storage_lifecycle_cron.md](T41_storage_lifecycle_cron.md)                                           |
+| T42 | 법적 고지 페이지 및 동의 흐름 구현                | P1       | 진행 전 | 확인 필요    | 없음               | [T42_legal_compliance_pages.md](T42_legal_compliance_pages.md)                                           |
 
 ## 추천 진행 흐름
 
 1. 운영 정책과 기준 문서 확정: T01, T06, T07, T08, T19, T27
 2. 운영 차단 요소 제거: T09, T02, T03, T04, T05
 3. 기본 개발 하네스와 자산 정리: T24, T17, T20, T39
-4. 심화 초반 구조 안정화: T10, T11, T12, T13, T14, T15, T16, T18, T40
+4. 심화 초반 구조 안정화: T10, T11, T12, T13, T14, T15, T16, T18, T40, T42
 5. 심화 기능 구현: T21, T22, T23, T25, T26, T28, T29, T30, T38, T41
 6. 확장 단계 검토: T31, T32, T33, T34, T35, T36, T37
