@@ -660,6 +660,7 @@ Behavior:
 - `pickupNumber`는 같은 sequence에서 `A-01`부터 `Z-99`까지 생성한다. 매장+픽업일 기준 2,574건을 초과하면 주문 확정 실패로 처리한다.
 - 취소/환불/노쇼가 발생해도 이미 발급된 `storeOrderNumber`와 `pickupNumber`는 회수하거나 재사용하지 않는다.
 - `payments` DB schema는 결제 기록과 주문 확정에 집중한다. 수수료/정산 필드는 후속 Settlement/Fee Policy phase 범위이다.
+- `confirm_payment` RPC 실패 시 보상 정책(Option B): `PAYMENT_MOCK=false`이면 `callTossCancel`로 Toss 자동 취소를 시도하고, 성공 시 `revert_payment_processing`으로 주문을 `payment_pending`으로 복구한다. cancel 실패 또는 revert 실패 시 주문은 `processing` 잔류하며 운영 알람 대상이 된다(30분 기준). `PAYMENT_MOCK=true`이면 Toss cancel을 호출하지 않고 `revert_payment_processing`만 시도한다.
 
 ### 6.3 `PaymentResponse`
 
@@ -691,6 +692,9 @@ export interface PaymentResponse {
 - lazy cleanup은 상품/주문/결제 API 진입 시 만료된 `payment_pending` 주문을 `expired`로 변경하고 `reserved_stock`을 복구하는 RPC/transaction을 호출한다.
 - 결제 confirm은 lazy cleanup과 별개로 반드시 `expiresAt`을 검사한다.
 - scheduled job/cron 기반 정리는 MVP 이후 안정화 단계에서 추가한다.
+- `confirm_payment` RPC 실패로 `processing` 잔류한 주문의 gap 처리는 6.2 Behavior의 Option B 보상 정책을 따른다.
+- `processing` 상태로 30분 이상 잔류하는 주문은 운영 알람 대상이며 관리자가 수동으로 확인한다.
+- outbox/webhook/idempotency 고도화는 T11 backlog으로 분리한다.
 
 DB source:
 
@@ -1012,6 +1016,8 @@ Admin API는 `/api/admin/*`로 분리한다. 모든 Admin API는 `requireAdmin()
 | ---------- | -------------- | ------ | --------------------- | -------- |
 | A-PROD-01  | 전체 상품 조회 | GET    | `/api/admin/products` | P1       |
 | A-ORDER-01 | 전체 주문 조회 | GET    | `/api/admin/orders`   | P1       |
+
+A-ORDER-01은 `status=processing` filter를 지원해야 한다. `processing` 잔류 주문 운영 확인(30분 알람 기준)에 사용된다. 우선순위 P1 유지, T04 이후 구현 예정.
 
 ### 10.5 Dashboard
 
