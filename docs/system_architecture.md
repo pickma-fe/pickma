@@ -567,6 +567,6 @@ src/
 
 ### 13.5 향후 재검토 사항
 
-- Toss 지급대행/KYC 책임 범위 확정 시 서류 보관 의무 재검토.
+- Toss 지급대행/KYC 책임 범위 확정 시 서류 보관 의무 재검토. 세부 정책은 T44에서 결정한다.
 - 분쟁 대응에 필요한 최소 메타데이터 범위 확인 (운영/CS 정책).
 - public bucket(store-images, product-images, profile-images) orphan 처리는 P3에서 결정.

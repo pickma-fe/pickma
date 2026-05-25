@@ -33,13 +33,16 @@
 - 작업 내용:
   - `DELETE /api/files` cleanup endpoint 구현: `{ storagePaths: string[] }` body, `requireActiveUser()` 인증, userId prefix로 소유권 검증, service role client로 storage 삭제.
   - `useCreateSellerApplication` hook `mutationFn` catch에서 업로드 성공 파일의 `storagePath` 목록으로 cleanup API 호출 (best-effort, 실패 시 로깅만).
-  - `POST /api/admin/sellers/:id/reject` Route Handler에서 서류 파일 best-effort cleanup (실패 시 로깅만, cron이 안전망 역할).
+  - `POST /api/admin/sellers/:id/reject` Route Handler에서 서류 파일 best-effort cleanup (실패 시 로깅만, cron이 안전망 역할). `:id`는 seller application id이며 내부 dynamic segment는 `[applicationId]`로 정리한다.
+  - admin seller application Route Handler dynamic segment를 실제 의미에 맞게 `[id]`에서 `[applicationId]`로 rename하고 관련 params/service 파라미터명을 정리한다.
 
 - 관련 파일/영역:
   - `src/app/api/files/route.ts` (신규)
   - `src/app/api/files/_lib/service.ts` (신규 또는 수정)
   - `src/hooks/seller/applications/useCreateSellerApplication.ts`
-  - `src/app/api/admin/sellers/[id]/reject/route.ts`
+  - `src/app/api/admin/sellers/[applicationId]/reject/route.ts` (rename)
+  - `src/app/api/admin/sellers/[applicationId]/approve/route.ts` (rename)
+  - `docs/api_spec.md`
 
 - 예상 난이도:
   중간
@@ -48,3 +51,4 @@
   - `DELETE /api/files` endpoint가 구현되고 소유권 검증이 통과한다.
   - `useCreateSellerApplication` 실패 시 업로드 파일이 best-effort로 cleanup된다.
   - 신청 거부 시 서류 파일이 best-effort로 cleanup된다.
+  - admin seller application approve/reject endpoint의 dynamic segment와 내부 변수명이 `applicationId` 기준으로 정리된다.
