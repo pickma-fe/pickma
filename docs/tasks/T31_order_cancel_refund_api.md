@@ -10,7 +10,7 @@
   P3
 
 - 선행 조건:
-  - 선행 task: T01. 결제 confirm 보상 정책 확정, T11. 결제 outbox/webhook/idempotency 설계
+  - 선행 task: T11. 결제 outbox/webhook/idempotency 설계
 
 - 분류:
   기능
