@@ -1,10 +1,10 @@
 # T01. 결제 confirm 보상 정책 확정
 
 - 상태:
-  진행 전
+  완료
 
 - GitHub Issue:
-  확인 필요
+  155
 
 - 우선순위:
   P0
@@ -54,3 +54,11 @@
   - 팀이 승인한 보상 정책이 문서화된다.
   - `processing` 장애 주문의 감지/처리 절차가 명확하다.
   - 후속 구현 task가 API/UI 단위로 분리된다.
+
+- 구현 결과:
+  - Option B 정책: `docs/system_architecture.md` 7절, `docs/api_spec.md` 6.2/6.4에 반영
+  - `callTossCancel` 구현: `src/app/api/payments/_lib/toss.ts`
+  - `confirm_payment` 실패 시 보상 블록: `src/app/api/payments/_lib/service.ts`
+  - 단위 테스트 45개 통과 (toss.test.ts, service.test.ts)
+  - A-ORDER-01 `status=processing` filter 스펙 P1 확정: `docs/api_spec.md` 10.4절
+  - 후속 task: T11 (outbox/webhook/idempotency), A-ORDER-01 구현 (T04 이후)

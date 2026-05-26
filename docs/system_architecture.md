@@ -325,6 +325,15 @@ sequenceDiagram
 - 주문 생성, 결제 확정, 예약 해제에 따른 재고 변경은 Postgres RPC/transaction으로 atomic하게 처리한다.
 - `payment_pending` 주문은 `expiresAt` 이후 `expired`로 전환하고 `reserved_stock`을 복구한다.
 - 초기 구현은 API 진입 시 lazy cleanup과 결제 confirm 시점 검사를 사용하고, scheduled job/cron은 MVP 이후 보강한다.
+- **Toss confirm 성공 + `confirm_payment` RPC 실패 시 보상 정책(Option B)**: Toss confirm 직후 내부 `confirm_payment` RPC가 실패하면 실제 결제는 승인됐지만 주문은 `processing` 상태에 잔류하는 gap이 발생한다. 보상 정책으로 Option B를 채택한다.
+  - `PAYMENT_MOCK=false`: `callTossCancel`로 Toss 자동 취소 시도 → 성공 시 `revert_payment_processing` RPC로 주문을 `payment_pending`으로 복구(best-effort)
+  - `PAYMENT_MOCK=true`: Toss cancel 미호출, `revert_payment_processing`만 시도
+  - fallback 상태:
+    - cancel 성공 + revert 성공 → 결제 취소, 주문 `payment_pending` 복구
+    - cancel 실패 → 결제 승인 상태 유지, 주문 `processing` 잔류 (운영 알람 대상)
+    - cancel 성공 + revert 실패 → 결제 취소, 주문 `processing` 잔류 (운영 알람 대상)
+  - `processing` 상태로 30분 이상 잔류하는 주문은 운영 알람 대상이며 수동 확인이 필요하다.
+  - 후속 고도화: T11 (outbox/webhook/idempotency), A-ORDER-01 `status=processing` filter (P1)
 
 ---
 

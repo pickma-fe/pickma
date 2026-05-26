@@ -35,6 +35,7 @@
   - Toss webhook 수신 정책과 허용 결제수단 범위를 정한다.
   - confirm retry와 idempotency key 기준을 정한다.
   - P2 realtime notification과 연결할 이벤트 모델을 정의한다.
+  - T01 보상 실패 이벤트(callTossCancel 실패, revert_payment_processing 실패, processing 30분 잔류)를 같은 운영 이벤트 모델로 통합해 추적 가능하도록 설계한다.
 
 - 관련 파일/영역:
   - `src/app/api/payments/_lib/service.ts`
