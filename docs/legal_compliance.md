@@ -96,6 +96,6 @@ T42에서 `/privacy-policy` 페이지 구현 시 아래 항목이 포함되어�
 
 ## 4. 미결 / 재검토 필요 항목
 
-- **Toss KYC 의무 범위**: PickMa가 신분증 사본을 직접 보관해야 하는지, Toss가 KYC 주체인지 Toss 계약서에서 확인 필요. 확인 결과에 따라 `docs/system_architecture.md` 섹션 13.5 재검토.
-- **신분증 원본 처리 개선**: 고유식별정보(주민번호) 마스킹 처리 또는 PASS·휴대폰 인증 등 대체 방식 검토 필요 → issue draft: `temp/issues/backend/seller-document-id-masking.md`
+- **Toss KYC 의무 범위**: PickMa가 신분증 사본을 직접 보관해야 하는지, Toss가 KYC 주체인지 Toss 계약서에서 확인 필요 → T44
+- **신분증 원본 처리 개선**: 고유식별정보(주민번호) 마스킹 처리 또는 PASS·휴대폰 인증 등 대체 방식 검토 필요 → T44
 - **개인정보 보호책임자 지정**: 처리방침 작성 전 담당자 확정 필요 (운영 결정).

@@ -10,7 +10,7 @@
   P2
 
 - 선행 조건:
-  - 선행 task: T02. 판매자 주문 관리 real API 연결
+  - 선행 task: T15. TanStack Query key 및 invalidation factory 도입
 
 - 분류:
   UI
