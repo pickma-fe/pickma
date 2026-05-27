@@ -1,10 +1,10 @@
 # T07. service role 사용 기준 및 owner scope 테스트 수립
 
 - 상태:
-  진행 전
+  진행 중
 
 - GitHub Issue:
-  확인 필요
+  175
 
 - 우선순위:
   P0
