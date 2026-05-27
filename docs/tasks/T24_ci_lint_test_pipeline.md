@@ -1,10 +1,10 @@
 # T24. CI 기본 파이프라인 구축
 
 - 상태:
-  진행 전
+  완료
 
 - GitHub Issue:
-  확인 필요
+  173
 
 - 우선순위:
   P1
@@ -38,6 +38,14 @@
   - E2E는 T23 완료 후 별도 job으로 추가한다. 이 task에서는 포함하지 않는다.
   - Supabase env/mock mode secret 전략을 정리한다.
   - 로컬 Codex 환경에서는 `npm run build`를 실행하지 않지만, CI에서 build를 실행할지는 팀 결정이 필요하다.
+
+- 구현 메모:
+  - 기본 CI job은 `npm ci`, `npx playwright install --with-deps chromium`, `npm run lint`, `npm run typecheck`, `npm run test`를 실행한다.
+  - `npm run test`에는 Storybook/Vitest browser project가 포함되어 Chromium 설치가 필요하다.
+  - CI env는 외부 서비스에 연결하지 않는 mock/test placeholder 값을 사용한다.
+  - `npm run build`는 초기 CI 필수 job에서 제외하고, 팀 결정 후 별도 job으로 추가한다.
+  - E2E job은 T23 완료 후 추가한다.
+  - branch protection은 GitHub UI에서 `CI / Lint, typecheck, and test` 필수 check로 설정한다.
 
 - 관련 파일/영역:
   - `.github/workflows/ci.yml` (신규)

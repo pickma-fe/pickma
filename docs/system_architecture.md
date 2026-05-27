@@ -476,7 +476,42 @@ src/
 
 ---
 
-## 11. 보안 고려사항
+## 11. CI/CD
+
+GitHub Actions 기본 CI는 PR과 `dev`/`main` push에서 실행한다.
+
+초기 CI job은 다음 명령을 순서대로 실행한다.
+
+```bash
+npm ci
+npx playwright install --with-deps chromium
+npm run lint
+npm run typecheck
+npm run test
+```
+
+`npm run test`에는 Storybook/Vitest browser project가 포함되므로 Chromium browser를 설치한다. E2E job은 T23 완료 후 별도 workflow 또는 job으로 분리하며, 이 기본 CI job에는 포함하지 않는다.
+
+CI 환경 변수는 실제 외부 서비스에 연결하지 않는 mock/test 값을 사용한다.
+
+| 변수명                                 | CI 기본값                | 비고                          |
+| -------------------------------------- | ------------------------ | ----------------------------- |
+| `API_MOCK_ENABLED`                     | `true`                   | Route Handler mock mode       |
+| `PAYMENT_MOCK`                         | `true`                   | Toss API 미호출               |
+| `NEXT_PUBLIC_APP_URL`                  | `http://localhost:3000`  | 서버 API origin 고정용        |
+| `NEXT_PUBLIC_SUPABASE_URL`             | `http://127.0.0.1:54321` | test placeholder              |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | `test-publishable-key`   | test placeholder              |
+| `SUPABASE_SECRET_KEY`                  | `test-secret-key`        | test placeholder, secret 아님 |
+| `NEXT_PUBLIC_TOSS_CLIENT_KEY`          | `test_ck_ci`             | test placeholder              |
+| `TOSS_SECRET_KEY`                      | `test_sk_ci`             | test placeholder, secret 아님 |
+
+`npm run build`는 초기 CI 필수 job에 포함하지 않고, 팀 결정 후 별도 job으로 추가한다.
+
+Branch protection은 `dev` 대상 PR에서 `CI / Lint, typecheck, and test` 통과를 필수 check로 설정한다. 저장소 설정은 GitHub UI에서 관리한다.
+
+---
+
+## 12. 보안 고려사항
 
 | 항목        | 대응 방안                                                                        |
 | ----------- | -------------------------------------------------------------------------------- |
@@ -489,7 +524,7 @@ src/
 
 ---
 
-## 12. 확장 포인트
+## 13. 확장 포인트
 
 | 기능        | 확장 방안                 |
 | ----------- | ------------------------- |
