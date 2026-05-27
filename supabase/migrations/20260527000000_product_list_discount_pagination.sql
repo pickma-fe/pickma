@@ -1,6 +1,13 @@
 -- ============================================================
 -- Public product list RPC
 -- Role: keep DB-level filtering/sorting/pagination for computed discount rate
+--
+-- SECURITY DEFINER note:
+-- This function intentionally exposes only public product list fields.
+-- Public scope is enforced in the function body by products.status = 'active',
+-- stores.status = 'approved', and the explicit region/category/keyword/
+-- availability filters below. Do not add private seller/customer fields to the
+-- JSON response without reviewing the public exposure boundary.
 -- ============================================================
 
 CREATE OR REPLACE FUNCTION list_public_products(

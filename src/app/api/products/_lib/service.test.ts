@@ -326,6 +326,45 @@ describe('getProducts', () => {
     expect(result.items).toHaveLength(1);
   });
 
+  it('할인율 RPC 실패 시 INTERNAL_SERVER_ERROR를 throw한다', async () => {
+    const supabase = buildSupabase(
+      { data: [], error: null, count: 0 },
+      { data: null, error: { message: 'rpc failed' } }
+    );
+
+    await expect(
+      getProducts(supabase, {
+        page: 1,
+        pageSize: 20,
+        discountOption: 'over-40',
+      })
+    ).rejects.toMatchObject({ code: ERROR_CODE.INTERNAL_SERVER_ERROR });
+  });
+
+  it('할인율 RPC 응답 구조가 깨지면 INTERNAL_SERVER_ERROR를 throw한다', async () => {
+    const supabase = buildSupabase(
+      { data: [], error: null, count: 0 },
+      {
+        data: {
+          items: [{ ...baseProductListItem, id: 'invalid-id' }],
+          page: 1,
+          pageSize: 20,
+          totalCount: 1,
+          totalPages: 1,
+        },
+        error: null,
+      }
+    );
+
+    await expect(
+      getProducts(supabase, {
+        page: 1,
+        pageSize: 20,
+        discountOption: 'over-40',
+      })
+    ).rejects.toMatchObject({ code: ERROR_CODE.INTERNAL_SERVER_ERROR });
+  });
+
   it('region 파라미터가 없으면 stores.region 필터를 적용하지 않는다', async () => {
     const supabase = buildSupabase({ data: [], error: null, count: 0 });
 

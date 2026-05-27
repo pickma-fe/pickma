@@ -1,4 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { z } from 'zod';
 
 import type {
   ProductDetailResponse,
@@ -31,6 +32,39 @@ const PRODUCT_SELECT = [
   'stores!inner(id, name, description, phone, address, address_detail, region, image)',
 ].join(', ');
 
+const productListItemResponseSchema = z.object({
+  id: z.uuid(),
+  storeId: z.uuid(),
+  storeName: z.string(),
+  categoryId: z.uuid().optional(),
+  categoryName: z.string().optional(),
+  menuItemId: z.uuid(),
+  name: z.string(),
+  image: z.string().optional(),
+  originalPrice: z.number(),
+  discountPrice: z.number(),
+  discountRate: z.number(),
+  stock: z.number(),
+  reservedStock: z.number(),
+  availableStock: z.number(),
+  isSoldOut: z.boolean(),
+  isExpired: z.boolean(),
+  displayStatus: z.enum(['available', 'soldOut', 'expired', 'closed']),
+  endAt: z.string(),
+  pickupStartTime: z.string(),
+  pickupEndTime: z.string(),
+  status: z.enum(['active', 'closed']),
+  updatedAt: z.string(),
+});
+
+const productListResponseSchema: z.ZodType<ProductListResponse> = z.object({
+  items: z.array(productListItemResponseSchema),
+  page: z.number().int().positive(),
+  pageSize: z.number().int().positive(),
+  totalCount: z.number().int().nonnegative(),
+  totalPages: z.number().int().nonnegative(),
+});
+
 export async function getProducts(
   supabase: SupabaseClient<Database>,
   params: ProductListParams
@@ -59,7 +93,13 @@ export async function getProducts(
       throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
     }
 
-    return data as unknown as ProductListResponse;
+    const parsedResponse = productListResponseSchema.safeParse(data);
+
+    if (!parsedResponse.success) {
+      throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
+    }
+
+    return parsedResponse.data;
   }
 
   let query = supabase
