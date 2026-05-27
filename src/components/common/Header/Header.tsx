@@ -107,40 +107,50 @@ function UserMenu({
   }
 
   return (
-    <div className="relative">
-      <Menu>
-        <MenuButton className="group headlessui-focus-visible:ring-2 headlessui-focus-visible:ring-primary-500 headlessui-focus-visible:ring-offset-2 flex items-center gap-2 rounded-sm px-4 py-2 focus:outline-none">
-          <ProfileAvatar user={user} />
-          {user.name}
-          <ChevronDownIcon className="h-4 w-4 group-data-active:hidden" />
-          <ChevronUpIcon className="hidden h-4 w-4 group-data-active:block" />
-        </MenuButton>
-        <MenuItems className="absolute right-0 z-50 mt-2 w-48 rounded border border-gray-200 bg-white shadow-lg focus:outline-none">
-          {menuItems.map((item) =>
-            item.type === 'link' ? (
-              <MenuItem
-                key={item.label}
-                as={Link}
-                href={item.href}
-                className={`block px-4 py-2 hover:bg-gray-100 data-focus:bg-gray-100 ${item.className || ''}`}
-              >
-                {item.label}
-              </MenuItem>
-            ) : (
-              <MenuItem
-                key={item.label}
-                as="button"
-                type="button"
-                onClick={item.onClick}
-                className={`block w-full px-4 py-2 text-left hover:bg-gray-100 data-focus:bg-gray-100 ${item.className || ''}`}
-              >
-                {item.label}
-              </MenuItem>
-            )
-          )}
-        </MenuItems>
-      </Menu>
-    </div>
+    <Menu as="div" className="relative inline-block text-left">
+      <MenuButton className="group focus-visible:ring-primary-500 flex items-center gap-2 rounded-sm px-4 py-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2">
+        <ProfileAvatar user={user} />
+        {user.name}
+        <ChevronDownIcon
+          aria-hidden="true"
+          focusable="false"
+          className="h-4 w-4 group-data-open:hidden"
+        />
+        <ChevronUpIcon
+          aria-hidden="true"
+          focusable="false"
+          className="hidden h-4 w-4 group-data-open:block"
+        />
+      </MenuButton>
+
+      <MenuItems
+        anchor="bottom end"
+        className="z-50 mt-2 w-48 rounded-md border border-gray-200 bg-white p-1 shadow-lg focus:outline-none"
+      >
+        {menuItems.map((item) =>
+          item.type === 'link' ? (
+            <MenuItem
+              key={item.label}
+              as={Link}
+              href={item.href}
+              className={`block rounded px-3 py-2 text-sm text-gray-700 data-focus:bg-gray-100 ${item.className || ''}`}
+            >
+              {item.label}
+            </MenuItem>
+          ) : (
+            <MenuItem
+              key={item.label}
+              as="button"
+              type="button"
+              onClick={item.onClick}
+              className={`block w-full rounded px-3 py-2 text-left text-sm text-gray-700 data-focus:bg-gray-100 ${item.className || ''}`}
+            >
+              {item.label}
+            </MenuItem>
+          )
+        )}
+      </MenuItems>
+    </Menu>
   );
 }
 
