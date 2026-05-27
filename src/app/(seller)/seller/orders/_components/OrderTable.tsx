@@ -2,25 +2,26 @@
 
 import { useState } from 'react';
 
-import type {
-  OrderListItemResponse,
-  OrderStatusParam,
-} from '@/contracts/order';
+import type { Order } from '@/types/order';
 import { Badge } from '@/components/common/Badge/Badge';
 import { Button } from '@/components/common/Button/Button';
 import { Dropdown } from '@/components/common/Dropdown/Dropdown';
 import { Pagination } from '@/components/common/Pagination/Pagination';
 
-type OrderActionStatus = Extract<
-  OrderStatusParam,
-  'accepted' | 'ready' | 'completed' | 'cancelled'
->;
+import type {
+  SellerOrderActionStatus,
+  SellerOrderDisplayStatus,
+} from '../_lib/sellerOrderTypes';
+
+type SellerOrderListItem = Omit<Order, 'items' | 'payment'>;
 
 interface OrderTableProps {
-  orders: OrderListItemResponse[];
+  orders: SellerOrderListItem[];
   currentPage: number;
   onPageChange: (page: number) => void;
-  onOrderAction: (orderId: string, newStatus: OrderActionStatus) => void;
+  onOrderAction: (orderId: string, newStatus: SellerOrderActionStatus) => void;
+  isLoading?: boolean;
+  isError?: boolean;
 }
 
 const PAGE_SIZE_OPTIONS = [
@@ -31,13 +32,10 @@ const PAGE_SIZE_OPTIONS = [
 
 const formatPrice = (price: number) => price.toLocaleString('ko-KR') + '원';
 
-const formatDate = (dateString: string) => {
-  const date = new Date(dateString);
-  return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`;
-};
+const formatDate = (date: Date) =>
+  `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`;
 
-const formatTime = (dateString: string) => {
-  const date = new Date(dateString);
+const formatTime = (date: Date) => {
   const hours = date.getHours();
   const minutes = String(date.getMinutes()).padStart(2, '0');
   const period = hours >= 12 ? '오후' : '오전';
@@ -46,7 +44,7 @@ const formatTime = (dateString: string) => {
 };
 
 const STATUS_BADGE: Record<
-  string,
+  SellerOrderDisplayStatus,
   { label: string; color: 'warning' | 'info' | 'success' | 'danger' | 'gray' }
 > = {
   reserved: { label: '수락 대기', color: 'warning' },
@@ -54,24 +52,30 @@ const STATUS_BADGE: Record<
   ready: { label: '픽업 대기', color: 'info' },
   completed: { label: '픽업 완료', color: 'success' },
   cancelled: { label: '취소/환불', color: 'danger' },
-  no_show: { label: '미수령', color: 'gray' },
+  noShow: { label: '미수령', color: 'gray' },
 };
 
-const STATUS_DESCRIPTION: Record<string, string> = {
+const STATUS_DESCRIPTION: Record<SellerOrderDisplayStatus, string> = {
   reserved: '주문을 수락하거나 취소해주세요.',
   accepted: '주문 상품을 준비해주세요.',
   ready: '고객 픽업을 기다리고 있습니다.',
   completed: '픽업이 완료되었습니다.',
   cancelled: '주문이 취소/환불되었습니다.',
-  no_show: '고객이 미수령하였습니다.',
+  noShow: '고객이 미수령하였습니다.',
 };
+
+function isSellerDisplayStatus(
+  status: Order['status']
+): status is SellerOrderDisplayStatus {
+  return status in STATUS_BADGE;
+}
 
 function OrderActionButtons({
   order,
   onOrderAction,
 }: {
-  order: OrderListItemResponse;
-  onOrderAction: (orderId: string, newStatus: OrderActionStatus) => void;
+  order: SellerOrderListItem;
+  onOrderAction: (orderId: string, newStatus: SellerOrderActionStatus) => void;
 }) {
   switch (order.status) {
     case 'reserved':
@@ -87,7 +91,8 @@ function OrderActionButtons({
             className="w-fit px-2 py-0.5 text-sm"
             variant="outline"
             color="danger"
-            onClick={() => onOrderAction(order.id, 'cancelled')}
+            disabled
+            title="주문 취소 기능은 준비 중입니다."
           >
             주문 취소
           </Button>
@@ -106,7 +111,8 @@ function OrderActionButtons({
             className="w-fit px-2 py-0.5 text-sm"
             variant="outline"
             color="danger"
-            onClick={() => onOrderAction(order.id, 'cancelled')}
+            disabled
+            title="주문 취소 기능은 준비 중입니다."
           >
             주문 취소
           </Button>
@@ -123,7 +129,7 @@ function OrderActionButtons({
       );
     case 'completed':
     case 'cancelled':
-    case 'no_show':
+    case 'noShow':
       return null;
     default:
       return null;
@@ -135,6 +141,8 @@ export function OrderTable({
   currentPage,
   onPageChange,
   onOrderAction,
+  isLoading = false,
+  isError = false,
 }: OrderTableProps) {
   const [pageSize, setPageSize] = useState(10);
 
@@ -146,6 +154,27 @@ export function OrderTable({
     setPageSize(Number(value));
     onPageChange(1);
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-[300px] items-center justify-center rounded-lg border border-gray-200 bg-white">
+        <p className="text-sm text-gray-500">주문 목록을 불러오는 중...</p>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="flex min-h-[300px] items-center justify-center rounded-lg border border-gray-200 bg-white">
+        <div className="text-center">
+          <p className="text-sm text-gray-500">
+            주문 목록을 불러오지 못했습니다.
+          </p>
+          <p className="text-xs text-gray-400">잠시 후 다시 시도해주세요.</p>
+        </div>
+      </div>
+    );
+  }
 
   if (orders.length === 0) {
     return (
@@ -199,11 +228,10 @@ export function OrderTable({
           </thead>
           <tbody>
             {paginatedOrders.map((order, index) => {
-              const badge = STATUS_BADGE[order.status] ?? {
-                label: order.status,
-                color: 'gray' as const,
-              };
-              const description = STATUS_DESCRIPTION[order.status] ?? '';
+              if (!isSellerDisplayStatus(order.status)) return null;
+
+              const badge = STATUS_BADGE[order.status];
+              const description = STATUS_DESCRIPTION[order.status];
 
               return (
                 <tr

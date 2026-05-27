@@ -1,39 +1,41 @@
 'use client';
 
 import {
-  ShoppingBag,
-  Clock,
-  PackageCheck,
-  CheckCircle,
-  XCircle,
-  Package,
   AlertCircle,
+  CheckCircle,
+  Clock,
+  Package,
+  PackageCheck,
+  ShoppingBag,
+  XCircle,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
-import type {
-  OrderStatusParam,
-  SellerOrderListParams,
-} from '@/contracts/order';
+import type { Order } from '@/types/order';
+import { useAcceptSellerOrder } from '@/hooks/seller/orders/useAcceptSellerOrder';
+import { useCompleteSellerOrder } from '@/hooks/seller/orders/useCompleteSellerOrder';
+import { useMarkSellerOrderReady } from '@/hooks/seller/orders/useMarkSellerOrderReady';
+import { useSellerOrders } from '@/hooks/seller/orders/useSellerOrders';
 import { Section } from '@/components/common/Section/Section';
-import { mockOrders } from '@/mocks/orders';
 
 import { OrderFilter } from './OrderFilter';
 import { OrderTable } from './OrderTable';
+import type {
+  SellerOrderActionStatus,
+  SellerOrderDisplayStatus,
+} from '../_lib/sellerOrderTypes';
 
-type SellerOrderFilterStatus =
-  | Exclude<SellerOrderListParams['status'], undefined>
-  | '전체';
+type SellerOrderListItem = Omit<Order, 'items' | 'payment'>;
+type SellerOrderFilterStatus = SellerOrderDisplayStatus | '전체';
 
-type OrderActionStatus = Extract<
-  OrderStatusParam,
-  'accepted' | 'ready' | 'completed' | 'cancelled'
->;
-
-const SELLER_BASE_STATUSES: Exclude<
-  SellerOrderListParams['status'],
-  undefined
->[] = ['reserved', 'accepted', 'ready', 'completed', 'cancelled', 'no_show'];
+const SELLER_DISPLAY_STATUSES = new Set<SellerOrderDisplayStatus>([
+  'reserved',
+  'accepted',
+  'ready',
+  'completed',
+  'cancelled',
+  'noShow',
+]);
 
 const STAT_CARDS: {
   label: string;
@@ -86,7 +88,7 @@ const STAT_CARDS: {
   },
   {
     label: '미수령',
-    value: 'no_show',
+    value: 'noShow',
     icon: AlertCircle,
     bgColor: 'bg-gray-100',
     iconColor: 'text-gray-600',
@@ -94,42 +96,63 @@ const STAT_CARDS: {
 ];
 
 export function OrderManageContent() {
-  const [orders, setOrders] = useState(
-    mockOrders.filter((o) =>
-      SELLER_BASE_STATUSES.includes(
-        o.status as Exclude<SellerOrderListParams['status'], undefined>
-      )
-    )
-  );
   const [selectedStatus, setSelectedStatus] =
     useState<SellerOrderFilterStatus>('전체');
   const [searchKeyword, setSearchKeyword] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
 
+  const { data, isLoading, isError } = useSellerOrders();
+  const acceptOrder = useAcceptSellerOrder();
+  const markOrderReady = useMarkSellerOrderReady();
+  const completeOrder = useCompleteSellerOrder();
+
+  // 판매자 화면에 표시할 상태만 필터링
+  const displayOrders = useMemo<SellerOrderListItem[]>(
+    () =>
+      (data?.items ?? []).filter((o) =>
+        SELLER_DISPLAY_STATUSES.has(o.status as SellerOrderDisplayStatus)
+      ),
+    [data?.items]
+  );
+
   const getCount = (value: SellerOrderFilterStatus) => {
-    if (value === '전체') return orders.length;
-    return orders.filter((o) => o.status === value).length;
+    if (value === '전체') return displayOrders.length;
+    return displayOrders.filter((o) => o.status === value).length;
   };
 
-  const filteredOrders = orders.filter((order) => {
-    const matchStatus =
-      selectedStatus === '전체' || order.status === selectedStatus;
+  const filteredOrders = useMemo(
+    () =>
+      displayOrders.filter((order) => {
+        const matchStatus =
+          selectedStatus === '전체' || order.status === selectedStatus;
+        const matchSearch =
+          searchKeyword.trim() === '' ||
+          order.orderNumber
+            .toLowerCase()
+            .includes(searchKeyword.trim().toLowerCase());
+        return matchStatus && matchSearch;
+      }),
+    [displayOrders, selectedStatus, searchKeyword]
+  );
 
-    const matchSearch =
-      searchKeyword.trim() === '' ||
-      order.orderNumber
-        .toLowerCase()
-        .includes(searchKeyword.trim().toLowerCase());
-
-    return matchStatus && matchSearch;
-  });
-
-  const handleOrderAction = (orderId: string, newStatus: OrderActionStatus) => {
-    setOrders((prev) =>
-      prev.map((order) =>
-        order.id === orderId ? { ...order, status: newStatus } : order
-      )
-    );
+  const handleOrderAction = (
+    orderId: string,
+    newStatus: SellerOrderActionStatus
+  ) => {
+    switch (newStatus) {
+      case 'accepted':
+        acceptOrder.mutate(orderId);
+        break;
+      case 'ready':
+        markOrderReady.mutate(orderId);
+        break;
+      case 'completed':
+        completeOrder.mutate(orderId);
+        break;
+      case 'cancelled':
+        // TODO: T31 주문 취소/환불 API 구현 후 연결
+        break;
+    }
     setCurrentPage(1);
   };
 
@@ -182,10 +205,16 @@ export function OrderManageContent() {
                   <div>
                     <p className="text-sm text-gray-500">{card.label}</p>
                     <p className="text-2xl font-bold text-gray-900">
-                      {getCount(card.value)}
-                      <span className="text-base font-normal text-gray-500">
-                        건
-                      </span>
+                      {isLoading ? (
+                        <span className="text-base text-gray-400">...</span>
+                      ) : (
+                        <>
+                          {getCount(card.value)}
+                          <span className="text-base font-normal text-gray-500">
+                            건
+                          </span>
+                        </>
+                      )}
                     </p>
                   </div>
                 </div>
@@ -207,6 +236,8 @@ export function OrderManageContent() {
         currentPage={currentPage}
         onPageChange={setCurrentPage}
         onOrderAction={handleOrderAction}
+        isLoading={isLoading}
+        isError={isError}
       />
     </div>
   );
