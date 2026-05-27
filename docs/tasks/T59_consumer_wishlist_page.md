@@ -25,10 +25,10 @@
   API
 
 - 배경:
-  PRD C-MY-04에서 찜 목록(관심 가게/상품 저장)을 P2 요구사항으로 정의한다. IA 정합성 확인 중 `/mypage/wishlist` 경로가 미구현 상태임을 확인했다. api_spec 11장에도 wishlist API가 명세되어 있다.
+  PRD C-MY-04에서 찜 목록(관심 가게 저장)을 P2 요구사항으로 정의한다. IA 정합성 확인 중 `/mypage/wishlist` 경로가 미구현 상태임을 확인했다. api_spec 11장에도 wishlist API가 명세되어 있다. 상품 찜은 현재 ERD/API spec 미정의이므로 이 task는 가게 찜 범위만 다루며, 상품 찜은 별도 후속 task가 필요하다.
 
 - 문제:
-  소비자가 관심 가게/상품을 저장하고 목록으로 확인할 화면과 API가 없다.
+  소비자가 관심 가게를 저장하고 목록으로 확인할 화면과 API가 없다.
 
 - 작업 내용:
   - `/mypage/wishlist` 찜 목록 페이지 구현
@@ -46,7 +46,7 @@
 - 완료 기준:
   - `/mypage/wishlist`에서 찜한 가게 목록을 확인할 수 있다.
   - 가게 찜 추가/삭제가 동작한다.
-  - PRD C-MY-04 요구사항을 충족한다.
+  - PRD C-MY-04 중 가게 찜 범위를 충족한다 (상품 찜은 ERD/API spec 미정의 — 후속 task).
 
 - 확인 필요 사항:
   - wishlist API 현재 구현 상태 (`api_spec` 11장 기준)
