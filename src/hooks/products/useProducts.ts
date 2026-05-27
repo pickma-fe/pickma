@@ -7,9 +7,17 @@ import type { Product } from '@/types/product';
 import type { ProductListParams } from '@/contracts/product';
 import { productApi } from '@/api/products/productApi';
 
-export function useProducts(params: ProductListParams) {
+interface UseProductsOptions {
+  initialData?: PaginatedResult<Product>;
+}
+
+export function useProducts(
+  params: ProductListParams,
+  options?: UseProductsOptions
+) {
   return useQuery<PaginatedResult<Product>>({
     queryKey: ['products', 'list', params],
     queryFn: () => productApi.getProducts(params),
+    initialData: options?.initialData,
   });
 }
