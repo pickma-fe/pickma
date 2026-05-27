@@ -27,8 +27,21 @@ describe('serverApiClient', () => {
 
     expect(fetch).toHaveBeenCalledWith(
       'https://pickma.example.com/api/products/1',
-      expect.objectContaining({ method: 'GET' })
+      expect.objectContaining({ credentials: 'include', method: 'GET' })
     );
+  });
+
+  it('성공 응답의 HTTP status와 envelope statusCode가 다르면 ApiError를 throw한다', async () => {
+    vi.mocked(fetch).mockResolvedValue(
+      new Response(JSON.stringify({ statusCode: 201, data: { ok: true } }), {
+        status: 200,
+      })
+    );
+
+    await expect(serverApiClient.get('/api/products/1')).rejects.toMatchObject({
+      statusCode: 200,
+      code: 'INTERNAL_SERVER_ERROR',
+    });
   });
 
   it('절대 URL path 입력을 거부한다', async () => {
@@ -68,6 +81,26 @@ describe('serverApiClient', () => {
 
     await expect(serverApiClient.get('/api/products/1')).rejects.toMatchObject({
       statusCode: 502,
+      code: 'INTERNAL_SERVER_ERROR',
+    });
+  });
+
+  it('에러 응답의 HTTP status와 envelope statusCode가 다르면 ApiError를 throw한다', async () => {
+    vi.mocked(fetch).mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          statusCode: 400,
+          error: {
+            code: 'PRODUCT_NOT_FOUND',
+            message: '상품을 찾을 수 없습니다.',
+          },
+        }),
+        { status: 404 }
+      )
+    );
+
+    await expect(serverApiClient.get('/api/products/1')).rejects.toMatchObject({
+      statusCode: 404,
       code: 'INTERNAL_SERVER_ERROR',
     });
   });

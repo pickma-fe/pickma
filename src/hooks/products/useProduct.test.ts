@@ -100,6 +100,18 @@ describe('useProduct', () => {
     expect(result.current.isLoading).toBe(false);
   });
 
+  it('초기 상세 데이터 ID가 요청 ID와 다르면 초기 주입을 사용하지 않는다', () => {
+    const { result } = renderHook(
+      () =>
+        useProduct('00000000-0000-4000-8000-000000000052', {
+          initialData: mockDetail,
+        }),
+      { wrapper: createWrapper() }
+    );
+
+    expect(result.current.data).toBeUndefined();
+  });
+
   it('id가 빈 문자열이면 쿼리를 실행하지 않는다', () => {
     const { result } = renderHook(() => useProduct(''), {
       wrapper: createWrapper(),

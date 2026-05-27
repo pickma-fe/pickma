@@ -24,6 +24,16 @@ function isApiSuccessResponse<T>(body: unknown): body is ApiSuccess<T> {
   return typeof response.statusCode === 'number' && 'data' in response;
 }
 
+function assertStatusCodeMatches(
+  httpStatus: number,
+  envelopeStatus: number,
+  message: string
+): void {
+  if (httpStatus === envelopeStatus) return;
+
+  throw new ApiError(httpStatus, 'INTERNAL_SERVER_ERROR', message);
+}
+
 function buildServerUrl(path: string): string {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL;
 
@@ -65,6 +75,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     res = await fetch(url, {
       ...init,
       cache: 'no-store',
+      credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
         ...init?.headers,
@@ -99,6 +110,12 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     }
 
     const err = body;
+    assertStatusCodeMatches(
+      res.status,
+      err.statusCode,
+      'API 오류 응답 상태가 일치하지 않습니다.'
+    );
+
     throw new ApiError(
       err.statusCode,
       err.error.code,
@@ -114,6 +131,12 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
       'API 성공 응답 형식이 올바르지 않습니다.'
     );
   }
+
+  assertStatusCodeMatches(
+    res.status,
+    body.statusCode,
+    'API 성공 응답 상태가 일치하지 않습니다.'
+  );
 
   return body.data;
 }

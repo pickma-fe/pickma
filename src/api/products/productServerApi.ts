@@ -7,7 +7,7 @@ import { mapProductDetail } from './productMapper';
 export const productServerApi = {
   getProduct(id: string): Promise<ProductDetail> {
     return serverApiClient
-      .get<ProductDetailResponse>(`/api/products/${id}`)
+      .get<ProductDetailResponse>(`/api/products/${encodeURIComponent(id)}`)
       .then(mapProductDetail);
   },
 };

@@ -10,10 +10,13 @@ interface UseProductOptions {
 }
 
 export function useProduct(id: string, options: UseProductOptions = {}) {
+  const initialData =
+    options.initialData?.id === id ? options.initialData : undefined;
+
   return useQuery<ProductDetail>({
     queryKey: ['products', 'detail', id],
     queryFn: () => productApi.getProduct(id),
     enabled: Boolean(id),
-    initialData: options.initialData,
+    initialData,
   });
 }
