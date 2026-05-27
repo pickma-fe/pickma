@@ -31,6 +31,36 @@ describe('serverApiClient', () => {
     );
   });
 
+  it('절대 URL path는 외부 origin 호출을 차단한다', async () => {
+    await expect(
+      serverApiClient.get('https://evil.example.com/api/products/1')
+    ).rejects.toMatchObject({
+      statusCode: 500,
+      code: 'INTERNAL_SERVER_ERROR',
+    });
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it('fetch 네트워크 예외를 ApiError로 정규화한다', async () => {
+    vi.mocked(fetch).mockRejectedValue(new TypeError('network failed'));
+
+    await expect(serverApiClient.get('/api/products/1')).rejects.toMatchObject({
+      statusCode: 500,
+      code: 'INTERNAL_SERVER_ERROR',
+    });
+  });
+
+  it('성공 envelope가 깨지면 ApiError를 throw한다', async () => {
+    vi.mocked(fetch).mockResolvedValue(
+      new Response(JSON.stringify({ ok: true }), { status: 200 })
+    );
+
+    await expect(serverApiClient.get('/api/products/1')).rejects.toMatchObject({
+      statusCode: 200,
+      code: 'INTERNAL_SERVER_ERROR',
+    });
+  });
+
   it('에러 envelope가 깨져도 안전한 ApiError를 throw한다', async () => {
     vi.mocked(fetch).mockResolvedValue(
       new Response(JSON.stringify({ message: 'unexpected' }), { status: 502 })
