@@ -75,7 +75,6 @@
 | `open_time`       | time         |                                 | 영업 시작      |
 | `close_time`      | time         |                                 | 영업 종료      |
 | `status`          | enum         | NOT NULL, DEFAULT 'approved'    | 상태           |
-| `reject_reason`   | varchar(500) |                                 | 거절 사유      |
 | `created_at`      | timestamp    | NOT NULL, DEFAULT now()         | 생성일시       |
 | `updated_at`      | timestamp    | NOT NULL, DEFAULT now()         | 수정일시       |
 
