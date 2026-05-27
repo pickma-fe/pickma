@@ -25,7 +25,7 @@
   API
 
 - 배경:
-  IA 정합성 확인 중 `/admin/users`, `/admin/products`, `/admin/orders` 경로가 미구현 상태임을 확인했다. PRD A-USER-01, A-PROD-01, A-ORDER-01 요구사항에 해당한다. 성격이 다른 3개 화면을 우선 하나의 task로 등록하며, 착수 시 규모에 따라 T58/T59 등으로 분리 가능하다.
+  IA 정합성 확인 중 `/admin/users`, `/admin/products`, `/admin/orders` 경로가 미구현 상태임을 확인했다. PRD A-USER-01, A-PROD-01, A-ORDER-01 요구사항에 해당한다. 성격이 다른 3개 화면을 우선 하나의 task로 등록하며, 착수 시 규모에 따라 후속 task로 분리 가능하다.
 
 - 문제:
   관리자가 사용자 목록, 전체 상품 목록, 전체 주문 목록을 확인할 화면이 없다.

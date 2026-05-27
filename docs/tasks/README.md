@@ -83,6 +83,7 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 | T56 | 상품/가게 검색 결과 화면 구현                     | P2       | 진행 전 | 확인 필요    | T05, T12           | [T56_search_result_page.md](T56_search_result_page.md)                                                           |
 | T57 | 관리자 사용자·상품·주문 관리 화면 구현            | P3       | 진행 전 | 확인 필요    | T04                | [T57_admin_users_products_orders_pages.md](T57_admin_users_products_orders_pages.md)                             |
 | T58 | 관리자 대시보드 통계 화면 구현                    | P1       | 진행 전 | 확인 필요    | T07                | [T58_admin_dashboard_statistics.md](T58_admin_dashboard_statistics.md)                                           |
+| T59 | 소비자 찜 목록 화면 및 API 구현                   | P2       | 진행 전 | 확인 필요    | 없음               | [T59_consumer_wishlist_page.md](T59_consumer_wishlist_page.md)                                                   |
 
 ## 추천 진행 흐름
 
@@ -90,6 +91,6 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 2. 인벤토리, 개발 하네스, 공통 정리: T09, T24, T17, T18, T20, T39, T43, T45
 3. 핵심 API/화면 구조 안정화: T02, T03, T04, T05, T10, T11, T12, T13, T14, T15, T16, T40, T42
 4. 미구현 핵심 화면 구현: T50, T51, T52, T53, T54, T58
-5. 심화 기능 구현: T21, T22, T23, T25, T26, T28, T29, T30, T38, T41, T55, T56
+5. 심화 기능 구현: T21, T22, T23, T25, T26, T28, T29, T30, T38, T41, T55, T56, T59
 6. 사용자 흐름별 UI/UX 및 접근성 개선: T46, T47, T48, T49
 7. 확장 단계 검토: T31, T32, T33, T34, T35, T36, T37, T57
