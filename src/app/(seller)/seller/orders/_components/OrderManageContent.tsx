@@ -262,13 +262,21 @@ export function OrderManageContent() {
       </div>
 
       {actionSuccess && (
-        <div className="flex items-center gap-2 rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
+        <div
+          role="status"
+          aria-live="polite"
+          className="flex items-center gap-2 rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700"
+        >
           <CheckCircle className="h-4 w-4 flex-shrink-0" />
           {actionSuccess}
         </div>
       )}
       {actionError && (
-        <div className="flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div
+          role="alert"
+          aria-live="assertive"
+          className="flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+        >
           <AlertCircle className="h-4 w-4 flex-shrink-0" />
           {actionError}
         </div>
