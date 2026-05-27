@@ -146,9 +146,10 @@ export function OrderManageContent() {
   const totalCount = data?.totalCount ?? 0;
   const totalPages = data?.totalPages ?? 0;
 
-  const getCount = (value: SellerOrderFilterStatus) => {
+  // TODO: T26 summary API 구현 후 상태별 집계 연결
+  const getCount = (value: SellerOrderFilterStatus): number | null => {
     if (value === '전체') return totalCount;
-    return displayOrders.filter((o) => o.status === value).length;
+    return null;
   };
 
   const handleOrderAction = (
@@ -218,6 +219,7 @@ export function OrderManageContent() {
         {STAT_CARDS.map((card) => {
           const Icon = card.icon;
           const isSelected = selectedStatus === card.value;
+          const count = getCount(card.value);
 
           return (
             <button
@@ -242,15 +244,19 @@ export function OrderManageContent() {
                   <div>
                     <p className="text-sm text-gray-500">{card.label}</p>
                     <p className="text-2xl font-bold text-gray-900">
-                      {isLoading ? (
+                      {isLoading && (
                         <span className="text-base text-gray-400">...</span>
-                      ) : (
+                      )}
+                      {!isLoading && count !== null && (
                         <>
-                          {getCount(card.value)}
+                          {count}
                           <span className="text-base font-normal text-gray-500">
                             건
                           </span>
                         </>
+                      )}
+                      {!isLoading && count === null && (
+                        <span className="text-base text-gray-400">-</span>
                       )}
                     </p>
                   </div>
