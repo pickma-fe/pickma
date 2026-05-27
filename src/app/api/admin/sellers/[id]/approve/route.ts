@@ -18,7 +18,16 @@ export async function POST(
   try {
     await requireAdmin();
     const result = paramsIdSchema.safeParse(await params);
-    if (!result.success) throw new AppError(ERROR_CODE.VALIDATION_ERROR, 400);
+    if (!result.success)
+      throw new AppError(
+        ERROR_CODE.VALIDATION_ERROR,
+        400,
+        undefined,
+        result.error.issues.map((issue) => ({
+          path: issue.path.join('.'),
+          message: issue.message,
+        }))
+      );
     const { id } = result.data;
     await approveSellerApplication(id);
     return success(null);
