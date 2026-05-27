@@ -26,7 +26,7 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 | ID  | Task                                              | 우선순위 | 상태    | GitHub Issue | 직접 선행 task     | 파일                                                                                                     |
 | --- | ------------------------------------------------- | -------- | ------- | ------------ | ------------------ | -------------------------------------------------------------------------------------------------------- |
 | T01 | 결제 confirm 보상 정책 확정                       | P0       | 완료    | 155          | 없음               | [T01_payment_confirm_compensation_policy.md](T01_payment_confirm_compensation_policy.md)                 |
-| T02 | 판매자 주문 관리 real API 연결                    | P0       | 진행 전 | 확인 필요    | 없음               | [T02_seller_orders_real_api.md](T02_seller_orders_real_api.md)                                           |
+| T02 | 판매자 주문 관리 real API 연결                    | P0       | 진행 중 | 164          | 없음               | [T02_seller_orders_real_api.md](T02_seller_orders_real_api.md)                                           |
 | T03 | 관리자 판매자 승인 화면 구현                      | P0       | 진행 전 | 확인 필요    | 없음               | [T03_admin_seller_approval_page.md](T03_admin_seller_approval_page.md)                                   |
 | T04 | 관리자 가게 목록 real endpoint 및 화면 구현       | P0       | 진행 전 | 확인 필요    | T07                | [T04_admin_stores_real_endpoint_page.md](T04_admin_stores_real_endpoint_page.md)                         |
 | T05 | 상품 목록 할인율 필터/정렬 DB pagination 복구     | P0       | 진행 전 | 확인 필요    | T08                | [T05_product_discount_sort_db_pagination.md](T05_product_discount_sort_db_pagination.md)                 |
