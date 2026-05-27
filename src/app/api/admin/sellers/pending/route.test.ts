@@ -42,10 +42,12 @@ describe('GET /api/admin/sellers/pending', () => {
 
     const res = await GET(makeGetRequest());
     const body = (await res.json()) as {
+      statusCode: number;
       data: AdminPendingSellerApplicationListResponse;
     };
 
     expect(res.status).toBe(200);
+    expect(body.statusCode).toBe(res.status);
     expect(body.data.items).toHaveLength(
       mockAdminPendingSellerApplicationList.items.length
     );
@@ -71,9 +73,13 @@ describe('GET /api/admin/sellers/pending', () => {
     vi.mocked(requireAdmin).mockResolvedValue(adminResult);
 
     const res = await GET(makeGetRequest('page=-1'));
-    const body = (await res.json()) as { error: { code: string } };
+    const body = (await res.json()) as {
+      statusCode: number;
+      error: { code: string };
+    };
 
     expect(res.status).toBe(400);
+    expect(body.statusCode).toBe(res.status);
     expect(body.error.code).toBe('VALIDATION_ERROR');
   });
 
@@ -84,9 +90,13 @@ describe('GET /api/admin/sellers/pending', () => {
     );
 
     const res = await GET(makeGetRequest());
-    const body = (await res.json()) as { error: { code: string } };
+    const body = (await res.json()) as {
+      statusCode: number;
+      error: { code: string };
+    };
 
     expect(res.status).toBe(403);
+    expect(body.statusCode).toBe(res.status);
     expect(body.error.code).toBe('FORBIDDEN');
   });
 });
