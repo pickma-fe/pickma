@@ -1,11 +1,8 @@
 'use client';
 
-import { useState } from 'react';
-
 import type { Order } from '@/types/order';
 import { Badge } from '@/components/common/Badge/Badge';
 import { Button } from '@/components/common/Button/Button';
-import { Dropdown } from '@/components/common/Dropdown/Dropdown';
 import { Pagination } from '@/components/common/Pagination/Pagination';
 
 import type {
@@ -18,18 +15,13 @@ type SellerOrderListItem = Omit<Order, 'items' | 'payment'>;
 interface OrderTableProps {
   orders: SellerOrderListItem[];
   currentPage: number;
+  totalPages: number;
   onPageChange: (page: number) => void;
   onOrderAction: (orderId: string, newStatus: SellerOrderActionStatus) => void;
   isLoading?: boolean;
   isError?: boolean;
   isActionPending?: boolean;
 }
-
-const PAGE_SIZE_OPTIONS = [
-  { label: '5개씩 보기', value: '5' },
-  { label: '10개씩 보기', value: '10' },
-  { label: '20개씩 보기', value: '20' },
-];
 
 const formatPrice = (price: number) => price.toLocaleString('ko-KR') + '원';
 
@@ -145,23 +137,13 @@ function OrderActionButtons({
 export function OrderTable({
   orders,
   currentPage,
+  totalPages,
   onPageChange,
   onOrderAction,
   isLoading = false,
   isError = false,
   isActionPending = false,
 }: OrderTableProps) {
-  const [pageSize, setPageSize] = useState(10);
-
-  const totalPages = Math.ceil(orders.length / pageSize);
-  const startIndex = (currentPage - 1) * pageSize;
-  const paginatedOrders = orders.slice(startIndex, startIndex + pageSize);
-
-  const handlePageSizeChange = (value: string) => {
-    setPageSize(Number(value));
-    onPageChange(1);
-  };
-
   if (isLoading) {
     return (
       <div className="flex min-h-[300px] items-center justify-center rounded-lg border border-gray-200 bg-white">
@@ -234,7 +216,7 @@ export function OrderTable({
             </tr>
           </thead>
           <tbody>
-            {paginatedOrders.map((order, index) => {
+            {orders.map((order, index) => {
               if (!isSellerDisplayStatus(order.status)) return null;
 
               const badge = STATUS_BADGE[order.status];
@@ -244,7 +226,7 @@ export function OrderTable({
                 <tr
                   key={order.id}
                   className={`hover:bg-gray-50 ${
-                    index !== paginatedOrders.length - 1
+                    index !== orders.length - 1
                       ? 'border-b border-gray-100'
                       : ''
                   }`}
@@ -319,21 +301,12 @@ export function OrderTable({
         </table>
       </div>
 
-      <div className="relative flex items-center justify-center border-t border-gray-200 px-4 py-4">
+      <div className="flex items-center justify-center border-t border-gray-200 px-4 py-4">
         <Pagination
           totalPages={totalPages}
           currentPage={currentPage}
           onPageChange={onPageChange}
         />
-        <div className="absolute right-4">
-          <Dropdown
-            type="select"
-            items={PAGE_SIZE_OPTIONS}
-            value={String(pageSize)}
-            onChange={handlePageSizeChange}
-            placeholder="10개씩 보기"
-          />
-        </div>
       </div>
     </div>
   );

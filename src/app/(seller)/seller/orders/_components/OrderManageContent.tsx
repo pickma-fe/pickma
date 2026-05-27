@@ -12,6 +12,7 @@ import {
 import { useMemo, useState } from 'react';
 
 import type { Order } from '@/types/order';
+import type { SellerOrderListParams } from '@/contracts/order';
 import { useAcceptSellerOrder } from '@/hooks/seller/orders/useAcceptSellerOrder';
 import { useCompleteSellerOrder } from '@/hooks/seller/orders/useCompleteSellerOrder';
 import { useMarkSellerOrderReady } from '@/hooks/seller/orders/useMarkSellerOrderReady';
@@ -28,14 +29,19 @@ import type {
 type SellerOrderListItem = Omit<Order, 'items' | 'payment'>;
 type SellerOrderFilterStatus = SellerOrderDisplayStatus | '전체';
 
-const SELLER_DISPLAY_STATUSES = new Set<SellerOrderDisplayStatus>([
-  'reserved',
-  'accepted',
-  'ready',
-  'completed',
-  'cancelled',
-  'noShow',
-]);
+const DOMAIN_TO_CONTRACT_STATUS: Record<
+  SellerOrderDisplayStatus,
+  Exclude<SellerOrderListParams['status'], undefined>
+> = {
+  reserved: 'reserved',
+  accepted: 'accepted',
+  ready: 'ready',
+  completed: 'completed',
+  cancelled: 'cancelled',
+  noShow: 'no_show',
+};
+
+const PAGE_SIZE = 20;
 
 const STAT_CARDS: {
   label: string;
@@ -102,7 +108,19 @@ export function OrderManageContent() {
   const [currentPage, setCurrentPage] = useState(1);
   const [actionError, setActionError] = useState<string | null>(null);
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
-  const { data, isLoading, isError } = useSellerOrders();
+
+  const serverStatus =
+    selectedStatus === '전체'
+      ? undefined
+      : DOMAIN_TO_CONTRACT_STATUS[selectedStatus];
+
+  const { data, isLoading, isError } = useSellerOrders({
+    page: currentPage,
+    pageSize: PAGE_SIZE,
+    status: serverStatus,
+    sort: 'createdAt',
+    order: 'desc',
+  });
 
   const acceptOrder = useAcceptSellerOrder();
   const markOrderReady = useMarkSellerOrderReady();
@@ -115,31 +133,23 @@ export function OrderManageContent() {
 
   const displayOrders = useMemo<SellerOrderListItem[]>(
     () =>
-      (data?.items ?? []).filter((o) =>
-        SELLER_DISPLAY_STATUSES.has(o.status as SellerOrderDisplayStatus)
-      ),
-    [data?.items]
-  );
-
-  const getCount = (value: SellerOrderFilterStatus) => {
-    if (value === '전체') return displayOrders.length;
-    return displayOrders.filter((o) => o.status === value).length;
-  };
-
-  const filteredOrders = useMemo(
-    () =>
-      displayOrders.filter((order) => {
-        const matchStatus =
-          selectedStatus === '전체' || order.status === selectedStatus;
-        const matchSearch =
+      (data?.items ?? []).filter(
+        (order) =>
           searchKeyword.trim() === '' ||
           order.orderNumber
             .toLowerCase()
-            .includes(searchKeyword.trim().toLowerCase());
-        return matchStatus && matchSearch;
-      }),
-    [displayOrders, selectedStatus, searchKeyword]
+            .includes(searchKeyword.trim().toLowerCase())
+      ),
+    [data?.items, searchKeyword]
   );
+
+  const totalCount = data?.totalCount ?? 0;
+  const totalPages = data?.totalPages ?? 0;
+
+  const getCount = (value: SellerOrderFilterStatus) => {
+    if (value === '전체') return totalCount;
+    return displayOrders.filter((o) => o.status === value).length;
+  };
 
   const handleOrderAction = (
     orderId: string,
@@ -251,7 +261,6 @@ export function OrderManageContent() {
         })}
       </div>
 
-      {/* 액션 성공/실패 피드백 */}
       {actionSuccess && (
         <div className="flex items-center gap-2 rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
           <CheckCircle className="h-4 w-4 flex-shrink-0" />
@@ -273,8 +282,9 @@ export function OrderManageContent() {
       />
 
       <OrderTable
-        orders={filteredOrders}
+        orders={displayOrders}
         currentPage={currentPage}
+        totalPages={totalPages}
         onPageChange={setCurrentPage}
         onOrderAction={handleOrderAction}
         isLoading={isLoading}
