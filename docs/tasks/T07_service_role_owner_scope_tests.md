@@ -55,5 +55,5 @@
   - `docs/system_architecture.md` §15 Route Handler 보안 checklist (auth helper 선택 기준, owner scope 원칙, P0/P1 API 커버리지 표) 신설
   - admin seller route 4개 `route.test.ts` 신규 작성 (pending, approve, reject, read-url)
   - seller-applications, files/upload-url, seller/onboarding-status `route.test.ts` 신규 작성
-  - 전체 API 테스트 469개 통과, lint 에러 없음
+  - 전체 API 테스트 482개 통과, lint 에러 없음
   - NOT_IMPLEMENTED route (admin/stores, orders/cancel, seller/no-show, seller/stock) 테스트는 후속 task(T04, T31, T52, T09/T28)로 명시적 이관
