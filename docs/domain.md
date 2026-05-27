@@ -244,8 +244,8 @@ export interface Product {
   reservedStock: number;
   availableStock: number;
   endAt: Date;
-  pickupStartTime: Date;
-  pickupEndTime: Date;
+  pickupStartTime: string;
+  pickupEndTime: string;
   status: ProductStatus;
   isSoldOut: boolean;
   isExpired: boolean;
@@ -434,4 +434,5 @@ export interface DailyAdminMetric {
 - Product 저장 상태는 `active | closed`만 사용하고, 품절/마감은 `isSoldOut`, `isExpired`, `displayStatus`로 파생한다.
 - Order 저장/API 상태 `payment_pending`, `no_show`는 Domain에서 `paymentPending`, `noShow`로 변환한다.
 - DB 저장 status와 Domain status가 다르면 mapper에서 명시적으로 변환한다.
+- `pickupStartTime`/`pickupEndTime`은 `HH:mm:ss` string이며 Date 변환 대상이 아니다.
 - hook/component는 Contract DTO를 직접 사용하지 않는다.
