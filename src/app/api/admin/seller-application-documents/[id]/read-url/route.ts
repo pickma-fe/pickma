@@ -1,5 +1,7 @@
 import type { NextRequest } from 'next/server';
 
+import { AppError } from '@/lib/errors/appError';
+import { ERROR_CODE } from '@/lib/errors/errorCodes';
 import { requireAdmin } from '@/app/api/_lib/auth';
 import { isApiMockEnabled } from '@/app/api/_lib/mock';
 import { routeError, success } from '@/app/api/_lib/response';
@@ -16,7 +18,9 @@ export async function POST(
 
   try {
     await requireAdmin();
-    const { id } = paramsIdSchema.parse(await params);
+    const result = paramsIdSchema.safeParse(await params);
+    if (!result.success) throw new AppError(ERROR_CODE.VALIDATION_ERROR, 400);
+    const { id } = result.data;
     const data = await getSellerApplicationDocumentReadUrl(id);
     return success(data);
   } catch (error) {

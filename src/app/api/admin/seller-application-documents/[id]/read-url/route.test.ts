@@ -77,6 +77,18 @@ describe('POST /api/admin/seller-application-documents/[id]/read-url', () => {
     expect(body.data.signedUrl).toBe(mockDocumentReadUrl.signedUrl);
   });
 
+  it('잘못된 UUID params는 400을 반환하고 service를 호출하지 않는다', async () => {
+    vi.mocked(isApiMockEnabled).mockReturnValue(false);
+    vi.mocked(requireAdmin).mockResolvedValue(adminResult);
+
+    const res = await POST(makeRequest(), makeParams('not-a-uuid'));
+    const body = (await res.json()) as { error: { code: string } };
+
+    expect(res.status).toBe(400);
+    expect(body.error.code).toBe('VALIDATION_ERROR');
+    expect(getSellerApplicationDocumentReadUrl).not.toHaveBeenCalled();
+  });
+
   it('requireAdmin이 실패하면 error envelope를 반환한다', async () => {
     vi.mocked(isApiMockEnabled).mockReturnValue(false);
     vi.mocked(requireAdmin).mockRejectedValue(
