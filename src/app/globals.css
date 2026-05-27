@@ -1,7 +1,5 @@
 @import 'tailwindcss';
 
-@custom-variant headlessui-focus-visible ([data-headlessui-focus-visible] &);
-
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
