@@ -7,10 +7,10 @@
   확인 필요
 
 - 우선순위:
-  P2
+  P1
 
 - 선행 조건:
-  - 선행 task: T03 (관리자 판매자 승인 화면 구현), T04 (관리자 가게 목록 real endpoint 및 화면 구현)
+  - 선행 task: T07 (service role 사용 기준 및 owner scope 테스트 수립)
 
 - 분류:
   화면/UI

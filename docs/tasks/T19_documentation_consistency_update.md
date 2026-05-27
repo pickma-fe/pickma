@@ -48,7 +48,7 @@
   - `docs/erd.md`
   - `docs/api_spec.md`
   - `docs/ia.md`
-  - `docs/tasks/T50~T57_*.md` (신규 생성)
+  - `docs/tasks/T50~T58_*.md` (신규 생성)
 
 - 예상 난이도:
   낮음
@@ -57,4 +57,4 @@
   - 심화 프로젝트 착수 전 기준 문서의 핵심 타입/상태/테이블 정보가 코드와 일치한다.
   - 이후 task 진행 중 문서를 함께 갱신하는 운영 규칙이 이미 문서화되어 있음을 확인한다.
   - doc drift는 이번 task에서 `rg` 수동 검증으로 확인하고, 지속형 자동화는 T24에서 다룬다.
-  - T50–T57 task 문서가 `docs/tasks/`에 존재하고 README.md에 등록된다.
+  - T50–T58 task 문서가 `docs/tasks/`에 존재하고 README.md에 등록된다.
