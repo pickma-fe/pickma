@@ -36,11 +36,31 @@ export async function getProducts(
   params: ProductListParams
 ): Promise<ProductListResponse> {
   const { region, categoryId, keyword } = params;
-  const shouldUseExtendedList =
+  const shouldUseRpcList =
     isDiscountFilterOption(params.discountOption) ||
     params.sort === 'discountRate';
   const from = (params.page - 1) * params.pageSize;
   const to = from + params.pageSize - 1;
+
+  if (shouldUseRpcList) {
+    const { data, error } = await supabase.rpc('list_public_products', {
+      p_page: params.page,
+      p_page_size: params.pageSize,
+      p_region: region ?? null,
+      p_category_id: categoryId ?? null,
+      p_keyword: keyword ?? null,
+      p_discount_option: params.discountOption ?? null,
+      p_sort: params.sort ?? 'endAt',
+      p_order: params.order ?? 'asc',
+      p_available_only: params.availableOnly ?? false,
+    });
+
+    if (error) {
+      throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
+    }
+
+    return data as unknown as ProductListResponse;
+  }
 
   let query = supabase
     .from('products')
@@ -74,33 +94,21 @@ export async function getProducts(
     });
   }
 
-  if (!shouldUseExtendedList) {
-    const { data, error, count } = await query.range(from, to);
-
-    if (error) {
-      throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
-    }
-
-    const totalCount = count ?? 0;
-
-    return {
-      items: ((data ?? []) as unknown as ProductRow[]).map(mapProductRow),
-      page: params.page,
-      pageSize: params.pageSize,
-      totalCount,
-      totalPages: Math.ceil(totalCount / params.pageSize),
-    };
-  }
-
-  const { data, error } = await query;
+  const { data, error, count } = await query.range(from, to);
 
   if (error) {
     throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
   }
-  return buildProductListResponse(
-    ((data ?? []) as unknown as ProductRow[]).map(mapProductRow),
-    { ...params, region: undefined }
-  );
+
+  const totalCount = count ?? 0;
+
+  return {
+    items: ((data ?? []) as unknown as ProductRow[]).map(mapProductRow),
+    page: params.page,
+    pageSize: params.pageSize,
+    totalCount,
+    totalPages: Math.ceil(totalCount / params.pageSize),
+  };
 }
 
 export function buildProductListResponse(

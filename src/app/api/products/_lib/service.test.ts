@@ -1,6 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { describe, expect, it, vi } from 'vitest';
 
+import type { ProductListResponse } from '@/contracts/product';
 import { AppError } from '@/lib/errors/appError';
 import { ERROR_CODE } from '@/lib/errors/errorCodes';
 import type { Database } from '@/lib/supabase/database';
@@ -41,6 +42,45 @@ const baseRow: ProductRow = {
   },
 };
 
+const baseProductListItem: ProductListResponse['items'][number] = {
+  id: baseRow.id,
+  storeId: baseRow.store_id,
+  storeName: baseRow.stores.name,
+  categoryId: baseRow.categories?.id,
+  categoryName: baseRow.categories?.name,
+  menuItemId: baseRow.menu_items.id,
+  name: baseRow.menu_items.name,
+  image: undefined,
+  originalPrice: baseRow.menu_items.original_price,
+  discountPrice: baseRow.discount_price,
+  discountRate: 40,
+  stock: baseRow.stock,
+  reservedStock: baseRow.reserved_stock,
+  availableStock: baseRow.stock - baseRow.reserved_stock,
+  isSoldOut: false,
+  isExpired: false,
+  displayStatus: 'available',
+  endAt: baseRow.end_at,
+  pickupStartTime: baseRow.pickup_start_time,
+  pickupEndTime: baseRow.pickup_end_time,
+  status: baseRow.status,
+  updatedAt: baseRow.updated_at,
+};
+
+function buildProductListResponse(
+  items: ProductListResponse['items'],
+  page = 1,
+  pageSize = 20
+): ProductListResponse {
+  return {
+    items,
+    page,
+    pageSize,
+    totalCount: items.length,
+    totalPages: Math.ceil(items.length / pageSize),
+  };
+}
+
 function buildChain(result: {
   data?: unknown;
   error?: { code: string; message: string } | null;
@@ -69,16 +109,25 @@ function buildChain(result: {
   return chain;
 }
 
-function buildSupabase(result: {
-  data?: unknown;
-  error?: { code: string; message: string } | null;
-  count?: number | null;
-}) {
+function buildSupabase(
+  result: {
+    data?: unknown;
+    error?: { code: string; message: string } | null;
+    count?: number | null;
+  },
+  rpcResult: {
+    data?: unknown;
+    error?: { code?: string; message: string } | null;
+  } = { data: buildProductListResponse([baseProductListItem]), error: null }
+) {
   const chain = buildChain(result);
+  const rpc = vi.fn().mockResolvedValue(rpcResult);
   return {
     from: vi.fn().mockReturnValue(chain),
+    rpc,
     _chain: chain,
   } as unknown as SupabaseClient<Database> & {
+    rpc: ReturnType<typeof vi.fn>;
     _chain: ReturnType<typeof buildChain>;
   };
 }
@@ -181,13 +230,19 @@ describe('getProducts', () => {
     expect(supabase._chain.range).toHaveBeenCalledWith(0, 19);
   });
 
-  it('할인율 필터는 서버 후처리 페이지네이션 경로를 사용한다', async () => {
-    const rows = Array.from({ length: 8 }, (_, index) => ({
-      ...baseRow,
-      id: `00000000-0000-4000-8000-00000000005${index}`,
-      end_at: `2099-12-31T23:5${index}:59.000Z`,
-    }));
-    const supabase = buildSupabase({ data: rows, error: null, count: 8 });
+  it('할인율 필터는 DB RPC 페이지네이션 경로를 사용한다', async () => {
+    const rpcResponse = buildProductListResponse(
+      Array.from({ length: 3 }, (_, index) => ({
+        ...baseProductListItem,
+        id: `00000000-0000-4000-8000-00000000005${index}`,
+      })),
+      2,
+      5
+    );
+    const supabase = buildSupabase(
+      { data: [], error: null, count: 0 },
+      { data: rpcResponse, error: null }
+    );
 
     const result = await getProducts(supabase, {
       page: 2,
@@ -195,18 +250,24 @@ describe('getProducts', () => {
       discountOption: 'over-40',
     });
 
+    expect(supabase.rpc).toHaveBeenCalledWith('list_public_products', {
+      p_page: 2,
+      p_page_size: 5,
+      p_region: null,
+      p_category_id: null,
+      p_keyword: null,
+      p_discount_option: 'over-40',
+      p_sort: 'endAt',
+      p_order: 'asc',
+      p_available_only: false,
+    });
     expect(supabase._chain.range).not.toHaveBeenCalled();
     expect(result.items).toHaveLength(3);
-    expect(result.items[0].id).toBe('00000000-0000-4000-8000-000000000055');
+    expect(result.page).toBe(2);
   });
 
-  it('할인율 높은순 정렬은 서버 후처리 페이지네이션 경로를 사용한다', async () => {
-    const rows = Array.from({ length: 8 }, (_, index) => ({
-      ...baseRow,
-      id: `00000000-0000-4000-8000-00000000005${index}`,
-      discount_price: 7200 - index,
-    }));
-    const supabase = buildSupabase({ data: rows, error: null, count: 8 });
+  it('할인율 높은순 정렬은 DB RPC 페이지네이션 경로를 사용한다', async () => {
+    const supabase = buildSupabase({ data: [], error: null, count: 0 });
 
     await getProducts(supabase, {
       page: 2,
@@ -215,6 +276,13 @@ describe('getProducts', () => {
       order: 'desc',
     });
 
+    expect(supabase.rpc).toHaveBeenCalledWith(
+      'list_public_products',
+      expect.objectContaining({
+        p_sort: 'discountRate',
+        p_order: 'desc',
+      })
+    );
     expect(supabase._chain.range).not.toHaveBeenCalled();
   });
 
@@ -237,25 +305,8 @@ describe('getProducts', () => {
     expect(supabase._chain.ilike).not.toHaveBeenCalled();
   });
 
-  it('확장 경로에서 keyword+discountOption 조합 시 인메모리 keyword 필터를 적용한다', async () => {
-    const rows = [
-      { ...baseRow, id: '00000000-0000-4000-8000-000000000051' },
-      {
-        ...baseRow,
-        id: '00000000-0000-4000-8000-000000000052',
-        menu_items: { ...baseRow.menu_items, name: '소금빵 세트' },
-      },
-      {
-        ...baseRow,
-        id: '00000000-0000-4000-8000-000000000053',
-        menu_items: { ...baseRow.menu_items, name: '크루아상 단품' },
-      },
-    ];
-    const supabase = buildSupabase({
-      data: rows,
-      error: null,
-      count: rows.length,
-    });
+  it('keyword+discountOption 조합도 DB RPC에 검색어를 전달한다', async () => {
+    const supabase = buildSupabase({ data: [], error: null, count: 0 });
 
     const result = await getProducts(supabase, {
       page: 1,
@@ -264,9 +315,15 @@ describe('getProducts', () => {
       discountOption: 'over-40',
     });
 
+    expect(supabase.rpc).toHaveBeenCalledWith(
+      'list_public_products',
+      expect.objectContaining({
+        p_keyword: '크루아상',
+        p_discount_option: 'over-40',
+      })
+    );
     expect(supabase._chain.range).not.toHaveBeenCalled();
-    expect(result.items).toHaveLength(2);
-    expect(result.items.every((i) => i.name.includes('크루아상'))).toBe(true);
+    expect(result.items).toHaveLength(1);
   });
 
   it('region 파라미터가 없으면 stores.region 필터를 적용하지 않는다', async () => {

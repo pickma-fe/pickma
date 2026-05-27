@@ -1,10 +1,10 @@
 # T05. 상품 목록 할인율 필터/정렬 DB pagination 복구
 
 - 상태:
-  진행 전
+  진행 중
 
 - GitHub Issue:
-  확인 필요
+  166
 
 - 우선순위:
   P0
@@ -35,6 +35,11 @@
   - DB 레벨에서 filter/sort/range가 적용되도록 service를 수정한다.
   - 기존 query params와 response contract를 유지 가능한지 확인한다.
   - 할인율 필터/정렬 테스트를 추가한다.
+
+- 구현 메모:
+  - `discountRate`는 `products.discount_price`와 `menu_items.original_price`를 함께 사용해야 하므로 generated column보다 RPC에서 계산한다.
+  - `discountOption` 또는 `sort=discountRate` 요청은 `list_public_products` RPC가 필터, 정렬, count, limit/offset을 DB에서 처리한다.
+  - 기존 query params와 `ProductListResponse` contract는 유지한다.
 
 - 관련 파일/영역:
   - `src/app/api/products/_lib/service.ts`

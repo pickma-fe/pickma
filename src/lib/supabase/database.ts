@@ -751,6 +751,20 @@ export type Database = {
         }[];
       };
       generate_order_number: { Args: never; Returns: string };
+      list_public_products: {
+        Args: {
+          p_available_only?: boolean;
+          p_category_id?: string | null;
+          p_discount_option?: string | null;
+          p_keyword?: string | null;
+          p_order?: string | null;
+          p_page?: number;
+          p_page_size?: number;
+          p_region?: string | null;
+          p_sort?: string | null;
+        };
+        Returns: Json;
+      };
       revert_payment_processing: {
         Args: { p_order_id: string };
         Returns: {
