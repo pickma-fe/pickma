@@ -31,7 +31,7 @@ describe('serverApiClient', () => {
     );
   });
 
-  it('절대 URL path는 외부 origin 호출을 차단한다', async () => {
+  it('절대 URL path 입력을 거부한다', async () => {
     await expect(
       serverApiClient.get('https://evil.example.com/api/products/1')
     ).rejects.toMatchObject({
