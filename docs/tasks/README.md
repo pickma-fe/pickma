@@ -43,7 +43,7 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 | T16 | upload URL purpose별 권한 정책 강화               | P1       | 진행 전 | 확인 필요    | T07                | [T16_upload_url_purpose_permission_policy.md](T16_upload_url_purpose_permission_policy.md)                       |
 | T17 | dev-test route 제거 또는 dev-only guard           | P1       | 진행 전 | 확인 필요    | 없음               | [T17_dev_test_route_guard.md](T17_dev_test_route_guard.md)                                                       |
 | T18 | mock import 금지 기준 정리                        | P1       | 진행 전 | 확인 필요    | 없음               | [T18_mock_import_policy.md](T18_mock_import_policy.md)                                                           |
-| T19 | 문서 baseline 정합성 및 지속 갱신 규칙 정리       | P0       | 진행 전 | 확인 필요    | 없음               | [T19_documentation_consistency_update.md](T19_documentation_consistency_update.md)                               |
+| T19 | 문서 baseline 정합성 및 지속 갱신 규칙 정리       | P0       | 완료    | 169          | 없음               | [T19_documentation_consistency_update.md](T19_documentation_consistency_update.md)                               |
 | T20 | Route Handler `_lib` 횡단 import 정리             | P1       | 진행 전 | 확인 필요    | 없음               | [T20_route_handler_lib_import_cleanup.md](T20_route_handler_lib_import_cleanup.md)                               |
 | T21 | 지도 기반 조회 및 거리순 정렬                     | P2       | 진행 전 | 확인 필요    | T08, T05           | [T21_map_based_search_distance_sort.md](T21_map_based_search_distance_sort.md)                                   |
 | T22 | 실시간 알림 기반 설계 및 1차 구현                 | P2       | 진행 전 | 확인 필요    | T11                | [T22_realtime_notification_foundation.md](T22_realtime_notification_foundation.md)                               |
@@ -74,12 +74,23 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 | T47 | Seller UI/UX 및 접근성 개선                       | P2       | 진행 전 | 확인 필요    | T45, T28, T29, T38 | [T47_seller_ui_accessibility_improvement.md](T47_seller_ui_accessibility_improvement.md)                         |
 | T48 | Admin UI/UX 및 접근성 개선                        | P2       | 진행 전 | 확인 필요    | T45, T03, T04, T26 | [T48_admin_ui_accessibility_improvement.md](T48_admin_ui_accessibility_improvement.md)                           |
 | T49 | Auth/Payment/Legal UI/UX 및 접근성 개선           | P2       | 진행 전 | 확인 필요    | T45, T27, T42      | [T49_auth_payment_legal_ui_accessibility_improvement.md](T49_auth_payment_legal_ui_accessibility_improvement.md) |
+| T50 | 판매자 심사 대기 화면 구현                        | P1       | 진행 전 | 확인 필요    | 없음               | [T50_seller_pending_page.md](T50_seller_pending_page.md)                                                         |
+| T51 | 판매자 대시보드 메인 화면 구현                    | P1       | 진행 전 | 확인 필요    | T10                | [T51_seller_dashboard_page.md](T51_seller_dashboard_page.md)                                                     |
+| T52 | 판매자 주문 상세 화면 구현                        | P1       | 진행 전 | 확인 필요    | T02                | [T52_seller_order_detail_page.md](T52_seller_order_detail_page.md)                                               |
+| T53 | 판매자 가게 정보 수정 화면 구현                   | P1       | 진행 전 | 확인 필요    | T15                | [T53_seller_store_edit_page.md](T53_seller_store_edit_page.md)                                                   |
+| T54 | 소비자 주문 내역 및 상세 화면 구현                | P1       | 진행 전 | 확인 필요    | T15                | [T54_consumer_orders_page.md](T54_consumer_orders_page.md)                                                       |
+| T55 | 소비자 프로필 수정 화면 구현                      | P2       | 진행 전 | 확인 필요    | 없음               | [T55_consumer_profile_edit_page.md](T55_consumer_profile_edit_page.md)                                           |
+| T56 | 상품/가게 검색 결과 화면 구현                     | P2       | 진행 전 | 확인 필요    | T05, T12           | [T56_search_result_page.md](T56_search_result_page.md)                                                           |
+| T57 | 관리자 사용자·상품·주문 관리 화면 구현            | P3       | 진행 전 | 확인 필요    | T04                | [T57_admin_users_products_orders_pages.md](T57_admin_users_products_orders_pages.md)                             |
+| T58 | 관리자 대시보드 통계 화면 구현                    | P1       | 진행 전 | 확인 필요    | T07                | [T58_admin_dashboard_statistics.md](T58_admin_dashboard_statistics.md)                                           |
+| T59 | 소비자 찜 목록 화면 및 API 구현                   | P2       | 진행 전 | 확인 필요    | 없음               | [T59_consumer_wishlist_page.md](T59_consumer_wishlist_page.md)                                                   |
 
 ## 추천 진행 흐름
 
 1. 운영 정책과 기준 문서 확정: T01, T06, T07, T08, T19, T27, T44
 2. 인벤토리, 개발 하네스, 공통 정리: T09, T24, T17, T18, T20, T39, T43, T45
 3. 핵심 API/화면 구조 안정화: T02, T03, T04, T05, T10, T11, T12, T13, T14, T15, T16, T40, T42
-4. 심화 기능 구현: T21, T22, T23, T25, T26, T28, T29, T30, T38, T41
-5. 사용자 흐름별 UI/UX 및 접근성 개선: T46, T47, T48, T49
-6. 확장 단계 검토: T31, T32, T33, T34, T35, T36, T37
+4. 미구현 핵심 화면 구현: T50, T51, T52, T53, T54, T58
+5. 심화 기능 구현: T21, T22, T23, T25, T26, T28, T29, T30, T38, T41, T55, T56, T59
+6. 사용자 흐름별 UI/UX 및 접근성 개선: T46, T47, T48, T49
+7. 확장 단계 검토: T31, T32, T33, T34, T35, T36, T37, T57
