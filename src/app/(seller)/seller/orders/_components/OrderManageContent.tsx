@@ -106,7 +106,6 @@ export function OrderManageContent() {
   const markOrderReady = useMarkSellerOrderReady();
   const completeOrder = useCompleteSellerOrder();
 
-  // 판매자 화면에 표시할 상태만 필터링
   const displayOrders = useMemo<SellerOrderListItem[]>(
     () =>
       (data?.items ?? []).filter((o) =>
@@ -139,6 +138,14 @@ export function OrderManageContent() {
     orderId: string,
     newStatus: SellerOrderActionStatus
   ) => {
+    if (
+      acceptOrder.isPending ||
+      markOrderReady.isPending ||
+      completeOrder.isPending
+    ) {
+      return;
+    }
+
     switch (newStatus) {
       case 'accepted':
         acceptOrder.mutate(orderId);
