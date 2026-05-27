@@ -81,6 +81,7 @@ describe('POST /api/files/upload-url', () => {
 
     expect(res.status).toBe(201);
     expect(resBody.data.signedUrl).toBe('/api/mock/upload');
+    expect(resBody.data.storagePath).toBe('mock/profile_image/mock-file');
     expect(requireActiveUser).not.toHaveBeenCalled();
   });
 
