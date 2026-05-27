@@ -100,11 +100,18 @@ export function OrderManageContent() {
     useState<SellerOrderFilterStatus>('전체');
   const [searchKeyword, setSearchKeyword] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [actionSuccess, setActionSuccess] = useState<string | null>(null);
   const { data, isLoading, isError } = useSellerOrders();
+
   const acceptOrder = useAcceptSellerOrder();
   const markOrderReady = useMarkSellerOrderReady();
   const completeOrder = useCompleteSellerOrder();
+
+  const isPending =
+    acceptOrder.isPending ||
+    markOrderReady.isPending ||
+    completeOrder.isPending;
 
   const displayOrders = useMemo<SellerOrderListItem[]>(
     () =>
@@ -138,29 +145,42 @@ export function OrderManageContent() {
     orderId: string,
     newStatus: SellerOrderActionStatus
   ) => {
-    if (
-      acceptOrder.isPending ||
-      markOrderReady.isPending ||
-      completeOrder.isPending
-    ) {
-      return;
-    }
+    if (isPending) return;
+
+    setActionError(null);
+    setActionSuccess(null);
+
+    const onSuccess = (label: string) => {
+      setActionSuccess(`${label} 처리가 완료되었습니다.`);
+      setCurrentPage(1);
+    };
+    const onError = (label: string) => {
+      setActionError(`${label} 처리에 실패했습니다. 다시 시도해주세요.`);
+    };
 
     switch (newStatus) {
       case 'accepted':
-        acceptOrder.mutate(orderId);
+        acceptOrder.mutate(orderId, {
+          onSuccess: () => onSuccess('주문 접수'),
+          onError: () => onError('주문 접수'),
+        });
         break;
       case 'ready':
-        markOrderReady.mutate(orderId);
+        markOrderReady.mutate(orderId, {
+          onSuccess: () => onSuccess('준비 완료'),
+          onError: () => onError('준비 완료'),
+        });
         break;
       case 'completed':
-        completeOrder.mutate(orderId);
+        completeOrder.mutate(orderId, {
+          onSuccess: () => onSuccess('픽업 완료'),
+          onError: () => onError('픽업 완료'),
+        });
         break;
       case 'cancelled':
         // TODO: T31 주문 취소/환불 API 구현 후 연결
         break;
     }
-    setCurrentPage(1);
   };
 
   const handleStatusChange = (status: string) => {
@@ -231,6 +251,20 @@ export function OrderManageContent() {
         })}
       </div>
 
+      {/* 액션 성공/실패 피드백 */}
+      {actionSuccess && (
+        <div className="flex items-center gap-2 rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
+          <CheckCircle className="h-4 w-4 flex-shrink-0" />
+          {actionSuccess}
+        </div>
+      )}
+      {actionError && (
+        <div className="flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <AlertCircle className="h-4 w-4 flex-shrink-0" />
+          {actionError}
+        </div>
+      )}
+
       <OrderFilter
         selectedStatus={selectedStatus}
         searchKeyword={searchKeyword}
@@ -245,6 +279,7 @@ export function OrderManageContent() {
         onOrderAction={handleOrderAction}
         isLoading={isLoading}
         isError={isError}
+        isActionPending={isPending}
       />
     </div>
   );

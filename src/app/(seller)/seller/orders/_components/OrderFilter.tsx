@@ -19,7 +19,7 @@ const STATUS_OPTIONS = [
   { label: '픽업 대기', value: 'ready' },
   { label: '픽업 완료', value: 'completed' },
   { label: '취소/환불', value: 'cancelled' },
-  { label: '미수령', value: 'no_show' },
+  { label: '미수령', value: 'noShow' },
 ];
 
 export function OrderFilter({

@@ -22,6 +22,7 @@ interface OrderTableProps {
   onOrderAction: (orderId: string, newStatus: SellerOrderActionStatus) => void;
   isLoading?: boolean;
   isError?: boolean;
+  isActionPending?: boolean;
 }
 
 const PAGE_SIZE_OPTIONS = [
@@ -73,9 +74,11 @@ function isSellerDisplayStatus(
 function OrderActionButtons({
   order,
   onOrderAction,
+  isActionPending,
 }: {
   order: SellerOrderListItem;
   onOrderAction: (orderId: string, newStatus: SellerOrderActionStatus) => void;
+  isActionPending: boolean;
 }) {
   switch (order.status) {
     case 'reserved':
@@ -84,8 +87,9 @@ function OrderActionButtons({
           <Button
             className="w-fit px-2 py-0.5 text-sm"
             onClick={() => onOrderAction(order.id, 'accepted')}
+            disabled={isActionPending}
           >
-            주문 접수
+            {isActionPending ? '처리 중...' : '주문 접수'}
           </Button>
           <Button
             className="w-fit px-2 py-0.5 text-sm"
@@ -104,8 +108,9 @@ function OrderActionButtons({
           <Button
             className="w-fit px-2 py-0.5 text-sm"
             onClick={() => onOrderAction(order.id, 'ready')}
+            disabled={isActionPending}
           >
-            준비 완료
+            {isActionPending ? '처리 중...' : '준비 완료'}
           </Button>
           <Button
             className="w-fit px-2 py-0.5 text-sm"
@@ -123,8 +128,9 @@ function OrderActionButtons({
         <Button
           className="w-fit px-2 py-0.5 text-sm"
           onClick={() => onOrderAction(order.id, 'completed')}
+          disabled={isActionPending}
         >
-          픽업 완료
+          {isActionPending ? '처리 중...' : '픽업 완료'}
         </Button>
       );
     case 'completed':
@@ -143,6 +149,7 @@ export function OrderTable({
   onOrderAction,
   isLoading = false,
   isError = false,
+  isActionPending = false,
 }: OrderTableProps) {
   const [pageSize, setPageSize] = useState(10);
 
@@ -302,6 +309,7 @@ export function OrderTable({
                     <OrderActionButtons
                       order={order}
                       onOrderAction={onOrderAction}
+                      isActionPending={isActionPending}
                     />
                   </td>
                 </tr>
