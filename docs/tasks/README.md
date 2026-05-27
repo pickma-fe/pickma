@@ -43,7 +43,7 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 | T16 | upload URL purpose별 권한 정책 강화               | P1       | 진행 전 | 확인 필요    | T07                | [T16_upload_url_purpose_permission_policy.md](T16_upload_url_purpose_permission_policy.md)                       |
 | T17 | dev-test route 제거 또는 dev-only guard           | P1       | 진행 전 | 확인 필요    | 없음               | [T17_dev_test_route_guard.md](T17_dev_test_route_guard.md)                                                       |
 | T18 | mock import 금지 기준 정리                        | P1       | 진행 전 | 확인 필요    | 없음               | [T18_mock_import_policy.md](T18_mock_import_policy.md)                                                           |
-| T19 | 문서 baseline 정합성 및 지속 갱신 규칙 정리       | P0       | 진행 전 | 확인 필요    | 없음               | [T19_documentation_consistency_update.md](T19_documentation_consistency_update.md)                               |
+| T19 | 문서 baseline 정합성 및 지속 갱신 규칙 정리       | P0       | 진행 중 | 169          | 없음               | [T19_documentation_consistency_update.md](T19_documentation_consistency_update.md)                               |
 | T20 | Route Handler `_lib` 횡단 import 정리             | P1       | 진행 전 | 확인 필요    | 없음               | [T20_route_handler_lib_import_cleanup.md](T20_route_handler_lib_import_cleanup.md)                               |
 | T21 | 지도 기반 조회 및 거리순 정렬                     | P2       | 진행 전 | 확인 필요    | T08, T05           | [T21_map_based_search_distance_sort.md](T21_map_based_search_distance_sort.md)                                   |
 | T22 | 실시간 알림 기반 설계 및 1차 구현                 | P2       | 진행 전 | 확인 필요    | T11                | [T22_realtime_notification_foundation.md](T22_realtime_notification_foundation.md)                               |
