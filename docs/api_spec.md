@@ -982,11 +982,12 @@ Admin API는 `/api/admin/*`로 분리한다. 모든 Admin API는 `requireAdmin()
 
 ### 10.1 Seller Applications
 
-| 기능                       | Method | API                              | Priority |
-| -------------------------- | ------ | -------------------------------- | -------- |
-| 승인 대기 판매자 신청 목록 | GET    | `/api/admin/sellers/pending`     | P0       |
-| 판매자 신청 승인           | POST   | `/api/admin/sellers/:id/approve` | P0       |
-| 판매자 신청 거절           | POST   | `/api/admin/sellers/:id/reject`  | P0       |
+| 기능                       | Method | API                                                    | Priority |
+| -------------------------- | ------ | ------------------------------------------------------ | -------- |
+| 승인 대기 판매자 신청 목록 | GET    | `/api/admin/sellers/pending`                           | P0       |
+| 판매자 신청 승인           | POST   | `/api/admin/sellers/:id/approve`                       | P0       |
+| 판매자 신청 거절           | POST   | `/api/admin/sellers/:id/reject`                        | P0       |
+| 첨부 파일 signed URL 발급  | GET    | `/api/admin/seller-application-documents/:id/read-url` | P0       |
 
 `:id`는 seller application id이다.
 
