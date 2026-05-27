@@ -114,6 +114,13 @@ export function OrderManageContent() {
       ? undefined
       : DOMAIN_TO_CONTRACT_STATUS[selectedStatus];
 
+  const { data: totalData } = useSellerOrders({
+    page: 1,
+    pageSize: 1,
+    sort: 'createdAt',
+    order: 'desc',
+  });
+
   const { data, isLoading, isError } = useSellerOrders({
     page: currentPage,
     pageSize: PAGE_SIZE,
@@ -143,7 +150,7 @@ export function OrderManageContent() {
     [data?.items, searchKeyword]
   );
 
-  const totalCount = data?.totalCount ?? 0;
+  const totalCount = totalData?.totalCount ?? 0;
   const totalPages = data?.totalPages ?? 0;
 
   // TODO: T26 summary API 구현 후 상태별 집계 연결
