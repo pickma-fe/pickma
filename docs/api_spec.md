@@ -857,6 +857,25 @@ DB source:
 - 가게가 없으면 `STORE_NOT_FOUND (404)`를 반환하고, client API는 화면 분기를 위해 `null`로 변환할 수 있다.
 - seller onboarding 상태 표현은 `/api/seller/onboarding-status` 책임이다.
 
+### 7.5 `PATCH /api/stores/me`
+
+- 권한: `seller` role, 본인 가게만 수정 가능
+- Request: `UpdateStoreRequest` (최소 1개 필드 필요)
+  - `name?`: string — 가게명
+  - `description?`: string — 가게 소개
+  - `phone?`: string — 연락처
+  - `address?`: string — 주소
+  - `addressDetail?`: string — 상세 주소
+  - `region?`: string — 지역
+  - `image?`: string — 이미지 URL
+  - `openTime?`: string — 영업 시작 시간 (ISO time 형식, 저장 시 `HH:mm:ss`로 정규화)
+  - `closeTime?`: string — 영업 종료 시간 (ISO time 형식, 저장 시 `HH:mm:ss`로 정규화)
+- Validation:
+  - 필드 미제공 시 `VALIDATION_ERROR (400)`
+  - 문자열 필드 trim 후 빈 문자열 불가
+- Response: `200 { statusCode: 200, data: StoreResponse }`
+- 정책: `businessNumber` 수정 불가
+
 ---
 
 ## 8. Seller Products
