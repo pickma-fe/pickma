@@ -498,3 +498,75 @@ src/
 | AI 추천     | OpenAI API 연동           |
 | Webhook     | Toss 결제 상태 동기화     |
 | CI/CD       | GitHub Actions 워크플로우 |
+
+---
+
+## 13. Storage lifecycle 정책
+
+### 13.1 Bucket 목록
+
+| Bucket                         | 접근    | 민감도 | cleanup 우선순위 |
+| ------------------------------ | ------- | ------ | ---------------- |
+| `seller-application-documents` | private | 높음   | P1/P2            |
+| `store-images`                 | public  | 낮음   | P3               |
+| `product-images`               | public  | 낮음   | P3               |
+| `profile-images`               | public  | 낮음   | P3               |
+
+파일 저장 경로 패턴:
+
+- seller-application-documents: `{userId}/{uploadId}/{documentType}/{fileName}`
+- store-images: `{userId}/{uploadId}/{fileName}`
+- product-images: `{storeId}/{uploadId}/{fileName}`
+- profile-images: `{userId}/{uploadId}/{fileName}`
+
+### 13.2 Orphan cleanup 방식
+
+클라이언트 best-effort와 서버 주기적 orphan 스캔의 hybrid 방식을 채택한다.
+
+**클라이언트 (hook, P1)**
+
+- 도메인 API 실패 시 업로드 성공 파일의 `storagePath` 목록으로 `DELETE /api/files` 호출.
+- cleanup 실패는 로깅만 하고 에러를 전파하지 않는다 (best-effort).
+
+**서버 (Vercel Cron, P2)**
+
+- bucket 파일 목록과 DB `seller_application_documents.storage_path`를 비교한다.
+- DB에 없고 생성 후 30일을 초과한 orphan 파일을 주기적으로 삭제한다 (클라이언트 best-effort cleanup 실패분의 safety net).
+- endpoint: `GET /api/cron/storage-cleanup`
+- 인증: `Authorization: Bearer ${CRON_SECRET}` (서버 전용 환경 변수, client bundle 미노출). 인증 실패 시 401 반환.
+
+### 13.3 보관 기간 정책
+
+개인정보보호법의 "처리목적 달성 후 지체 없이 파기" 원칙을 기준으로 한다. 세부 기간은 법무/운영 확인 후 최종 확정한다.
+
+| 상태                                      | 보관 기간                                        |
+| ----------------------------------------- | ------------------------------------------------ |
+| orphan (도메인 API 실패)                  | 생성 후 30일 이내 삭제                           |
+| 승인(`approved`), 판매자 활동 중          | 판매자 활동 기간 보관                            |
+| 승인 후 회원 탈퇴                         | 30일 이내 원본 서류 삭제                         |
+| 판매자 자격 종료 / 가게 비활성화          | 진행 중 주문·정산·분쟁 없으면 30일 이내 삭제     |
+| 판매자 자격 종료 (진행 중 주문/분쟁 있음) | 해당 처리 완료 후 30일 이내 삭제                 |
+| 거부(`rejected`)                          | 거부 확정 후 30일 이내 삭제                      |
+| 철회 / 만료                               | 지체 없이 삭제 대상                              |
+| 분쟁 / 법령 대응 필요                     | 원본 파일 장기 보관 금지, 최소 메타데이터만 보존 |
+
+### 13.4 삭제 트리거 및 주체
+
+| 트리거             | 주체               | 구현 시점 |
+| ------------------ | ------------------ | --------- |
+| 도메인 API 실패    | 클라이언트 (hook)  | P1        |
+| 신청 거부          | 서버 Route Handler | P1        |
+| 회원 탈퇴          | 서버 Route Handler | P2        |
+| 판매자 자격 종료   | 서버 Route Handler | P2        |
+| 주기적 orphan 스캔 | Vercel Cron        | P2        |
+
+삭제 실행:
+
+- 클라이언트 cleanup: 본인 인증(`requireActiveUser()`) 후 `DELETE /api/files`. userId prefix로 소유권 검증.
+- 서버 cleanup: service role client (RLS bypass).
+
+### 13.5 향후 재검토 사항
+
+- Toss 지급대행/KYC 책임 범위 확정 시 서류 보관 의무 재검토.
+- 분쟁 대응에 필요한 최소 메타데이터 범위 확인 (운영/CS 정책).
+- public bucket(store-images, product-images, profile-images) orphan 처리는 P3에서 결정.

@@ -30,7 +30,7 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 | T03 | 관리자 판매자 승인 화면 구현                      | P0       | 진행 전 | 확인 필요    | 없음               | [T03_admin_seller_approval_page.md](T03_admin_seller_approval_page.md)                                   |
 | T04 | 관리자 가게 목록 real endpoint 및 화면 구현       | P0       | 진행 전 | 확인 필요    | T07                | [T04_admin_stores_real_endpoint_page.md](T04_admin_stores_real_endpoint_page.md)                         |
 | T05 | 상품 목록 할인율 필터/정렬 DB pagination 복구     | P0       | 진행 전 | 확인 필요    | T08                | [T05_product_discount_sort_db_pagination.md](T05_product_discount_sort_db_pagination.md)                 |
-| T06 | Storage orphan 및 개인정보 cleanup 정책 확정      | P0       | 진행 전 | 확인 필요    | 없음               | [T06_storage_orphan_privacy_cleanup_policy.md](T06_storage_orphan_privacy_cleanup_policy.md)             |
+| T06 | Storage orphan 및 개인정보 cleanup 정책 확정      | P0       | 완료    | 확인 필요    | 없음               | [T06_storage_orphan_privacy_cleanup_policy.md](T06_storage_orphan_privacy_cleanup_policy.md)             |
 | T07 | service role 사용 기준 및 owner scope 테스트 수립 | P0       | 진행 전 | 확인 필요    | 없음               | [T07_service_role_owner_scope_tests.md](T07_service_role_owner_scope_tests.md)                           |
 | T08 | incremental migration 전환 결정                   | P0       | 진행 전 | 확인 필요    | 없음               | [T08_incremental_migration_policy.md](T08_incremental_migration_policy.md)                               |
 | T09 | 501 API 및 UI 노출 목록 정리                      | P0       | 진행 전 | 확인 필요    | 없음               | [T09_api_501_ui_exposure_inventory.md](T09_api_501_ui_exposure_inventory.md)                             |
@@ -64,12 +64,15 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 | T37 | 운영 CS/모니터링/관리자 권한 정책 정리            | P3       | 진행 전 | 확인 필요    | T01, T06           | [T37_ops_cs_monitoring_admin_permission_policy.md](T37_ops_cs_monitoring_admin_permission_policy.md)     |
 | T38 | 판매자 랜딩/온보딩 CTA 정리                       | P2       | 진행 전 | 확인 필요    | T10                | [T38_seller_landing_onboarding_cta.md](T38_seller_landing_onboarding_cta.md)                             |
 | T39 | public 이미지 자산 구조 및 Footer badge 크기 정리 | P1       | 진행 전 | 확인 필요    | T18                | [T39_public_image_asset_footer_badge_cleanup.md](T39_public_image_asset_footer_badge_cleanup.md)         |
+| T40 | Storage orphan cleanup API 및 hook 통합           | P1       | 진행 전 | 확인 필요    | T06                | [T40_storage_orphan_cleanup_api_hook.md](T40_storage_orphan_cleanup_api_hook.md)                         |
+| T41 | Storage lifecycle 주기적 orphan scanner           | P2       | 진행 전 | 확인 필요    | T06, T40           | [T41_storage_lifecycle_cron.md](T41_storage_lifecycle_cron.md)                                           |
+| T42 | 법적 고지 페이지 및 동의 흐름 구현                | P1       | 진행 전 | 161          | 없음               | [T42_legal_compliance_pages.md](T42_legal_compliance_pages.md)                                           |
 
 ## 추천 진행 흐름
 
 1. 운영 정책과 기준 문서 확정: T01, T06, T07, T08, T19, T27
 2. 운영 차단 요소 제거: T09, T02, T03, T04, T05
 3. 기본 개발 하네스와 자산 정리: T24, T17, T20, T39
-4. 심화 초반 구조 안정화: T10, T11, T12, T13, T14, T15, T16, T18
-5. 심화 기능 구현: T21, T22, T23, T25, T26, T28, T29, T30, T38
+4. 심화 초반 구조 안정화: T10, T11, T12, T13, T14, T15, T16, T18, T40, T42
+5. 심화 기능 구현: T21, T22, T23, T25, T26, T28, T29, T30, T38, T41
 6. 확장 단계 검토: T31, T32, T33, T34, T35, T36, T37
