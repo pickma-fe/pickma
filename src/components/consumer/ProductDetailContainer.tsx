@@ -1,5 +1,6 @@
 'use client';
 
+import type { ProductDetail } from '@/types/product';
 import { useProduct } from '@/hooks/products/useProduct';
 import { Footer } from '@/components/common';
 
@@ -12,6 +13,7 @@ import { RecentProductTracker } from './RecentProductTracker';
 
 interface ProductDetailContainerProps {
   productId: string;
+  initialProduct?: ProductDetail;
 }
 
 function getStatusMessage(params: { isFetching: boolean; isError: boolean }) {
@@ -35,6 +37,7 @@ function getStatusMessage(params: { isFetching: boolean; isError: boolean }) {
 }
 
 export function ProductDetailContainer({
+  initialProduct,
   productId,
 }: ProductDetailContainerProps) {
   const {
@@ -42,7 +45,7 @@ export function ProductDetailContainer({
     isError,
     isFetching,
     isLoading,
-  } = useProduct(productId);
+  } = useProduct(productId, { initialData: initialProduct });
   const statusMessage = getStatusMessage({ isFetching, isError });
 
   if (isLoading) {
