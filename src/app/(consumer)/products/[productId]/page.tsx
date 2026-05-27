@@ -13,10 +13,7 @@ async function getInitialProduct(productId: string): Promise<ProductDetail> {
   try {
     return await productServerApi.getProduct(productId);
   } catch (error) {
-    if (
-      error instanceof ApiError &&
-      (error.statusCode === 404 || error.statusCode === 400)
-    ) {
+    if (error instanceof ApiError && error.statusCode === 404) {
       notFound();
     }
 

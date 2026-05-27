@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { ProductDetail } from '@/types/product';
 import { ApiError } from '@/api/apiClient';
@@ -55,6 +55,10 @@ const mockDetail: ProductDetail = {
 };
 
 describe('ProductDetailPage', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   it('서버에서 상품 상세를 조회해 초기 데이터로 전달한다', async () => {
     vi.mocked(productServerApi.getProduct).mockResolvedValue(mockDetail);
 
@@ -86,5 +90,23 @@ describe('ProductDetailPage', () => {
       })
     ).rejects.toThrow('NEXT_NOT_FOUND');
     expect(notFound).toHaveBeenCalled();
+  });
+
+  it('잘못된 상품 ID 에러는 notFound로 변환하지 않는다', async () => {
+    const validationError = new ApiError(
+      400,
+      'VALIDATION_ERROR',
+      '상품 ID가 올바르지 않습니다.'
+    );
+    vi.mocked(productServerApi.getProduct).mockRejectedValue(validationError);
+
+    await expect(
+      ProductDetailPage({
+        params: Promise.resolve({
+          productId: 'invalid-id',
+        }),
+      })
+    ).rejects.toBe(validationError);
+    expect(notFound).not.toHaveBeenCalled();
   });
 });
