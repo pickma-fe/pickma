@@ -989,7 +989,8 @@ Admin API는 `/api/admin/*`로 분리한다. 모든 Admin API는 `requireAdmin()
 | 판매자 신청 거절           | POST   | `/api/admin/sellers/:id/reject`                        | P0       |
 | 첨부 파일 signed URL 발급  | GET    | `/api/admin/seller-application-documents/:id/read-url` | P0       |
 
-`:id`는 seller application id이다.
+- `/api/admin/sellers/:id/*`의 `:id`는 seller application id이다.
+- `/api/admin/seller-application-documents/:id/read-url`의 `:id`는 seller application document id이다.
 
 `GET /api/admin/sellers/pending`은 pending 신청만 반환한다. 전체 심사 이력/검색은 후속 `/api/admin/seller-applications` 같은 별도 API로 검토한다.
 
