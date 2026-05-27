@@ -647,7 +647,7 @@ src/
 | `GET /api/admin/stores`                                      | P0       | admin                    | 없음        | 제외 (NOT_IMPLEMENTED) | T04                     |
 | `POST /api/seller-applications`                              | P0       | activeUser + eligibility | 없음        | 추가                   | —                       |
 | `GET /api/seller/onboarding-status`                          | P0       | activeUser               | 없음        | 추가                   | —                       |
-| `GET /api/users/me`                                          | P0       | activeUser               | 없음        | 미작성                 | —                       |
+| `GET /api/users/me`                                          | P0       | activeUser               | 없음        | 추가                   | —                       |
 | `POST /api/stores`                                           | P0       | seller                   | 있음        | 기존 확인              | —                       |
 | `GET /api/stores/me`                                         | P0       | seller                   | 있음        | 기존 확인              | —                       |
 | `GET /api/seller/products`                                   | P0       | seller                   | 있음        | 기존 확인              | —                       |
@@ -667,8 +667,8 @@ src/
 | `POST /api/files/upload-url`                                 | P0       | purpose별                | 없음        | 추가                   | T16 (purpose 권한 강화) |
 | `GET /api/products/[productId]`                              | P0       | 없음 (public)            | 있음        | 기존 확인              | —                       |
 | `GET /api/stores`                                            | P1       | 없음 (public)            | 있음        | 기존 확인              | —                       |
-| `PATCH /api/users/me`                                        | P1       | activeUser               | 없음        | 미작성                 | —                       |
-| `DELETE /api/users/me`                                       | P1       | activeUser               | 없음        | 미작성                 | —                       |
+| `PATCH /api/users/me`                                        | P1       | activeUser               | 없음        | 추가                   | —                       |
+| `DELETE /api/users/me`                                       | P1       | activeUser               | 없음        | 추가                   | —                       |
 | `PATCH /api/stores/me`                                       | P1       | seller                   | 있음        | 기존 확인              | —                       |
 | `PATCH /api/orders/[orderId]/cancel`                         | P1       | owner                    | 없음        | 제외 (NOT_IMPLEMENTED) | T31                     |
 | `POST /api/payments/[paymentId]/cancel`                      | P1       | owner                    | 없음        | 제외 (NOT_IMPLEMENTED) | T31                     |
