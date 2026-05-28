@@ -536,9 +536,9 @@ Branch protection은 `dev` 대상 PR에서 `CI / Lint, typecheck, and test` 통�
 
 ---
 
-## 13. Storage lifecycle 정책
+## 14. Storage lifecycle 정책
 
-### 13.1 Bucket 목록
+### 14.1 Bucket 목록
 
 | Bucket                         | 접근    | 민감도 | cleanup 우선순위 |
 | ------------------------------ | ------- | ------ | ---------------- |
@@ -554,7 +554,7 @@ Branch protection은 `dev` 대상 PR에서 `CI / Lint, typecheck, and test` 통�
 - product-images: `{storeId}/{uploadId}/{fileName}`
 - profile-images: `{userId}/{uploadId}/{fileName}`
 
-### 13.2 Orphan cleanup 방식
+### 14.2 Orphan cleanup 방식
 
 클라이언트 best-effort와 서버 주기적 orphan 스캔의 hybrid 방식을 채택한다.
 
@@ -570,7 +570,7 @@ Branch protection은 `dev` 대상 PR에서 `CI / Lint, typecheck, and test` 통�
 - endpoint: `GET /api/cron/storage-cleanup`
 - 인증: `Authorization: Bearer ${CRON_SECRET}` (서버 전용 환경 변수, client bundle 미노출). 인증 실패 시 401 반환.
 
-### 13.3 보관 기간 정책
+### 14.3 보관 기간 정책
 
 개인정보보호법의 "처리목적 달성 후 지체 없이 파기" 원칙을 기준으로 한다. 세부 기간은 법무/운영 확인 후 최종 확정한다.
 
@@ -585,7 +585,7 @@ Branch protection은 `dev` 대상 PR에서 `CI / Lint, typecheck, and test` 통�
 | 철회 / 만료                               | 지체 없이 삭제 대상                              |
 | 분쟁 / 법령 대응 필요                     | 원본 파일 장기 보관 금지, 최소 메타데이터만 보존 |
 
-### 13.4 삭제 트리거 및 주체
+### 14.4 삭제 트리거 및 주체
 
 | 트리거             | 주체               | 구현 시점 |
 | ------------------ | ------------------ | --------- |
@@ -600,7 +600,7 @@ Branch protection은 `dev` 대상 PR에서 `CI / Lint, typecheck, and test` 통�
 - 클라이언트 cleanup: 본인 인증(`requireActiveUser()`) 후 `DELETE /api/files`. userId prefix로 소유권 검증.
 - 서버 cleanup: service role client (RLS bypass).
 
-### 13.5 향후 재검토 사항
+### 14.5 향후 재검토 사항
 
 - Toss 지급대행/KYC 책임 범위 확정 시 서류 보관 의무 재검토. 세부 정책은 T44에서 결정한다.
 - 분쟁 대응에 필요한 최소 메타데이터 범위 확인 (운영/CS 정책).
