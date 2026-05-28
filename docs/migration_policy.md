@@ -40,11 +40,11 @@ YYYYMMDDHHMMSS_<snake_case_name>.sql
 
 후속 task에서 스키마 변경이 필요한 항목의 주제와 목적을 사전 정리한다. 세부 내용(컬럼명, 타입, 방식)은 각 task 계획 시점에 확정한다.
 
-| 후보 주제                      | 관련 Task | 변경 내용 요약                                                                                                                                                                     |
-| ------------------------------ | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `store_operation_status`       | T10       | `stores` 테이블에 판매자 운영 상태 컬럼 추가. `is_open` boolean 또는 `operation_status` enum 중 선택은 T10에서 결정. 관련 RLS/index 포함.                                          |
-| `product_discount_sort_fields` | T05       | `products` 테이블에서 `discountRate`, `availableStock`, `displayStatus`를 DB 레벨에서 filter/sort/range 가능하게 하는 방식 검토. view/RPC/generated column 등 방식은 T05에서 결정. |
-| `store_location_strategy`      | T21       | `stores` 테이블에 위치 데이터 추가 및 거리 계산 전략 결정. `latitude`/`longitude` 컬럼, 외부 거리 API, PostGIS/RPC 등 방식은 T21에서 결정.                                         |
+| 후보 주제                      | 관련 Task | 변경 내용 요약                                                                                                                                                                                                                                                                               |
+| ------------------------------ | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `store_operation_status`       | T10       | `stores` 테이블에 판매자 운영 상태 컬럼 추가. `is_open` boolean 또는 `operation_status` enum 중 선택은 T10에서 결정. 관련 RLS/index 포함.                                                                                                                                                    |
+| `product_discount_sort_fields` | T05       | 결정: generated column + `original_price` 역정규화 (T05 완료). `products.original_price` snapshot 컬럼 추가 (INSERT 트리거로 `menu_items.original_price` 복사), `available_stock`/`discount_rate` STORED generated column 추가. `displayStatus`는 현재 시각 의존이므로 mapper에서 계속 계산. |
+| `store_location_strategy`      | T21       | `stores` 테이블에 위치 데이터 추가 및 거리 계산 전략 결정. `latitude`/`longitude` 컬럼, 외부 거리 API, PostGIS/RPC 등 방식은 T21에서 결정.                                                                                                                                                   |
 
 ### 비차단 후보 (T11 이후 결정)
 

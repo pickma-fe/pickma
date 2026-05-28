@@ -343,7 +343,7 @@ Behavior:
 - 상품 생성 시 `menuItemId`는 seller store 소유 menu item이어야 한다.
 - 상품 생성 시 `menuItemId`는 `active` 상태여야 한다.
 - `products.category_id`는 상품 생성 시 `menu_items.category_id`를 복사한다.
-- `ProductResponse.originalPrice`는 `menu_items.original_price`에서 가져온다.
+- `ProductResponse.originalPrice`는 `products.original_price` (등록 시점 snapshot)에서 가져온다. `menu_items.original_price`가 나중에 변경되어도 기존 상품의 원가는 소급 변경되지 않는다.
 - 메뉴 이미지가 새 파일로 교체되는 경우 공통 file helper의 `seller_product_image` purpose를 사용한다.
 - 메뉴 삭제는 물리 삭제보다 `status = inactive` 비활성화를 우선 검토한다.
 
@@ -415,9 +415,9 @@ DB source:
 
 Mapping:
 
-- `originalPrice`는 `menu_items.original_price`에서 가져온다.
-- `availableStock = stock - reserved_stock`
-- `discountRate = round((1 - discountPrice / originalPrice) * 100)`
+- `originalPrice`는 `products.original_price` (등록 시점 snapshot)에서 가져온다.
+- `availableStock`은 `products.available_stock` DB generated column (`stock - reserved_stock`)에서 가져온다.
+- `discountRate`는 `products.discount_rate` DB generated column (`round((1 - discountPrice / originalPrice) * 100)`)에서 가져온다.
 - `isSoldOut = availableStock <= 0`
 - `isExpired = endAt <= now`
 - `displayStatus`는 `status`, `isSoldOut`, `isExpired` 기준으로 계산한다.
