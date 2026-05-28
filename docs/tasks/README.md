@@ -11,6 +11,7 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 - `temp/`에 생성하는 task 관련 산출물은 task ID를 파일명 맨 앞에 둔다. 예: `temp/T02-plan.md`, `temp/T02-code-review.md`, `temp/T02-checkpoint.md`.
 - task 실행 전에는 개별 task 문서와 관련 architecture/docs를 함께 확인한다.
 - task 완료 전에는 관련 `docs/*` 최신화 필요 여부를 확인한다. 문서 수정이 필요하지만 해당 task 범위를 넘으면 후속 task 또는 `확인 필요`로 남긴다.
+- 스키마 변경이 포함된 task는 `docs/migration_policy.md`를 먼저 확인한다.
 
 ## 우선순위
 
