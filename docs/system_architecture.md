@@ -476,7 +476,42 @@ src/
 
 ---
 
-## 11. 보안 고려사항
+## 11. CI/CD
+
+GitHub Actions 기본 CI는 PR과 `dev`/`main` push에서 실행한다.
+
+초기 CI job은 다음 명령을 순서대로 실행한다.
+
+```bash
+npm ci
+npx playwright install --with-deps chromium
+npm run lint
+npm run typecheck
+npm run test
+```
+
+`npm run test`에는 Storybook/Vitest browser project가 포함되므로 Chromium browser를 설치한다. E2E job은 T23 완료 후 별도 workflow 또는 job으로 분리하며, 이 기본 CI job에는 포함하지 않는다.
+
+CI 환경 변수는 실제 외부 서비스에 연결하지 않는 mock/test 값을 사용한다.
+
+| 변수명                                 | CI 기본값                | 비고                          |
+| -------------------------------------- | ------------------------ | ----------------------------- |
+| `API_MOCK_ENABLED`                     | `true`                   | Route Handler mock mode       |
+| `PAYMENT_MOCK`                         | `true`                   | Toss API 미호출               |
+| `NEXT_PUBLIC_APP_URL`                  | `http://localhost:3000`  | 서버 API origin 고정용        |
+| `NEXT_PUBLIC_SUPABASE_URL`             | `http://127.0.0.1:54321` | test placeholder              |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | `test-publishable-key`   | test placeholder              |
+| `SUPABASE_SECRET_KEY`                  | `test-secret-key`        | test placeholder, secret 아님 |
+| `NEXT_PUBLIC_TOSS_CLIENT_KEY`          | `test_ck_ci`             | test placeholder              |
+| `TOSS_SECRET_KEY`                      | `test_sk_ci`             | test placeholder, secret 아님 |
+
+`npm run build`는 초기 CI 필수 job에 포함하지 않고, 팀 결정 후 별도 job으로 추가한다.
+
+Branch protection은 `dev` 대상 PR에서 `CI / Lint, typecheck, and test` 통과를 필수 check로 설정한다. 저장소 설정은 GitHub UI에서 관리한다.
+
+---
+
+## 12. 보안 고려사항
 
 | 항목        | 대응 방안                                                                        |
 | ----------- | -------------------------------------------------------------------------------- |
@@ -489,7 +524,7 @@ src/
 
 ---
 
-## 12. 확장 포인트
+## 13. 확장 포인트
 
 | 기능        | 확장 방안                 |
 | ----------- | ------------------------- |
@@ -501,9 +536,9 @@ src/
 
 ---
 
-## 13. Storage lifecycle 정책
+## 14. Storage lifecycle 정책
 
-### 13.1 Bucket 목록
+### 14.1 Bucket 목록
 
 | Bucket                         | 접근    | 민감도 | cleanup 우선순위 |
 | ------------------------------ | ------- | ------ | ---------------- |
@@ -519,7 +554,7 @@ src/
 - product-images: `{storeId}/{uploadId}/{fileName}`
 - profile-images: `{userId}/{uploadId}/{fileName}`
 
-### 13.2 Orphan cleanup 방식
+### 14.2 Orphan cleanup 방식
 
 클라이언트 best-effort와 서버 주기적 orphan 스캔의 hybrid 방식을 채택한다.
 
@@ -535,7 +570,7 @@ src/
 - endpoint: `GET /api/cron/storage-cleanup`
 - 인증: `Authorization: Bearer ${CRON_SECRET}` (서버 전용 환경 변수, client bundle 미노출). 인증 실패 시 401 반환.
 
-### 13.3 보관 기간 정책
+### 14.3 보관 기간 정책
 
 개인정보보호법의 "처리목적 달성 후 지체 없이 파기" 원칙을 기준으로 한다. 세부 기간은 법무/운영 확인 후 최종 확정한다.
 
@@ -550,7 +585,7 @@ src/
 | 철회 / 만료                               | 지체 없이 삭제 대상                              |
 | 분쟁 / 법령 대응 필요                     | 원본 파일 장기 보관 금지, 최소 메타데이터만 보존 |
 
-### 13.4 삭제 트리거 및 주체
+### 14.4 삭제 트리거 및 주체
 
 | 트리거             | 주체               | 구현 시점 |
 | ------------------ | ------------------ | --------- |
@@ -565,7 +600,7 @@ src/
 - 클라이언트 cleanup: 본인 인증(`requireActiveUser()`) 후 `DELETE /api/files`. userId prefix로 소유권 검증.
 - 서버 cleanup: service role client (RLS bypass).
 
-### 13.5 향후 재검토 사항
+### 14.5 향후 재검토 사항
 
 - Toss 지급대행/KYC 책임 범위 확정 시 서류 보관 의무 재검토. 세부 정책은 T44에서 결정한다.
 - 분쟁 대응에 필요한 최소 메타데이터 범위 확인 (운영/CS 정책).
