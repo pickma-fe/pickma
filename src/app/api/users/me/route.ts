@@ -1,5 +1,8 @@
+import type { User as SupabaseUser } from '@supabase/supabase-js';
 import type { NextRequest } from 'next/server';
 
+import type { AuthProvider } from '@/types/auth';
+import type { UserResponse } from '@/contracts/user';
 import { ERROR_CODE } from '@/lib/errors/errorCodes';
 import { requireActiveUser } from '@/app/api/_lib/auth';
 import { isApiMockEnabled } from '@/app/api/_lib/mock';
@@ -16,14 +19,31 @@ function getMockUser(req: NextRequest) {
   return mockUser;
 }
 
+function toAuthProvider(provider?: string): AuthProvider | undefined {
+  if (provider === 'google' || provider === 'kakao' || provider === 'email') {
+    return provider;
+  }
+  return undefined;
+}
+
+function withAuthProvider(
+  user: UserResponse,
+  authUser: SupabaseUser
+): UserResponse {
+  return {
+    ...user,
+    authProvider: toAuthProvider(authUser.app_metadata.provider),
+  };
+}
+
 export async function GET(request: NextRequest): Promise<Response> {
   if (isApiMockEnabled()) {
     return success(getMockUser(request));
   }
 
   try {
-    const { serviceUser } = await requireActiveUser();
-    return success(serviceUser);
+    const { authUser, serviceUser } = await requireActiveUser();
+    return success(withAuthProvider(serviceUser, authUser));
   } catch (e) {
     return routeError(e);
   }
@@ -51,10 +71,10 @@ export async function PATCH(req: NextRequest): Promise<Response> {
   }
 
   try {
-    const { serviceUser } = await requireActiveUser();
+    const { authUser, serviceUser } = await requireActiveUser();
     const data = await validateBody(updateMeSchema, req);
     const updated = await updateUser(serviceUser.id, data);
-    return success(updated);
+    return success(withAuthProvider(updated, authUser));
   } catch (e) {
     return routeError(e);
   }

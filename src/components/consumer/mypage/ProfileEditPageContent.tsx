@@ -8,6 +8,12 @@ import { useMe } from '@/hooks/users/useMe';
 
 import { ProfileEditForm } from './ProfileEditForm';
 
+const AUTH_PROVIDER_LABELS = {
+  google: { label: '구글 계정으로 로그인', badge: 'G' },
+  kakao: { label: '카카오 계정으로 로그인', badge: 'K' },
+  email: { label: '이메일 계정으로 로그인', badge: '@' },
+};
+
 export function ProfileEditPageContent() {
   const router = useRouter();
   const { data: user, isError, isLoading } = useMe();
@@ -37,6 +43,10 @@ export function ProfileEditPageContent() {
       </p>
     );
   }
+
+  const authProvider = user.authProvider
+    ? AUTH_PROVIDER_LABELS[user.authProvider]
+    : undefined;
 
   return (
     <section className="max-w-320">
@@ -80,6 +90,17 @@ export function ProfileEditPageContent() {
                 </span>
               </div>
               <p className="mt-3 text-base text-gray-500">{user.email}</p>
+              {authProvider ? (
+                <p className="mt-3 inline-flex items-center gap-2 text-sm text-gray-600">
+                  <span
+                    aria-hidden="true"
+                    className="inline-flex size-4 items-center justify-center rounded-full bg-yellow-300 text-[10px] font-bold text-gray-900"
+                  >
+                    {authProvider.badge}
+                  </span>
+                  {authProvider.label}
+                </p>
+              ) : null}
             </div>
           </div>
 

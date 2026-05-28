@@ -26,7 +26,7 @@ vi.mock('./_lib/service', () => ({
 const USER_ID = '00000000-0000-4000-8000-000000000001';
 
 const activeUserResult = {
-  authUser: { id: USER_ID },
+  authUser: { id: USER_ID, app_metadata: { provider: 'kakao' } },
   serviceUser: { id: USER_ID, role: 'customer', status: 'active' },
 } as unknown as Awaited<ReturnType<typeof requireActiveUser>>;
 
@@ -61,11 +61,14 @@ describe('GET /api/users/me', () => {
     vi.mocked(requireActiveUser).mockResolvedValue(activeUserResult);
 
     const res = await GET(makeGetRequest());
-    const body = (await res.json()) as { data: { id: string } };
+    const body = (await res.json()) as {
+      data: { id: string; authProvider?: string };
+    };
 
     expect(res.status).toBe(200);
     expect(requireActiveUser).toHaveBeenCalledOnce();
     expect(body.data.id).toBe(USER_ID);
+    expect(body.data.authProvider).toBe('kakao');
   });
 
   it('requireActiveUser가 실패하면 error envelope를 반환한다', async () => {
@@ -123,6 +126,24 @@ describe('PATCH /api/users/me', () => {
       USER_ID,
       expect.objectContaining({ name: '새 이름' })
     );
+  });
+
+  it('real 모드에서 수정된 사용자 정보에 authProvider를 포함한다', async () => {
+    vi.mocked(isApiMockEnabled).mockReturnValue(false);
+    vi.mocked(requireActiveUser).mockResolvedValue(activeUserResult);
+    vi.mocked(updateUser).mockResolvedValue({
+      ...mockUser,
+      id: USER_ID,
+      name: '새 이름',
+    });
+
+    const res = await PATCH(makePatchRequest({ name: '새 이름' }));
+    const body = (await res.json()) as {
+      data: { id: string; authProvider?: string };
+    };
+
+    expect(res.status).toBe(200);
+    expect(body.data.authProvider).toBe('kakao');
   });
 
   it('requireActiveUser가 실패하면 error envelope를 반환한다', async () => {

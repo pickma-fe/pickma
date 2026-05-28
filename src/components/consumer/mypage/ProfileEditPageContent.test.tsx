@@ -28,6 +28,7 @@ const mockUser: User = {
   email: 'customer@example.com',
   name: '픽마 고객',
   phone: '010-1234-5678',
+  authProvider: 'kakao',
   role: 'customer',
   status: 'active',
   createdAt: new Date('2026-05-01T00:00:00.000Z'),
@@ -65,9 +66,7 @@ describe('ProfileEditPageContent', () => {
       screen.getByText('로그인 계정 정보를 확인할 수 있습니다.')
     ).toBeInTheDocument();
     expect(screen.getByText('customer@example.com')).toBeInTheDocument();
-    expect(
-      screen.queryByText('카카오 계정으로 로그인')
-    ).not.toBeInTheDocument();
+    expect(screen.getByText('카카오 계정으로 로그인')).toBeInTheDocument();
     expect(
       screen.queryByRole('button', { name: '계정 연결 관리' })
     ).not.toBeInTheDocument();
@@ -81,6 +80,23 @@ describe('ProfileEditPageContent', () => {
     ).toBeInTheDocument();
     expect(
       screen.getByRole('heading', { name: '도움이 필요하신가요?' })
+    ).toBeInTheDocument();
+  });
+
+  it('authProvider가 없으면 로그인 provider를 단정하지 않는다', () => {
+    vi.mocked(useMe).mockReturnValue({
+      data: { ...mockUser, authProvider: undefined },
+      isError: false,
+      isLoading: false,
+    } as ReturnType<typeof useMe>);
+
+    render(<ProfileEditPageContent />);
+
+    expect(
+      screen.queryByText('카카오 계정으로 로그인')
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByText('이메일과 로그인 정보는 인증 계정 설정에서 관리됩니다.')
     ).toBeInTheDocument();
   });
 

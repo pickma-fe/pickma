@@ -1,3 +1,5 @@
+import type { AuthProvider } from './auth';
+
 export type UserRole = 'customer' | 'seller' | 'admin';
 
 export type UserStatus = 'active' | 'suspended' | 'deleted';
@@ -7,6 +9,7 @@ export interface User {
   email: string;
   name: string;
   phone?: string;
+  authProvider?: AuthProvider;
   profileImage?: string;
   role: UserRole;
   status: UserStatus;
