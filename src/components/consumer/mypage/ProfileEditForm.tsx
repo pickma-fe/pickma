@@ -50,13 +50,13 @@ export function ProfileEditForm({ user }: ProfileEditFormProps) {
 
   return (
     <form
-      className="space-y-6 rounded-lg border border-gray-200 bg-white p-6"
+      className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]"
       onSubmit={handleSubmit}
     >
       {error ? (
         <p
           role="alert"
-          className="rounded-md bg-red-50 p-3 text-sm text-red-600"
+          className="rounded-md bg-red-50 p-3 text-sm text-red-600 lg:col-span-3"
         >
           {error}
         </p>
@@ -84,7 +84,7 @@ export function ProfileEditForm({ user }: ProfileEditFormProps) {
         disabled={isPending}
       />
 
-      <div className="flex justify-end gap-2">
+      <div className="flex justify-end gap-2 lg:items-end">
         <Button
           type="button"
           variant="outline"
