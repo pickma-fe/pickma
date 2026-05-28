@@ -165,7 +165,7 @@ export function OrderTable({
     );
   }
 
-  if (orders.length === 0) {
+  if (orders.length === 0 && totalPages === 0) {
     return (
       <div className="flex min-h-[300px] items-center justify-center rounded-lg border border-gray-200 bg-white">
         <div className="text-center">
@@ -216,87 +216,98 @@ export function OrderTable({
             </tr>
           </thead>
           <tbody>
-            {orders.map((order, index) => {
-              if (!isSellerDisplayStatus(order.status)) return null;
-
-              const badge = STATUS_BADGE[order.status];
-              const description = STATUS_DESCRIPTION[order.status];
-
-              return (
-                <tr
-                  key={order.id}
-                  className={`hover:bg-gray-50 ${
-                    index !== orders.length - 1
-                      ? 'border-b border-gray-100'
-                      : ''
-                  }`}
+            {orders.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={5}
+                  className="px-4 py-16 text-center text-sm text-gray-500"
                 >
-                  <td className="px-4 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100">
-                        <div className="flex h-full w-full items-center justify-center text-gray-400">
-                          🛍️
+                  검색 결과가 없습니다.
+                </td>
+              </tr>
+            ) : (
+              orders.map((order, index) => {
+                if (!isSellerDisplayStatus(order.status)) return null;
+
+                const badge = STATUS_BADGE[order.status];
+                const description = STATUS_DESCRIPTION[order.status];
+
+                return (
+                  <tr
+                    key={order.id}
+                    className={`hover:bg-gray-50 ${
+                      index !== orders.length - 1
+                        ? 'border-b border-gray-100'
+                        : ''
+                    }`}
+                  >
+                    <td className="px-4 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100">
+                          <div className="flex h-full w-full items-center justify-center text-gray-400">
+                            🛍️
+                          </div>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <p className="text-sm font-medium text-gray-900">
+                            {order.orderNumber}
+                          </p>
+                          <p className="text-xs text-gray-400">
+                            {order.storeName}
+                          </p>
+                          <p className="text-xs text-gray-400">
+                            주문일 {formatDate(order.createdAt)}{' '}
+                            {formatTime(order.createdAt)}
+                          </p>
                         </div>
                       </div>
+                    </td>
+                    <td className="px-4 py-4 whitespace-nowrap">
+                      <div className="flex flex-col">
+                        <span className="text-sm font-medium text-gray-900">
+                          {formatPrice(order.paymentAmount)}
+                        </span>
+                        <span className="text-xs text-gray-400 line-through">
+                          {formatPrice(order.totalAmount)}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-4 whitespace-nowrap">
                       <div className="flex flex-col gap-1">
-                        <p className="text-sm font-medium text-gray-900">
-                          {order.orderNumber}
+                        <p className="text-sm text-gray-900">
+                          {formatDate(order.pickupAt)}{' '}
+                          {formatTime(order.pickupAt)}
                         </p>
-                        <p className="text-xs text-gray-400">
-                          {order.storeName}
-                        </p>
-                        <p className="text-xs text-gray-400">
-                          주문일 {formatDate(order.createdAt)}{' '}
-                          {formatTime(order.createdAt)}
-                        </p>
+                        {order.pickupNumber && (
+                          <p className="text-xs text-gray-400">
+                            픽업 번호 {order.pickupNumber}
+                          </p>
+                        )}
                       </div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-4 whitespace-nowrap">
-                    <div className="flex flex-col">
-                      <span className="text-sm font-medium text-gray-900">
-                        {formatPrice(order.paymentAmount)}
-                      </span>
-                      <span className="text-xs text-gray-400 line-through">
-                        {formatPrice(order.totalAmount)}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="px-4 py-4 whitespace-nowrap">
-                    <div className="flex flex-col gap-1">
-                      <p className="text-sm text-gray-900">
-                        {formatDate(order.pickupAt)}{' '}
-                        {formatTime(order.pickupAt)}
-                      </p>
-                      {order.pickupNumber && (
-                        <p className="text-xs text-gray-400">
-                          픽업 번호 {order.pickupNumber}
-                        </p>
-                      )}
-                    </div>
-                  </td>
-                  <td className="w-40 px-4 py-4">
-                    <div className="flex flex-col gap-1">
-                      <div className="w-fit">
-                        <Badge variant="soft" color={badge.color}>
-                          {badge.label}
-                        </Badge>
+                    </td>
+                    <td className="w-40 px-4 py-4">
+                      <div className="flex flex-col gap-1">
+                        <div className="w-fit">
+                          <Badge variant="soft" color={badge.color}>
+                            {badge.label}
+                          </Badge>
+                        </div>
+                        {description && (
+                          <p className="text-xs text-gray-400">{description}</p>
+                        )}
                       </div>
-                      {description && (
-                        <p className="text-xs text-gray-400">{description}</p>
-                      )}
-                    </div>
-                  </td>
-                  <td className="px-4 py-4 whitespace-nowrap">
-                    <OrderActionButtons
-                      order={order}
-                      onOrderAction={onOrderAction}
-                      isActionPending={isActionPending}
-                    />
-                  </td>
-                </tr>
-              );
-            })}
+                    </td>
+                    <td className="px-4 py-4 whitespace-nowrap">
+                      <OrderActionButtons
+                        order={order}
+                        onOrderAction={onOrderAction}
+                        isActionPending={isActionPending}
+                      />
+                    </td>
+                  </tr>
+                );
+              })
+            )}
           </tbody>
         </table>
       </div>
