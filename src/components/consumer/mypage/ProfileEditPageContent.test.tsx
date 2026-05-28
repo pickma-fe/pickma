@@ -62,9 +62,15 @@ describe('ProfileEditPageContent', () => {
       screen.getByRole('heading', { name: '계정 정보' })
     ).toBeInTheDocument();
     expect(
-      screen.getByText('소셜 계정으로 로그인 중입니다.')
+      screen.getByText('로그인 계정 정보를 확인할 수 있습니다.')
     ).toBeInTheDocument();
     expect(screen.getByText('customer@example.com')).toBeInTheDocument();
+    expect(
+      screen.queryByText('카카오 계정으로 로그인')
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: '계정 연결 관리' })
+    ).not.toBeInTheDocument();
     expect(
       screen.getByRole('button', { name: '로그아웃' })
     ).toBeInTheDocument();

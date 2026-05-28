@@ -1,13 +1,6 @@
 'use client';
 
-import {
-  ExternalLink,
-  HelpCircle,
-  LogOut,
-  MessageCircle,
-  User,
-  UserX,
-} from 'lucide-react';
+import { HelpCircle, LogOut, MessageCircle, User, UserX } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 import { useSignOut } from '@/hooks/auth/useSignOut';
@@ -60,7 +53,7 @@ export function ProfileEditPageContent() {
             <div>
               <h2 className="text-lg font-bold text-gray-900">계정 정보</h2>
               <p className="mt-2 text-sm text-gray-500">
-                소셜 계정으로 로그인 중입니다.
+                로그인 계정 정보를 확인할 수 있습니다.
               </p>
             </div>
             <button
@@ -87,31 +80,13 @@ export function ProfileEditPageContent() {
                 </span>
               </div>
               <p className="mt-3 text-base text-gray-500">{user.email}</p>
-              <p className="mt-3 inline-flex items-center gap-2 text-sm text-gray-600">
-                <span
-                  aria-hidden="true"
-                  className="inline-flex size-4 items-center justify-center rounded-full bg-yellow-300 text-[10px] font-bold text-gray-900"
-                >
-                  K
-                </span>
-                카카오 계정으로 로그인
-              </p>
             </div>
           </div>
 
           <div className="mt-7 border-t border-gray-100 pt-6">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-              <p className="text-sm text-gray-500">
-                이메일, 비밀번호는 소셜 계정에서 관리됩니다.
-              </p>
-              <button
-                type="button"
-                className="inline-flex items-center justify-center gap-2 rounded-md border border-gray-200 px-5 py-3 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
-              >
-                계정 연결 관리
-                <ExternalLink className="size-4" aria-hidden="true" />
-              </button>
-            </div>
+            <p className="text-sm text-gray-500">
+              이메일과 로그인 정보는 인증 계정 설정에서 관리됩니다.
+            </p>
           </div>
         </section>
 
