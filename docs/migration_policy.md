@@ -33,6 +33,7 @@ YYYYMMDDHHMMSS_<snake_case_name>.sql
 - 각 migration은 단일 주제 변경을 담는다.
 - 멱등성을 고려한다 — 컬럼 추가 시 `IF NOT EXISTS`, enum 값 추가 시 존재 확인 등 idempotent guard를 사용한다.
 - `db reset`은 **로컬 개발 전용**이다. 원격 DB에는 `supabase db push`와 incremental migration만 사용한다.
+- `GENERATED ALWAYS AS ... STORED` 컬럼은 앱 코드(Route Handler, service)에서 직접 insert/update하지 않는다. Supabase typegen이 `Insert`/`Update` 타입에 해당 컬럼을 optional로 포함하지만, DB에서 쓰기를 거부한다. 현재 해당 컬럼: `products.available_stock`, `products.discount_rate`.
 
 ---
 
