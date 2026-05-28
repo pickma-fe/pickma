@@ -1,5 +1,5 @@
 import { XCircleIcon } from 'lucide-react';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 import { Button } from '@/components/common/Button/Button';
 
@@ -8,6 +8,8 @@ interface RejectedViewProps {
 }
 
 export function RejectedView({ rejectReason }: RejectedViewProps) {
+  const router = useRouter();
+
   return (
     <div className="flex flex-col items-center justify-center gap-6 py-20 text-center">
       <div className="flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
@@ -42,14 +44,18 @@ export function RejectedView({ rejectReason }: RejectedViewProps) {
       </div>
 
       <div className="flex gap-3">
-        <Link href="/seller/register">
-          <Button>재신청하기</Button>
-        </Link>
-        <Link href="/support" target="_blank" rel="noopener noreferrer">
-          <Button variant="outline" color="gray">
-            고객센터
-          </Button>
-        </Link>
+        <Button onClick={() => router.push('/seller/register')}>
+          재신청하기
+        </Button>
+        <Button
+          variant="outline"
+          color="gray"
+          onClick={() =>
+            window.open('/support', '_blank', 'noopener,noreferrer')
+          }
+        >
+          고객센터
+        </Button>
       </div>
     </div>
   );

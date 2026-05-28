@@ -39,8 +39,12 @@ export function useSellerAuth() {
   const { data: onboardingStatus } = useQuery<SellerOnboardingStatus>({
     queryKey: ['sellers', 'onboarding-status'],
     queryFn: () => sellerOnboardingApi.getSellerOnboardingStatus(),
-    staleTime: 30 * 1000,
-    refetchInterval: 5000,
+    staleTime: 10 * 1000,
+    refetchInterval: (query) => {
+      const status = query.state.data?.applicationStatus;
+      if (status === 'pending') return 10 * 1000;
+      return false;
+    },
   });
 
   const applicationStatus = onboardingStatus?.applicationStatus;
@@ -50,6 +54,8 @@ export function useSellerAuth() {
   const isApiRejected = applicationStatus === 'rejected';
   const hasApplication = isApiPending || isApiApproved || isApiRejected;
 
+  // 로컬 제출 상태 OR API 신청 존재 여부로 결정
+  // TODO(T29): API 확장 후 실제 데이터 복원 필요
   const resolvedDocumentsSubmitted = documentsSubmitted || hasApplication;
   const resolvedBusinessInfoSubmitted = businessInfoSubmitted || hasApplication;
   const resolvedTermsSubmitted = termsSubmitted || hasApplication;

@@ -1,9 +1,11 @@
 import { ClockIcon } from 'lucide-react';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 import { Button } from '@/components/common/Button/Button';
 
 export function PendingView() {
+  const router = useRouter();
+
   return (
     <div className="flex flex-col items-center justify-center gap-6 py-20 text-center">
       <div className="flex h-16 w-16 items-center justify-center rounded-full bg-yellow-100">
@@ -31,16 +33,22 @@ export function PendingView() {
       </div>
 
       <div className="flex gap-3">
-        <Link href="/seller/register">
-          <Button variant="outline" color="gray">
-            신청 내역 확인
-          </Button>
-        </Link>
-        <Link href="/support" target="_blank" rel="noopener noreferrer">
-          <Button variant="outline" color="gray">
-            고객센터
-          </Button>
-        </Link>
+        <Button
+          variant="outline"
+          color="gray"
+          onClick={() => router.push('/seller/register')}
+        >
+          신청 내역 확인
+        </Button>
+        <Button
+          variant="outline"
+          color="gray"
+          onClick={() =>
+            window.open('/support', '_blank', 'noopener,noreferrer')
+          }
+        >
+          고객센터
+        </Button>
       </div>
     </div>
   );
