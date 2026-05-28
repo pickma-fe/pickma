@@ -128,14 +128,6 @@ export function ProfileEditPageContent() {
                 <Pencil className="size-4" aria-hidden="true" />
                 {isEditOpen ? '수정 닫기' : '정보 수정'}
               </button>
-              {isEditOpen ? (
-                <ProfileEditForm
-                  name={editName}
-                  phone={editPhone}
-                  onErrorClear={() => setEditError(null)}
-                  onErrorSet={setEditError}
-                />
-              ) : null}
               <button
                 type="button"
                 disabled={isSignOutPending}
@@ -209,6 +201,17 @@ export function ProfileEditPageContent() {
             >
               {editError}
             </p>
+          ) : null}
+
+          {isEditOpen ? (
+            <div className="mt-4 flex justify-end">
+              <ProfileEditForm
+                name={editName}
+                phone={editPhone}
+                onErrorClear={() => setEditError(null)}
+                onErrorSet={setEditError}
+              />
+            </div>
           ) : null}
         </section>
 
