@@ -113,9 +113,6 @@ describe('ProfileEditPageContent', () => {
   });
 
   it('저장 시 trim된 닉네임과 연락처를 업데이트하고 현재 페이지에 머문다', async () => {
-    mockUpdateMe.mockImplementation((_data, options) => {
-      options.onSuccess();
-    });
     render(<ProfileEditPageContent />);
 
     fireEvent.change(screen.getByLabelText('닉네임'), {
@@ -126,16 +123,17 @@ describe('ProfileEditPageContent', () => {
     });
     fireEvent.click(screen.getByRole('button', { name: '저장하기' }));
 
-    await waitFor(() => {
-      expect(mockUpdateMe).toHaveBeenCalledWith(
-        { name: '새 이름', phone: '010-9999-0000' },
-        expect.objectContaining({ onSuccess: expect.any(Function) })
-      );
-    });
+    expect(mockUpdateMe).toHaveBeenCalledWith(
+      { name: '새 이름', phone: '010-9999-0000' },
+      expect.objectContaining({ onError: expect.any(Function) })
+    );
     expect(mockPush).not.toHaveBeenCalledWith('/mypage');
     expect(
-      screen.getByText('프로필 정보가 저장되었습니다.')
-    ).toBeInTheDocument();
+      screen.queryByText('프로필 정보가 저장되었습니다.')
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: '취소' })
+    ).not.toBeInTheDocument();
   });
 
   it('회원 탈퇴 확인 후 deleteMe와 signOut을 실행하고 홈으로 이동한다', async () => {
