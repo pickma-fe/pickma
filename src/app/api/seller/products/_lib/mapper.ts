@@ -7,8 +7,8 @@ export type SellerProductRow = {
   category_id: string | null;
   discount_price: number;
   original_price: number;
-  discount_rate: number | null;
-  available_stock: number | null;
+  discount_rate: number;
+  available_stock: number;
   stock: number;
   reserved_stock: number;
   end_at: string;
@@ -45,8 +45,8 @@ function toDisplayStatus(
 export function mapSellerProductRow(
   row: SellerProductRow
 ): ProductListItemResponse {
-  const availableStock = row.available_stock ?? row.stock - row.reserved_stock;
-  const discountRate = row.discount_rate ?? 0;
+  const availableStock = row.available_stock;
+  const discountRate = row.discount_rate;
   const isSoldOut = availableStock <= 0;
   const isExpired = new Date(row.end_at) <= new Date();
 

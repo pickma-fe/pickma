@@ -313,11 +313,11 @@ export type Database = {
       };
       products: {
         Row: {
-          available_stock: number | null;
+          available_stock: number;
           category_id: string | null;
           created_at: string;
           discount_price: number;
-          discount_rate: number | null;
+          discount_rate: number;
           end_at: string;
           id: string;
           menu_item_id: string;
@@ -331,11 +331,11 @@ export type Database = {
           updated_at: string;
         };
         Insert: {
-          available_stock?: number | null;
+          available_stock?: number;
           category_id?: string | null;
           created_at?: string;
           discount_price: number;
-          discount_rate?: number | null;
+          discount_rate?: number;
           end_at: string;
           id?: string;
           menu_item_id: string;
@@ -349,11 +349,11 @@ export type Database = {
           updated_at?: string;
         };
         Update: {
-          available_stock?: number | null;
+          available_stock?: number;
           category_id?: string | null;
           created_at?: string;
           discount_price?: number;
-          discount_rate?: number | null;
+          discount_rate?: number;
           end_at?: string;
           id?: string;
           menu_item_id?: string;
