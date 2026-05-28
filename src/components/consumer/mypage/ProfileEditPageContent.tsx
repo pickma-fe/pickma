@@ -148,7 +148,7 @@ export function ProfileEditPageContent() {
             <div className="w-full max-w-80">
               <div className="flex items-center gap-2">
                 {isEditOpen ? (
-                  <div className="w-52">
+                  <div className="w-52 sm:w-64">
                     <input
                       type="text"
                       aria-label="닉네임"
@@ -161,7 +161,10 @@ export function ProfileEditPageContent() {
                     />
                   </div>
                 ) : (
-                  <p className="flex h-8 max-w-52 items-center truncate text-xl font-bold text-gray-900">
+                  <p
+                    title={user.name}
+                    className="flex h-8 max-w-52 items-center truncate text-xl font-bold text-gray-900 sm:max-w-64"
+                  >
                     {user.name}
                   </p>
                 )}
