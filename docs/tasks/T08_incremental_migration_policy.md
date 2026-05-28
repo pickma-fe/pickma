@@ -50,4 +50,4 @@
 
 - 구현 결과:
   - `docs/migration_policy.md` 신설: 초기 migration freeze 조건 및 예외, incremental migration 명명 규칙(`YYYYMMDDHHMMSS_<snake_case_name>.sql`), 멱등성 원칙, 예정 migration 후보 목록(T10/T05/T21), T22 비차단 후보 분리 기록
-  - `docs/erd.md` 섹션 8 추가: 현행 스키마와 분리된 예정 스키마 변경 후보 목록
+  - `docs/erd.md` 섹션 8 추가: 예정 스키마 변경 후보는 `docs/migration_policy.md`를 참조하도록 안내
