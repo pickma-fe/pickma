@@ -15,6 +15,9 @@ const SELLER_PRODUCT_SELECT = [
   'menu_item_id',
   'category_id',
   'discount_price',
+  'original_price',
+  'discount_rate',
+  'available_stock',
   'stock',
   'reserved_stock',
   'end_at',
@@ -22,7 +25,7 @@ const SELLER_PRODUCT_SELECT = [
   'pickup_end_time',
   'status',
   'updated_at',
-  'menu_items!inner(id, name, image, original_price)',
+  'menu_items!inner(id, name, image)',
   'categories(id, name)',
   'stores!inner(id, name)',
 ].join(', ');

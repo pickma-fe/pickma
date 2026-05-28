@@ -52,6 +52,8 @@ function buildChain(result: {
     select: vi.fn(),
     eq: vi.fn(),
     gt: vi.fn(),
+    gte: vi.fn(),
+    lt: vi.fn(),
     ilike: vi.fn(),
     order: vi.fn(),
     range: vi.fn().mockResolvedValue(result),
@@ -66,6 +68,8 @@ function buildChain(result: {
   chain.select.mockReturnValue(chain);
   chain.eq.mockReturnValue(chain);
   chain.gt.mockReturnValue(chain);
+  chain.gte.mockReturnValue(chain);
+  chain.lt.mockReturnValue(chain);
   chain.ilike.mockReturnValue(chain);
   chain.order.mockReturnValue(chain);
   return chain;
@@ -183,41 +187,33 @@ describe('getProducts', () => {
     expect(supabase._chain.range).toHaveBeenCalledWith(0, 19);
   });
 
-  it('할인율 필터는 서버 후처리 페이지네이션 경로를 사용한다', async () => {
-    const rows = Array.from({ length: 8 }, (_, index) => ({
-      ...baseRow,
-      id: `00000000-0000-4000-8000-00000000005${index}`,
-      end_at: `2099-12-31T23:5${index}:59.000Z`,
-    }));
-    const supabase = buildSupabase({ data: rows, error: null, count: 8 });
+  it('할인율 필터도 DB range 페이지네이션을 사용한다', async () => {
+    const supabase = buildSupabase({ data: [baseRow], error: null, count: 1 });
 
-    const result = await getProducts(supabase, {
-      page: 2,
-      pageSize: 5,
+    await getProducts(supabase, {
+      page: 1,
+      pageSize: 20,
       discountOption: 'over-40',
     });
 
-    expect(supabase._chain.range).not.toHaveBeenCalled();
-    expect(result.items).toHaveLength(3);
-    expect(result.items[0].id).toBe('00000000-0000-4000-8000-000000000055');
+    expect(supabase._chain.gte).toHaveBeenCalledWith('discount_rate', 40);
+    expect(supabase._chain.range).toHaveBeenCalledWith(0, 19);
   });
 
-  it('할인율 높은순 정렬은 서버 후처리 페이지네이션 경로를 사용한다', async () => {
-    const rows = Array.from({ length: 8 }, (_, index) => ({
-      ...baseRow,
-      id: `00000000-0000-4000-8000-00000000005${index}`,
-      discount_price: 7200 - index,
-    }));
-    const supabase = buildSupabase({ data: rows, error: null, count: 8 });
+  it('할인율 높은순 정렬도 DB range 페이지네이션을 사용한다', async () => {
+    const supabase = buildSupabase({ data: [baseRow], error: null, count: 1 });
 
     await getProducts(supabase, {
-      page: 2,
-      pageSize: 5,
+      page: 1,
+      pageSize: 20,
       sort: 'discountRate',
       order: 'desc',
     });
 
-    expect(supabase._chain.range).not.toHaveBeenCalled();
+    expect(supabase._chain.order).toHaveBeenCalledWith('discount_rate', {
+      ascending: false,
+    });
+    expect(supabase._chain.range).toHaveBeenCalledWith(0, 19);
   });
 
   it('keyword 파라미터가 있으면 menu_items.name ILIKE 필터를 적용한다', async () => {
@@ -239,36 +235,22 @@ describe('getProducts', () => {
     expect(supabase._chain.ilike).not.toHaveBeenCalled();
   });
 
-  it('확장 경로에서 keyword+discountOption 조합 시 인메모리 keyword 필터를 적용한다', async () => {
-    const rows = [
-      { ...baseRow, id: '00000000-0000-4000-8000-000000000051' },
-      {
-        ...baseRow,
-        id: '00000000-0000-4000-8000-000000000052',
-        menu_items: { ...baseRow.menu_items, name: '소금빵 세트' },
-      },
-      {
-        ...baseRow,
-        id: '00000000-0000-4000-8000-000000000053',
-        menu_items: { ...baseRow.menu_items, name: '크루아상 단품' },
-      },
-    ];
-    const supabase = buildSupabase({
-      data: rows,
-      error: null,
-      count: rows.length,
-    });
+  it('keyword + discountOption 조합 시 ilike + gte 모두 DB 쿼리로 적용한다', async () => {
+    const supabase = buildSupabase({ data: [baseRow], error: null, count: 1 });
 
-    const result = await getProducts(supabase, {
+    await getProducts(supabase, {
       page: 1,
       pageSize: 20,
       keyword: '크루아상',
       discountOption: 'over-40',
     });
 
-    expect(supabase._chain.range).not.toHaveBeenCalled();
-    expect(result.items).toHaveLength(2);
-    expect(result.items.every((i) => i.name.includes('크루아상'))).toBe(true);
+    expect(supabase._chain.ilike).toHaveBeenCalledWith(
+      'menu_items.name',
+      '%크루아상%'
+    );
+    expect(supabase._chain.gte).toHaveBeenCalledWith('discount_rate', 40);
+    expect(supabase._chain.range).toHaveBeenCalledWith(0, 19);
   });
 
   it('region 파라미터가 없으면 stores.region 필터를 적용하지 않는다', async () => {
@@ -280,6 +262,62 @@ describe('getProducts', () => {
     expect(
       eqCalls.every((args: unknown[]) => args[0] !== 'stores.region')
     ).toBe(true);
+  });
+
+  it('discountOption: 30-to-40은 gte(30), lt(40)과 range를 호출한다', async () => {
+    const supabase = buildSupabase({ data: [], error: null, count: 0 });
+
+    await getProducts(supabase, {
+      page: 1,
+      pageSize: 20,
+      discountOption: '30-to-40',
+    });
+
+    expect(supabase._chain.gte).toHaveBeenCalledWith('discount_rate', 30);
+    expect(supabase._chain.lt).toHaveBeenCalledWith('discount_rate', 40);
+    expect(supabase._chain.range).toHaveBeenCalledWith(0, 19);
+  });
+
+  it('discountOption: 20-to-30은 gte(20), lt(30)과 range를 호출한다', async () => {
+    const supabase = buildSupabase({ data: [], error: null, count: 0 });
+
+    await getProducts(supabase, {
+      page: 1,
+      pageSize: 20,
+      discountOption: '20-to-30',
+    });
+
+    expect(supabase._chain.gte).toHaveBeenCalledWith('discount_rate', 20);
+    expect(supabase._chain.lt).toHaveBeenCalledWith('discount_rate', 30);
+    expect(supabase._chain.range).toHaveBeenCalledWith(0, 19);
+  });
+
+  it('discountOption: under-20은 lt(20)과 range를 호출한다', async () => {
+    const supabase = buildSupabase({ data: [], error: null, count: 0 });
+
+    await getProducts(supabase, {
+      page: 1,
+      pageSize: 20,
+      discountOption: 'under-20',
+    });
+
+    expect(supabase._chain.lt).toHaveBeenCalledWith('discount_rate', 20);
+    expect(supabase._chain.gte).not.toHaveBeenCalled();
+    expect(supabase._chain.range).toHaveBeenCalledWith(0, 19);
+  });
+
+  it('discountOption: all은 discount_rate 필터를 적용하지 않고 range를 호출한다', async () => {
+    const supabase = buildSupabase({ data: [], error: null, count: 0 });
+
+    await getProducts(supabase, {
+      page: 1,
+      pageSize: 20,
+      discountOption: 'all',
+    });
+
+    expect(supabase._chain.gte).not.toHaveBeenCalled();
+    expect(supabase._chain.lt).not.toHaveBeenCalled();
+    expect(supabase._chain.range).toHaveBeenCalledWith(0, 19);
   });
 
   it('페이지네이션: range를 올바른 인덱스로 호출한다', async () => {
