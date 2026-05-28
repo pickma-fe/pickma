@@ -570,3 +570,107 @@ src/
 - Toss 지급대행/KYC 책임 범위 확정 시 서류 보관 의무 재검토. 세부 정책은 T44에서 결정한다.
 - 분쟁 대응에 필요한 최소 메타데이터 범위 확인 (운영/CS 정책).
 - public bucket(store-images, product-images, profile-images) orphan 처리는 P3에서 결정.
+
+---
+
+## 14. service role 사용 기준
+
+`createServiceRoleClient()`는 RLS를 우회하므로 남용하면 사용자·판매자·관리자 데이터 노출 위험이 생긴다. 반드시 아래 허용 케이스에 해당할 때만 사용한다.
+
+### 14.1 허용 케이스
+
+| 케이스                | 설명                                                          | 예시                                                           |
+| --------------------- | ------------------------------------------------------------- | -------------------------------------------------------------- |
+| RPC 호출              | DB function은 RLS가 아닌 SECURITY DEFINER로 실행              | `create_order`, `confirm_payment`, `create_seller_application` |
+| 초기 row 생성         | 사용자 최초 로그인 시 users row INSERT — RLS INSERT 정책 없음 | `getOrCreateUserByAuthUser`                                    |
+| admin cross-user 조작 | admin이 타 사용자 데이터 조회/변경                            | `getPendingSellerApplications`, `approveSellerApplication`     |
+| Storage API           | Supabase Storage에는 RLS가 없어 service role 필수             | `createSignedUploadUrl`, Storage orphan cleanup                |
+
+### 14.2 금지 케이스
+
+단순 owner-scoped SELECT는 service role을 사용하지 않는다. `createServerClient()` + RLS 정책으로 처리한다.
+
+- `orders.user_id = auth.uid()` 기준 소비자 주문 조회
+- `products.store_id ∈ 내 가게` 기준 판매자 상품 조회
+- `users.id = auth.uid()` 기준 프로필 조회/수정
+
+### 14.3 RLS 전환 후보 목록
+
+현재 service role을 사용하지만 RLS+server client로 전환 가능한 후보다. 전환 전 해당 테이블의 RLS 정책 추가가 전제 조건이며, 실제 전환은 후속 task에서 수행한다.
+
+| 파일                                       | 함수                                                               | scope 유형                                 | 전제 조건          |
+| ------------------------------------------ | ------------------------------------------------------------------ | ------------------------------------------ | ------------------ |
+| `_lib/auth.ts`                             | `checkApplicationEligibility`                                      | `seller_applications.user_id = auth.uid()` | RLS 정책 확인 필요 |
+| `orders/_lib/service.ts`                   | `getOrders`, `getOrder`                                            | `orders.user_id = auth.uid()`              | RLS 정책 추가      |
+| `seller/orders/_lib/service.ts`            | `getSellerOrders`, `getSellerOrder`                                | `orders.store_id ∈ 내 가게`                | RLS 정책 추가      |
+| `seller/orders/_lib/service.ts`            | `acceptSellerOrder`, `markSellerOrderReady`, `completeSellerOrder` | store 소유권 필터                          | RLS 정책 추가      |
+| `seller/products/_lib/service.ts`          | 전체                                                               | `products.store_id ∈ 내 가게`              | RLS 정책 추가      |
+| `seller/menu-items/_lib/service.ts`        | 전체                                                               | `menu_items.store_id ∈ 내 가게`            | RLS 정책 추가      |
+| `seller/onboarding-status/_lib/service.ts` | `getSellerOnboardingStatus`                                        | 여러 테이블 user 소유                      | RLS 정책 추가      |
+| `users/me/_lib/service.ts`                 | profile 조회/수정                                                  | `users.id = auth.uid()`                    | RLS 정책 확인      |
+
+---
+
+## 15. Route Handler 보안 checklist
+
+신규 Route Handler를 구현하거나 기존 Route Handler를 수정할 때 아래 항목을 확인한다.
+
+### 15.1 auth helper 선택 기준
+
+| 조건                           | 사용할 helper                                           |
+| ------------------------------ | ------------------------------------------------------- |
+| 로그인 사용자 전용 (role 무관) | `requireActiveUser()`                                   |
+| 판매자 전용 (가게 불필요)      | `requireSeller()`                                       |
+| 판매자 전용 + 가게 필요        | `requireSellerStore()`                                  |
+| 관리자 전용                    | `requireAdmin()`                                        |
+| 판매자 신청 자격 확인          | `requireActiveUser()` + `checkApplicationEligibility()` |
+
+### 15.2 owner scope 검증 원칙
+
+- auth helper가 반환한 `authUser.id` / `store.id`를 service에 직접 전달해 소유권 필터를 적용한다.
+- service 내부에서 params의 id를 무검증으로 사용하지 않는다. Route Handler에서 auth → params → service 순서로 검증한다.
+- 민감 리소스(admin 전용, 개인 문서, 결제)는 auth를 params/body 검증보다 먼저 수행하는 것을 권장한다.
+
+### 15.3 응답 민감도 원칙
+
+- 에러 응답에 DB 쿼리 오류 메시지, 내부 파일 경로, 타 사용자 ID 등 민감 정보를 포함하지 않는다.
+- `routeError(error)`는 `AppError`만 클라이언트에 노출하고, 그 외는 `INTERNAL_SERVER_ERROR`로 처리한다.
+
+### 15.4 P0/P1 API owner scope 테스트 커버리지
+
+| API                                                          | 우선순위 | 필요 scope               | 현재 테스트 | T07 조치               | 후속 task               |
+| ------------------------------------------------------------ | -------- | ------------------------ | ----------- | ---------------------- | ----------------------- |
+| `GET /api/admin/sellers/pending`                             | P0       | admin                    | 없음        | 추가                   | —                       |
+| `POST /api/admin/sellers/[id]/approve`                       | P0       | admin                    | 없음        | 추가                   | —                       |
+| `POST /api/admin/sellers/[id]/reject`                        | P0       | admin                    | 없음        | 추가                   | —                       |
+| `POST /api/admin/seller-application-documents/[id]/read-url` | P0       | admin                    | 없음        | 추가                   | —                       |
+| `GET /api/admin/stores`                                      | P0       | admin                    | 없음        | 제외 (NOT_IMPLEMENTED) | T04                     |
+| `POST /api/seller-applications`                              | P0       | activeUser + eligibility | 없음        | 추가                   | —                       |
+| `GET /api/seller/onboarding-status`                          | P0       | activeUser               | 없음        | 추가                   | —                       |
+| `GET /api/users/me`                                          | P0       | activeUser               | 없음        | 추가                   | —                       |
+| `POST /api/stores`                                           | P0       | seller                   | 있음        | 기존 확인              | —                       |
+| `GET /api/stores/me`                                         | P0       | seller                   | 있음        | 기존 확인              | —                       |
+| `GET /api/seller/products`                                   | P0       | seller                   | 있음        | 기존 확인              | —                       |
+| `POST /api/seller/products`                                  | P0       | seller                   | 있음        | 기존 확인              | —                       |
+| `PATCH /api/seller/products/[productId]`                     | P0       | seller                   | 있음        | 기존 확인              | —                       |
+| `DELETE /api/seller/products/[productId]`                    | P0       | seller                   | 있음        | 기존 확인              | —                       |
+| `GET /api/seller/orders`                                     | P0       | sellerStore              | 있음        | 기존 확인              | —                       |
+| `GET /api/seller/orders/[orderId]`                           | P0       | sellerStore              | 있음        | 기존 확인              | —                       |
+| `PATCH /api/seller/orders/[orderId]/accept`                  | P0       | sellerStore              | 있음        | 기존 확인              | —                       |
+| `PATCH /api/seller/orders/[orderId]/ready`                   | P0       | sellerStore              | 있음        | 기존 확인              | —                       |
+| `PATCH /api/seller/orders/[orderId]/complete`                | P0       | sellerStore              | 있음        | 기존 확인              | —                       |
+| `GET /api/orders`                                            | P0       | activeUser               | 있음        | 기존 확인              | —                       |
+| `POST /api/orders`                                           | P0       | activeUser               | 있음        | 기존 확인              | —                       |
+| `GET /api/orders/[orderId]`                                  | P0       | owner                    | 있음        | 기존 확인              | —                       |
+| `POST /api/payments/prepare`                                 | P0       | activeUser               | 있음        | 기존 확인              | —                       |
+| `POST /api/payments/confirm`                                 | P0       | activeUser               | 있음        | 기존 확인              | —                       |
+| `POST /api/files/upload-url`                                 | P0       | purpose별                | 없음        | 추가                   | T16 (purpose 권한 강화) |
+| `GET /api/products/[productId]`                              | P0       | 없음 (public)            | 있음        | 기존 확인              | —                       |
+| `GET /api/stores`                                            | P1       | 없음 (public)            | 있음        | 기존 확인              | —                       |
+| `PATCH /api/users/me`                                        | P1       | activeUser               | 없음        | 추가                   | —                       |
+| `DELETE /api/users/me`                                       | P1       | activeUser               | 없음        | 추가                   | —                       |
+| `PATCH /api/stores/me`                                       | P1       | seller                   | 있음        | 기존 확인              | —                       |
+| `PATCH /api/orders/[orderId]/cancel`                         | P1       | owner                    | 없음        | 제외 (NOT_IMPLEMENTED) | T31                     |
+| `POST /api/payments/[paymentId]/cancel`                      | P1       | owner                    | 없음        | 제외 (NOT_IMPLEMENTED) | T31                     |
+| `PATCH /api/seller/orders/[orderId]/no-show`                 | P1       | sellerStore              | 없음        | 제외 (NOT_IMPLEMENTED) | T52                     |
+| `PATCH /api/seller/products/[productId]/stock`               | P1       | sellerStore              | 없음        | 제외 (NOT_IMPLEMENTED) | T09/T28                 |
