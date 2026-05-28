@@ -19,6 +19,9 @@ const PRODUCT_SELECT = [
   'menu_item_id',
   'category_id',
   'discount_price',
+  'original_price',
+  'discount_rate',
+  'available_stock',
   'stock',
   'reserved_stock',
   'end_at',
@@ -26,7 +29,7 @@ const PRODUCT_SELECT = [
   'pickup_end_time',
   'status',
   'updated_at',
-  'menu_items!inner(id, name, description, image, original_price)',
+  'menu_items!inner(id, name, description, image)',
   'categories(id, name)',
   'stores!inner(id, name, description, phone, address, address_detail, region, image)',
 ].join(', ');
@@ -36,9 +39,6 @@ export async function getProducts(
   params: ProductListParams
 ): Promise<ProductListResponse> {
   const { region, categoryId, keyword } = params;
-  const shouldUseExtendedList =
-    isDiscountFilterOption(params.discountOption) ||
-    params.sort === 'discountRate';
   const from = (params.page - 1) * params.pageSize;
   const to = from + params.pageSize - 1;
 
@@ -64,7 +64,23 @@ export async function getProducts(
     query = query.gt('end_at', new Date().toISOString());
   }
 
-  if (params.sort === 'discountPrice') {
+  if (params.discountOption && params.discountOption !== 'all') {
+    if (params.discountOption === 'over-40') {
+      query = query.gte('discount_rate', 40);
+    } else if (params.discountOption === '30-to-40') {
+      query = query.gte('discount_rate', 30).lt('discount_rate', 40);
+    } else if (params.discountOption === '20-to-30') {
+      query = query.gte('discount_rate', 20).lt('discount_rate', 30);
+    } else if (params.discountOption === 'under-20') {
+      query = query.lt('discount_rate', 20);
+    }
+  }
+
+  if (params.sort === 'discountRate') {
+    query = query.order('discount_rate', {
+      ascending: getSortOrder(params) === 'asc',
+    });
+  } else if (params.sort === 'discountPrice') {
     query = query.order('discount_price', {
       ascending: getSortOrder(params) === 'asc',
     });
@@ -74,33 +90,21 @@ export async function getProducts(
     });
   }
 
-  if (!shouldUseExtendedList) {
-    const { data, error, count } = await query.range(from, to);
-
-    if (error) {
-      throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
-    }
-
-    const totalCount = count ?? 0;
-
-    return {
-      items: ((data ?? []) as unknown as ProductRow[]).map(mapProductRow),
-      page: params.page,
-      pageSize: params.pageSize,
-      totalCount,
-      totalPages: Math.ceil(totalCount / params.pageSize),
-    };
-  }
-
-  const { data, error } = await query;
+  const { data, error, count } = await query.range(from, to);
 
   if (error) {
     throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
   }
-  return buildProductListResponse(
-    ((data ?? []) as unknown as ProductRow[]).map(mapProductRow),
-    { ...params, region: undefined }
-  );
+
+  const totalCount = count ?? 0;
+
+  return {
+    items: ((data ?? []) as unknown as ProductRow[]).map(mapProductRow),
+    page: params.page,
+    pageSize: params.pageSize,
+    totalCount,
+    totalPages: Math.ceil(totalCount / params.pageSize),
+  };
 }
 
 export function buildProductListResponse(
@@ -168,10 +172,6 @@ function matchesDiscountOption(
   }
 
   return true;
-}
-
-function isDiscountFilterOption(discountOption: string | undefined) {
-  return Boolean(discountOption && discountOption !== 'all');
 }
 
 function compareProducts(

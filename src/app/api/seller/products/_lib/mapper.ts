@@ -6,6 +6,9 @@ export type SellerProductRow = {
   menu_item_id: string;
   category_id: string | null;
   discount_price: number;
+  original_price: number;
+  discount_rate: number;
+  available_stock: number;
   stock: number;
   reserved_stock: number;
   end_at: string;
@@ -17,7 +20,6 @@ export type SellerProductRow = {
     id: string;
     name: string;
     image: string | null;
-    original_price: number;
   };
   categories: {
     id: string;
@@ -43,10 +45,8 @@ function toDisplayStatus(
 export function mapSellerProductRow(
   row: SellerProductRow
 ): ProductListItemResponse {
-  const availableStock = row.stock - row.reserved_stock;
-  const discountRate = Math.round(
-    (1 - row.discount_price / row.menu_items.original_price) * 100
-  );
+  const availableStock = row.available_stock;
+  const discountRate = row.discount_rate;
   const isSoldOut = availableStock <= 0;
   const isExpired = new Date(row.end_at) <= new Date();
 
@@ -59,7 +59,7 @@ export function mapSellerProductRow(
     menuItemId: row.menu_items.id,
     name: row.menu_items.name,
     image: row.menu_items.image ?? undefined,
-    originalPrice: row.menu_items.original_price,
+    originalPrice: row.original_price,
     discountPrice: row.discount_price,
     discountRate,
     stock: row.stock,

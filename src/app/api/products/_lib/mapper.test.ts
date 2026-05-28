@@ -9,6 +9,9 @@ const baseRow: ProductRow = {
   menu_item_id: '00000000-0000-4000-8000-000000000041',
   category_id: '00000000-0000-4000-8000-000000000011',
   discount_price: 7200,
+  original_price: 12000,
+  discount_rate: 40,
+  available_stock: 6,
   stock: 8,
   reserved_stock: 2,
   end_at: '2099-12-31T23:59:59.000Z',
@@ -21,7 +24,6 @@ const baseRow: ProductRow = {
     name: '마감 할인 크루아상 세트',
     description: '당일 생산 후 남은 크루아상과 페이스트리를 담은 세트입니다.',
     image: null,
-    original_price: 12000,
   },
   categories: {
     id: '00000000-0000-4000-8000-000000000011',
@@ -40,28 +42,34 @@ const baseRow: ProductRow = {
 };
 
 describe('mapProductRow', () => {
-  it('availableStock을 계산한다', () => {
+  it('availableStock을 DB 컬럼에서 읽는다', () => {
     expect(mapProductRow(baseRow).availableStock).toBe(6);
+    expect(
+      mapProductRow({ ...baseRow, available_stock: 3 }).availableStock
+    ).toBe(3);
   });
 
-  it('discountRate를 계산한다', () => {
+  it('discountRate를 DB 컬럼에서 읽는다', () => {
     expect(mapProductRow(baseRow).discountRate).toBe(40);
+    expect(mapProductRow({ ...baseRow, discount_rate: 25 }).discountRate).toBe(
+      25
+    );
+  });
+
+  it('menu_items.original_price가 달라도 originalPrice는 row.original_price를 반환한다', () => {
+    expect(mapProductRow(baseRow).originalPrice).toBe(12000);
     expect(
-      mapProductRow({
-        ...baseRow,
-        discount_price: 9000,
-        menu_items: { ...baseRow.menu_items, original_price: 12000 },
-      }).discountRate
-    ).toBe(25);
+      mapProductRow({ ...baseRow, original_price: 15000 }).originalPrice
+    ).toBe(15000);
   });
 
   it('isSoldOut을 계산한다', () => {
-    expect(
-      mapProductRow({ ...baseRow, stock: 2, reserved_stock: 2 }).isSoldOut
-    ).toBe(true);
-    expect(
-      mapProductRow({ ...baseRow, stock: 3, reserved_stock: 2 }).isSoldOut
-    ).toBe(false);
+    expect(mapProductRow({ ...baseRow, available_stock: 0 }).isSoldOut).toBe(
+      true
+    );
+    expect(mapProductRow({ ...baseRow, available_stock: 1 }).isSoldOut).toBe(
+      false
+    );
   });
 
   it('isExpired를 계산한다', () => {
@@ -76,8 +84,7 @@ describe('mapProductRow', () => {
     const expiredSoldOut = {
       ...baseRow,
       end_at: '2020-01-01T00:00:00.000Z',
-      stock: 2,
-      reserved_stock: 2,
+      available_stock: 0,
     };
 
     expect(
@@ -85,7 +92,7 @@ describe('mapProductRow', () => {
     ).toBe('closed');
     expect(mapProductRow(expiredSoldOut).displayStatus).toBe('expired');
     expect(
-      mapProductRow({ ...baseRow, stock: 2, reserved_stock: 2 }).displayStatus
+      mapProductRow({ ...baseRow, available_stock: 0 }).displayStatus
     ).toBe('soldOut');
     expect(mapProductRow(baseRow).displayStatus).toBe('available');
   });

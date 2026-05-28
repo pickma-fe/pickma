@@ -430,7 +430,8 @@ export interface DailyAdminMetric {
 ## 12. Mapper 주의사항
 
 - Contract DTO의 ISO string 날짜는 client mapper에서 `Date`로 변환한다.
-- `Product.availableStock`, `Product.discountRate`, `Product.isSoldOut`, `Product.isExpired`, `Product.displayStatus`는 mapper에서 계산한다.
+- `Product.availableStock`, `Product.discountRate`는 DB generated column 값을 mapper가 Contract/Domain으로 전달한다. `Product.isSoldOut`, `Product.isExpired`, `Product.displayStatus`는 mapper에서 파생한다.
+- `Product.originalPrice`는 `products.original_price` (등록 시점 snapshot)이며 `menu_items.original_price` 변경에 영향을 받지 않는다.
 - Product 저장 상태는 `active | closed`만 사용하고, 품절/마감은 `isSoldOut`, `isExpired`, `displayStatus`로 파생한다.
 - Order 저장/API 상태 `payment_pending`, `no_show`는 Domain에서 `paymentPending`, `noShow`로 변환한다.
 - DB 저장 status와 Domain status가 다르면 mapper에서 명시적으로 변환한다.

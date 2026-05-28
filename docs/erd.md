@@ -165,25 +165,28 @@
 
 ## 2.8 products (상품)
 
-| 컬럼명              | 타입      | 제약조건                     | 설명      |
-| ------------------- | --------- | ---------------------------- | --------- |
-| `id`                | uuid      | PK                           | 상품 ID   |
-| `store_id`          | uuid      | FK → stores.id, NOT NULL     | 가게 ID   |
-| `menu_item_id`      | uuid      | FK → menu_items.id, NOT NULL | 메뉴 ID   |
-| `category_id`       | uuid      | FK → categories.id           | 카테고리  |
-| `discount_price`    | int       | NOT NULL                     | 할인가    |
-| `stock`             | int       | NOT NULL, DEFAULT 0          | 총 재고   |
-| `reserved_stock`    | int       | NOT NULL, DEFAULT 0          | 예약 재고 |
-| `end_at`            | timestamp | NOT NULL                     | 판매 마감 |
-| `pickup_start_time` | time      | NOT NULL                     | 픽업 시작 |
-| `pickup_end_time`   | time      | NOT NULL                     | 픽업 종료 |
-| `status`            | enum      | NOT NULL, DEFAULT 'active'   | 상태      |
-| `created_at`        | timestamp | NOT NULL, DEFAULT now()      | 생성일시  |
-| `updated_at`        | timestamp | NOT NULL, DEFAULT now()      | 수정일시  |
+| 컬럼명              | 타입      | 제약조건                             | 설명                                                                                               |
+| ------------------- | --------- | ------------------------------------ | -------------------------------------------------------------------------------------------------- |
+| `id`                | uuid      | PK                                   | 상품 ID                                                                                            |
+| `store_id`          | uuid      | FK → stores.id, NOT NULL             | 가게 ID                                                                                            |
+| `menu_item_id`      | uuid      | FK → menu_items.id, NOT NULL         | 메뉴 ID                                                                                            |
+| `category_id`       | uuid      | FK → categories.id                   | 카테고리                                                                                           |
+| `discount_price`    | int       | NOT NULL                             | 할인가                                                                                             |
+| `original_price`    | int       | NOT NULL, DEFAULT 0                  | 원가 snapshot (등록 시점 고정, INSERT 트리거로 menu_items에서 복사)                                |
+| `available_stock`   | int       | GENERATED ALWAYS AS STORED, NOT NULL | 구매 가능 재고 (`stock - reserved_stock`). 앱 코드에서 직접 insert/update 불가                     |
+| `discount_rate`     | int       | GENERATED ALWAYS AS STORED, NOT NULL | 할인율 (`round((1 - discount_price / original_price) * 100)`). 앱 코드에서 직접 insert/update 불가 |
+| `stock`             | int       | NOT NULL, DEFAULT 0                  | 총 재고                                                                                            |
+| `reserved_stock`    | int       | NOT NULL, DEFAULT 0                  | 예약 재고                                                                                          |
+| `end_at`            | timestamp | NOT NULL                             | 판매 마감                                                                                          |
+| `pickup_start_time` | time      | NOT NULL                             | 픽업 시작                                                                                          |
+| `pickup_end_time`   | time      | NOT NULL                             | 픽업 종료                                                                                          |
+| `status`            | enum      | NOT NULL, DEFAULT 'active'           | 상태                                                                                               |
+| `created_at`        | timestamp | NOT NULL, DEFAULT now()              | 생성일시                                                                                           |
+| `updated_at`        | timestamp | NOT NULL, DEFAULT now()              | 수정일시                                                                                           |
 
 ### 재고 관리 정책
 
-- 구매 가능 수량: `stock - reserved_stock`
+- 구매 가능 수량: `available_stock` generated column (`stock - reserved_stock`)
 - 주문 생성 시 `reserved_stock` 증가
 - 결제 완료 시 `stock` 감소 + `reserved_stock` 감소
 - 실패/취소/만료 시 `reserved_stock` 복구
