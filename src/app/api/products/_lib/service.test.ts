@@ -14,6 +14,9 @@ const baseRow: ProductRow = {
   menu_item_id: '00000000-0000-4000-8000-000000000041',
   category_id: '00000000-0000-4000-8000-000000000011',
   discount_price: 7200,
+  original_price: 12000,
+  discount_rate: 40,
+  available_stock: 6,
   stock: 8,
   reserved_stock: 2,
   end_at: '2099-12-31T23:59:59.000Z',
@@ -26,7 +29,6 @@ const baseRow: ProductRow = {
     name: '마감 할인 크루아상 세트',
     description: '당일 생산 후 남은 크루아상과 페이스트리를 담은 세트입니다.',
     image: null,
-    original_price: 12000,
   },
   categories: { id: '00000000-0000-4000-8000-000000000011', name: '베이커리' },
   stores: {

@@ -22,6 +22,9 @@ const productRow: SellerProductRow = {
   menu_item_id: MENU_ITEM_ID,
   category_id: '00000000-0000-4000-8000-000000000011',
   discount_price: 7200,
+  original_price: 12000,
+  discount_rate: 40,
+  available_stock: 6,
   stock: 8,
   reserved_stock: 2,
   end_at: '2099-12-31T23:59:59.000Z',
@@ -33,7 +36,6 @@ const productRow: SellerProductRow = {
     id: MENU_ITEM_ID,
     name: '마감 할인 크루아상 세트',
     image: null,
-    original_price: 12000,
   },
   categories: {
     id: '00000000-0000-4000-8000-000000000011',
