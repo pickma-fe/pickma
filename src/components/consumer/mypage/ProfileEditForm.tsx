@@ -60,16 +60,20 @@ export function ProfileEditForm({ user }: ProfileEditFormProps) {
         </p>
       ) : null}
 
-      <Input
-        label="닉네임"
-        value={name}
-        onChange={(event) => {
-          setName(event.target.value);
-          setError(null);
-        }}
-        placeholder="닉네임을 입력해주세요"
-        disabled={isPending}
-      />
+      <label className="flex flex-col gap-1">
+        <span className="text-sm text-gray-500">닉네임</span>
+        <textarea
+          value={name}
+          onChange={(event) => {
+            setName(event.target.value);
+            setError(null);
+          }}
+          placeholder="닉네임을 입력해주세요"
+          disabled={isPending}
+          rows={3}
+          className="focus:border-primary-500 focus:ring-primary-300 w-full resize-none rounded-md border border-gray-200 px-4 py-2 text-sm outline-none placeholder:text-gray-300 focus:ring-2 disabled:cursor-default disabled:bg-gray-100 disabled:text-gray-400"
+        />
+      </label>
 
       <Input
         label="연락처"

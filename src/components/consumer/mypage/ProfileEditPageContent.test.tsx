@@ -76,6 +76,7 @@ describe('ProfileEditPageContent', () => {
       screen.getByText('로그인 계정 정보를 확인할 수 있습니다.')
     ).toBeInTheDocument();
     expect(screen.getByText('customer@example.com')).toBeInTheDocument();
+    expect(screen.getByText('010-1234-5678')).toBeInTheDocument();
     expect(screen.getByText('일반 회원')).toBeInTheDocument();
     expect(screen.getByText('로그인 방식: 카카오')).toBeInTheDocument();
     expect(
@@ -95,7 +96,9 @@ describe('ProfileEditPageContent', () => {
 
     fireEvent.click(screen.getByRole('button', { name: '정보 수정' }));
 
-    expect(screen.getByLabelText('닉네임')).toHaveValue('픽마 고객');
+    const nameField = screen.getByLabelText('닉네임');
+    expect(nameField).toHaveValue('픽마 고객');
+    expect(nameField.tagName).toBe('TEXTAREA');
     expect(screen.getByLabelText('연락처')).toHaveValue('010-1234-5678');
     expect(
       screen.getByRole('heading', { name: '계정 관리' })

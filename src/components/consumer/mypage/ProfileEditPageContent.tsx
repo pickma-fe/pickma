@@ -134,6 +134,9 @@ export function ProfileEditPageContent() {
                 </span>
               </div>
               <p className="mt-3 text-base text-gray-500">{user.email}</p>
+              <p className="mt-2 text-base text-gray-500">
+                {user.phone ?? '등록된 연락처가 없습니다.'}
+              </p>
               {authProviderLabel ? (
                 <p className="mt-3 text-sm text-gray-600">
                   로그인 방식: {authProviderLabel}
