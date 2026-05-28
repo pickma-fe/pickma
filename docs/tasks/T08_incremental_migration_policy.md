@@ -1,10 +1,10 @@
 # T08. incremental migration 전환 결정
 
 - 상태:
-  진행 전
+  진행 중
 
 - GitHub Issue:
-  확인 필요
+  178
 
 - 우선순위:
   P0
