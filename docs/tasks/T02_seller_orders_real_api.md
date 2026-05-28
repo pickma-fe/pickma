@@ -1,7 +1,7 @@
 # T02. 판매자 주문 관리 real API 연결
 
 - 상태:
-  진행 중
+  완료
 
 - GitHub Issue:
   164

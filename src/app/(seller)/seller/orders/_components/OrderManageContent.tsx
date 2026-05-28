@@ -9,9 +9,8 @@ import {
   ShoppingBag,
   XCircle,
 } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 
-import type { Order } from '@/types/order';
 import type { SellerOrderListParams } from '@/contracts/order';
 import { useAcceptSellerOrder } from '@/hooks/seller/orders/useAcceptSellerOrder';
 import { useCompleteSellerOrder } from '@/hooks/seller/orders/useCompleteSellerOrder';
@@ -26,7 +25,6 @@ import type {
   SellerOrderDisplayStatus,
 } from '../_lib/sellerOrderTypes';
 
-type SellerOrderListItem = Omit<Order, 'items' | 'payment'>;
 type SellerOrderFilterStatus = SellerOrderDisplayStatus | '전체';
 
 const DOMAIN_TO_CONTRACT_STATUS: Record<
@@ -138,16 +136,12 @@ export function OrderManageContent() {
     markOrderReady.isPending ||
     completeOrder.isPending;
 
-  const displayOrders = useMemo<SellerOrderListItem[]>(
-    () =>
-      (data?.items ?? []).filter(
-        (order) =>
-          searchKeyword.trim() === '' ||
-          order.orderNumber
-            .toLowerCase()
-            .includes(searchKeyword.trim().toLowerCase())
-      ),
-    [data?.items, searchKeyword]
+  const displayOrders = (data?.items ?? []).filter(
+    (order) =>
+      searchKeyword.trim() === '' ||
+      order.orderNumber
+        .toLowerCase()
+        .includes(searchKeyword.trim().toLowerCase())
   );
 
   const totalCount = totalData?.totalCount ?? 0;
