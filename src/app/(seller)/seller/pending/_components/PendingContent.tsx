@@ -25,7 +25,7 @@ export function PendingContent() {
       router.replace('/seller/register');
     }
     if (data.applicationStatus === 'approved') {
-      router.replace('/seller/dashboard');
+      router.replace(data.hasStore ? '/seller/dashboard' : '/seller/register');
     }
   }, [data, router, devStatus]);
 
