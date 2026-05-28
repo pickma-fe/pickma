@@ -2,9 +2,13 @@
 
 import { HelpCircle, LogOut, MessageCircle, User, UserX } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 import { useSignOut } from '@/hooks/auth/useSignOut';
+import { useDeleteMe } from '@/hooks/users/useDeleteMe';
 import { useMe } from '@/hooks/users/useMe';
+import { Button } from '@/components/common/Button/Button';
+import { Modal } from '@/components/common/Modal/Modal';
 
 import { ProfileEditForm } from './ProfileEditForm';
 
@@ -17,12 +21,28 @@ const AUTH_PROVIDER_LABELS = {
 export function ProfileEditPageContent() {
   const router = useRouter();
   const { data: user, isError, isLoading } = useMe();
+  const { mutateAsync: deleteMe, isPending: isDeletePending } = useDeleteMe();
   const { mutateAsync: signOut, isPending: isSignOutPending } = useSignOut();
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   async function handleSignOut() {
     await signOut();
     router.push('/');
     router.refresh();
+  }
+
+  async function handleDeleteAccount() {
+    setDeleteError(null);
+
+    try {
+      await deleteMe();
+      await signOut();
+      router.push('/');
+      router.refresh();
+    } catch {
+      setDeleteError('회원 탈퇴에 실패했습니다. 다시 시도해주세요.');
+    }
   }
 
   if (isLoading) {
@@ -125,12 +145,13 @@ export function ProfileEditPageContent() {
               <div>
                 <p className="font-semibold text-gray-900">회원 탈퇴</p>
                 <p className="mt-1 text-sm text-gray-500">
-                  계정을 삭제하고 모든 정보를 삭제합니다.
+                  계정을 비활성화하고 PickMa 이용을 중단합니다.
                 </p>
               </div>
             </div>
             <button
               type="button"
+              onClick={() => setIsDeleteModalOpen(true)}
               className="rounded-md border border-red-500 px-6 py-3 text-sm font-semibold text-red-500 transition hover:bg-red-50"
             >
               회원 탈퇴
@@ -167,6 +188,51 @@ export function ProfileEditPageContent() {
           </div>
         </section>
       </div>
+
+      <Modal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        title="회원 탈퇴"
+        size="sm"
+      >
+        <div className="space-y-5">
+          <div>
+            <p className="text-sm font-medium text-gray-900">
+              정말 회원 탈퇴를 진행할까요?
+            </p>
+            <p className="mt-2 text-sm leading-6 text-gray-500">
+              탈퇴하면 계정이 비활성화되고 PickMa 서비스를 이용할 수 없습니다.
+            </p>
+          </div>
+
+          {deleteError ? (
+            <p
+              role="alert"
+              className="rounded-md bg-red-50 p-3 text-sm text-red-600"
+            >
+              {deleteError}
+            </p>
+          ) : null}
+
+          <div className="flex justify-end gap-2">
+            <Button
+              variant="outline"
+              color="gray"
+              disabled={isDeletePending || isSignOutPending}
+              onClick={() => setIsDeleteModalOpen(false)}
+            >
+              취소
+            </Button>
+            <Button
+              color="danger"
+              disabled={isDeletePending || isSignOutPending}
+              onClick={() => void handleDeleteAccount()}
+            >
+              {isDeletePending || isSignOutPending ? '탈퇴 중...' : '탈퇴하기'}
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </section>
   );
 }

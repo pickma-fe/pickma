@@ -3,15 +3,14 @@ import type { NextRequest } from 'next/server';
 
 import type { AuthProvider } from '@/types/auth';
 import type { UserResponse } from '@/contracts/user';
-import { ERROR_CODE } from '@/lib/errors/errorCodes';
 import { requireActiveUser } from '@/app/api/_lib/auth';
 import { isApiMockEnabled } from '@/app/api/_lib/mock';
-import { fail, routeError, success } from '@/app/api/_lib/response';
+import { routeError, success } from '@/app/api/_lib/response';
 import { validateBody } from '@/app/api/_lib/validation';
 import { mockAdminUser, mockUser } from '@/mocks/users';
 
 import { updateMeSchema } from './_lib/schemas';
-import { updateUser } from './_lib/service';
+import { deleteUser, updateUser } from './_lib/service';
 
 function getMockUser(req: NextRequest) {
   const cookie = req.cookies.get('mock_user')?.value;
@@ -53,8 +52,9 @@ export async function DELETE(): Promise<Response> {
   if (isApiMockEnabled()) return success(null);
 
   try {
-    await requireActiveUser();
-    return fail(ERROR_CODE.NOT_IMPLEMENTED);
+    const { serviceUser } = await requireActiveUser();
+    await deleteUser(serviceUser.id);
+    return success(null);
   } catch (e) {
     return routeError(e);
   }

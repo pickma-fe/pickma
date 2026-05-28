@@ -3,15 +3,20 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { User } from '@/types/user';
 import { useSignOut } from '@/hooks/auth/useSignOut';
+import { useDeleteMe } from '@/hooks/users/useDeleteMe';
 import { useMe } from '@/hooks/users/useMe';
 import { useUpdateMe } from '@/hooks/users/useUpdateMe';
 
 import { ProfileEditPageContent } from './ProfileEditPageContent';
 
-const { mockPush, mockUpdateMe } = vi.hoisted(() => ({
-  mockPush: vi.fn(),
-  mockUpdateMe: vi.fn(),
-}));
+const { mockDeleteMe, mockPush, mockSignOut, mockUpdateMe } = vi.hoisted(
+  () => ({
+    mockPush: vi.fn(),
+    mockDeleteMe: vi.fn(),
+    mockSignOut: vi.fn(),
+    mockUpdateMe: vi.fn(),
+  })
+);
 
 vi.mock('next/navigation', () => ({
   useRouter: () => ({
@@ -21,6 +26,7 @@ vi.mock('next/navigation', () => ({
 
 vi.mock('@/hooks/users/useMe');
 vi.mock('@/hooks/users/useUpdateMe');
+vi.mock('@/hooks/users/useDeleteMe');
 vi.mock('@/hooks/auth/useSignOut');
 
 const mockUser: User = {
@@ -47,8 +53,12 @@ describe('ProfileEditPageContent', () => {
       mutate: mockUpdateMe,
       isPending: false,
     } as unknown as ReturnType<typeof useUpdateMe>);
+    vi.mocked(useDeleteMe).mockReturnValue({
+      mutateAsync: mockDeleteMe,
+      isPending: false,
+    } as unknown as ReturnType<typeof useDeleteMe>);
     vi.mocked(useSignOut).mockReturnValue({
-      mutateAsync: vi.fn(),
+      mutateAsync: mockSignOut,
       isPending: false,
     } as unknown as ReturnType<typeof useSignOut>);
   });
@@ -123,5 +133,24 @@ describe('ProfileEditPageContent', () => {
       );
     });
     expect(mockPush).toHaveBeenCalledWith('/mypage');
+  });
+
+  it('회원 탈퇴 확인 후 deleteMe와 signOut을 실행하고 홈으로 이동한다', async () => {
+    mockDeleteMe.mockResolvedValue(undefined);
+    mockSignOut.mockResolvedValue(undefined);
+    render(<ProfileEditPageContent />);
+
+    fireEvent.click(screen.getByRole('button', { name: '회원 탈퇴' }));
+    expect(
+      screen.getByRole('dialog', { name: '회원 탈퇴' })
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: '탈퇴하기' }));
+
+    await waitFor(() => {
+      expect(mockDeleteMe).toHaveBeenCalledOnce();
+    });
+    expect(mockSignOut).toHaveBeenCalledOnce();
+    expect(mockPush).toHaveBeenCalledWith('/');
   });
 });

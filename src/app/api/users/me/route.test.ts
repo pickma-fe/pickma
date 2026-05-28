@@ -8,7 +8,7 @@ import { requireActiveUser } from '@/app/api/_lib/auth';
 import { isApiMockEnabled } from '@/app/api/_lib/mock';
 import { mockUser } from '@/mocks/users';
 
-import { updateUser } from './_lib/service';
+import { deleteUser, updateUser } from './_lib/service';
 import { DELETE, GET, PATCH } from './route';
 
 vi.mock('@/app/api/_lib/auth', () => ({
@@ -20,6 +20,7 @@ vi.mock('@/app/api/_lib/mock', () => ({
 }));
 
 vi.mock('./_lib/service', () => ({
+  deleteUser: vi.fn(),
   updateUser: vi.fn(),
 }));
 
@@ -174,16 +175,18 @@ describe('DELETE /api/users/me', () => {
     expect(requireActiveUser).not.toHaveBeenCalled();
   });
 
-  it('real 모드에서 requireActiveUser 호출 후 501을 반환한다', async () => {
+  it('real 모드에서 requireActiveUser 호출 후 serviceUser.id로 deleteUser를 호출한다', async () => {
     vi.mocked(isApiMockEnabled).mockReturnValue(false);
     vi.mocked(requireActiveUser).mockResolvedValue(activeUserResult);
+    vi.mocked(deleteUser).mockResolvedValue(undefined);
 
     const res = await DELETE();
-    const body = (await res.json()) as { error: { code: string } };
+    const body = (await res.json()) as { data: null };
 
-    expect(res.status).toBe(501);
-    expect(body.error.code).toBe('NOT_IMPLEMENTED');
+    expect(res.status).toBe(200);
+    expect(body.data).toBeNull();
     expect(requireActiveUser).toHaveBeenCalledOnce();
+    expect(deleteUser).toHaveBeenCalledWith(USER_ID);
   });
 
   it('requireActiveUser가 실패하면 error envelope를 반환한다', async () => {
