@@ -103,12 +103,6 @@ export function ProfileEditPageContent() {
               ) : null}
             </div>
           </div>
-
-          <div className="mt-7 border-t border-gray-100 pt-6">
-            <p className="text-sm text-gray-500">
-              이메일과 로그인 정보는 인증 계정 설정에서 관리됩니다.
-            </p>
-          </div>
         </section>
 
         <section className="rounded-lg border border-gray-200 bg-white p-7">

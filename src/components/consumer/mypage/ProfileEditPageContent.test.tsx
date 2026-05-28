@@ -96,8 +96,10 @@ describe('ProfileEditPageContent', () => {
       screen.queryByText('카카오 계정으로 로그인')
     ).not.toBeInTheDocument();
     expect(
-      screen.getByText('이메일과 로그인 정보는 인증 계정 설정에서 관리됩니다.')
-    ).toBeInTheDocument();
+      screen.queryByText(
+        '이메일과 로그인 정보는 인증 계정 설정에서 관리됩니다.'
+      )
+    ).not.toBeInTheDocument();
   });
 
   it('저장 시 trim된 닉네임과 연락처를 업데이트하고 성공하면 마이페이지로 이동한다', async () => {
