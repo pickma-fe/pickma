@@ -1,7 +1,7 @@
 # T08. incremental migration 전환 결정
 
 - 상태:
-  진행 중
+  완료
 
 - GitHub Issue:
   178
@@ -47,3 +47,7 @@
   - migration 운영 원칙이 문서화된다.
   - 신규 스키마 작업자가 초기 migration 직접 수정 여부로 혼란을 겪지 않는다.
   - P1/P2 스키마 작업의 선행 조건이 충족된다.
+
+- 구현 결과:
+  - `docs/migration_policy.md` 신설: 초기 migration freeze 조건 및 예외, incremental migration 명명 규칙(`YYYYMMDDHHMMSS_<snake_case_name>.sql`), 멱등성 원칙, 예정 migration 후보 목록(T10/T05/T21), T22 비차단 후보 분리 기록
+  - `docs/erd.md` 섹션 8 추가: 현행 스키마와 분리된 예정 스키마 변경 후보 목록
