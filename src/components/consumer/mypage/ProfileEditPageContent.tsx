@@ -146,14 +146,14 @@ export function ProfileEditPageContent() {
                 {isEditOpen ? (
                   <label className="flex min-w-64 flex-col gap-1">
                     <span className="text-sm text-gray-500">닉네임</span>
-                    <textarea
+                    <input
+                      type="text"
                       value={editName}
                       onChange={(event) => {
                         setName(event.target.value);
                         setEditError(null);
                       }}
-                      rows={3}
-                      className="focus:border-primary-500 focus:ring-primary-300 w-full resize-none rounded-md border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-900 outline-none focus:ring-2"
+                      className="focus:border-primary-500 focus:ring-primary-300 w-full rounded-md border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-900 outline-none focus:ring-2"
                     />
                   </label>
                 ) : (
