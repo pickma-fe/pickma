@@ -51,8 +51,12 @@
   - 성능 영향과 쿼리 전략이 문서화된다.
 
 - 구현 결과:
-  - `products` 테이블에 `original_price` (snapshot), `available_stock` (generated), `discount_rate` (generated) 컬럼 추가 (migration: `20260528120000_product_discount_sort_fields.sql`)
+  - `products` 테이블에 `original_price` (snapshot), `available_stock` (generated NOT NULL), `discount_rate` (generated NOT NULL) 컬럼 추가 (migration: `20260528120000_product_discount_sort_fields.sql`, `20260528140000_product_generated_columns_not_null.sql`)
+  - `create_order` RPC를 `products.original_price` snapshot 기준으로 교체 (migration: `20260528130000_fix_create_order_original_price.sql`)
   - `getProducts` 함수의 `shouldUseExtendedList` 분기 제거, 모든 조회에 DB `.range()` 페이지네이션 적용
   - `discountOption` 필터 → DB `gte`/`lt` 쿼리, `discountRate` 정렬 → DB `order('discount_rate')` 적용
   - mapper에서 `availableStock`, `discountRate`, `originalPrice`를 DB 컬럼에서 직접 읽도록 변경
   - 검증: vitest 72개 통과, TypeScript check 통과
+  - 수동 검증 (seed 데이터 기준):
+    - `GET /api/products?discountOption=over-40&page=2&pageSize=5` → totalCount: 79, items 5개 모두 discountRate ≥ 40 (46–49%)
+    - `GET /api/products?sort=discountRate&order=desc&page=1&pageSize=5` → totalCount: 101, items 5개 모두 discountRate: 50 (최고값 내림차순)
