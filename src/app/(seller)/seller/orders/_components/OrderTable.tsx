@@ -1,43 +1,34 @@
 'use client';
 
-import { useState } from 'react';
-
-import type {
-  OrderListItemResponse,
-  OrderStatusParam,
-} from '@/contracts/order';
+import type { Order } from '@/types/order';
 import { Badge } from '@/components/common/Badge/Badge';
 import { Button } from '@/components/common/Button/Button';
-import { Dropdown } from '@/components/common/Dropdown/Dropdown';
 import { Pagination } from '@/components/common/Pagination/Pagination';
 
-type OrderActionStatus = Extract<
-  OrderStatusParam,
-  'accepted' | 'ready' | 'completed' | 'cancelled'
->;
+import type {
+  SellerOrderActionStatus,
+  SellerOrderDisplayStatus,
+} from '../_lib/sellerOrderTypes';
+
+type SellerOrderListItem = Omit<Order, 'items' | 'payment'>;
 
 interface OrderTableProps {
-  orders: OrderListItemResponse[];
+  orders: SellerOrderListItem[];
   currentPage: number;
+  totalPages: number;
   onPageChange: (page: number) => void;
-  onOrderAction: (orderId: string, newStatus: OrderActionStatus) => void;
+  onOrderAction: (orderId: string, newStatus: SellerOrderActionStatus) => void;
+  isLoading?: boolean;
+  isError?: boolean;
+  isActionPending?: boolean;
 }
-
-const PAGE_SIZE_OPTIONS = [
-  { label: '5개씩 보기', value: '5' },
-  { label: '10개씩 보기', value: '10' },
-  { label: '20개씩 보기', value: '20' },
-];
 
 const formatPrice = (price: number) => price.toLocaleString('ko-KR') + '원';
 
-const formatDate = (dateString: string) => {
-  const date = new Date(dateString);
-  return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`;
-};
+const formatDate = (date: Date) =>
+  `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`;
 
-const formatTime = (dateString: string) => {
-  const date = new Date(dateString);
+const formatTime = (date: Date) => {
   const hours = date.getHours();
   const minutes = String(date.getMinutes()).padStart(2, '0');
   const period = hours >= 12 ? '오후' : '오전';
@@ -46,7 +37,7 @@ const formatTime = (dateString: string) => {
 };
 
 const STATUS_BADGE: Record<
-  string,
+  SellerOrderDisplayStatus,
   { label: string; color: 'warning' | 'info' | 'success' | 'danger' | 'gray' }
 > = {
   reserved: { label: '수락 대기', color: 'warning' },
@@ -54,24 +45,32 @@ const STATUS_BADGE: Record<
   ready: { label: '픽업 대기', color: 'info' },
   completed: { label: '픽업 완료', color: 'success' },
   cancelled: { label: '취소/환불', color: 'danger' },
-  no_show: { label: '미수령', color: 'gray' },
+  noShow: { label: '미수령', color: 'gray' },
 };
 
-const STATUS_DESCRIPTION: Record<string, string> = {
+const STATUS_DESCRIPTION: Record<SellerOrderDisplayStatus, string> = {
   reserved: '주문을 수락하거나 취소해주세요.',
   accepted: '주문 상품을 준비해주세요.',
   ready: '고객 픽업을 기다리고 있습니다.',
   completed: '픽업이 완료되었습니다.',
   cancelled: '주문이 취소/환불되었습니다.',
-  no_show: '고객이 미수령하였습니다.',
+  noShow: '고객이 미수령하였습니다.',
 };
+
+function isSellerDisplayStatus(
+  status: Order['status']
+): status is SellerOrderDisplayStatus {
+  return status in STATUS_BADGE;
+}
 
 function OrderActionButtons({
   order,
   onOrderAction,
+  isActionPending,
 }: {
-  order: OrderListItemResponse;
-  onOrderAction: (orderId: string, newStatus: OrderActionStatus) => void;
+  order: SellerOrderListItem;
+  onOrderAction: (orderId: string, newStatus: SellerOrderActionStatus) => void;
+  isActionPending: boolean;
 }) {
   switch (order.status) {
     case 'reserved':
@@ -80,14 +79,16 @@ function OrderActionButtons({
           <Button
             className="w-fit px-2 py-0.5 text-sm"
             onClick={() => onOrderAction(order.id, 'accepted')}
+            disabled={isActionPending}
           >
-            주문 접수
+            {isActionPending ? '처리 중...' : '주문 접수'}
           </Button>
           <Button
             className="w-fit px-2 py-0.5 text-sm"
             variant="outline"
             color="danger"
-            onClick={() => onOrderAction(order.id, 'cancelled')}
+            disabled
+            title="주문 취소 기능은 준비 중입니다."
           >
             주문 취소
           </Button>
@@ -99,14 +100,16 @@ function OrderActionButtons({
           <Button
             className="w-fit px-2 py-0.5 text-sm"
             onClick={() => onOrderAction(order.id, 'ready')}
+            disabled={isActionPending}
           >
-            준비 완료
+            {isActionPending ? '처리 중...' : '준비 완료'}
           </Button>
           <Button
             className="w-fit px-2 py-0.5 text-sm"
             variant="outline"
             color="danger"
-            onClick={() => onOrderAction(order.id, 'cancelled')}
+            disabled
+            title="주문 취소 기능은 준비 중입니다."
           >
             주문 취소
           </Button>
@@ -117,13 +120,14 @@ function OrderActionButtons({
         <Button
           className="w-fit px-2 py-0.5 text-sm"
           onClick={() => onOrderAction(order.id, 'completed')}
+          disabled={isActionPending}
         >
-          픽업 완료
+          {isActionPending ? '처리 중...' : '픽업 완료'}
         </Button>
       );
     case 'completed':
     case 'cancelled':
-    case 'no_show':
+    case 'noShow':
       return null;
     default:
       return null;
@@ -133,21 +137,35 @@ function OrderActionButtons({
 export function OrderTable({
   orders,
   currentPage,
+  totalPages,
   onPageChange,
   onOrderAction,
+  isLoading = false,
+  isError = false,
+  isActionPending = false,
 }: OrderTableProps) {
-  const [pageSize, setPageSize] = useState(10);
+  if (isLoading) {
+    return (
+      <div className="flex min-h-[300px] items-center justify-center rounded-lg border border-gray-200 bg-white">
+        <p className="text-sm text-gray-500">주문 목록을 불러오는 중...</p>
+      </div>
+    );
+  }
 
-  const totalPages = Math.ceil(orders.length / pageSize);
-  const startIndex = (currentPage - 1) * pageSize;
-  const paginatedOrders = orders.slice(startIndex, startIndex + pageSize);
+  if (isError) {
+    return (
+      <div className="flex min-h-[300px] items-center justify-center rounded-lg border border-gray-200 bg-white">
+        <div className="text-center">
+          <p className="text-sm text-gray-500">
+            주문 목록을 불러오지 못했습니다.
+          </p>
+          <p className="text-xs text-gray-400">잠시 후 다시 시도해주세요.</p>
+        </div>
+      </div>
+    );
+  }
 
-  const handlePageSizeChange = (value: string) => {
-    setPageSize(Number(value));
-    onPageChange(1);
-  };
-
-  if (orders.length === 0) {
+  if (orders.length === 0 && totalPages === 0) {
     return (
       <div className="flex min-h-[300px] items-center justify-center rounded-lg border border-gray-200 bg-white">
         <div className="text-center">
@@ -198,106 +216,108 @@ export function OrderTable({
             </tr>
           </thead>
           <tbody>
-            {paginatedOrders.map((order, index) => {
-              const badge = STATUS_BADGE[order.status] ?? {
-                label: order.status,
-                color: 'gray' as const,
-              };
-              const description = STATUS_DESCRIPTION[order.status] ?? '';
-
-              return (
-                <tr
-                  key={order.id}
-                  className={`hover:bg-gray-50 ${
-                    index !== paginatedOrders.length - 1
-                      ? 'border-b border-gray-100'
-                      : ''
-                  }`}
+            {orders.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={5}
+                  className="px-4 py-16 text-center text-sm text-gray-500"
                 >
-                  <td className="px-4 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100">
-                        <div className="flex h-full w-full items-center justify-center text-gray-400">
-                          🛍️
+                  검색 결과가 없습니다.
+                </td>
+              </tr>
+            ) : (
+              orders.map((order, index) => {
+                if (!isSellerDisplayStatus(order.status)) return null;
+
+                const badge = STATUS_BADGE[order.status];
+                const description = STATUS_DESCRIPTION[order.status];
+
+                return (
+                  <tr
+                    key={order.id}
+                    className={`hover:bg-gray-50 ${
+                      index !== orders.length - 1
+                        ? 'border-b border-gray-100'
+                        : ''
+                    }`}
+                  >
+                    <td className="px-4 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100">
+                          <div className="flex h-full w-full items-center justify-center text-gray-400">
+                            🛍️
+                          </div>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <p className="text-sm font-medium text-gray-900">
+                            {order.orderNumber}
+                          </p>
+                          <p className="text-xs text-gray-400">
+                            {order.storeName}
+                          </p>
+                          <p className="text-xs text-gray-400">
+                            주문일 {formatDate(order.createdAt)}{' '}
+                            {formatTime(order.createdAt)}
+                          </p>
                         </div>
                       </div>
+                    </td>
+                    <td className="px-4 py-4 whitespace-nowrap">
+                      <div className="flex flex-col">
+                        <span className="text-sm font-medium text-gray-900">
+                          {formatPrice(order.paymentAmount)}
+                        </span>
+                        <span className="text-xs text-gray-400 line-through">
+                          {formatPrice(order.totalAmount)}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-4 whitespace-nowrap">
                       <div className="flex flex-col gap-1">
-                        <p className="text-sm font-medium text-gray-900">
-                          {order.orderNumber}
+                        <p className="text-sm text-gray-900">
+                          {formatDate(order.pickupAt)}{' '}
+                          {formatTime(order.pickupAt)}
                         </p>
-                        <p className="text-xs text-gray-400">
-                          {order.storeName}
-                        </p>
-                        <p className="text-xs text-gray-400">
-                          주문일 {formatDate(order.createdAt)}{' '}
-                          {formatTime(order.createdAt)}
-                        </p>
+                        {order.pickupNumber && (
+                          <p className="text-xs text-gray-400">
+                            픽업 번호 {order.pickupNumber}
+                          </p>
+                        )}
                       </div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-4 whitespace-nowrap">
-                    <div className="flex flex-col">
-                      <span className="text-sm font-medium text-gray-900">
-                        {formatPrice(order.paymentAmount)}
-                      </span>
-                      <span className="text-xs text-gray-400 line-through">
-                        {formatPrice(order.totalAmount)}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="px-4 py-4 whitespace-nowrap">
-                    <div className="flex flex-col gap-1">
-                      <p className="text-sm text-gray-900">
-                        {formatDate(order.pickupAt)}{' '}
-                        {formatTime(order.pickupAt)}
-                      </p>
-                      {order.pickupNumber && (
-                        <p className="text-xs text-gray-400">
-                          픽업 번호 {order.pickupNumber}
-                        </p>
-                      )}
-                    </div>
-                  </td>
-                  <td className="w-40 px-4 py-4">
-                    <div className="flex flex-col gap-1">
-                      <div className="w-fit">
-                        <Badge variant="soft" color={badge.color}>
-                          {badge.label}
-                        </Badge>
+                    </td>
+                    <td className="w-40 px-4 py-4">
+                      <div className="flex flex-col gap-1">
+                        <div className="w-fit">
+                          <Badge variant="soft" color={badge.color}>
+                            {badge.label}
+                          </Badge>
+                        </div>
+                        {description && (
+                          <p className="text-xs text-gray-400">{description}</p>
+                        )}
                       </div>
-                      {description && (
-                        <p className="text-xs text-gray-400">{description}</p>
-                      )}
-                    </div>
-                  </td>
-                  <td className="px-4 py-4 whitespace-nowrap">
-                    <OrderActionButtons
-                      order={order}
-                      onOrderAction={onOrderAction}
-                    />
-                  </td>
-                </tr>
-              );
-            })}
+                    </td>
+                    <td className="px-4 py-4 whitespace-nowrap">
+                      <OrderActionButtons
+                        order={order}
+                        onOrderAction={onOrderAction}
+                        isActionPending={isActionPending}
+                      />
+                    </td>
+                  </tr>
+                );
+              })
+            )}
           </tbody>
         </table>
       </div>
 
-      <div className="relative flex items-center justify-center border-t border-gray-200 px-4 py-4">
+      <div className="flex items-center justify-center border-t border-gray-200 px-4 py-4">
         <Pagination
           totalPages={totalPages}
           currentPage={currentPage}
           onPageChange={onPageChange}
         />
-        <div className="absolute right-4">
-          <Dropdown
-            type="select"
-            items={PAGE_SIZE_OPTIONS}
-            value={String(pageSize)}
-            onChange={handlePageSizeChange}
-            placeholder="10개씩 보기"
-          />
-        </div>
       </div>
     </div>
   );

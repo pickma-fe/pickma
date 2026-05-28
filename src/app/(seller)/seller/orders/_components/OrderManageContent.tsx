@@ -1,39 +1,45 @@
 'use client';
 
 import {
-  ShoppingBag,
-  Clock,
-  PackageCheck,
-  CheckCircle,
-  XCircle,
-  Package,
   AlertCircle,
+  CheckCircle,
+  Clock,
+  Package,
+  PackageCheck,
+  ShoppingBag,
+  XCircle,
 } from 'lucide-react';
 import { useState } from 'react';
 
-import type {
-  OrderStatusParam,
-  SellerOrderListParams,
-} from '@/contracts/order';
+import type { SellerOrderListParams } from '@/contracts/order';
+import { useAcceptSellerOrder } from '@/hooks/seller/orders/useAcceptSellerOrder';
+import { useCompleteSellerOrder } from '@/hooks/seller/orders/useCompleteSellerOrder';
+import { useMarkSellerOrderReady } from '@/hooks/seller/orders/useMarkSellerOrderReady';
+import { useSellerOrders } from '@/hooks/seller/orders/useSellerOrders';
 import { Section } from '@/components/common/Section/Section';
-import { mockOrders } from '@/mocks/orders';
 
 import { OrderFilter } from './OrderFilter';
 import { OrderTable } from './OrderTable';
+import type {
+  SellerOrderActionStatus,
+  SellerOrderDisplayStatus,
+} from '../_lib/sellerOrderTypes';
 
-type SellerOrderFilterStatus =
-  | Exclude<SellerOrderListParams['status'], undefined>
-  | '전체';
+type SellerOrderFilterStatus = SellerOrderDisplayStatus | '전체';
 
-type OrderActionStatus = Extract<
-  OrderStatusParam,
-  'accepted' | 'ready' | 'completed' | 'cancelled'
->;
+const DOMAIN_TO_CONTRACT_STATUS: Record<
+  SellerOrderDisplayStatus,
+  Exclude<SellerOrderListParams['status'], undefined>
+> = {
+  reserved: 'reserved',
+  accepted: 'accepted',
+  ready: 'ready',
+  completed: 'completed',
+  cancelled: 'cancelled',
+  noShow: 'no_show',
+};
 
-const SELLER_BASE_STATUSES: Exclude<
-  SellerOrderListParams['status'],
-  undefined
->[] = ['reserved', 'accepted', 'ready', 'completed', 'cancelled', 'no_show'];
+const PAGE_SIZE = 20;
 
 const STAT_CARDS: {
   label: string;
@@ -86,7 +92,7 @@ const STAT_CARDS: {
   },
   {
     label: '미수령',
-    value: 'no_show',
+    value: 'noShow',
     icon: AlertCircle,
     bgColor: 'bg-gray-100',
     iconColor: 'text-gray-600',
@@ -94,43 +100,99 @@ const STAT_CARDS: {
 ];
 
 export function OrderManageContent() {
-  const [orders, setOrders] = useState(
-    mockOrders.filter((o) =>
-      SELLER_BASE_STATUSES.includes(
-        o.status as Exclude<SellerOrderListParams['status'], undefined>
-      )
-    )
-  );
   const [selectedStatus, setSelectedStatus] =
     useState<SellerOrderFilterStatus>('전체');
   const [searchKeyword, setSearchKeyword] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [actionSuccess, setActionSuccess] = useState<string | null>(null);
 
-  const getCount = (value: SellerOrderFilterStatus) => {
-    if (value === '전체') return orders.length;
-    return orders.filter((o) => o.status === value).length;
-  };
+  const serverStatus =
+    selectedStatus === '전체'
+      ? undefined
+      : DOMAIN_TO_CONTRACT_STATUS[selectedStatus];
 
-  const filteredOrders = orders.filter((order) => {
-    const matchStatus =
-      selectedStatus === '전체' || order.status === selectedStatus;
+  const { data: totalData } = useSellerOrders({
+    page: 1,
+    pageSize: 1,
+    sort: 'createdAt',
+    order: 'desc',
+  });
 
-    const matchSearch =
+  const { data, isLoading, isError } = useSellerOrders({
+    page: currentPage,
+    pageSize: PAGE_SIZE,
+    status: serverStatus,
+    sort: 'createdAt',
+    order: 'desc',
+  });
+
+  const acceptOrder = useAcceptSellerOrder();
+  const markOrderReady = useMarkSellerOrderReady();
+  const completeOrder = useCompleteSellerOrder();
+
+  const isPending =
+    acceptOrder.isPending ||
+    markOrderReady.isPending ||
+    completeOrder.isPending;
+
+  const displayOrders = (data?.items ?? []).filter(
+    (order) =>
       searchKeyword.trim() === '' ||
       order.orderNumber
         .toLowerCase()
-        .includes(searchKeyword.trim().toLowerCase());
+        .includes(searchKeyword.trim().toLowerCase())
+  );
 
-    return matchStatus && matchSearch;
-  });
+  const totalCount = totalData?.totalCount ?? 0;
+  const totalPages = data?.totalPages ?? 0;
 
-  const handleOrderAction = (orderId: string, newStatus: OrderActionStatus) => {
-    setOrders((prev) =>
-      prev.map((order) =>
-        order.id === orderId ? { ...order, status: newStatus } : order
-      )
-    );
-    setCurrentPage(1);
+  // TODO: T26 summary API 구현 후 상태별 집계 연결
+  const getCount = (value: SellerOrderFilterStatus): number | null => {
+    if (value === '전체') return totalCount;
+    return null;
+  };
+
+  const handleOrderAction = (
+    orderId: string,
+    newStatus: SellerOrderActionStatus
+  ) => {
+    if (isPending) return;
+
+    setActionError(null);
+    setActionSuccess(null);
+
+    const onSuccess = (label: string) => {
+      setActionSuccess(`${label} 처리가 완료되었습니다.`);
+      setCurrentPage(1);
+    };
+    const onError = (label: string) => {
+      setActionError(`${label} 처리에 실패했습니다. 다시 시도해주세요.`);
+    };
+
+    switch (newStatus) {
+      case 'accepted':
+        acceptOrder.mutate(orderId, {
+          onSuccess: () => onSuccess('주문 접수'),
+          onError: () => onError('주문 접수'),
+        });
+        break;
+      case 'ready':
+        markOrderReady.mutate(orderId, {
+          onSuccess: () => onSuccess('준비 완료'),
+          onError: () => onError('준비 완료'),
+        });
+        break;
+      case 'completed':
+        completeOrder.mutate(orderId, {
+          onSuccess: () => onSuccess('픽업 완료'),
+          onError: () => onError('픽업 완료'),
+        });
+        break;
+      case 'cancelled':
+        // TODO: T31 주문 취소/환불 API 구현 후 연결
+        break;
+    }
   };
 
   const handleStatusChange = (status: string) => {
@@ -158,6 +220,7 @@ export function OrderManageContent() {
         {STAT_CARDS.map((card) => {
           const Icon = card.icon;
           const isSelected = selectedStatus === card.value;
+          const count = getCount(card.value);
 
           return (
             <button
@@ -182,10 +245,20 @@ export function OrderManageContent() {
                   <div>
                     <p className="text-sm text-gray-500">{card.label}</p>
                     <p className="text-2xl font-bold text-gray-900">
-                      {getCount(card.value)}
-                      <span className="text-base font-normal text-gray-500">
-                        건
-                      </span>
+                      {isLoading && (
+                        <span className="text-base text-gray-400">...</span>
+                      )}
+                      {!isLoading && count !== null && (
+                        <>
+                          {count}
+                          <span className="text-base font-normal text-gray-500">
+                            건
+                          </span>
+                        </>
+                      )}
+                      {!isLoading && count === null && (
+                        <span className="text-base text-gray-400">-</span>
+                      )}
                     </p>
                   </div>
                 </div>
@@ -195,6 +268,27 @@ export function OrderManageContent() {
         })}
       </div>
 
+      {actionSuccess && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="flex items-center gap-2 rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700"
+        >
+          <CheckCircle className="h-4 w-4 flex-shrink-0" />
+          {actionSuccess}
+        </div>
+      )}
+      {actionError && (
+        <div
+          role="alert"
+          aria-live="assertive"
+          className="flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+        >
+          <AlertCircle className="h-4 w-4 flex-shrink-0" />
+          {actionError}
+        </div>
+      )}
+
       <OrderFilter
         selectedStatus={selectedStatus}
         searchKeyword={searchKeyword}
@@ -203,10 +297,14 @@ export function OrderManageContent() {
       />
 
       <OrderTable
-        orders={filteredOrders}
+        orders={displayOrders}
         currentPage={currentPage}
+        totalPages={totalPages}
         onPageChange={setCurrentPage}
         onOrderAction={handleOrderAction}
+        isLoading={isLoading}
+        isError={isError}
+        isActionPending={isPending}
       />
     </div>
   );

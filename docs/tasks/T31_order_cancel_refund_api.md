@@ -10,7 +10,7 @@
   P3
 
 - 선행 조건:
-  - 선행 task: T11. 결제 outbox/webhook/idempotency 설계
+  - 선행 task: T11. 결제 outbox/webhook/idempotency 설계, T02. 판매자 주문 관리 real API 연결
 
 - 분류:
   기능
