@@ -145,7 +145,7 @@ export function ProfileEditPageContent() {
               <User className="size-16" aria-hidden="true" />
             </div>
 
-            <div>
+            <div className="w-full max-w-80">
               <div className="flex items-center gap-3">
                 {isEditOpen ? (
                   <div className="min-w-64">
@@ -157,11 +157,13 @@ export function ProfileEditPageContent() {
                         setName(event.target.value);
                         setEditError(null);
                       }}
-                      className="focus:border-primary-500 focus:ring-primary-300 w-full rounded-md border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-900 outline-none focus:ring-2"
+                      className="focus:border-primary-500 focus:ring-primary-300 h-8 w-full rounded-md border border-gray-200 px-3 text-xl font-bold text-gray-900 outline-none focus:ring-2"
                     />
                   </div>
                 ) : (
-                  <p className="text-xl font-bold text-gray-900">{user.name}</p>
+                  <p className="flex h-8 min-w-64 items-center text-xl font-bold text-gray-900">
+                    {user.name}
+                  </p>
                 )}
                 <span className="text-primary-600 rounded-md bg-green-50 px-2 py-1 text-xs font-semibold">
                   {ROLE_LABELS[user.role]}
@@ -177,10 +179,10 @@ export function ProfileEditPageContent() {
                     setPhone(event.target.value);
                     setEditError(null);
                   }}
-                  className="focus:border-primary-500 focus:ring-primary-300 mt-2 w-full rounded-md border border-gray-200 px-4 py-2 text-sm text-gray-900 outline-none focus:ring-2"
+                  className="focus:border-primary-500 focus:ring-primary-300 mt-2 h-8 w-full rounded-md border border-gray-200 px-3 text-base text-gray-900 outline-none focus:ring-2"
                 />
               ) : (
-                <p className="mt-2 text-base text-gray-500">
+                <p className="mt-2 flex h-8 items-center text-base text-gray-500">
                   {user.phone ?? '등록된 연락처가 없습니다.'}
                 </p>
               )}
