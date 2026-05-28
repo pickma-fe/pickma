@@ -1,6 +1,13 @@
 'use client';
 
-import { HelpCircle, LogOut, MessageCircle, User, UserX } from 'lucide-react';
+import {
+  HelpCircle,
+  LogOut,
+  MessageCircle,
+  Pencil,
+  User,
+  UserX,
+} from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
@@ -13,9 +20,15 @@ import { Modal } from '@/components/common/Modal/Modal';
 import { ProfileEditForm } from './ProfileEditForm';
 
 const AUTH_PROVIDER_LABELS = {
-  google: { label: '구글 계정으로 로그인', badge: 'G' },
-  kakao: { label: '카카오 계정으로 로그인', badge: 'K' },
-  email: { label: '이메일 계정으로 로그인', badge: '@' },
+  google: '구글',
+  kakao: '카카오',
+  email: '이메일',
+};
+
+const ROLE_LABELS = {
+  customer: '일반 회원',
+  seller: '판매자',
+  admin: '관리자',
 };
 
 export function ProfileEditPageContent() {
@@ -23,6 +36,7 @@ export function ProfileEditPageContent() {
   const { data: user, isError, isLoading } = useMe();
   const { mutateAsync: deleteMe, isPending: isDeletePending } = useDeleteMe();
   const { mutateAsync: signOut, isPending: isSignOutPending } = useSignOut();
+  const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
@@ -64,7 +78,7 @@ export function ProfileEditPageContent() {
     );
   }
 
-  const authProvider = user.authProvider
+  const authProviderLabel = user.authProvider
     ? AUTH_PROVIDER_LABELS[user.authProvider]
     : undefined;
 
@@ -86,15 +100,25 @@ export function ProfileEditPageContent() {
                 로그인 계정 정보를 확인할 수 있습니다.
               </p>
             </div>
-            <button
-              type="button"
-              disabled={isSignOutPending}
-              onClick={() => void handleSignOut()}
-              className="inline-flex items-center gap-2 rounded-md border border-gray-200 px-5 py-3 text-sm font-medium text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-400"
-            >
-              <LogOut className="size-4" aria-hidden="true" />
-              로그아웃
-            </button>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setIsEditOpen((current) => !current)}
+                className="inline-flex items-center gap-2 rounded-md border border-gray-200 px-5 py-3 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
+              >
+                <Pencil className="size-4" aria-hidden="true" />
+                {isEditOpen ? '수정 닫기' : '정보 수정'}
+              </button>
+              <button
+                type="button"
+                disabled={isSignOutPending}
+                onClick={() => void handleSignOut()}
+                className="inline-flex items-center gap-2 rounded-md border border-gray-200 px-5 py-3 text-sm font-medium text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-400"
+              >
+                <LogOut className="size-4" aria-hidden="true" />
+                로그아웃
+              </button>
+            </div>
           </div>
 
           <div className="mt-7 flex items-center gap-8">
@@ -106,33 +130,23 @@ export function ProfileEditPageContent() {
               <div className="flex items-center gap-3">
                 <p className="text-xl font-bold text-gray-900">{user.name}</p>
                 <span className="text-primary-600 rounded-md bg-green-50 px-2 py-1 text-xs font-semibold">
-                  일반 회원
+                  {ROLE_LABELS[user.role]}
                 </span>
               </div>
               <p className="mt-3 text-base text-gray-500">{user.email}</p>
-              {authProvider ? (
-                <p className="mt-3 inline-flex items-center gap-2 text-sm text-gray-600">
-                  <span
-                    aria-hidden="true"
-                    className="inline-flex size-4 items-center justify-center rounded-full bg-yellow-300 text-[10px] font-bold text-gray-900"
-                  >
-                    {authProvider.badge}
-                  </span>
-                  {authProvider.label}
+              {authProviderLabel ? (
+                <p className="mt-3 text-sm text-gray-600">
+                  로그인 방식: {authProviderLabel}
                 </p>
               ) : null}
             </div>
           </div>
-        </section>
 
-        <section className="rounded-lg border border-gray-200 bg-white p-7">
-          <h2 className="text-lg font-bold text-gray-900">프로필 정보</h2>
-          <p className="mt-2 text-sm text-gray-500">
-            예약 안내에 사용할 닉네임과 연락처를 수정합니다.
-          </p>
-          <div className="mt-6">
-            <ProfileEditForm user={user} />
-          </div>
+          {isEditOpen ? (
+            <div className="mt-7 border-t border-gray-100 pt-6">
+              <ProfileEditForm user={user} />
+            </div>
+          ) : null}
         </section>
 
         <section className="rounded-lg border border-gray-200 bg-white p-7">

@@ -63,7 +63,7 @@ describe('ProfileEditPageContent', () => {
     } as unknown as ReturnType<typeof useSignOut>);
   });
 
-  it('내 정보 값을 입력값으로 표시한다', () => {
+  it('계정 정보에서 회원 정보와 수정 진입점을 표시한다', () => {
     render(<ProfileEditPageContent />);
 
     expect(
@@ -76,13 +76,25 @@ describe('ProfileEditPageContent', () => {
       screen.getByText('로그인 계정 정보를 확인할 수 있습니다.')
     ).toBeInTheDocument();
     expect(screen.getByText('customer@example.com')).toBeInTheDocument();
-    expect(screen.getByText('카카오 계정으로 로그인')).toBeInTheDocument();
+    expect(screen.getByText('일반 회원')).toBeInTheDocument();
+    expect(screen.getByText('로그인 방식: 카카오')).toBeInTheDocument();
     expect(
       screen.queryByRole('button', { name: '계정 연결 관리' })
     ).not.toBeInTheDocument();
     expect(
       screen.getByRole('button', { name: '로그아웃' })
     ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: '정보 수정' })
+    ).toBeInTheDocument();
+    expect(screen.queryByLabelText('닉네임')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('연락처')).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('heading', { name: '프로필 정보' })
+    ).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: '정보 수정' }));
+
     expect(screen.getByLabelText('닉네임')).toHaveValue('픽마 고객');
     expect(screen.getByLabelText('연락처')).toHaveValue('010-1234-5678');
     expect(
@@ -102,9 +114,7 @@ describe('ProfileEditPageContent', () => {
 
     render(<ProfileEditPageContent />);
 
-    expect(
-      screen.queryByText('카카오 계정으로 로그인')
-    ).not.toBeInTheDocument();
+    expect(screen.queryByText('로그인 방식: 카카오')).not.toBeInTheDocument();
     expect(
       screen.queryByText(
         '이메일과 로그인 정보는 인증 계정 설정에서 관리됩니다.'
@@ -112,8 +122,23 @@ describe('ProfileEditPageContent', () => {
     ).not.toBeInTheDocument();
   });
 
+  it('role에 맞는 회원 배지를 표시한다', () => {
+    vi.mocked(useMe).mockReturnValue({
+      data: { ...mockUser, role: 'seller' },
+      isError: false,
+      isLoading: false,
+    } as ReturnType<typeof useMe>);
+
+    render(<ProfileEditPageContent />);
+
+    expect(screen.getByText('판매자')).toBeInTheDocument();
+    expect(screen.queryByText('일반 회원')).not.toBeInTheDocument();
+  });
+
   it('저장 시 trim된 닉네임과 연락처를 업데이트하고 현재 페이지에 머문다', async () => {
     render(<ProfileEditPageContent />);
+
+    fireEvent.click(screen.getByRole('button', { name: '정보 수정' }));
 
     fireEvent.change(screen.getByLabelText('닉네임'), {
       target: { value: ' 새 이름 ' },
@@ -138,6 +163,8 @@ describe('ProfileEditPageContent', () => {
 
   it('이전 저장 실패 후 다음 저장 성공 시 에러 메시지를 지운다', () => {
     render(<ProfileEditPageContent />);
+
+    fireEvent.click(screen.getByRole('button', { name: '정보 수정' }));
 
     mockUpdateMe.mockImplementationOnce((_data, options) => {
       options.onError();
