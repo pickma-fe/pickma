@@ -94,6 +94,14 @@ describe('ProfileEditPageContent', () => {
     expect(
       screen.getByRole('button', { name: '정보 수정' })
     ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '정보 수정' })).toHaveAttribute(
+      'aria-expanded',
+      'false'
+    );
+    expect(screen.getByRole('button', { name: '정보 수정' })).toHaveAttribute(
+      'aria-controls',
+      'profile-edit-actions'
+    );
     expect(screen.queryByLabelText('닉네임')).not.toBeInTheDocument();
     expect(screen.queryByLabelText('연락처')).not.toBeInTheDocument();
     expect(
@@ -102,6 +110,10 @@ describe('ProfileEditPageContent', () => {
 
     fireEvent.click(screen.getByRole('button', { name: '정보 수정' }));
 
+    expect(screen.getByRole('button', { name: '수정 닫기' })).toHaveAttribute(
+      'aria-expanded',
+      'true'
+    );
     const nameField = screen.getByLabelText('닉네임');
     expect(nameField).toHaveValue('픽마 고객');
     expect(nameField.tagName).toBe('INPUT');
@@ -130,6 +142,18 @@ describe('ProfileEditPageContent', () => {
         '이메일과 로그인 정보는 인증 계정 설정에서 관리됩니다.'
       )
     ).not.toBeInTheDocument();
+  });
+
+  it('등록된 연락처가 없으면 안내 문구를 표시한다', () => {
+    vi.mocked(useMe).mockReturnValue({
+      data: { ...mockUser, phone: '' },
+      isError: false,
+      isLoading: false,
+    } as ReturnType<typeof useMe>);
+
+    render(<ProfileEditPageContent />);
+
+    expect(screen.getByText('등록된 연락처가 없습니다.')).toBeInTheDocument();
   });
 
   it('role에 맞는 회원 배지를 표시한다', () => {

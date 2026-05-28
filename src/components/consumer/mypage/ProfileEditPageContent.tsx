@@ -86,6 +86,7 @@ export function ProfileEditPageContent() {
     : undefined;
   const editName = isEditOpen ? name : user.name;
   const editPhone = isEditOpen ? phone : (user.phone ?? '');
+  const displayPhone = user.phone?.trim() || '등록된 연락처가 없습니다.';
   const userName = user.name;
   const userPhone = user.phone ?? '';
 
@@ -122,6 +123,8 @@ export function ProfileEditPageContent() {
             <div className="flex gap-2">
               <button
                 type="button"
+                aria-controls="profile-edit-actions"
+                aria-expanded={isEditOpen}
                 onClick={handleEditToggle}
                 className="inline-flex items-center gap-2 rounded-md border border-gray-200 px-5 py-3 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
               >
@@ -185,7 +188,7 @@ export function ProfileEditPageContent() {
                 />
               ) : (
                 <p className="mt-2 flex h-8 items-center text-base text-gray-500">
-                  {user.phone ?? '등록된 연락처가 없습니다.'}
+                  {displayPhone}
                 </p>
               )}
               <p className="mt-3 text-base text-gray-500">{user.email}</p>
@@ -206,7 +209,10 @@ export function ProfileEditPageContent() {
             </p>
           ) : null}
 
-          <div className="mt-4 flex min-h-[42px] justify-end">
+          <div
+            id="profile-edit-actions"
+            className="mt-4 flex min-h-[42px] justify-end"
+          >
             {isEditOpen ? (
               <ProfileEditForm
                 name={editName}
