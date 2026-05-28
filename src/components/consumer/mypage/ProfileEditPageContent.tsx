@@ -38,6 +38,7 @@ export function ProfileEditPageContent() {
   const { mutateAsync: signOut, isPending: isSignOutPending } = useSignOut();
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
   const [editError, setEditError] = useState<string | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
@@ -83,13 +84,16 @@ export function ProfileEditPageContent() {
   const authProviderLabel = user.authProvider
     ? AUTH_PROVIDER_LABELS[user.authProvider]
     : undefined;
-  const editName = name || user.name;
+  const editName = isEditOpen ? name : user.name;
+  const editPhone = isEditOpen ? phone : (user.phone ?? '');
   const userName = user.name;
+  const userPhone = user.phone ?? '';
 
   function handleEditToggle() {
     setIsEditOpen((current) => {
       if (!current) {
         setName(userName);
+        setPhone(userPhone);
         setEditError(null);
       }
 
@@ -144,10 +148,10 @@ export function ProfileEditPageContent() {
             <div>
               <div className="flex items-center gap-3">
                 {isEditOpen ? (
-                  <label className="flex min-w-64 flex-col gap-1">
-                    <span className="text-sm text-gray-500">닉네임</span>
+                  <div className="min-w-64">
                     <input
                       type="text"
+                      aria-label="닉네임"
                       value={editName}
                       onChange={(event) => {
                         setName(event.target.value);
@@ -155,7 +159,7 @@ export function ProfileEditPageContent() {
                       }}
                       className="focus:border-primary-500 focus:ring-primary-300 w-full rounded-md border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-900 outline-none focus:ring-2"
                     />
-                  </label>
+                  </div>
                 ) : (
                   <p className="text-xl font-bold text-gray-900">{user.name}</p>
                 )}
@@ -164,9 +168,22 @@ export function ProfileEditPageContent() {
                 </span>
               </div>
               <p className="mt-3 text-base text-gray-500">{user.email}</p>
-              <p className="mt-2 text-base text-gray-500">
-                {user.phone ?? '등록된 연락처가 없습니다.'}
-              </p>
+              {isEditOpen ? (
+                <input
+                  type="tel"
+                  aria-label="연락처"
+                  value={editPhone}
+                  onChange={(event) => {
+                    setPhone(event.target.value);
+                    setEditError(null);
+                  }}
+                  className="focus:border-primary-500 focus:ring-primary-300 mt-2 w-full rounded-md border border-gray-200 px-4 py-2 text-sm text-gray-900 outline-none focus:ring-2"
+                />
+              ) : (
+                <p className="mt-2 text-base text-gray-500">
+                  {user.phone ?? '등록된 연락처가 없습니다.'}
+                </p>
+              )}
               {authProviderLabel ? (
                 <p className="mt-3 text-sm text-gray-600">
                   로그인 방식: {authProviderLabel}
@@ -188,9 +205,9 @@ export function ProfileEditPageContent() {
 
               <ProfileEditForm
                 name={editName}
+                phone={editPhone}
                 onErrorClear={() => setEditError(null)}
                 onErrorSet={setEditError}
-                user={user}
               />
             </div>
           ) : null}

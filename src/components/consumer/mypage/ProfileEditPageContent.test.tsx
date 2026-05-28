@@ -99,6 +99,7 @@ describe('ProfileEditPageContent', () => {
     const nameField = screen.getByLabelText('닉네임');
     expect(nameField).toHaveValue('픽마 고객');
     expect(nameField.tagName).toBe('INPUT');
+    expect(screen.queryByText('닉네임')).not.toBeInTheDocument();
     expect(screen.getByLabelText('연락처')).toHaveValue('010-1234-5678');
     expect(
       screen.getByRole('heading', { name: '계정 관리' })
