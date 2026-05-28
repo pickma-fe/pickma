@@ -165,7 +165,7 @@ export function ProfileEditPageContent() {
                     {user.name}
                   </p>
                 )}
-                <span className="text-primary-600 rounded-md bg-green-50 px-2 py-1 text-xs font-semibold">
+                <span className="text-primary-600 shrink-0 rounded-md bg-green-50 px-2 py-1 text-xs font-semibold whitespace-nowrap">
                   {ROLE_LABELS[user.role]}
                 </span>
               </div>
@@ -203,16 +203,17 @@ export function ProfileEditPageContent() {
             </p>
           ) : null}
 
-          {isEditOpen ? (
-            <div className="mt-4 flex justify-end">
+          <div className="mt-4 flex min-h-[42px] justify-end">
+            {isEditOpen ? (
               <ProfileEditForm
                 name={editName}
                 phone={editPhone}
                 onErrorClear={() => setEditError(null)}
                 onErrorSet={setEditError}
+                onSuccess={() => setIsEditOpen(false)}
               />
-            </div>
-          ) : null}
+            ) : null}
+          </div>
         </section>
 
         <section className="rounded-lg border border-gray-200 bg-white p-7">

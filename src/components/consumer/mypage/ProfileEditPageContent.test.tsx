@@ -1,4 +1,10 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { User } from '@/types/user';
@@ -162,6 +168,16 @@ describe('ProfileEditPageContent', () => {
     ).not.toBeInTheDocument();
     expect(
       screen.queryByRole('button', { name: '취소' })
+    ).not.toBeInTheDocument();
+
+    const updateOptions = mockUpdateMe.mock.calls[0]?.[1];
+    act(() => {
+      updateOptions.onSuccess();
+    });
+
+    expect(screen.queryByLabelText('닉네임')).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: '저장하기' })
     ).not.toBeInTheDocument();
   });
 

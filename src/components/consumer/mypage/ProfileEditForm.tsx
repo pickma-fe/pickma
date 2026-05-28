@@ -10,6 +10,7 @@ interface ProfileEditFormProps {
   phone: string;
   onErrorClear: () => void;
   onErrorSet: (message: string) => void;
+  onSuccess: () => void;
 }
 
 export function ProfileEditForm({
@@ -17,6 +18,7 @@ export function ProfileEditForm({
   phone,
   onErrorClear,
   onErrorSet,
+  onSuccess,
 }: ProfileEditFormProps) {
   const { mutate: updateMe, isPending } = useUpdateMe();
 
@@ -41,6 +43,7 @@ export function ProfileEditForm({
       {
         onSuccess: () => {
           onErrorClear();
+          onSuccess();
         },
         onError: () => {
           onErrorSet('프로필 저장에 실패했습니다. 다시 시도해주세요.');
