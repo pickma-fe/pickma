@@ -169,7 +169,6 @@ export function ProfileEditPageContent() {
                   {ROLE_LABELS[user.role]}
                 </span>
               </div>
-              <p className="mt-3 text-base text-gray-500">{user.email}</p>
               {isEditOpen ? (
                 <input
                   type="tel"
@@ -186,6 +185,7 @@ export function ProfileEditPageContent() {
                   {user.phone ?? '등록된 연락처가 없습니다.'}
                 </p>
               )}
+              <p className="mt-3 text-base text-gray-500">{user.email}</p>
               {authProviderLabel ? (
                 <p className="mt-3 text-sm text-gray-600">
                   로그인 방식: {authProviderLabel}
