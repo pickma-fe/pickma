@@ -22,6 +22,7 @@
 - Next.js `proxy.ts`는 세션 refresh와 보호 라우트 1차 접근 제어를 담당한다.
 - API별 최종 인증, 권한, 리소스 소유권 검증은 Route Handler와 서버 service에서 수행한다.
 - Mock/Real 전환은 Route Handler 내부에서 `API_MOCK_ENABLED`로 분기한다.
+- 원격 Supabase에 초기 migration이 적용된 이후의 스키마 변경은 incremental migration 파일로 작성한다. 상세 운영 원칙은 `docs/migration_policy.md`를 참고한다.
 
 ---
 

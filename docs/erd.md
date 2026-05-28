@@ -419,3 +419,9 @@ stores 1:N store_order_sequences
 - 만료: expires_at 기반 처리
 
 ---
+
+# 8. 예정 스키마 변경 후보
+
+후속 task의 스키마 변경 후보 목록과 운영 원칙은 `docs/migration_policy.md`를 참고한다.
+
+---

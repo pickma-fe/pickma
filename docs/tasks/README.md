@@ -11,6 +11,7 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 - `temp/`에 생성하는 task 관련 산출물은 task ID를 파일명 맨 앞에 둔다. 예: `temp/T02-plan.md`, `temp/T02-code-review.md`, `temp/T02-checkpoint.md`.
 - task 실행 전에는 개별 task 문서와 관련 architecture/docs를 함께 확인한다.
 - task 완료 전에는 관련 `docs/*` 최신화 필요 여부를 확인한다. 문서 수정이 필요하지만 해당 task 범위를 넘으면 후속 task 또는 `확인 필요`로 남긴다.
+- 스키마 변경이 포함된 task는 `docs/migration_policy.md`를 먼저 확인한다.
 
 ## 우선순위
 
@@ -32,7 +33,7 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 | T05 | 상품 목록 할인율 필터/정렬 DB pagination 복구     | P0       | 진행 전 | 확인 필요    | T08                | [T05_product_discount_sort_db_pagination.md](T05_product_discount_sort_db_pagination.md)                         |
 | T06 | Storage orphan 및 개인정보 cleanup 정책 확정      | P0       | 완료    | 확인 필요    | 없음               | [T06_storage_orphan_privacy_cleanup_policy.md](T06_storage_orphan_privacy_cleanup_policy.md)                     |
 | T07 | service role 사용 기준 및 owner scope 테스트 수립 | P0       | 완료    | 175          | 없음               | [T07_service_role_owner_scope_tests.md](T07_service_role_owner_scope_tests.md)                                   |
-| T08 | incremental migration 전환 결정                   | P0       | 진행 전 | 확인 필요    | 없음               | [T08_incremental_migration_policy.md](T08_incremental_migration_policy.md)                                       |
+| T08 | incremental migration 전환 결정                   | P0       | 완료    | 178          | 없음               | [T08_incremental_migration_policy.md](T08_incremental_migration_policy.md)                                       |
 | T09 | 501 API 및 UI 노출 목록 정리                      | P0       | 진행 전 | 확인 필요    | 없음               | [T09_api_501_ui_exposure_inventory.md](T09_api_501_ui_exposure_inventory.md)                                     |
 | T10 | 판매자 운영 상태 정책 및 구현                     | P1       | 진행 전 | 확인 필요    | T08                | [T10_seller_operation_status.md](T10_seller_operation_status.md)                                                 |
 | T11 | 결제 outbox/webhook/idempotency 설계              | P1       | 진행 전 | 확인 필요    | T01                | [T11_payment_outbox_webhook_idempotency.md](T11_payment_outbox_webhook_idempotency.md)                           |
