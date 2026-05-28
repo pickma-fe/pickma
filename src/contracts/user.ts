@@ -12,5 +12,6 @@ export interface UserResponse {
 
 export interface UpdateMeRequest {
   name?: string;
+  phone?: string;
   profileImage?: string;
 }

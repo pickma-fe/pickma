@@ -16,6 +16,7 @@ export async function updateUser(
     .from('users')
     .update({
       ...(data.name !== undefined && { name: data.name }),
+      ...(data.phone !== undefined && { phone: data.phone }),
       ...(data.profileImage !== undefined && {
         profile_image: data.profileImage,
       }),

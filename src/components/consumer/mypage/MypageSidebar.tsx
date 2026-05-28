@@ -27,6 +27,7 @@ const menuItems: SidebarItem[] = [
   {
     label: '내 정보',
     icon: <User className="size-5" aria-hidden="true" />,
+    href: '/mypage/profile',
   },
   {
     label: '설정',

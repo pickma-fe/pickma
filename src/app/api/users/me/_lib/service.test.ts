@@ -73,6 +73,20 @@ describe('updateUser', () => {
     expect(result).toBe(mockUserResponse);
   });
 
+  it('phone이 포함되면 users.phone 컬럼 업데이트 인자로 전달한다', async () => {
+    const { client, updateFn } = makeServiceClient({
+      data: mockRow,
+      error: null,
+    });
+    vi.mocked(createServiceRoleClient).mockReturnValue(
+      client as unknown as ReturnType<typeof createServiceRoleClient>
+    );
+
+    await updateUser('user-1', { phone: '010-1234-5678' });
+
+    expect(updateFn).toHaveBeenCalledWith({ phone: '010-1234-5678' });
+  });
+
   it('PGRST116 에러면 NOT_FOUND를 던진다', async () => {
     const { client } = makeServiceClient({
       data: null,
