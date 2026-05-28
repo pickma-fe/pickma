@@ -37,6 +37,8 @@ export function ProfileEditPageContent() {
   const { mutateAsync: deleteMe, isPending: isDeletePending } = useDeleteMe();
   const { mutateAsync: signOut, isPending: isSignOutPending } = useSignOut();
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const [name, setName] = useState('');
+  const [editError, setEditError] = useState<string | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
@@ -81,6 +83,19 @@ export function ProfileEditPageContent() {
   const authProviderLabel = user.authProvider
     ? AUTH_PROVIDER_LABELS[user.authProvider]
     : undefined;
+  const editName = name || user.name;
+  const userName = user.name;
+
+  function handleEditToggle() {
+    setIsEditOpen((current) => {
+      if (!current) {
+        setName(userName);
+        setEditError(null);
+      }
+
+      return !current;
+    });
+  }
 
   return (
     <section className="max-w-320">
@@ -103,7 +118,7 @@ export function ProfileEditPageContent() {
             <div className="flex gap-2">
               <button
                 type="button"
-                onClick={() => setIsEditOpen((current) => !current)}
+                onClick={handleEditToggle}
                 className="inline-flex items-center gap-2 rounded-md border border-gray-200 px-5 py-3 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
               >
                 <Pencil className="size-4" aria-hidden="true" />
@@ -128,7 +143,22 @@ export function ProfileEditPageContent() {
 
             <div>
               <div className="flex items-center gap-3">
-                <p className="text-xl font-bold text-gray-900">{user.name}</p>
+                {isEditOpen ? (
+                  <label className="flex min-w-64 flex-col gap-1">
+                    <span className="text-sm text-gray-500">닉네임</span>
+                    <textarea
+                      value={editName}
+                      onChange={(event) => {
+                        setName(event.target.value);
+                        setEditError(null);
+                      }}
+                      rows={3}
+                      className="focus:border-primary-500 focus:ring-primary-300 w-full resize-none rounded-md border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-900 outline-none focus:ring-2"
+                    />
+                  </label>
+                ) : (
+                  <p className="text-xl font-bold text-gray-900">{user.name}</p>
+                )}
                 <span className="text-primary-600 rounded-md bg-green-50 px-2 py-1 text-xs font-semibold">
                   {ROLE_LABELS[user.role]}
                 </span>
@@ -147,7 +177,21 @@ export function ProfileEditPageContent() {
 
           {isEditOpen ? (
             <div className="mt-7 border-t border-gray-100 pt-6">
-              <ProfileEditForm user={user} />
+              {editError ? (
+                <p
+                  role="alert"
+                  className="mb-5 rounded-md bg-red-50 p-3 text-sm text-red-600"
+                >
+                  {editError}
+                </p>
+              ) : null}
+
+              <ProfileEditForm
+                name={editName}
+                onErrorClear={() => setEditError(null)}
+                onErrorSet={setEditError}
+                user={user}
+              />
             </div>
           ) : null}
         </section>
