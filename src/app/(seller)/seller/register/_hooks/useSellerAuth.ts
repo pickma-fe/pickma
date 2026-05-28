@@ -10,6 +10,9 @@ import { useCreateSellerApplication } from '@/hooks/seller/applications/useCreat
 
 import type { AuthStepState } from '../_components/types';
 
+// TODO(T29): API 확장 후 신청 데이터(businessInfo, termsAgreed, documentFiles) 복원 필요
+// 현재는 applicationStatus만 반환하므로 페이지 이동 후 로컬 state 초기화 불가
+
 export function useSellerAuth() {
   const [termsAgreed, setTermsAgreed] = useState<Record<
     string,
@@ -37,22 +40,30 @@ export function useSellerAuth() {
     queryKey: ['sellers', 'onboarding-status'],
     queryFn: () => sellerOnboardingApi.getSellerOnboardingStatus(),
     staleTime: 30 * 1000,
-    enabled: documentsSubmitted,
-    refetchInterval: documentsSubmitted ? 5000 : false,
+    refetchInterval: 5000,
   });
 
   const applicationStatus = onboardingStatus?.applicationStatus;
+
+  const isApiPending = applicationStatus === 'pending';
+  const isApiApproved = applicationStatus === 'approved';
+  const isApiRejected = applicationStatus === 'rejected';
+  const hasApplication = isApiPending || isApiApproved || isApiRejected;
+
+  const resolvedDocumentsSubmitted = documentsSubmitted || hasApplication;
+  const resolvedBusinessInfoSubmitted = businessInfoSubmitted || hasApplication;
+  const resolvedTermsSubmitted = termsSubmitted || hasApplication;
 
   let reviewStatus: AuthStepState['reviewStatus'] = 'pending';
   let certificationStatus: AuthStepState['certificationStatus'] = 'waiting';
   let rejectionReason: string | undefined;
 
-  if (documentsSubmitted) {
+  if (resolvedDocumentsSubmitted) {
     reviewStatus = 'reviewing';
-    if (applicationStatus === 'approved') {
+    if (isApiApproved) {
       reviewStatus = 'completed';
       certificationStatus = 'approved';
-    } else if (applicationStatus === 'rejected') {
+    } else if (isApiRejected) {
       reviewStatus = 'completed';
       certificationStatus = 'rejected';
       rejectionReason = onboardingStatus?.latestRejectReason;
@@ -60,9 +71,9 @@ export function useSellerAuth() {
   }
 
   const authState: AuthStepState = {
-    termsAgreed: termsSubmitted,
-    businessInfoSubmitted,
-    documentsSubmitted,
+    termsAgreed: resolvedTermsSubmitted,
+    businessInfoSubmitted: resolvedBusinessInfoSubmitted,
+    documentsSubmitted: resolvedDocumentsSubmitted,
     reviewStatus,
     certificationStatus,
     rejectionReason,
@@ -76,7 +87,7 @@ export function useSellerAuth() {
   };
 
   const handleBusinessInfoComplete = (data: BusinessInfoData) => {
-    if (!termsSubmitted) return;
+    if (!resolvedTermsSubmitted) return;
     setBusinessInfo(data);
     setBusinessInfoSubmitted(true);
   };
@@ -85,7 +96,12 @@ export function useSellerAuth() {
     files: Record<string, File | null>,
     onClose: () => void
   ) => {
-    if (!termsSubmitted || !businessInfoSubmitted || !businessInfo) return;
+    if (
+      !resolvedTermsSubmitted ||
+      !resolvedBusinessInfoSubmitted ||
+      !businessInfo
+    )
+      return;
 
     const { businessLicense, idCard, bankbook, businessReport } = files;
     if (!businessLicense || !idCard || !bankbook || !businessReport) return;

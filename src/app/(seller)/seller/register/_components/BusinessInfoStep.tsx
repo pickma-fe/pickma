@@ -94,6 +94,8 @@ export function BusinessInfoStep({
   if (isViewMode && !isEditing) {
     return (
       <div className="flex flex-col gap-4">
+        {/* TODO(T29): onboarding-status API 확장 후 savedData로 실제 신청 데이터 표시
+          현재는 페이지 이동 후 데이터 유실로 '-' 표시됨 */}
         <dl className="flex flex-col gap-3">
           {fields.map((field) => (
             <div key={field.key} className="flex flex-col gap-1">
