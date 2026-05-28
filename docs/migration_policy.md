@@ -20,7 +20,7 @@
 
 **파일명 규칙**
 
-```
+```text
 YYYYMMDDHHMMSS_<snake_case_name>.sql
 ```
 
