@@ -1,5 +1,7 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
+
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/common/Button/Button';
 
@@ -25,6 +27,8 @@ interface AuthStepListProps {
 }
 
 export function AuthStepList({ state, onActionClick }: AuthStepListProps) {
+  const router = useRouter();
+
   const steps = [
     {
       id: 1,
@@ -104,10 +108,20 @@ export function AuthStepList({ state, onActionClick }: AuthStepListProps) {
 
             <div className="flex items-center gap-2 self-end sm:self-auto">
               {step.id === 4 && status !== 'pending' && (
-                <StatusBadge
-                  text={REVIEW_STATUS_TEXT[state.reviewStatus]}
-                  colorClass={REVIEW_STATUS_COLOR[state.reviewStatus]}
-                />
+                <>
+                  <StatusBadge
+                    text={REVIEW_STATUS_TEXT[state.reviewStatus]}
+                    colorClass={REVIEW_STATUS_COLOR[state.reviewStatus]}
+                  />
+                  <Button
+                    variant="outline"
+                    color="gray"
+                    className="text-xs whitespace-nowrap"
+                    onClick={() => router.push('/seller/pending')}
+                  >
+                    상세 확인
+                  </Button>
+                </>
               )}
 
               {step.id === 5 && status !== 'pending' && (

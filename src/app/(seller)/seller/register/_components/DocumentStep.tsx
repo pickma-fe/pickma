@@ -167,6 +167,8 @@ export function DocumentStep({
   if (isViewMode && !isEditing) {
     return (
       <div className="flex flex-col gap-4">
+        {/* TODO(T29): onboarding-status API 확장 후 제출된 서류 파일명/URL 표시 필요
+          현재는 페이지 이동 후 File 객체 유실로 '파일 없음' 표시됨 */}
         <div className="rounded-md bg-green-50 p-4">
           <p className="text-sm font-medium text-green-700">
             ✓ 모든 서류가 제출되었습니다.
