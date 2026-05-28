@@ -128,6 +128,14 @@ export function ProfileEditPageContent() {
                 <Pencil className="size-4" aria-hidden="true" />
                 {isEditOpen ? '수정 닫기' : '정보 수정'}
               </button>
+              {isEditOpen ? (
+                <ProfileEditForm
+                  name={editName}
+                  phone={editPhone}
+                  onErrorClear={() => setEditError(null)}
+                  onErrorSet={setEditError}
+                />
+              ) : null}
               <button
                 type="button"
                 disabled={isSignOutPending}
@@ -194,24 +202,13 @@ export function ProfileEditPageContent() {
             </div>
           </div>
 
-          {isEditOpen ? (
-            <div className="mt-7 border-t border-gray-100 pt-6">
-              {editError ? (
-                <p
-                  role="alert"
-                  className="mb-5 rounded-md bg-red-50 p-3 text-sm text-red-600"
-                >
-                  {editError}
-                </p>
-              ) : null}
-
-              <ProfileEditForm
-                name={editName}
-                phone={editPhone}
-                onErrorClear={() => setEditError(null)}
-                onErrorSet={setEditError}
-              />
-            </div>
+          {editError ? (
+            <p
+              role="alert"
+              className="mt-5 rounded-md bg-red-50 p-3 text-sm text-red-600"
+            >
+              {editError}
+            </p>
           ) : null}
         </section>
 
