@@ -136,6 +136,28 @@ describe('ProfileEditPageContent', () => {
     ).not.toBeInTheDocument();
   });
 
+  it('이전 저장 실패 후 다음 저장 성공 시 에러 메시지를 지운다', () => {
+    render(<ProfileEditPageContent />);
+
+    mockUpdateMe.mockImplementationOnce((_data, options) => {
+      options.onError();
+    });
+    fireEvent.click(screen.getByRole('button', { name: '저장하기' }));
+
+    expect(
+      screen.getByText('프로필 저장에 실패했습니다. 다시 시도해주세요.')
+    ).toBeInTheDocument();
+
+    mockUpdateMe.mockImplementationOnce((_data, options) => {
+      options.onSuccess();
+    });
+    fireEvent.click(screen.getByRole('button', { name: '저장하기' }));
+
+    expect(
+      screen.queryByText('프로필 저장에 실패했습니다. 다시 시도해주세요.')
+    ).not.toBeInTheDocument();
+  });
+
   it('회원 탈퇴 확인 후 deleteMe와 signOut을 실행하고 홈으로 이동한다', async () => {
     mockDeleteMe.mockResolvedValue(undefined);
     mockSignOut.mockResolvedValue(undefined);

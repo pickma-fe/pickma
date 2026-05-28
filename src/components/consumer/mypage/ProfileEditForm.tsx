@@ -36,6 +36,9 @@ export function ProfileEditForm({ user }: ProfileEditFormProps) {
     updateMe(
       { name: nextName, phone: nextPhone },
       {
+        onSuccess: () => {
+          setError(null);
+        },
         onError: () => {
           setError('프로필 저장에 실패했습니다. 다시 시도해주세요.');
         },
