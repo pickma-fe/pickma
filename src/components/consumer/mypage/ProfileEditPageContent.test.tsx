@@ -115,10 +115,17 @@ describe('ProfileEditPageContent', () => {
       'true'
     );
     const nameField = screen.getByLabelText('닉네임');
+    const phoneField = screen.getByLabelText('연락처');
+    const editForm = screen.getByRole('form', { name: '프로필 정보 수정' });
     expect(nameField).toHaveValue('픽마 고객');
     expect(nameField.tagName).toBe('INPUT');
     expect(screen.queryByText('닉네임')).not.toBeInTheDocument();
-    expect(screen.getByLabelText('연락처')).toHaveValue('010-1234-5678');
+    expect(phoneField).toHaveValue('010-1234-5678');
+    expect(editForm).toContainElement(nameField);
+    expect(editForm).toContainElement(phoneField);
+    expect(editForm).toContainElement(
+      screen.getByRole('button', { name: '저장하기' })
+    );
     expect(
       screen.getByRole('heading', { name: '계정 관리' })
     ).toBeInTheDocument();
@@ -203,6 +210,22 @@ describe('ProfileEditPageContent', () => {
     expect(
       screen.queryByRole('button', { name: '저장하기' })
     ).not.toBeInTheDocument();
+  });
+
+  it('빈 연락처도 저장해 기존 연락처를 삭제할 수 있다', () => {
+    render(<ProfileEditPageContent />);
+
+    fireEvent.click(screen.getByRole('button', { name: '정보 수정' }));
+
+    fireEvent.change(screen.getByLabelText('연락처'), {
+      target: { value: '   ' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: '저장하기' }));
+
+    expect(mockUpdateMe).toHaveBeenCalledWith(
+      { name: '픽마 고객', phone: '' },
+      expect.objectContaining({ onError: expect.any(Function) })
+    );
   });
 
   it('이전 저장 실패 후 다음 저장 성공 시 에러 메시지를 지운다', () => {

@@ -9,15 +9,14 @@ import {
   UserX,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { type FormEvent, useState } from 'react';
 
 import { useSignOut } from '@/hooks/auth/useSignOut';
 import { useDeleteMe } from '@/hooks/users/useDeleteMe';
 import { useMe } from '@/hooks/users/useMe';
+import { useUpdateMe } from '@/hooks/users/useUpdateMe';
 import { Button } from '@/components/common/Button/Button';
 import { Modal } from '@/components/common/Modal/Modal';
-
-import { ProfileEditForm } from './ProfileEditForm';
 
 const AUTH_PROVIDER_LABELS = {
   google: '구글',
@@ -34,6 +33,7 @@ const ROLE_LABELS = {
 export function ProfileEditPageContent() {
   const router = useRouter();
   const { data: user, isError, isLoading } = useMe();
+  const { mutate: updateMe, isPending: isUpdatePending } = useUpdateMe();
   const { mutateAsync: deleteMe, isPending: isDeletePending } = useDeleteMe();
   const { mutateAsync: signOut, isPending: isSignOutPending } = useSignOut();
   const [isEditOpen, setIsEditOpen] = useState(false);
@@ -102,6 +102,31 @@ export function ProfileEditPageContent() {
     });
   }
 
+  function handleProfileSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    const nextName = name.trim();
+    const nextPhone = phone.trim();
+
+    if (!nextName) {
+      setEditError('닉네임을 입력해주세요.');
+      return;
+    }
+
+    updateMe(
+      { name: nextName, phone: nextPhone },
+      {
+        onSuccess: () => {
+          setEditError(null);
+          setIsEditOpen(false);
+        },
+        onError: () => {
+          setEditError('프로필 저장에 실패했습니다. 다시 시도해주세요.');
+        },
+      }
+    );
+  }
+
   return (
     <section className="max-w-320">
       <div className="mb-8">
@@ -143,86 +168,87 @@ export function ProfileEditPageContent() {
             </div>
           </div>
 
-          <div className="mt-7 flex items-center gap-8">
-            <div className="bg-primary-50 text-primary-600 flex size-32 shrink-0 items-center justify-center rounded-full">
-              <User className="size-16" aria-hidden="true" />
-            </div>
+          <form
+            id="profile-edit-actions"
+            aria-label="프로필 정보 수정"
+            onSubmit={handleProfileSubmit}
+          >
+            <div className="mt-7 flex items-center gap-8">
+              <div className="bg-primary-50 text-primary-600 flex size-32 shrink-0 items-center justify-center rounded-full">
+                <User className="size-16" aria-hidden="true" />
+              </div>
 
-            <div className="w-full max-w-80">
-              <div className="flex items-center gap-2">
+              <div className="w-full max-w-80">
+                <div className="flex items-center gap-2">
+                  {isEditOpen ? (
+                    <div className="w-52 sm:w-64">
+                      <input
+                        type="text"
+                        aria-label="닉네임"
+                        value={editName}
+                        disabled={isUpdatePending}
+                        onChange={(event) => {
+                          setName(event.target.value);
+                          setEditError(null);
+                        }}
+                        className="focus:border-primary-500 focus:ring-primary-300 h-8 w-full rounded-md border border-gray-200 px-3 text-xl font-bold text-gray-900 outline-none focus:ring-2 disabled:bg-gray-100 disabled:text-gray-400"
+                      />
+                    </div>
+                  ) : (
+                    <p
+                      title={user.name}
+                      className="flex h-8 max-w-52 items-center truncate text-xl font-bold text-gray-900 sm:max-w-64"
+                    >
+                      {user.name}
+                    </p>
+                  )}
+                  <span className="text-primary-600 shrink-0 rounded-md bg-green-50 px-2 py-1 text-xs font-semibold whitespace-nowrap">
+                    {ROLE_LABELS[user.role]}
+                  </span>
+                </div>
                 {isEditOpen ? (
-                  <div className="w-52 sm:w-64">
-                    <input
-                      type="text"
-                      aria-label="닉네임"
-                      value={editName}
-                      onChange={(event) => {
-                        setName(event.target.value);
-                        setEditError(null);
-                      }}
-                      className="focus:border-primary-500 focus:ring-primary-300 h-8 w-full rounded-md border border-gray-200 px-3 text-xl font-bold text-gray-900 outline-none focus:ring-2"
-                    />
-                  </div>
+                  <input
+                    type="tel"
+                    aria-label="연락처"
+                    value={editPhone}
+                    disabled={isUpdatePending}
+                    onChange={(event) => {
+                      setPhone(event.target.value);
+                      setEditError(null);
+                    }}
+                    className="focus:border-primary-500 focus:ring-primary-300 mt-2 h-8 w-full rounded-md border border-gray-200 px-3 text-base text-gray-900 outline-none focus:ring-2 disabled:bg-gray-100 disabled:text-gray-400"
+                  />
                 ) : (
-                  <p
-                    title={user.name}
-                    className="flex h-8 max-w-52 items-center truncate text-xl font-bold text-gray-900 sm:max-w-64"
-                  >
-                    {user.name}
+                  <p className="mt-2 flex h-8 items-center text-base text-gray-500">
+                    {displayPhone}
                   </p>
                 )}
-                <span className="text-primary-600 shrink-0 rounded-md bg-green-50 px-2 py-1 text-xs font-semibold whitespace-nowrap">
-                  {ROLE_LABELS[user.role]}
-                </span>
+                <p className="mt-3 text-base text-gray-500">{user.email}</p>
+                {authProviderLabel ? (
+                  <p className="mt-3 text-sm text-gray-600">
+                    로그인 방식: {authProviderLabel}
+                  </p>
+                ) : null}
               </div>
+            </div>
+
+            {editError ? (
+              <p
+                role="alert"
+                className="mt-5 rounded-md bg-red-50 p-3 text-sm text-red-600"
+              >
+                {editError}
+              </p>
+            ) : null}
+
+            <div className="mt-4 flex min-h-[42px] justify-end">
               {isEditOpen ? (
-                <input
-                  type="tel"
-                  aria-label="연락처"
-                  value={editPhone}
-                  onChange={(event) => {
-                    setPhone(event.target.value);
-                    setEditError(null);
-                  }}
-                  className="focus:border-primary-500 focus:ring-primary-300 mt-2 h-8 w-full rounded-md border border-gray-200 px-3 text-base text-gray-900 outline-none focus:ring-2"
-                />
-              ) : (
-                <p className="mt-2 flex h-8 items-center text-base text-gray-500">
-                  {displayPhone}
-                </p>
-              )}
-              <p className="mt-3 text-base text-gray-500">{user.email}</p>
-              {authProviderLabel ? (
-                <p className="mt-3 text-sm text-gray-600">
-                  로그인 방식: {authProviderLabel}
-                </p>
+                <Button type="submit" disabled={isUpdatePending}>
+                  {isUpdatePending ? '저장 중...' : '저장하기'}
+                </Button>
               ) : null}
             </div>
-          </div>
-
-          {editError ? (
-            <p
-              role="alert"
-              className="mt-5 rounded-md bg-red-50 p-3 text-sm text-red-600"
-            >
-              {editError}
-            </p>
-          ) : null}
-
-          <div
-            id="profile-edit-actions"
-            className="mt-4 flex min-h-[42px] justify-end"
-          >
-            {isEditOpen ? (
-              <ProfileEditForm
-                name={editName}
-                phone={editPhone}
-                onErrorClear={() => setEditError(null)}
-                onErrorSet={setEditError}
-                onSuccess={() => setIsEditOpen(false)}
-              />
-            ) : null}
-          </div>
+          </form>
         </section>
 
         <section className="rounded-lg border border-gray-200 bg-white p-7">
