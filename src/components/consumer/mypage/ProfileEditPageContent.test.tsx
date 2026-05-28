@@ -112,7 +112,7 @@ describe('ProfileEditPageContent', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('저장 시 trim된 닉네임과 연락처를 업데이트하고 성공하면 마이페이지로 이동한다', async () => {
+  it('저장 시 trim된 닉네임과 연락처를 업데이트하고 현재 페이지에 머문다', async () => {
     mockUpdateMe.mockImplementation((_data, options) => {
       options.onSuccess();
     });
@@ -132,7 +132,10 @@ describe('ProfileEditPageContent', () => {
         expect.objectContaining({ onSuccess: expect.any(Function) })
       );
     });
-    expect(mockPush).toHaveBeenCalledWith('/mypage');
+    expect(mockPush).not.toHaveBeenCalledWith('/mypage');
+    expect(
+      screen.getByText('프로필 정보가 저장되었습니다.')
+    ).toBeInTheDocument();
   });
 
   it('회원 탈퇴 확인 후 deleteMe와 signOut을 실행하고 홈으로 이동한다', async () => {
