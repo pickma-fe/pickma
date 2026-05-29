@@ -22,7 +22,7 @@ vi.mock('../_lib/service', () => ({
   getSellerOrder: vi.fn(),
 }));
 
-const STORE_ID = '00000000-0000-4000-8000-000000000031';
+const STORE_ID = mockSellerOrderDetail.storeId;
 const ORDER_ID = mockSellerOrderDetail.id;
 
 const sellerResult = {
