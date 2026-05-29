@@ -98,7 +98,12 @@ export async function verifyEmailOtp(
     throw new AppError(ERROR_CODE.AUTH_EMAIL_OTP_EXPIRED, 400);
   }
 
-  const attemptCount = await store.incrementAttempt(challenge.challengeId);
+  let attemptCount: number;
+  try {
+    attemptCount = await store.incrementAttempt(challenge.challengeId);
+  } catch {
+    throw new AppError(ERROR_CODE.AUTH_EMAIL_STORE_UNAVAILABLE, 503);
+  }
   if (attemptCount > config.maxOtpAttempts) {
     throw new AppError(ERROR_CODE.AUTH_EMAIL_OTP_ATTEMPT_LIMIT_EXCEEDED, 429);
   }
@@ -114,12 +119,17 @@ export async function verifyEmailOtp(
     Date.now() + config.verificationTokenTtlSeconds * 1000
   );
 
-  const marked = await store.markVerified({
-    challengeId: challenge.challengeId,
-    emailHash,
-    verificationTokenHash: tokenHash,
-    tokenExpiresAt,
-  });
+  let marked: boolean;
+  try {
+    marked = await store.markVerified({
+      challengeId: challenge.challengeId,
+      emailHash,
+      verificationTokenHash: tokenHash,
+      tokenExpiresAt,
+    });
+  } catch {
+    throw new AppError(ERROR_CODE.AUTH_EMAIL_STORE_UNAVAILABLE, 503);
+  }
 
   if (!marked) {
     throw new AppError(ERROR_CODE.AUTH_EMAIL_OTP_EXPIRED, 400);

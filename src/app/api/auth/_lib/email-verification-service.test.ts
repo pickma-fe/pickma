@@ -209,6 +209,15 @@ describe('verifyEmailOtp', () => {
     });
   });
 
+  it('incrementAttempt 실패 시 AUTH_EMAIL_STORE_UNAVAILABLE를 던진다', async () => {
+    mockStore.incrementAttempt.mockRejectedValue(new Error('Redis error'));
+
+    await expect(verifyEmailOtp(EMAIL, TEST_OTP)).rejects.toMatchObject({
+      code: ERROR_CODE.AUTH_EMAIL_STORE_UNAVAILABLE,
+      statusCode: 503,
+    });
+  });
+
   it('시도 횟수 초과 시 AUTH_EMAIL_OTP_ATTEMPT_LIMIT_EXCEEDED를 던진다', async () => {
     mockStore.incrementAttempt.mockResolvedValue(6);
 
@@ -222,6 +231,15 @@ describe('verifyEmailOtp', () => {
     await expect(verifyEmailOtp(EMAIL, '000000')).rejects.toMatchObject({
       code: ERROR_CODE.AUTH_EMAIL_OTP_INVALID,
       statusCode: 400,
+    });
+  });
+
+  it('markVerified 실패 시 AUTH_EMAIL_STORE_UNAVAILABLE를 던진다', async () => {
+    mockStore.markVerified.mockRejectedValue(new Error('Redis error'));
+
+    await expect(verifyEmailOtp(EMAIL, TEST_OTP)).rejects.toMatchObject({
+      code: ERROR_CODE.AUTH_EMAIL_STORE_UNAVAILABLE,
+      statusCode: 503,
     });
   });
 
