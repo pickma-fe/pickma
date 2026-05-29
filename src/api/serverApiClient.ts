@@ -67,6 +67,24 @@ function buildServerUrl(path: string): string {
   return url.toString();
 }
 
+function buildPath(path: string, params?: object): string {
+  if (!params) return path;
+
+  const query = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (
+      typeof value === 'string' ||
+      typeof value === 'number' ||
+      typeof value === 'boolean'
+    ) {
+      query.set(key, String(value));
+    }
+  }
+
+  const queryString = query.toString();
+  return queryString ? `${path}?${queryString}` : path;
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const url = buildServerUrl(path);
   let res: Response;
@@ -142,7 +160,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export const serverApiClient = {
-  get<T>(path: string): Promise<T> {
-    return request<T>(path, { method: 'GET' });
+  get<T>(path: string, params?: object): Promise<T> {
+    return request<T>(buildPath(path, params), { method: 'GET' });
   },
 };
