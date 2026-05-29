@@ -42,14 +42,13 @@ describe('GET /api/seller/orders', () => {
 
   it('mock 모드에서 mockSellerOrderList를 반환한다', async () => {
     vi.mocked(isApiMockEnabled).mockReturnValue(true);
-    vi.mocked(requireSellerStore).mockResolvedValue(sellerResult);
 
     const res = await GET(makeGetRequest());
     const body = (await res.json()) as { data: OrderListResponse };
 
     expect(res.status).toBe(200);
     expect(body.data.items).toHaveLength(mockSellerOrderList.items.length);
-    expect(requireSellerStore).toHaveBeenCalled();
+    expect(requireSellerStore).not.toHaveBeenCalled();
   });
 
   it('mock 모드에서 잘못된 query는 400을 반환한다', async () => {
