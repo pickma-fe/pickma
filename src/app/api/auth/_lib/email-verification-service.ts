@@ -30,11 +30,15 @@ export async function requestEmailVerification(
   }
 
   const supabase = createServiceRoleClient();
-  const { data: existing } = await supabase
+  const { data: existing, error: existingError } = await supabase
     .from('users')
     .select('id')
     .eq('email', email)
     .maybeSingle();
+
+  if (existingError) {
+    throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
+  }
 
   if (existing) {
     throw new AppError(ERROR_CODE.AUTH_EMAIL_ALREADY_EXISTS, 409);
