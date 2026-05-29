@@ -73,4 +73,4 @@
   - [x] `.env.local`에 `RESEND_API_KEY`, `AUTH_EMAIL_FROM` 설정
   - [x] Supabase Dashboard custom SMTP 설정 완료
   - [x] 실제 OTP 이메일 수신 확인 (가입 흐름 수동 테스트)
-  - [ ] 실제 password reset 이메일 수신 확인
+  - [x] 실제 password reset 이메일 수신 확인 (스팸 폴더 수신 확인)
