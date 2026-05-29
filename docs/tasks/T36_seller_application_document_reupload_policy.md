@@ -10,7 +10,7 @@
   P3
 
 - 선행 조건:
-  - 선행 task: T06. Storage orphan 및 개인정보 cleanup 정책 확정, T44. 판매자 신분증 원본 처리 및 KYC 보관 정책 결정
+  - 선행 task: T06. Storage orphan 및 개인정보 cleanup 정책 확정, T44. 판매자 신분증 원본 처리 및 KYC 보관 정책 결정, T61. 판매자 신청 서류에서 신분증 타입 완전 제거
 
 - 분류:
   정책
