@@ -23,7 +23,7 @@ vi.mock('../_lib/service', () => ({
 }));
 
 const STORE_ID = '00000000-0000-4000-8000-000000000031';
-const ORDER_ID = '00000000-0000-4000-8000-000000000051';
+const ORDER_ID = mockSellerOrderDetail.id;
 
 const sellerResult = {
   authUser: {},
@@ -40,6 +40,7 @@ describe('GET /api/seller/orders/[orderId]', () => {
 
   it('mock 모드에서 mockSellerOrderDetail을 반환한다', async () => {
     vi.mocked(isApiMockEnabled).mockReturnValue(true);
+    vi.mocked(requireSellerStore).mockResolvedValue(sellerResult);
 
     const res = await GET(
       new Request('http://localhost'),
@@ -49,7 +50,7 @@ describe('GET /api/seller/orders/[orderId]', () => {
 
     expect(res.status).toBe(200);
     expect(body.data.id).toBe(mockSellerOrderDetail.id);
-    expect(requireSellerStore).not.toHaveBeenCalled();
+    expect(requireSellerStore).toHaveBeenCalled();
   });
 
   it('UUID 형식이 아닌 orderId는 400을 반환한다', async () => {
