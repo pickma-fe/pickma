@@ -4,6 +4,7 @@ import { isApiMockEnabled } from '@/app/api/_lib/mock';
 import { fail, routeError, success } from '@/app/api/_lib/response';
 
 import { orderIdSchema } from '../../_lib/schemas';
+import { noShowSellerOrder } from '../../_lib/service';
 
 export async function PATCH(
   _request: Request,
@@ -21,8 +22,9 @@ export async function PATCH(
   if (isApiMockEnabled()) return success(undefined);
 
   try {
-    await requireSellerStore();
-    return fail(ERROR_CODE.NOT_IMPLEMENTED);
+    const { store } = await requireSellerStore();
+    await noShowSellerOrder(store.id, parsed.data);
+    return success(undefined);
   } catch (error) {
     return routeError(error);
   }

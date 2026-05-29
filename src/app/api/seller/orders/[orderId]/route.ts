@@ -2,7 +2,7 @@ import { ERROR_CODE } from '@/lib/errors/errorCodes';
 import { requireSellerStore } from '@/app/api/_lib/auth';
 import { isApiMockEnabled } from '@/app/api/_lib/mock';
 import { fail, routeError, success } from '@/app/api/_lib/response';
-import { mockSellerOrderDetail } from '@/mocks/seller';
+import { mockSellerOrderDetailsMap } from '@/mocks/seller';
 
 import { orderIdSchema } from '../_lib/schemas';
 import { getSellerOrder } from '../_lib/service';
@@ -20,7 +20,11 @@ export async function GET(
     ]);
   }
 
-  if (isApiMockEnabled()) return success(mockSellerOrderDetail);
+  if (isApiMockEnabled()) {
+    const detail = mockSellerOrderDetailsMap[parsed.data];
+    if (!detail) return fail(ERROR_CODE.ORDER_NOT_FOUND, 404);
+    return success(detail);
+  }
 
   try {
     const { store } = await requireSellerStore();

@@ -1,5 +1,7 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
+
 import type { Order } from '@/types/order';
 import { Badge } from '@/components/common/Badge/Badge';
 import { Button } from '@/components/common/Button/Button';
@@ -66,10 +68,12 @@ function isSellerDisplayStatus(
 function OrderActionButtons({
   order,
   onOrderAction,
+  onDetail,
   isActionPending,
 }: {
   order: SellerOrderListItem;
   onOrderAction: (orderId: string, newStatus: SellerOrderActionStatus) => void;
+  onDetail: () => void;
   isActionPending: boolean;
 }) {
   switch (order.status) {
@@ -92,6 +96,13 @@ function OrderActionButtons({
           >
             주문 취소
           </Button>
+          <Button
+            className="w-fit px-2 py-0.5 text-sm"
+            variant="outline"
+            onClick={onDetail}
+          >
+            상세 보기
+          </Button>
         </div>
       );
     case 'accepted':
@@ -113,22 +124,46 @@ function OrderActionButtons({
           >
             주문 취소
           </Button>
+          <Button
+            className="w-fit px-2 py-0.5 text-sm"
+            variant="outline"
+            onClick={onDetail}
+          >
+            상세 보기
+          </Button>
         </div>
       );
     case 'ready':
       return (
-        <Button
-          className="w-fit px-2 py-0.5 text-sm"
-          onClick={() => onOrderAction(order.id, 'completed')}
-          disabled={isActionPending}
-        >
-          {isActionPending ? '처리 중...' : '픽업 완료'}
-        </Button>
+        <div className="flex w-fit flex-col gap-2">
+          <Button
+            className="w-fit px-2 py-0.5 text-sm"
+            onClick={() => onOrderAction(order.id, 'completed')}
+            disabled={isActionPending}
+          >
+            {isActionPending ? '처리 중...' : '픽업 완료'}
+          </Button>
+          <Button
+            className="w-fit px-2 py-0.5 text-sm"
+            variant="outline"
+            onClick={onDetail}
+          >
+            상세 보기
+          </Button>
+        </div>
       );
     case 'completed':
     case 'cancelled':
     case 'noShow':
-      return null;
+      return (
+        <Button
+          className="w-fit px-2 py-0.5 text-sm"
+          variant="outline"
+          onClick={onDetail}
+        >
+          상세 보기
+        </Button>
+      );
     default:
       return null;
   }
@@ -144,6 +179,8 @@ export function OrderTable({
   isError = false,
   isActionPending = false,
 }: OrderTableProps) {
+  const router = useRouter();
+
   if (isLoading) {
     return (
       <div className="flex min-h-[300px] items-center justify-center rounded-lg border border-gray-200 bg-white">
@@ -301,6 +338,9 @@ export function OrderTable({
                       <OrderActionButtons
                         order={order}
                         onOrderAction={onOrderAction}
+                        onDetail={() =>
+                          router.push(`/seller/orders/${order.id}`)
+                        }
                         isActionPending={isActionPending}
                       />
                     </td>

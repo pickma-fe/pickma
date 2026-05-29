@@ -150,6 +150,7 @@ export function OrderManageContent() {
   // TODO: T26 summary API 구현 후 상태별 집계 연결
   const getCount = (value: SellerOrderFilterStatus): number | null => {
     if (value === '전체') return totalCount;
+    if (value === selectedStatus) return data?.totalCount ?? null;
     return null;
   };
 
