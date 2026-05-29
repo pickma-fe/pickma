@@ -35,6 +35,8 @@ interface ConsumerPageClientProps {
   initialProducts: PaginatedResult<Product>;
 }
 
+// Keep a light interval refetch because stock, reservation count, and closing
+// time can change while the user is browsing the public product list.
 const PRODUCT_LIST_REFRESH_INTERVAL_MS = 60_000;
 const categoryIconMap: Record<string, string> = {
   bread: '🥖',
@@ -60,6 +62,12 @@ export function ConsumerPageClient({
   const [keyword, setKeyword] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const productSortQuery = getProductSortQuery(selectedSortOption);
+  const shouldUseInitialProducts =
+    currentPage === 1 &&
+    selectedCategoryId === ALL_CATEGORY_ID &&
+    selectedRegion === CONSUMER_REGION_ITEMS[0].value &&
+    selectedSortOption === DEFAULT_SORT_OPTION_ID &&
+    selectedDiscountOption === DEFAULT_DISCOUNT_OPTION_ID;
   const { data: categories = [] } = useCategories({
     initialData: initialCategories,
   });
@@ -98,7 +106,7 @@ export function ConsumerPageClient({
       availableOnly: true,
     },
     {
-      initialData: initialProducts,
+      initialData: shouldUseInitialProducts ? initialProducts : undefined,
     }
   );
   const products = productList?.items;

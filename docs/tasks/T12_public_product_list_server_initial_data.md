@@ -1,10 +1,10 @@
 # T12. 공개 상품 목록 Server Component 초기 데이터 전환
 
 - 상태:
-  진행 전
+  진행 중
 
 - GitHub Issue:
-  확인 필요
+  165
 
 - 우선순위:
   P1

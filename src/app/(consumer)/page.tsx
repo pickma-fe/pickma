@@ -8,6 +8,8 @@ import { ConsumerPageClient } from '@/components/consumer/ConsumerPageClient';
 
 import { getConsumerPageInitialData } from './_lib/getConsumerPageInitialData';
 
+export const dynamic = 'force-dynamic';
+
 export default async function ConsumerPage() {
   const productSortQuery = getProductSortQuery(DEFAULT_SORT_OPTION_ID);
   const { initialProducts, initialCategories } =
