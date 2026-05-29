@@ -33,6 +33,7 @@ describe('POST /api/auth/email-signup', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.unstubAllEnvs();
+    vi.stubEnv('API_MOCK_ENABLED', 'false');
   });
 
   it('mock 모드에서 고정 성공 응답을 반환한다', async () => {
