@@ -16,6 +16,8 @@ export async function GET(request: NextRequest): Promise<Response> {
       request.nextUrl.searchParams
     );
 
+    const { store } = await requireSellerStore();
+
     if (isApiMockEnabled()) {
       const filtered = params.status
         ? mockSellerOrders.filter((o) => o.status === params.status)
@@ -34,7 +36,6 @@ export async function GET(request: NextRequest): Promise<Response> {
       });
     }
 
-    const { store } = await requireSellerStore();
     const data = await getSellerOrders(store.id, params);
     return success(data);
   } catch (error) {

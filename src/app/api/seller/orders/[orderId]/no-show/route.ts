@@ -19,10 +19,11 @@ export async function PATCH(
     ]);
   }
 
-  if (isApiMockEnabled()) return success(undefined);
-
   try {
     const { store } = await requireSellerStore();
+
+    if (isApiMockEnabled()) return success(undefined);
+
     await noShowSellerOrder(store.id, parsed.data);
     return success(undefined);
   } catch (error) {

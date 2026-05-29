@@ -20,14 +20,17 @@ export async function GET(
     ]);
   }
 
-  if (isApiMockEnabled()) {
-    const detail = mockSellerOrderDetailsMap[parsed.data];
-    if (!detail) return fail(ERROR_CODE.ORDER_NOT_FOUND, 404);
-    return success(detail);
-  }
-
   try {
     const { store } = await requireSellerStore();
+
+    if (isApiMockEnabled()) {
+      const detail = mockSellerOrderDetailsMap[parsed.data];
+      if (detail?.storeId !== store.id) {
+        return fail(ERROR_CODE.ORDER_NOT_FOUND, 404);
+      }
+      return success(detail);
+    }
+
     const data = await getSellerOrder(store.id, parsed.data);
     return success(data);
   } catch (error) {
