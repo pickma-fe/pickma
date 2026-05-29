@@ -709,7 +709,7 @@ Branch protection은 `dev` 대상 PR에서 `CI / Lint, typecheck, and test` 통�
 
 `createServiceRoleClient()`는 RLS를 우회하므로 남용하면 사용자·판매자·관리자 데이터 노출 위험이 생긴다. 반드시 아래 허용 케이스에 해당할 때만 사용한다.
 
-### 14.1 허용 케이스
+### 15.1 허용 케이스
 
 | 케이스                | 설명                                                          | 예시                                                           |
 | --------------------- | ------------------------------------------------------------- | -------------------------------------------------------------- |
@@ -718,7 +718,7 @@ Branch protection은 `dev` 대상 PR에서 `CI / Lint, typecheck, and test` 통�
 | admin cross-user 조작 | admin이 타 사용자 데이터 조회/변경                            | `getPendingSellerApplications`, `approveSellerApplication`     |
 | Storage API           | Supabase Storage에는 RLS가 없어 service role 필수             | `createSignedUploadUrl`, Storage orphan cleanup                |
 
-### 14.2 금지 케이스
+### 15.2 금지 케이스
 
 단순 owner-scoped SELECT는 service role을 사용하지 않는다. `createServerClient()` + RLS 정책으로 처리한다.
 
@@ -726,7 +726,7 @@ Branch protection은 `dev` 대상 PR에서 `CI / Lint, typecheck, and test` 통�
 - `products.store_id ∈ 내 가게` 기준 판매자 상품 조회
 - `users.id = auth.uid()` 기준 프로필 조회/수정
 
-### 14.3 RLS 전환 후보 목록
+### 15.3 RLS 전환 후보 목록
 
 현재 service role을 사용하지만 RLS+server client로 전환 가능한 후보다. 전환 전 해당 테이블의 RLS 정책 추가가 전제 조건이며, 실제 전환은 후속 task에서 수행한다.
 
@@ -747,7 +747,7 @@ Branch protection은 `dev` 대상 PR에서 `CI / Lint, typecheck, and test` 통�
 
 신규 Route Handler를 구현하거나 기존 Route Handler를 수정할 때 아래 항목을 확인한다.
 
-### 15.1 auth helper 선택 기준
+### 16.1 auth helper 선택 기준
 
 | 조건                           | 사용할 helper                                           |
 | ------------------------------ | ------------------------------------------------------- |
@@ -757,18 +757,18 @@ Branch protection은 `dev` 대상 PR에서 `CI / Lint, typecheck, and test` 통�
 | 관리자 전용                    | `requireAdmin()`                                        |
 | 판매자 신청 자격 확인          | `requireActiveUser()` + `checkApplicationEligibility()` |
 
-### 15.2 owner scope 검증 원칙
+### 16.2 owner scope 검증 원칙
 
 - auth helper가 반환한 `authUser.id` / `store.id`를 service에 직접 전달해 소유권 필터를 적용한다.
 - service 내부에서 params의 id를 무검증으로 사용하지 않는다. Route Handler에서 auth → params → service 순서로 검증한다.
 - 민감 리소스(admin 전용, 개인 문서, 결제)는 auth를 params/body 검증보다 먼저 수행하는 것을 권장한다.
 
-### 15.3 응답 민감도 원칙
+### 16.3 응답 민감도 원칙
 
 - 에러 응답에 DB 쿼리 오류 메시지, 내부 파일 경로, 타 사용자 ID 등 민감 정보를 포함하지 않는다.
 - `routeError(error)`는 `AppError`만 클라이언트에 노출하고, 그 외는 `INTERNAL_SERVER_ERROR`로 처리한다.
 
-### 15.4 P0/P1 API owner scope 테스트 커버리지
+### 16.4 P0/P1 API owner scope 테스트 커버리지
 
 | API                                                          | 우선순위 | 필요 scope               | 현재 테스트 | T07 조치               | 후속 task               |
 | ------------------------------------------------------------ | -------- | ------------------------ | ----------- | ---------------------- | ----------------------- |
