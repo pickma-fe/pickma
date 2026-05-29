@@ -130,27 +130,24 @@ available otherwise
 서버 API가 아니라 클라이언트 API 래퍼로 제공한다.
 `authApi`는 Supabase Auth client SDK 호출을 감싸고, cookie 기반 session 관리는 `@supabase/ssr`, session refresh와 보호 라우트 redirect는 `src/proxy.ts`가 담당한다.
 
-| 기능                 | 위치                              | Priority |
-| -------------------- | --------------------------------- | -------- |
-| Google 로그인        | `authApi.signInWithGoogle()`      | P0       |
-| Kakao 로그인         | `authApi.signInWithKakao()`       | P0       |
-| Email 회원가입       | `authApi.signUpWithEmail()`       | P0       |
-| Email 로그인         | `authApi.signInWithEmail()`       | P0       |
-| 비밀번호 재설정 요청 | `authApi.resetPasswordForEmail()` | P1       |
-| 비밀번호 변경        | `authApi.updatePassword()`        | P1       |
-| 로그아웃             | `authApi.signOut()`               | P0       |
-| 세션 조회            | `authApi.getSession()`            | P0       |
+| 기능                 | 위치                                 | Priority |
+| -------------------- | ------------------------------------ | -------- |
+| Google 로그인        | `authApi.signInWithGoogle()`         | P0       |
+| Kakao 로그인         | `authApi.signInWithKakao()`          | P0       |
+| 이메일 인증 요청     | `authApi.requestEmailVerification()` | P0       |
+| OTP 검증             | `authApi.verifyEmailOtp()`           | P0       |
+| Email 회원가입 완료  | `authApi.completeEmailSignup()`      | P0       |
+| Email 로그인         | `authApi.signInWithEmail()`          | P0       |
+| 비밀번호 재설정 요청 | `authApi.resetPasswordForEmail()`    | P1       |
+| 비밀번호 변경        | `authApi.updatePassword()`           | P1       |
+| 로그아웃             | `authApi.signOut()`                  | P0       |
+| 세션 조회            | `authApi.getSession()`               | P0       |
 
-Email/password auth request DTO는 클라이언트 auth wrapper 입력 contract로 `src/contracts/auth.ts`에 둔다. `/api/*` Route Handler request contract가 아니므로 Phase 2.5에서는 서버 validation schema를 만들지 않는다.
+`authApi.signUpWithEmail()`은 가입 전 이메일 선인증 방식으로 전환됨에 따라 제거되었다. 회원가입은 `requestEmailVerification → verifyEmailOtp → completeEmailSignup` 3단계로 처리한다.
+
+Email/password auth wrapper 입력 DTO와 이메일 선인증 Route Handler contract는 모두 `src/contracts/auth.ts`에 둔다.
 
 ```ts
-export interface SignUpWithEmailRequest {
-  email: string;
-  password: string;
-  name: string;
-  redirectPath?: string;
-}
-
 export interface SignInWithEmailRequest {
   email: string;
   password: string;
@@ -164,9 +161,99 @@ export interface ResetPasswordRequest {
 export interface UpdatePasswordRequest {
   password: string;
 }
+
+export interface RequestEmailVerificationRequest {
+  email: string;
+}
+
+export interface RequestEmailVerificationResponse {
+  expiresAt: string;
+}
+
+export interface VerifyEmailOtpRequest {
+  email: string;
+  code: string;
+}
+
+export interface VerifyEmailOtpResponse {
+  verificationToken: string;
+  expiresAt: string;
+}
+
+export interface CompleteEmailSignupRequest {
+  email: string;
+  password: string;
+  name: string;
+  verificationToken: string;
+}
 ```
 
-### 2.2 사용자 API
+### 2.2 이메일 선인증 Route Handler API
+
+email/password 회원가입은 서버 Route Handler를 통해 처리한다.
+
+| 기능                   | Method | API                                     | Auth   | Priority |
+| ---------------------- | ------ | --------------------------------------- | ------ | -------- |
+| OTP 발송 요청          | POST   | `/api/auth/email-verifications/request` | public | P0       |
+| OTP 검증               | POST   | `/api/auth/email-verifications/verify`  | public | P0       |
+| 이메일 선인증 회원가입 | POST   | `/api/auth/email-signup`                | public | P0       |
+
+#### `POST /api/auth/email-verifications/request`
+
+Request: `RequestEmailVerificationRequest`
+
+Response: `RequestEmailVerificationResponse`
+
+Behavior:
+
+- email normalize + Zod validation
+- emailHash/ipHash HMAC 생성 (raw email/IP는 저장하지 않음)
+- `checkAndIncrementRequestLimit()`: email/IP rate limit 먼저 적용. 이메일 존재 여부와 무관하게 count 증가
+- rate limit 초과 시 `RATE_LIMIT_EXCEEDED` 429 반환 (이메일 존재 여부 미노출)
+- `public.users.email` 중복 확인 → 존재하면 `AUTH_EMAIL_ALREADY_EXISTS` 409
+- 6자리 OTP 생성, salt+hash 저장
+- `issueChallenge()`: 새 active challenge 발급. 이전 active challenge는 즉시 무효화
+- Resend HTTP API `fetch`로 OTP 메일 발송 (Resend SDK 미사용)
+- 발송 성공: challenge `status = 'sent'`
+- 발송 실패: challenge `status = 'send_failed'`, `AUTH_EMAIL_SEND_FAILED` 502 반환. 이전 OTP 복구 없음
+- `expiresAt` 반환
+
+#### `POST /api/auth/email-verifications/verify`
+
+Request: `VerifyEmailOtpRequest`
+
+Response: `VerifyEmailOtpResponse`
+
+Behavior:
+
+- emailHash로 active challenge 조회 (`status = 'sent'`, 미만료)
+- Redis에 이전 challenge가 남아 있어도 active challenge가 아니면 검증하지 않음
+- OTP 검증 attempt count 증가 → 5회 초과 시 `AUTH_EMAIL_OTP_ATTEMPT_LIMIT_EXCEEDED` 429
+- OTP hash 비교 실패 시 `AUTH_EMAIL_OTP_INVALID` 400
+- 성공 시 verification token 생성, token hash 저장, challenge `status = 'verified'`
+- challenge TTL을 verification token TTL 이상으로 연장
+- raw verification token을 response로 1회 반환
+
+#### `POST /api/auth/email-signup`
+
+Request: `CompleteEmailSignupRequest`
+
+Response: `200 { data: null }`
+
+Behavior:
+
+- verification token hash + emailHash + expiry + status 검증
+- `verified → signup_in_progress` 원자적 전환 (동시 제출 방지)
+- 이미 `signup_in_progress`이면 `AUTH_EMAIL_SIGNUP_IN_PROGRESS` 409 (error details에 `retryAfterSeconds` 포함)
+- `auth.admin.createUser({ email, password, email_confirm: true, user_metadata: { name } })`
+- `auth.admin.createUser()` conflict → token을 `consumed`로 닫고 `AUTH_EMAIL_ALREADY_EXISTS` 409
+- `public.users` row 생성 (`id`, `email`, `name`, role/status 기본값)
+- `public.users` 생성 실패 + 보상 삭제 성공 → token `verified`로 되돌려 재시도 가능
+- `public.users` 생성 실패 + 보상 삭제 실패 → token `consumed`로 닫고 `INTERNAL_SERVER_ERROR`
+- 성공 시 token `status = 'consumed'`
+- 클라이언트는 응답 후 `signInWithPassword`로 세션 생성
+
+### 2.3 사용자 API
 
 | PRD ID    | 기능         | Method | API             | Auth | Priority |
 | --------- | ------------ | ------ | --------------- | ---- | -------- |
@@ -1094,37 +1181,47 @@ RPC에서 raise하는 예외는 아래 정책으로 API error code로 변환한�
 
 `create_seller_application`의 unique index 충돌(`23505`)은 race condition 시 `APPLICATION_ALREADY_SUBMITTED` 409로 매핑된다.
 
-| Code                             | HTTP | 메시지                                         |
-| -------------------------------- | ---- | ---------------------------------------------- |
-| `UNAUTHORIZED`                   | 401  | 로그인이 필요합니다.                           |
-| `FORBIDDEN`                      | 403  | 접근 권한이 없습니다.                          |
-| `VALIDATION_ERROR`               | 400  | 요청 값이 올바르지 않습니다.                   |
-| `NOT_FOUND`                      | 404  | 요청한 리소스를 찾을 수 없습니다.              |
-| `PRODUCT_NOT_FOUND`              | 404  | 상품을 찾을 수 없습니다.                       |
-| `ORDER_NOT_FOUND`                | 404  | 주문을 찾을 수 없습니다.                       |
-| `STORE_NOT_FOUND`                | 404  | 가게를 찾을 수 없습니다.                       |
-| `CATEGORY_NOT_FOUND`             | 404  | 카테고리를 찾을 수 없습니다.                   |
-| `MENU_ITEM_NOT_FOUND`            | 404  | 메뉴 아이템을 찾을 수 없습니다.                |
-| `MENU_ITEM_INACTIVE`             | 409  | 판매 중지된 메뉴 아이템입니다.                 |
-| `STORE_NOT_APPROVED`             | 403  | 승인된 가게만 사용할 수 있습니다.              |
-| `STORE_ALREADY_EXISTS`           | 409  | 이미 등록된 가게가 있습니다.                   |
-| `SELLER_APPLICATION_NOT_FOUND`   | 404  | 판매자 신청을 찾을 수 없습니다.                |
-| `APPLICATION_ALREADY_SUBMITTED`  | 409  | 진행 중이거나 승인된 판매자 신청이 있습니다.   |
-| `SELLER_ALREADY_REGISTERED`      | 409  | 이미 판매자로 등록되어 있습니다.               |
-| `APPLICATION_DOCUMENT_NOT_FOUND` | 404  | 신청 서류를 찾을 수 없습니다.                  |
-| `FILE_UPLOAD_NOT_ALLOWED`        | 403  | 파일을 업로드할 권한이 없습니다.               |
-| `FILE_TYPE_NOT_ALLOWED`          | 400  | 허용되지 않는 파일 형식입니다.                 |
-| `FILE_TOO_LARGE`                 | 400  | 파일 용량이 너무 큽니다.                       |
-| `AUTH_IDENTITY_CONFLICT`         | 409  | 이미 다른 로그인 방식으로 가입된 이메일입니다. |
-| `OUT_OF_STOCK`                   | 409  | 재고가 부족합니다.                             |
-| `PRODUCT_EXPIRED`                | 409  | 판매가 마감된 상품입니다.                      |
-| `PRODUCT_NOT_AVAILABLE`          | 409  | 구매할 수 없는 상품입니다.                     |
-| `INVALID_ORDER_STATUS`           | 409  | 현재 주문 상태에서는 진행할 수 없습니다.       |
-| `ORDER_EXPIRED`                  | 409  | 결제 가능 시간이 만료되었습니다.               |
-| `DUPLICATE_PRODUCT_IN_ORDER`     | 400  | 주문 항목에 중복된 상품이 있습니다.            |
-| `PAYMENT_AMOUNT_MISMATCH`        | 400  | 결제 금액이 일치하지 않습니다.                 |
-| `PAYMENT_CONFIRM_FAILED`         | 502  | 결제 승인에 실패했습니다.                      |
-| `ORDER_NUMBER_EXHAUSTED`         | 503  | 주문번호가 모두 소진되었습니다.                |
-| `PICKUP_NUMBER_EXHAUSTED`        | 409  | 픽업 번호가 모두 소진되었습니다.               |
-| `NOT_IMPLEMENTED`                | 501  | 아직 구현되지 않은 API입니다.                  |
-| `INTERNAL_SERVER_ERROR`          | 500  | 서버 오류가 발생했습니다.                      |
+| Code                                    | HTTP | 메시지                                                         |
+| --------------------------------------- | ---- | -------------------------------------------------------------- |
+| `UNAUTHORIZED`                          | 401  | 로그인이 필요합니다.                                           |
+| `FORBIDDEN`                             | 403  | 접근 권한이 없습니다.                                          |
+| `VALIDATION_ERROR`                      | 400  | 요청 값이 올바르지 않습니다.                                   |
+| `NOT_FOUND`                             | 404  | 요청한 리소스를 찾을 수 없습니다.                              |
+| `PRODUCT_NOT_FOUND`                     | 404  | 상품을 찾을 수 없습니다.                                       |
+| `ORDER_NOT_FOUND`                       | 404  | 주문을 찾을 수 없습니다.                                       |
+| `STORE_NOT_FOUND`                       | 404  | 가게를 찾을 수 없습니다.                                       |
+| `CATEGORY_NOT_FOUND`                    | 404  | 카테고리를 찾을 수 없습니다.                                   |
+| `MENU_ITEM_NOT_FOUND`                   | 404  | 메뉴 아이템을 찾을 수 없습니다.                                |
+| `MENU_ITEM_INACTIVE`                    | 409  | 판매 중지된 메뉴 아이템입니다.                                 |
+| `STORE_NOT_APPROVED`                    | 403  | 승인된 가게만 사용할 수 있습니다.                              |
+| `STORE_ALREADY_EXISTS`                  | 409  | 이미 등록된 가게가 있습니다.                                   |
+| `SELLER_APPLICATION_NOT_FOUND`          | 404  | 판매자 신청을 찾을 수 없습니다.                                |
+| `APPLICATION_ALREADY_SUBMITTED`         | 409  | 진행 중이거나 승인된 판매자 신청이 있습니다.                   |
+| `SELLER_ALREADY_REGISTERED`             | 409  | 이미 판매자로 등록되어 있습니다.                               |
+| `APPLICATION_DOCUMENT_NOT_FOUND`        | 404  | 신청 서류를 찾을 수 없습니다.                                  |
+| `FILE_UPLOAD_NOT_ALLOWED`               | 403  | 파일을 업로드할 권한이 없습니다.                               |
+| `FILE_TYPE_NOT_ALLOWED`                 | 400  | 허용되지 않는 파일 형식입니다.                                 |
+| `FILE_TOO_LARGE`                        | 400  | 파일 용량이 너무 큽니다.                                       |
+| `AUTH_IDENTITY_CONFLICT`                | 409  | 이미 다른 로그인 방식으로 가입된 이메일입니다.                 |
+| `AUTH_EMAIL_ALREADY_EXISTS`             | 409  | 이미 가입된 이메일입니다. 로그인해 주세요.                     |
+| `AUTH_EMAIL_OTP_EXPIRED`                | 400  | 인증 코드가 만료되었습니다. 다시 요청해 주세요.                |
+| `AUTH_EMAIL_OTP_INVALID`                | 400  | 인증 코드가 올바르지 않습니다.                                 |
+| `AUTH_EMAIL_OTP_ATTEMPT_LIMIT_EXCEEDED` | 429  | 인증 시도 횟수를 초과했습니다. 다시 요청해 주세요.             |
+| `AUTH_EMAIL_VERIFICATION_TOKEN_EXPIRED` | 400  | 이메일 인증이 만료되었습니다. 다시 인증해 주세요.              |
+| `AUTH_EMAIL_VERIFICATION_TOKEN_INVALID` | 400  | 이메일 인증이 유효하지 않습니다. 다시 인증해 주세요.           |
+| `AUTH_EMAIL_SIGNUP_IN_PROGRESS`         | 409  | 회원가입 요청을 처리 중입니다. 잠시 후 다시 시도해 주세요.     |
+| `RATE_LIMIT_EXCEEDED`                   | 429  | 요청이 너무 많습니다. 잠시 후 다시 시도해 주세요.              |
+| `AUTH_EMAIL_SEND_FAILED`                | 502  | 인증 메일을 발송하지 못했습니다. 잠시 후 다시 시도해 주세요.   |
+| `AUTH_EMAIL_STORE_UNAVAILABLE`          | 503  | 이메일 인증을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요. |
+| `OUT_OF_STOCK`                          | 409  | 재고가 부족합니다.                                             |
+| `PRODUCT_EXPIRED`                       | 409  | 판매가 마감된 상품입니다.                                      |
+| `PRODUCT_NOT_AVAILABLE`                 | 409  | 구매할 수 없는 상품입니다.                                     |
+| `INVALID_ORDER_STATUS`                  | 409  | 현재 주문 상태에서는 진행할 수 없습니다.                       |
+| `ORDER_EXPIRED`                         | 409  | 결제 가능 시간이 만료되었습니다.                               |
+| `DUPLICATE_PRODUCT_IN_ORDER`            | 400  | 주문 항목에 중복된 상품이 있습니다.                            |
+| `PAYMENT_AMOUNT_MISMATCH`               | 400  | 결제 금액이 일치하지 않습니다.                                 |
+| `PAYMENT_CONFIRM_FAILED`                | 502  | 결제 승인에 실패했습니다.                                      |
+| `ORDER_NUMBER_EXHAUSTED`                | 503  | 주문번호가 모두 소진되었습니다.                                |
+| `PICKUP_NUMBER_EXHAUSTED`               | 409  | 픽업 번호가 모두 소진되었습니다.                               |
+| `NOT_IMPLEMENTED`                       | 501  | 아직 구현되지 않은 API입니다.                                  |
+| `INTERNAL_SERVER_ERROR`                 | 500  | 서버 오류가 발생했습니다.                                      |
