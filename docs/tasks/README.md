@@ -80,7 +80,7 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 | T52 | 판매자 주문 상세 화면 구현                        | P1       | 진행 전 | 확인 필요    | T02                | [T52_seller_order_detail_page.md](T52_seller_order_detail_page.md)                                               |
 | T53 | 판매자 가게 정보 수정 화면 구현                   | P1       | 진행 전 | 확인 필요    | T15                | [T53_seller_store_edit_page.md](T53_seller_store_edit_page.md)                                                   |
 | T54 | 소비자 주문 내역 및 상세 화면 구현                | P1       | 진행 전 | 확인 필요    | T15                | [T54_consumer_orders_page.md](T54_consumer_orders_page.md)                                                       |
-| T55 | 소비자 프로필 수정 화면 구현                      | P2       | 진행 전 | 확인 필요    | 없음               | [T55_consumer_profile_edit_page.md](T55_consumer_profile_edit_page.md)                                           |
+| T55 | 소비자 프로필 수정 화면 구현                      | P2       | 완료    | 177          | 없음               | [T55_consumer_profile_edit_page.md](T55_consumer_profile_edit_page.md)                                           |
 | T56 | 상품/가게 검색 결과 화면 구현                     | P2       | 진행 전 | 확인 필요    | T05, T12           | [T56_search_result_page.md](T56_search_result_page.md)                                                           |
 | T57 | 관리자 사용자·상품·주문 관리 화면 구현            | P3       | 진행 전 | 확인 필요    | T04                | [T57_admin_users_products_orders_pages.md](T57_admin_users_products_orders_pages.md)                             |
 | T58 | 관리자 대시보드 통계 화면 구현                    | P1       | 진행 전 | 확인 필요    | T07                | [T58_admin_dashboard_statistics.md](T58_admin_dashboard_statistics.md)                                           |

@@ -43,4 +43,28 @@ describe('updateMeSchema', () => {
       expect(result.data.name).toBe('홍길동');
     }
   });
+
+  it('phone 앞뒤 공백은 trim되어 통과한다', () => {
+    const result = updateMeSchema.safeParse({ phone: ' 010-1234-5678 ' });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.phone).toBe('010-1234-5678');
+    }
+  });
+
+  it('phone이 공백만 있으면 null로 정규화한다', () => {
+    const result = updateMeSchema.safeParse({ phone: '   ' });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.phone).toBeNull();
+    }
+  });
+
+  it('phone이 빈 문자열이면 null로 정규화한다', () => {
+    const result = updateMeSchema.safeParse({ phone: '' });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.phone).toBeNull();
+    }
+  });
 });

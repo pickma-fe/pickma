@@ -16,6 +16,7 @@ export async function updateUser(
     .from('users')
     .update({
       ...(data.name !== undefined && { name: data.name }),
+      ...(data.phone !== undefined && { phone: data.phone }),
       ...(data.profileImage !== undefined && {
         profile_image: data.profileImage,
       }),
@@ -36,4 +37,26 @@ export async function updateUser(
   }
 
   return mapUserRow(updated);
+}
+
+export async function deleteUser(userId: string): Promise<void> {
+  const supabase = createServiceRoleClient();
+
+  const { data: updated, error } = await supabase
+    .from('users')
+    .update({ status: 'deleted' })
+    .eq('id', userId)
+    .select('*')
+    .single();
+
+  if (error) {
+    if (error.code === 'PGRST116') {
+      throw new AppError(ERROR_CODE.NOT_FOUND, 404);
+    }
+    throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
+  }
+
+  if (!updated) {
+    throw new AppError(ERROR_CODE.NOT_FOUND, 404);
+  }
 }

@@ -7,6 +7,7 @@ export function mapUser(dto: UserResponse): User {
     email: dto.email,
     name: dto.name,
     phone: dto.phone,
+    authProvider: dto.authProvider,
     profileImage: dto.profileImage,
     role: dto.role,
     status: dto.status,
