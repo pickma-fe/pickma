@@ -52,8 +52,19 @@ describe('updateMeSchema', () => {
     }
   });
 
-  it('phone이 공백만 있으면 trim 후 min(1) 실패한다', () => {
+  it('phone이 공백만 있으면 null로 정규화한다', () => {
     const result = updateMeSchema.safeParse({ phone: '   ' });
-    expect(result.success).toBe(false);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.phone).toBeNull();
+    }
+  });
+
+  it('phone이 빈 문자열이면 null로 정규화한다', () => {
+    const result = updateMeSchema.safeParse({ phone: '' });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.phone).toBeNull();
+    }
   });
 });

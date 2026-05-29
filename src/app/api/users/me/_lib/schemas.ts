@@ -3,7 +3,13 @@ import { z } from 'zod';
 export const updateMeSchema = z
   .object({
     name: z.string().trim().min(1).max(100).optional(),
-    phone: z.string().trim().min(1).max(30).optional(),
+    phone: z
+      .preprocess(
+        (value) =>
+          typeof value === 'string' && value.trim() === '' ? null : value,
+        z.string().trim().max(30).nullable()
+      )
+      .optional(),
     profileImage: z.string().trim().min(1).optional(),
   })
   .refine((data) => Object.values(data).some((v) => v !== undefined), {
