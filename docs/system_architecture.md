@@ -641,6 +641,8 @@ Branch protection은 `dev` 대상 PR에서 `CI / Lint, typecheck, and test` 통�
 - product-images: `{storeId}/{uploadId}/{fileName}`
 - profile-images: `{userId}/{uploadId}/{fileName}`
 
+`seller-application-documents`에 저장 가능한 문서 타입은 사업자등록증(`business_license`), 영업신고증(`food_service_permit`), 통장사본(`bank_account`) 3종으로 한정한다. 신분증(`id_card`)은 T44 결정으로 수집 대상에서 제외된다 (T61에서 코드/DB 기준 제거).
+
 ### 14.2 Orphan cleanup 방식
 
 클라이언트 best-effort와 서버 주기적 orphan 스캔의 hybrid 방식을 채택한다.
@@ -689,7 +691,7 @@ Branch protection은 `dev` 대상 PR에서 `CI / Lint, typecheck, and test` 통�
 
 ### 14.5 향후 재검토 사항
 
-- Toss 지급대행/KYC 책임 범위 확정 시 서류 보관 의무 재검토. 세부 정책은 T44에서 결정한다.
+- **[T44 결정 완료]** Toss 지급대행이 셀러 신원 확인(KYC)을 직접 수행하므로 PickMa는 신분증 원본을 보관할 의무가 없다. 정산 방식과 무관하게 동일 결론(PASS·사업자등록번호 API 대체 가능). 판매자 신청 서류를 사업자등록증·영업신고증·통장사본 3종으로 한정하고 신분증(`id_card`)을 제외한다. 코드/DB 기준 제거는 T61에서 진행한다.
 - 분쟁 대응에 필요한 최소 메타데이터 범위 확인 (운영/CS 정책).
 - public bucket(store-images, product-images, profile-images) orphan 처리는 P3에서 결정.
 
