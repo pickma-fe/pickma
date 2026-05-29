@@ -44,4 +44,48 @@ describe('buildMockProductListResponse', () => {
     expect(result.pageSize).toBe(3);
     expect(result.totalPages).toBeGreaterThan(1);
   });
+
+  it('availableOnly=false여도 비활성 상품은 제외한다', () => {
+    const activeProduct = {
+      id: 'active-product',
+      storeId: 'store-1',
+      storeName: '활성 매장',
+      menuItemId: 'menu-1',
+      name: '활성 상품',
+      originalPrice: 10000,
+      discountPrice: 8000,
+      discountRate: 20,
+      stock: 3,
+      reservedStock: 0,
+      availableStock: 3,
+      isSoldOut: false,
+      isExpired: false,
+      displayStatus: 'available',
+      endAt: new Date('2026-05-29T10:00:00.000Z').toISOString(),
+      pickupStartTime: '09:00:00',
+      pickupEndTime: '10:00:00',
+      status: 'active',
+      updatedAt: new Date('2026-05-29T03:00:00.000Z').toISOString(),
+    } as const;
+    const closedProduct = {
+      ...activeProduct,
+      id: 'closed-product',
+      name: '비활성 상품',
+      status: 'closed',
+      displayStatus: 'closed',
+    } as const;
+
+    const result = buildMockProductListResponse(
+      {
+        page: 1,
+        pageSize: 10,
+        availableOnly: false,
+      },
+      [activeProduct, closedProduct]
+    );
+
+    expect(result.items.map((product) => product.id)).toEqual([
+      'active-product',
+    ]);
+  });
 });

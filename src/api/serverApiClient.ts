@@ -70,7 +70,8 @@ function buildServerUrl(path: string): string {
 function buildPath(path: string, params?: object): string {
   if (!params) return path;
 
-  const query = new URLSearchParams();
+  const [pathname, search = ''] = path.split('?');
+  const query = new URLSearchParams(search);
   for (const [key, value] of Object.entries(params)) {
     if (
       typeof value === 'string' ||
@@ -82,7 +83,7 @@ function buildPath(path: string, params?: object): string {
   }
 
   const queryString = query.toString();
-  return queryString ? `${path}?${queryString}` : path;
+  return queryString ? `${pathname}?${queryString}` : pathname;
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {

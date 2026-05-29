@@ -57,6 +57,27 @@ describe('serverApiClient', () => {
     expect(parsed.searchParams.has('empty')).toBe(false);
   });
 
+  it('기존 query string이 있는 path에는 params를 추가로 병합한다', async () => {
+    vi.mocked(fetch).mockResolvedValue(
+      new Response(JSON.stringify({ statusCode: 200, data: { ok: true } }), {
+        status: 200,
+      })
+    );
+
+    await serverApiClient.get('/api/products?sort=endAt', {
+      page: 1,
+      pageSize: 10,
+    });
+
+    const [url] = vi.mocked(fetch).mock.calls[0];
+    const parsed = new URL(url as string);
+
+    expect(parsed.pathname).toBe('/api/products');
+    expect(parsed.searchParams.get('sort')).toBe('endAt');
+    expect(parsed.searchParams.get('page')).toBe('1');
+    expect(parsed.searchParams.get('pageSize')).toBe('10');
+  });
+
   it('성공 응답의 HTTP status와 envelope statusCode가 다르면 ApiError를 throw한다', async () => {
     vi.mocked(fetch).mockResolvedValue(
       new Response(JSON.stringify({ statusCode: 201, data: { ok: true } }), {

@@ -8,13 +8,15 @@ import type {
 import { mockProductDetailsMap, mockProductList } from './products';
 
 export function buildMockProductListResponse(
-  params: ProductListParams
+  params: ProductListParams,
+  products: ProductListItemResponse[] = mockProductList.items
 ): ProductListResponse {
   const { page, pageSize, region, categoryId, keyword } = params;
   const discountOption = params.discountOption ?? 'all';
   const from = (page - 1) * pageSize;
   const to = from + pageSize;
-  const filteredProducts = mockProductList.items
+  const filteredProducts = products
+    .filter((product) => product.status === 'active')
     .filter((product) => !params.availableOnly || isAvailableProduct(product))
     .filter(
       (product) =>
