@@ -63,7 +63,11 @@ export async function completeEmailSignup(
     throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
   }
 
-  const authUserId = authData.user.id;
+  const authUserId = authData?.user?.id;
+  if (!authUserId) {
+    await store.releaseSignupVerificationToken(tokenHash).catch(() => {});
+    throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
+  }
 
   const { error: insertError } = await supabase
     .from('users')
