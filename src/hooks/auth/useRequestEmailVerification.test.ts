@@ -3,8 +3,8 @@ import { act, renderHook, waitFor } from '@testing-library/react';
 import { createElement } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import type { RequestEmailVerificationResponse } from '@/contracts/auth';
 import { authApi } from '@/api/auth/authApi';
+import type { RequestEmailVerificationResponse } from '@/contracts';
 
 import { useRequestEmailVerification } from './useRequestEmailVerification';
 

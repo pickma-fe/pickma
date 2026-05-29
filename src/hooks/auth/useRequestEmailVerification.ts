@@ -2,11 +2,11 @@
 
 import { useMutation } from '@tanstack/react-query';
 
+import { authApi } from '@/api/auth/authApi';
 import type {
   RequestEmailVerificationRequest,
   RequestEmailVerificationResponse,
-} from '@/contracts/auth';
-import { authApi } from '@/api/auth/authApi';
+} from '@/contracts';
 
 export function useRequestEmailVerification() {
   return useMutation<

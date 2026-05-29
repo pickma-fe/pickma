@@ -1,4 +1,5 @@
 import type { AuthResult, AuthSession } from '@/types/auth';
+import { createClient } from '@/lib/supabase/client';
 import type {
   CompleteEmailSignupRequest,
   RequestEmailVerificationRequest,
@@ -8,8 +9,7 @@ import type {
   UpdatePasswordRequest,
   VerifyEmailOtpRequest,
   VerifyEmailOtpResponse,
-} from '@/contracts/auth';
-import { createClient } from '@/lib/supabase/client';
+} from '@/contracts';
 
 import { apiClient } from '../apiClient';
 import { mapAuthResult, mapAuthSession } from './authMapper';

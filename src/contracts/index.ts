@@ -12,6 +12,16 @@ export type {
   ValidationIssue,
 } from './common';
 export type {
+  CompleteEmailSignupRequest,
+  RequestEmailVerificationRequest,
+  RequestEmailVerificationResponse,
+  ResetPasswordRequest,
+  SignInWithEmailRequest,
+  UpdatePasswordRequest,
+  VerifyEmailOtpRequest,
+  VerifyEmailOtpResponse,
+} from './auth';
+export type {
   ConfirmPaymentRequest,
   PaymentResponse,
   PreparePaymentRequest,
@@ -48,9 +58,4 @@ export type {
   ProductListParams,
   ProductListResponse,
 } from './product';
-export type {
-  ResetPasswordRequest,
-  SignInWithEmailRequest,
-  UpdatePasswordRequest,
-} from './auth';
 export type { UserResponse } from './user';
