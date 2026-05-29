@@ -1,12 +1,18 @@
 import type { AuthResult, AuthSession } from '@/types/auth';
 import type {
+  CompleteEmailSignupRequest,
+  RequestEmailVerificationRequest,
+  RequestEmailVerificationResponse,
   ResetPasswordRequest,
   SignInWithEmailRequest,
   SignUpWithEmailRequest,
   UpdatePasswordRequest,
+  VerifyEmailOtpRequest,
+  VerifyEmailOtpResponse,
 } from '@/contracts/auth';
 import { createClient } from '@/lib/supabase/client';
 
+import { apiClient } from '../apiClient';
 import { mapAuthResult, mapAuthSession } from './authMapper';
 
 function buildRedirectTo(redirectPath?: string): string {
@@ -103,6 +109,35 @@ export const authApi = {
       if (error) throw error;
       return mapAuthResult(data.user, null);
     });
+  },
+
+  requestEmailVerification(
+    req: RequestEmailVerificationRequest
+  ): Promise<RequestEmailVerificationResponse> {
+    return apiClient.post<RequestEmailVerificationResponse>(
+      '/api/auth/email-verifications/request',
+      req
+    );
+  },
+
+  verifyEmailOtp(req: VerifyEmailOtpRequest): Promise<VerifyEmailOtpResponse> {
+    return apiClient.post<VerifyEmailOtpResponse>(
+      '/api/auth/email-verifications/verify',
+      req
+    );
+  },
+
+  async completeEmailSignup(
+    req: CompleteEmailSignupRequest
+  ): Promise<AuthResult> {
+    await apiClient.post<null>('/api/auth/email-signup', req);
+    const supabase = createClient();
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: req.email,
+      password: req.password,
+    });
+    if (error) throw error;
+    return mapAuthResult(data.user, data.session);
   },
 
   signOut(): Promise<void> {
