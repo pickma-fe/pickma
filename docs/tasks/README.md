@@ -52,7 +52,7 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 | T24 | CI 기본 파이프라인 구축                           | P1       | 완료    | 173          | 없음               | [T24_ci_lint_test_pipeline.md](T24_ci_lint_test_pipeline.md)                                                     |
 | T25 | hook input Domain/UI 타입 분리                    | P2       | 진행 전 | 확인 필요    | T15                | [T25_hook_input_domain_ui_type_split.md](T25_hook_input_domain_ui_type_split.md)                                 |
 | T26 | 운영 화면 summary/list API 분리                   | P2       | 진행 전 | 확인 필요    | T04                | [T26_admin_seller_summary_list_api_split.md](T26_admin_seller_summary_list_api_split.md)                         |
-| T27 | Auth 이메일/Supabase SMTP/rate limit 정책 정리    | P0       | 진행 전 | 확인 필요    | 없음               | [T27_auth_email_smtp_rate_limit_policy.md](T27_auth_email_smtp_rate_limit_policy.md)                             |
+| T27 | Auth 이메일/Supabase SMTP/rate limit 정책 정리    | P0       | 완료    | 186          | 없음               | [T27_auth_email_smtp_rate_limit_policy.md](T27_auth_email_smtp_rate_limit_policy.md)                             |
 | T28 | 판매자 상품 수정 진입점 결정 및 구현              | P2       | 진행 전 | 확인 필요    | T15                | [T28_seller_product_edit_entrypoint.md](T28_seller_product_edit_entrypoint.md)                                   |
 | T29 | 판매자 제출 문서 확인 UX 개선                     | P2       | 진행 전 | 확인 필요    | T06, T44           | [T29_seller_document_review_ux.md](T29_seller_document_review_ux.md)                                             |
 | T30 | AI 추천 1차 설계                                  | P2       | 진행 전 | 확인 필요    | T25, T05           | [T30_ai_recommendation_first_design.md](T30_ai_recommendation_first_design.md)                                   |
@@ -85,6 +85,7 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 | T57 | 관리자 사용자·상품·주문 관리 화면 구현            | P3       | 진행 전 | 확인 필요    | T04                | [T57_admin_users_products_orders_pages.md](T57_admin_users_products_orders_pages.md)                             |
 | T58 | 관리자 대시보드 통계 화면 구현                    | P1       | 진행 전 | 확인 필요    | T07                | [T58_admin_dashboard_statistics.md](T58_admin_dashboard_statistics.md)                                           |
 | T59 | 소비자 찜 목록 화면 및 API 구현                   | P2       | 진행 전 | 확인 필요    | 없음               | [T59_consumer_wishlist_page.md](T59_consumer_wishlist_page.md)                                                   |
+| T60 | Auth 비밀번호 정책 강화                           | P1       | 진행 전 | 확인 필요    | T27                | [T60_auth_password_policy.md](T60_auth_password_policy.md)                                                       |
 
 ## 추천 진행 흐름
 

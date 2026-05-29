@@ -3,8 +3,8 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import type { AuthResult } from '@/types/auth';
-import type { SignInWithEmailRequest } from '@/contracts/auth';
 import { authApi } from '@/api/auth/authApi';
+import type { SignInWithEmailRequest } from '@/contracts';
 
 export function useEmailLogin() {
   const queryClient = useQueryClient();

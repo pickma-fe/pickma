@@ -9,10 +9,12 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
 import { getAuthErrorMessage } from '@/lib/errors/authErrorMessage';
+import { useCompleteEmailSignup } from '@/hooks/auth/useCompleteEmailSignup';
 import { useEmailLogin } from '@/hooks/auth/useEmailLogin';
-import { useEmailSignup } from '@/hooks/auth/useEmailSignup';
 import { useOAuthLogin } from '@/hooks/auth/useOAuthLogin';
+import { useRequestEmailVerification } from '@/hooks/auth/useRequestEmailVerification';
 import { useResetPassword } from '@/hooks/auth/useResetPassword';
+import { useVerifyEmailOtp } from '@/hooks/auth/useVerifyEmailOtp';
 import { Button, Input } from '@/components/common';
 
 import { type AuthModalView, useAuthModal } from './useAuthModal';
@@ -224,46 +226,78 @@ interface SignupFormProps {
 
 function SignupForm({ next, onClose, onChangeView }: SignupFormProps) {
   const router = useRouter();
-  const { mutateAsync: emailSignup } = useEmailSignup();
-  const [isEmailSent, setIsEmailSent] = useState(false);
-  const [sentEmail, setSentEmail] = useState('');
+  const { mutateAsync: completeSignup } = useCompleteEmailSignup();
+  const { mutateAsync: requestVerification, isPending: isRequestingOtp } =
+    useRequestEmailVerification();
+  const { mutateAsync: verifyOtp, isPending: isVerifyingOtp } =
+    useVerifyEmailOtp();
+  const [verificationState, setVerificationState] = useState<
+    'idle' | 'otp-sent' | 'verified'
+  >('idle');
+  const [verificationToken, setVerificationToken] = useState('');
+  const [otp, setOtp] = useState('');
+  const [otpError, setOtpError] = useState('');
   const {
     register,
     handleSubmit: handleSubmitRH,
     setError,
+    trigger,
+    getValues,
     formState: { errors, isSubmitting },
   } = useForm<SignupFields>({ resolver: zodResolver(signupSchema) });
 
-  async function handleSubmit(data: SignupFields) {
+  function handleEmailChange() {
+    setVerificationState('idle');
+    setVerificationToken('');
+    setOtp('');
+    setOtpError('');
+  }
+
+  async function handleRequestVerification() {
+    const requestedEmail = getValues('email').trim();
+    const valid = await trigger('email');
+    if (!valid) return;
     try {
-      const result = await emailSignup({
+      setOtp('');
+      setOtpError('');
+      await requestVerification({ email: requestedEmail });
+      if (getValues('email').trim() !== requestedEmail) return;
+      setVerificationState('otp-sent');
+    } catch (err) {
+      setError('email', { message: getAuthErrorMessage(err) });
+    }
+  }
+
+  async function handleVerifyOtp() {
+    const requestedEmail = getValues('email').trim();
+    try {
+      setOtpError('');
+      const result = await verifyOtp({ email: requestedEmail, otp });
+      if (getValues('email').trim() !== requestedEmail) return;
+      setVerificationToken(result.verificationToken);
+      setVerificationState('verified');
+      setOtp('');
+    } catch (err) {
+      setOtpError(getAuthErrorMessage(err));
+    }
+  }
+
+  async function handleSubmit(data: SignupFields) {
+    if (!verificationToken) return;
+    try {
+      const result = await completeSignup({
         email: data.email,
+        verificationToken,
         password: data.password,
         name: data.name,
-        redirectPath: next,
       });
       if (result.session) {
         onClose();
         router.push(getSafeNextPath(next));
-      } else {
-        setSentEmail(data.email);
-        setIsEmailSent(true);
       }
     } catch (err) {
       setError('root', { message: getAuthErrorMessage(err) });
     }
-  }
-
-  if (isEmailSent) {
-    return (
-      <div className="space-y-4">
-        <DialogTitle className="text-lg font-semibold">이메일 확인</DialogTitle>
-        <p className="text-sm text-gray-600">
-          {sentEmail}로 확인 메일을 발송했습니다. 메일을 확인해 가입을 완료해
-          주세요.
-        </p>
-      </div>
-    );
   }
 
   return (
@@ -277,13 +311,66 @@ function SignupForm({ next, onClose, onChangeView }: SignupFormProps) {
           error={errors.name?.message}
           {...register('name')}
         />
-        <Input
-          label="이메일"
-          type="email"
-          placeholder="이메일"
-          error={errors.email?.message}
-          {...register('email')}
-        />
+        <div className="space-y-1">
+          <Input
+            label="이메일"
+            type="email"
+            placeholder="이메일"
+            error={errors.email?.message}
+            disabled={verificationState === 'verified'}
+            {...register('email', { onChange: handleEmailChange })}
+          />
+          {verificationState === 'idle' && (
+            <Button
+              type="button"
+              variant="outline"
+              color="gray"
+              disabled={isRequestingOtp}
+              onClick={handleRequestVerification}
+              className="w-full text-sm"
+            >
+              {isRequestingOtp ? '발송 중...' : '이메일 인증하기'}
+            </Button>
+          )}
+          {verificationState === 'otp-sent' && (
+            <div className="space-y-1">
+              <Input
+                label="인증 코드"
+                type="text"
+                inputMode="numeric"
+                maxLength={6}
+                placeholder="6자리 숫자"
+                value={otp}
+                onChange={(e) => setOtp(e.target.value)}
+                error={otpError}
+              />
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  disabled={isVerifyingOtp || otp.length !== 6}
+                  onClick={handleVerifyOtp}
+                  color="primary"
+                  className="flex-1 text-sm"
+                >
+                  {isVerifyingOtp ? '확인 중...' : '인증 확인'}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  color="gray"
+                  disabled={isRequestingOtp}
+                  onClick={handleRequestVerification}
+                  className="flex-1 text-sm"
+                >
+                  재전송
+                </Button>
+              </div>
+            </div>
+          )}
+          {verificationState === 'verified' && (
+            <p className="text-sm text-green-600">✓ 이메일 인증 완료</p>
+          )}
+        </div>
         <Input
           label="비밀번호"
           type="password"
@@ -303,7 +390,7 @@ function SignupForm({ next, onClose, onChangeView }: SignupFormProps) {
         )}
         <Button
           type="submit"
-          disabled={isSubmitting}
+          disabled={isSubmitting || verificationState !== 'verified'}
           color="primary"
           className="w-full text-sm"
         >

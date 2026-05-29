@@ -68,9 +68,11 @@ Client authApi
   -> cookie 기반 세션 저장
 ```
 
-OAuth 로그인 시작, email/password 회원가입/로그인, 비밀번호 재설정, 로그아웃은 서버 Route Handler가 아니라 Supabase Auth SDK 래퍼에서 처리한다. 컴포넌트는 Supabase SDK를 직접 호출하지 않고 `src/api/auth/authApi.ts`만 사용한다.
+OAuth 로그인 시작, email/password 로그인, 비밀번호 재설정, 로그아웃은 서버 Route Handler가 아니라 Supabase Auth SDK 래퍼에서 처리한다. 컴포넌트는 Supabase SDK를 직접 호출하지 않고 `src/api/auth/authApi.ts`만 사용한다.
 
-회원가입 시 입력한 이름은 Phase 2.5에서 Supabase Auth metadata에만 전달한다. PickMa 서비스 내부 `users` row 보장과 role/status 검증은 Phase 3의 `/api/users/me`와 서버 인증 helper에서 OAuth/email 로그인 모두 동일한 흐름으로 처리한다.
+email/password **회원가입**은 가입 전 이메일 선인증(pre-verification) 흐름으로 처리하며, Supabase Auth SDK `signUp()`을 직접 사용하지 않는다. 상세 흐름은 4.4절을 참고한다.
+
+OAuth 로그인 후 PickMa 서비스 내부 `users` row 보장과 role/status 검증은 `/api/users/me`와 서버 인증 helper에서 처리한다.
 
 ### 4.2 Proxy 역할
 
@@ -116,6 +118,76 @@ export const config = {
 - 소비자 보호 라우트: `/?auth=required&next={pathname}`
 - 판매자 보호 라우트: `/seller?auth=required&next={pathname}`
 - 관리자 보호 라우트: `/?auth=required&next={pathname}`
+
+### 4.4 이메일 선인증 흐름 (email/password 회원가입)
+
+email/password 회원가입은 가입 전 이메일 선인증(pre-verification) 방식으로 처리한다. Supabase 기본 `signUp()` confirmation OTP는 UX 목표와 맞지 않으므로 사용하지 않는다.
+
+```text
+Client
+  1. AuthModal 이메일 입력 → "이메일 인증하기" 클릭
+  2. POST /api/auth/email-verifications/request
+       -> emailHash/ipHash HMAC 생성
+       -> checkAndIncrementRequestLimit (email/IP rate limit)
+       -> public.users.email 중복 확인 (이미 존재하면 AUTH_EMAIL_ALREADY_EXISTS)
+       -> 6자리 OTP 생성 (hash 저장)
+       -> issueChallenge (Upstash Redis에 challenge 저장, 이전 active challenge 무효화)
+       -> Resend HTTP API fetch로 OTP 메일 발송
+       -> challenge status = 'sent' (발송 성공) / 'send_failed' (발송 실패)
+  3. Client: OTP input 노출, 재전송 버튼 노출
+  4. POST /api/auth/email-verifications/verify
+       -> emailHash로 active challenge 조회 (status = 'sent', 미만료)
+       -> OTP hash 비교, attempt count 증가 (5회 초과 시 AUTH_EMAIL_OTP_ATTEMPT_LIMIT_EXCEEDED)
+       -> 성공 시 verification token 생성 (hash 저장, challenge status = 'verified')
+       -> raw verification token 1회 반환
+  5. Client: OTP input 숨김, "인증 완료" 표시, verification token React local state에 저장
+  6. POST /api/auth/email-signup (verification token + email + password + name)
+       -> verification token hash + emailHash + expiry + status 검증
+       -> verified → signup_in_progress 원자적 전환 (동시 제출 방지)
+       -> auth.admin.createUser({ email, password, email_confirm: true, user_metadata: { name } })
+       -> public.users row 생성 (id, email, name, role/status 기본값)
+       -> 실패 시 Auth user 보상 삭제 + token 처리 (상세는 아래)
+       -> 성공 시 token status = 'consumed'
+  7. Client: completeEmailSignup 성공 후 signInWithPassword로 세션 생성 → next 이동
+```
+
+보상 처리 정책:
+
+- `public.users` row 생성 실패 + Auth user 보상 삭제 성공: token을 `verified`로 되돌려 재시도 가능하게 처리
+- `public.users` row 생성 실패 + 보상 삭제 실패: token을 `consumed`로 닫고 운영 확인 항목으로 기록. 서버 로그에는 auth user id, email hash, error만 남기고 raw email 미포함
+- `auth.admin.createUser()` conflict (race condition): token을 `consumed`로 닫고 `AUTH_EMAIL_ALREADY_EXISTS` 반환
+
+OTP/token 저장소 정책 (Upstash Redis):
+
+| 키 패턴                                     | 내용                                        | TTL                                     |
+| ------------------------------------------- | ------------------------------------------- | --------------------------------------- |
+| `auth:email:signup:{emailHash}:current`     | current challenge id                        | OTP TTL                                 |
+| `auth:email:signup:challenge:{challengeId}` | OTP hash, email hash, status                | OTP TTL → 검증 성공 시 token TTL로 연장 |
+| `auth:email:signup:verify:{tokenHash}`      | email hash, challenge id, expiresAt, status | verification token TTL                  |
+| `auth:email:signup:rate:email:{emailHash}`  | 발송 요청 count                             | request window                          |
+| `auth:email:signup:rate:ip:{ipHash}`        | 발송 요청 count                             | request window                          |
+| `auth:email:signup:attempt:{challengeId}`   | 검증 attempt count                          | OTP TTL                                 |
+
+기본값: OTP window 10분, email 발송 요청 제한 3회, IP 발송 요청 제한 10회, OTP 검증 attempt 5회, signup_in_progress lock 30초
+
+보안 정책:
+
+- Redis key/value에 raw email, raw IP, OTP 원문, token 원문 저장 금지
+- email/IP hash는 `AUTH_EMAIL_HASH_SECRET` 기반 HMAC으로 생성
+- `AUTH_EMAIL_HASH_SECRET`은 32바이트 이상 랜덤 값, `scripts/generate-auth-email-hash-secret.mjs`로 생성
+- OTP 재전송 시 이전 active challenge는 즉시 무효화 (메일 발송 전에 새 challenge를 active로 전환)
+
+메일 발송 정책:
+
+- 가입 전 OTP 메일: PickMa 서버 Route Handler → Resend HTTP API `fetch` 직접 호출 (Resend SDK/package 미사용)
+- password reset 등 Supabase Auth 메일: Supabase custom SMTP (Resend SMTP 연결)
+
+### 4.5 OAuth + email/password 중복 이메일 처리
+
+- OTP 요청 단계의 중복 이메일 확인 기준: `public.users.email`
+- OAuth 계정과 동일 이메일도 `public.users.email` 기준으로 email/password 신규 가입을 차단하고 로그인/비밀번호 재설정 안내
+- email signup Route Handler가 `public.users` row를 직접 생성한다. 이후 `/api/users/me`의 `getOrCreateUserByAuthUser()`는 이미 생성된 row를 반환하는 기존 흐름 유지
+- `auth.admin.createUser()` conflict는 race condition 또는 예외 상태의 마지막 방어선으로 `AUTH_EMAIL_ALREADY_EXISTS`로 매핑
 
 ### 4.3 Supabase client 분리
 
@@ -464,16 +536,23 @@ src/
 
 ## 10. 환경 변수
 
-| 변수명                                 | 용도                                                          | 공개 여부 |
-| -------------------------------------- | ------------------------------------------------------------- | --------- |
-| `NEXT_PUBLIC_SUPABASE_URL`             | Supabase URL                                                  | Public    |
-| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Supabase Publishable key                                      | Public    |
-| `SUPABASE_SECRET_KEY`                  | 관리자/서버 전용 Supabase key                                 | Secret    |
-| `NEXT_PUBLIC_TOSS_CLIENT_KEY`          | Toss 클라이언트 키                                            | Public    |
-| `TOSS_SECRET_KEY`                      | Toss Secret key                                               | Secret    |
-| `NEXT_PUBLIC_APP_URL`                  | 앱 URL                                                        | Public    |
-| `API_MOCK_ENABLED`                     | Route Handler mock 응답 여부                                  | Secret    |
-| `PAYMENT_MOCK`                         | `true`이면 Toss API 미호출, mock 결제 결과 반환. 로컬 개발용. | Secret    |
+| 변수명                                      | 용도                                                          | 공개 여부 |
+| ------------------------------------------- | ------------------------------------------------------------- | --------- |
+| `NEXT_PUBLIC_SUPABASE_URL`                  | Supabase URL                                                  | Public    |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`      | Supabase Publishable key                                      | Public    |
+| `SUPABASE_SECRET_KEY`                       | 관리자/서버 전용 Supabase key                                 | Secret    |
+| `NEXT_PUBLIC_TOSS_CLIENT_KEY`               | Toss 클라이언트 키                                            | Public    |
+| `TOSS_SECRET_KEY`                           | Toss Secret key                                               | Secret    |
+| `NEXT_PUBLIC_APP_URL`                       | 앱 URL                                                        | Public    |
+| `API_MOCK_ENABLED`                          | Route Handler mock 응답 여부                                  | Secret    |
+| `PAYMENT_MOCK`                              | `true`이면 Toss API 미호출, mock 결제 결과 반환. 로컬 개발용. | Secret    |
+| `UPSTASH_REDIS_REST_URL`                    | Upstash Redis REST URL (이메일 인증 OTP 상태 저장소)          | Secret    |
+| `UPSTASH_REDIS_REST_TOKEN`                  | Upstash Redis REST Token                                      | Secret    |
+| `AUTH_EMAIL_HASH_SECRET`                    | 이메일/IP HMAC hash 생성용 서버 시크릿 (32바이트 이상 랜덤값) | Secret    |
+| `RESEND_API_KEY`                            | Resend API Key (OTP 메일 발송)                                | Secret    |
+| `AUTH_EMAIL_FROM`                           | OTP 메일 발신 주소 (Resend 인증 도메인)                       | Secret    |
+| `AUTH_EMAIL_OTP_TTL_SECONDS`                | OTP 유효 시간 (기본값 600초)                                  | Secret    |
+| `AUTH_EMAIL_VERIFICATION_TOKEN_TTL_SECONDS` | verification token 유효 시간 (기본값 1800초)                  | Secret    |
 
 ---
 
@@ -495,16 +574,23 @@ npm run test
 
 CI 환경 변수는 실제 외부 서비스에 연결하지 않는 mock/test 값을 사용한다.
 
-| 변수명                                 | CI 기본값                | 비고                          |
-| -------------------------------------- | ------------------------ | ----------------------------- |
-| `API_MOCK_ENABLED`                     | `true`                   | Route Handler mock mode       |
-| `PAYMENT_MOCK`                         | `true`                   | Toss API 미호출               |
-| `NEXT_PUBLIC_APP_URL`                  | `http://localhost:3000`  | 서버 API origin 고정용        |
-| `NEXT_PUBLIC_SUPABASE_URL`             | `http://127.0.0.1:54321` | test placeholder              |
-| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | `test-publishable-key`   | test placeholder              |
-| `SUPABASE_SECRET_KEY`                  | `test-secret-key`        | test placeholder, secret 아님 |
-| `NEXT_PUBLIC_TOSS_CLIENT_KEY`          | `test_ck_ci`             | test placeholder              |
-| `TOSS_SECRET_KEY`                      | `test_sk_ci`             | test placeholder, secret 아님 |
+| 변수명                                      | CI 기본값                                | 비고                                       |
+| ------------------------------------------- | ---------------------------------------- | ------------------------------------------ |
+| `API_MOCK_ENABLED`                          | `true`                                   | Route Handler mock mode                    |
+| `PAYMENT_MOCK`                              | `true`                                   | Toss API 미호출                            |
+| `NEXT_PUBLIC_APP_URL`                       | `http://localhost:3000`                  | 서버 API origin 고정용                     |
+| `NEXT_PUBLIC_SUPABASE_URL`                  | `http://127.0.0.1:54321`                 | test placeholder                           |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`      | `test-publishable-key`                   | test placeholder                           |
+| `SUPABASE_SECRET_KEY`                       | `test-secret-key`                        | test placeholder, secret 아님              |
+| `NEXT_PUBLIC_TOSS_CLIENT_KEY`               | `test_ck_ci`                             | test placeholder                           |
+| `TOSS_SECRET_KEY`                           | `test_sk_ci`                             | test placeholder, secret 아님              |
+| `UPSTASH_REDIS_REST_URL`                    | `http://localhost:6379`                  | test placeholder (단위 테스트는 mock 사용) |
+| `UPSTASH_REDIS_REST_TOKEN`                  | `test-redis-token`                       | test placeholder                           |
+| `AUTH_EMAIL_HASH_SECRET`                    | `test-hash-secret-32byte-placeholder000` | test placeholder (32바이트 이상)           |
+| `RESEND_API_KEY`                            | `re_test_ci`                             | test placeholder                           |
+| `AUTH_EMAIL_FROM`                           | `noreply@test.example`                   | test placeholder                           |
+| `AUTH_EMAIL_OTP_TTL_SECONDS`                | `600`                                    | 기본값                                     |
+| `AUTH_EMAIL_VERIFICATION_TOKEN_TTL_SECONDS` | `1800`                                   | 기본값                                     |
 
 `npm run build`는 초기 CI 필수 job에 포함하지 않고, 팀 결정 후 별도 job으로 추가한다.
 

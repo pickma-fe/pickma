@@ -25,7 +25,7 @@ type ResetPasswordFields = z.infer<typeof resetPasswordSchema>;
 // TODO: 디자인 확정 후 reset password 화면 스타일 교체
 export default function ResetPasswordPage() {
   const router = useRouter();
-  const { data: session, isLoading, isError } = useAuthSession();
+  const { data: session, isLoading } = useAuthSession();
   const { mutateAsync: updatePassword } = useUpdatePassword();
   const {
     register,
@@ -36,15 +36,8 @@ export default function ResetPasswordPage() {
     resolver: zodResolver(resetPasswordSchema),
   });
 
-  const isSessionReady = !isLoading && !isError && !!session;
-
-  useEffect(() => {
-    if (isError) {
-      setError('root', {
-        message: '비밀번호를 변경하지 못했습니다. 다시 시도해 주세요.',
-      });
-    }
-  }, [isError, setError]);
+  const isSessionReady = !isLoading && !!session;
+  const isExpired = !isLoading && !session;
 
   useEffect(() => {
     const code = new URLSearchParams(window.location.search).get('code');
@@ -62,6 +55,30 @@ export default function ResetPasswordPage() {
         message: '비밀번호를 변경하지 못했습니다. 다시 시도해 주세요.',
       });
     }
+  }
+
+  if (isExpired) {
+    return (
+      <main className="flex min-h-screen items-center justify-center px-4 py-12">
+        <section className="w-full max-w-sm space-y-6">
+          <div className="space-y-2">
+            <h1 className="text-xl font-semibold">비밀번호 재설정</h1>
+            <p className="text-sm text-gray-600">
+              링크가 만료되었거나 이미 사용되었습니다. 비밀번호 재설정을 다시
+              요청해 주세요.
+            </p>
+          </div>
+          <Button
+            type="button"
+            color="primary"
+            className="w-full text-sm"
+            onClick={() => router.push('/?auth=required&view=reset')}
+          >
+            재설정 링크 재요청
+          </Button>
+        </section>
+      </main>
+    );
   }
 
   return (

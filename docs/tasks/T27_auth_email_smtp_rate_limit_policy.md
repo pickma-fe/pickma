@@ -1,10 +1,10 @@
 # T27. Auth 이메일/Supabase SMTP/rate limit 정책 정리
 
 - 상태:
-  진행 전
+  완료
 
 - GitHub Issue:
-  확인 필요
+  186
 
 - 우선순위:
   P0
@@ -52,3 +52,25 @@
   - Supabase 기본 메일을 계속 쓸지 custom SMTP를 도입할지 결정되어 있다.
   - auth 이메일 실패/제한 상태의 사용자 안내가 명확하다.
   - 운영 전 메일 발송 검증 체크리스트가 있다.
+
+- 구현 결과:
+  - 가입 전 이메일 선인증(pre-verification) 흐름 도입: `requestEmailVerification → verifyEmailOtp → completeEmailSignup`
+  - Upstash Redis 기반 OTP challenge/token 저장소 구현 (`src/app/api/auth/_lib/`)
+  - Resend HTTP API 직접 호출 방식으로 이메일 발송 (`src/app/api/auth/_lib/email-service.ts`)
+  - Supabase `auth.admin.createUser({ email_confirm: true })` 사용 — Supabase 내부 confirm 흐름 미사용
+  - auth 에러 메시지 `ApiError.code` 기반 매핑 추가 (`src/lib/errors/authErrorMessage.ts`)
+  - reset-password 만료 링크 에러 안내 및 재요청 유도 UI 추가 (`src/app/auth/reset-password/page.tsx`)
+  - `AuthModalRouteSync`에 `view` 쿼리 파라미터 지원 추가 (`?auth=required&view=reset`)
+  - mock 모드(`API_MOCK_ENABLED=true`)에서 3개 신규 엔드포인트 고정 성공 응답 반환
+
+- 검증 체크리스트:
+  - [x] TypeScript typecheck 통과
+  - [x] ESLint 통과
+  - [x] authErrorMessage 유닛 테스트 22개 통과
+  - [x] Upstash Redis `.env.local` 설정 완료
+  - [x] Resend 도메인 구매 및 DNS 등록 완료
+  - [x] Resend DNS 전파 및 Verify 완료
+  - [x] `.env.local`에 `RESEND_API_KEY`, `AUTH_EMAIL_FROM` 설정
+  - [x] Supabase Dashboard custom SMTP 설정 완료
+  - [x] 실제 OTP 이메일 수신 확인 (가입 흐름 수동 테스트)
+  - [x] 실제 password reset 이메일 수신 확인 (스팸 폴더 수신 확인)

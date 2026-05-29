@@ -199,10 +199,23 @@ export interface Product {
 
 - Auth는 로그인 상태와 Supabase Auth user 식별을 담당한다.
 - User는 PickMa 서비스 내부 사용자 정보를 담당한다.
-- OAuth 로그인, email/password 회원가입/로그인, 비밀번호 재설정, 로그아웃은 Supabase Auth SDK 래퍼에서 처리한다.
+- OAuth 로그인, email/password 로그인, 비밀번호 재설정, 로그아웃은 Supabase Auth SDK 래퍼에서 처리한다.
+- email/password **회원가입**은 가입 전 이메일 선인증 Route Handler(`/api/auth/email-verifications/request`, `/api/auth/email-verifications/verify`, `/api/auth/email-signup`)를 통해 처리한다. `authApi.signUpWithEmail()`은 사용하지 않는다.
 - Auth Domain Type은 `src/types/auth.ts`에 두고, `AuthProvider`, `AuthUser`, `AuthSession`, `AuthResult`만 앱에 노출한다. Supabase `Session`, `User`, `access_token`은 hook/component로 직접 노출하지 않는다.
-- Email/password auth wrapper 입력 DTO는 `src/contracts/auth.ts`에 둔다. 이는 `/api/*` Route Handler contract가 아니라 `authApi` 입력 contract이다.
+- `src/contracts/auth.ts`에는 두 가지 종류의 contract가 공존한다:
+  1. `authApi` 입력 contract (`SignInWithEmailRequest`, `ResetPasswordRequest`, `UpdatePasswordRequest`) — Supabase Auth SDK 래퍼 입력용
+  2. 이메일 선인증 Route Handler contract (`RequestEmailVerificationRequest/Response`, `VerifyEmailOtpRequest/Response`, `CompleteEmailSignupRequest`) — `/api/auth/*` Route Handler 입출력용
+- verification token은 클라이언트 React local state에만 보관한다. Zustand store, localStorage, sessionStorage, URL query에는 저장하지 않는다.
 - 서비스 사용자 조회/수정/탈퇴는 `/api/users/me`에서 처리한다.
+
+이메일 선인증 OTP 상태 저장소 인터페이스:
+
+- `EmailVerificationStore` interface는 `src/app/api/auth/_lib/email-verification-store.ts`에 둔다.
+- 운영 구현체는 `UpstashEmailVerificationStore` (`src/app/api/auth/_lib/upstash-email-verification-store.ts`)이다.
+- service와 Route Handler는 interface에만 의존한다. 구현체 교체 시 Route Handler/service 변경이 없다.
+- OTP challenge 상태값: `pending | sent | send_failed | superseded | verified | signup_in_progress | consumed`
+- verification token 상태값: `verified | signup_in_progress | consumed`
+- Redis는 TTL 기반 cleanup만 사용하며 별도 cron cleanup은 만들지 않는다.
 
 ### Catalog
 
