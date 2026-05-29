@@ -1,4 +1,20 @@
+import type { ErrorCode } from './errorCodes';
+import { ERROR_MESSAGES } from './errorMessages';
+
+function hasCode(error: unknown): error is { code: string } {
+  return (
+    error instanceof Error &&
+    'code' in error &&
+    typeof (error as Record<string, unknown>).code === 'string'
+  );
+}
+
 export function getAuthErrorMessage(error: unknown): string {
+  if (hasCode(error)) {
+    const message = ERROR_MESSAGES[error.code as ErrorCode];
+    if (message) return message;
+  }
+
   const msg = error instanceof Error ? error.message.toLowerCase() : '';
 
   if (
