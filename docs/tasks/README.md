@@ -69,7 +69,7 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 | T41 | Storage lifecycle 주기적 orphan scanner           | P2       | 진행 전 | 확인 필요    | T40, T43           | [T41_storage_lifecycle_cron.md](T41_storage_lifecycle_cron.md)                                                   |
 | T42 | 법적 고지 페이지 및 동의 흐름 구현                | P1       | 진행 전 | 161          | T44                | [T42_legal_compliance_pages.md](T42_legal_compliance_pages.md)                                                   |
 | T43 | Vercel 배포 설정 및 Cron 환경 구성                | P2       | 진행 전 | 확인 필요    | 없음               | [T43_vercel_deployment_config.md](T43_vercel_deployment_config.md)                                               |
-| T44 | 판매자 신분증 원본 처리 및 KYC 보관 정책 결정     | P0       | 진행 전 | 확인 필요    | T06                | [T44_seller_id_document_kyc_policy.md](T44_seller_id_document_kyc_policy.md)                                     |
+| T44 | 판매자 신분증 원본 처리 및 KYC 보관 정책 결정     | P0       | 진행 중 | 191          | T06                | [T44_seller_id_document_kyc_policy.md](T44_seller_id_document_kyc_policy.md)                                     |
 | T45 | UI/UX 및 접근성 baseline 기준 수립                | P1       | 진행 전 | 확인 필요    | T09                | [T45_ui_accessibility_baseline_policy.md](T45_ui_accessibility_baseline_policy.md)                               |
 | T46 | Consumer UI/UX 및 접근성 개선                     | P2       | 진행 전 | 확인 필요    | T45, T12, T13      | [T46_consumer_ui_accessibility_improvement.md](T46_consumer_ui_accessibility_improvement.md)                     |
 | T47 | Seller UI/UX 및 접근성 개선                       | P2       | 진행 전 | 확인 필요    | T45, T28, T29, T38 | [T47_seller_ui_accessibility_improvement.md](T47_seller_ui_accessibility_improvement.md)                         |
@@ -86,6 +86,7 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 | T58 | 관리자 대시보드 통계 화면 구현                    | P1       | 진행 전 | 확인 필요    | T07                | [T58_admin_dashboard_statistics.md](T58_admin_dashboard_statistics.md)                                           |
 | T59 | 소비자 찜 목록 화면 및 API 구현                   | P2       | 진행 전 | 확인 필요    | 없음               | [T59_consumer_wishlist_page.md](T59_consumer_wishlist_page.md)                                                   |
 | T60 | Auth 비밀번호 정책 강화                           | P1       | 진행 전 | 확인 필요    | T27                | [T60_auth_password_policy.md](T60_auth_password_policy.md)                                                       |
+| T61 | 판매자 신청 서류에서 신분증 타입 완전 제거        | P1       | 진행 전 | 확인 필요    | T44                | [T61_seller_id_card_removal.md](T61_seller_id_card_removal.md)                                                   |
 
 ## 추천 진행 흐름
 
