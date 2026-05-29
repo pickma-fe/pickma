@@ -85,6 +85,7 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 | T57 | 관리자 사용자·상품·주문 관리 화면 구현            | P3       | 진행 전 | 확인 필요    | T04                | [T57_admin_users_products_orders_pages.md](T57_admin_users_products_orders_pages.md)                             |
 | T58 | 관리자 대시보드 통계 화면 구현                    | P1       | 진행 전 | 확인 필요    | T07                | [T58_admin_dashboard_statistics.md](T58_admin_dashboard_statistics.md)                                           |
 | T59 | 소비자 찜 목록 화면 및 API 구현                   | P2       | 진행 전 | 확인 필요    | 없음               | [T59_consumer_wishlist_page.md](T59_consumer_wishlist_page.md)                                                   |
+| T60 | Auth 비밀번호 정책 강화                           | P1       | 진행 전 | 확인 필요    | T27                | [T60_auth_password_policy.md](T60_auth_password_policy.md)                                                       |
 
 ## 추천 진행 흐름
 

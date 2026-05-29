@@ -36,6 +36,7 @@
   - 결제 성공/실패/checkout 화면의 loading, 실패 복구 CTA, query parameter 오류 상태를 점검한다.
   - 개인정보처리방침/이용약관 페이지의 heading 구조, link, 모바일 가독성을 점검한다.
   - T27, T42, T23 구현 범위와 겹치는 개선은 해당 task와 조정한다.
+  - Supabase 비밀번호 재설정 이메일 템플릿을 한국어로 커스터마이징한다.
 
 - 관련 파일/영역:
   - `src/app/auth/**`

@@ -68,9 +68,9 @@
   - [x] ESLint 통과
   - [x] authErrorMessage 유닛 테스트 22개 통과
   - [x] Upstash Redis `.env.local` 설정 완료
-  - [ ] Resend 도메인 구매 및 DNS 등록 완료
-  - [ ] Resend DNS 전파 및 Verify 완료
-  - [ ] `.env.local`에 `RESEND_API_KEY`, `AUTH_EMAIL_FROM` 설정
-  - [ ] Supabase Dashboard custom SMTP 설정 완료
-  - [ ] 실제 OTP 이메일 수신 확인 (가입 흐름 수동 테스트)
+  - [x] Resend 도메인 구매 및 DNS 등록 완료
+  - [x] Resend DNS 전파 및 Verify 완료
+  - [x] `.env.local`에 `RESEND_API_KEY`, `AUTH_EMAIL_FROM` 설정
+  - [x] Supabase Dashboard custom SMTP 설정 완료
+  - [x] 실제 OTP 이메일 수신 확인 (가입 흐름 수동 테스트)
   - [ ] 실제 password reset 이메일 수신 확인
