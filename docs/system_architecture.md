@@ -705,7 +705,7 @@ Branch protection은 `dev` 대상 PR에서 `CI / Lint, typecheck, and test` 통�
 
 ---
 
-## 14. service role 사용 기준
+## 15. service role 사용 기준
 
 `createServiceRoleClient()`는 RLS를 우회하므로 남용하면 사용자·판매자·관리자 데이터 노출 위험이 생긴다. 반드시 아래 허용 케이스에 해당할 때만 사용한다.
 
@@ -743,7 +743,7 @@ Branch protection은 `dev` 대상 PR에서 `CI / Lint, typecheck, and test` 통�
 
 ---
 
-## 15. Route Handler 보안 checklist
+## 16. Route Handler 보안 checklist
 
 신규 Route Handler를 구현하거나 기존 Route Handler를 수정할 때 아래 항목을 확인한다.
 
