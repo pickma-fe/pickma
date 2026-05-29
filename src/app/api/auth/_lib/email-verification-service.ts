@@ -53,10 +53,19 @@ export async function requestEmailVerification(
 
   try {
     await sendOtpEmail(email, otp);
-    await store.markChallengeSent(challengeId, emailHash).catch(() => {});
   } catch {
     await store.markChallengeSendFailed(challengeId, emailHash).catch(() => {});
     throw new AppError(ERROR_CODE.AUTH_EMAIL_SEND_FAILED, 502);
+  }
+
+  let sent: boolean;
+  try {
+    sent = await store.markChallengeSent(challengeId, emailHash);
+  } catch {
+    throw new AppError(ERROR_CODE.AUTH_EMAIL_STORE_UNAVAILABLE, 503);
+  }
+  if (!sent) {
+    throw new AppError(ERROR_CODE.AUTH_EMAIL_STORE_UNAVAILABLE, 503);
   }
 
   return { challengeId, expiresAt };
