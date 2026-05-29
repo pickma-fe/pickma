@@ -5,7 +5,7 @@ import { AppError } from '@/lib/errors/appError';
 import { ERROR_CODE } from '@/lib/errors/errorCodes';
 import { requireSellerStore } from '@/app/api/_lib/auth';
 import { isApiMockEnabled } from '@/app/api/_lib/mock';
-import { mockSellerOrderDetail } from '@/mocks/seller';
+import { mockSellerOrderDetail, mockSellerOrders } from '@/mocks/seller';
 import { mockMyStore } from '@/mocks/stores';
 
 import { GET } from './route';
@@ -51,6 +51,32 @@ describe('GET /api/seller/orders/[orderId]', () => {
     expect(res.status).toBe(200);
     expect(body.data.id).toBe(mockSellerOrderDetail.id);
     expect(requireSellerStore).not.toHaveBeenCalled();
+  });
+
+  it('mock 모드에서 두 번째 주문 상세 items가 채워진다', async () => {
+    vi.mocked(isApiMockEnabled).mockReturnValue(true);
+
+    const res = await GET(
+      new Request('http://localhost'),
+      makeParams(mockSellerOrders[1].id)
+    );
+    const body = (await res.json()) as { data: OrderDetailResponse };
+
+    expect(res.status).toBe(200);
+    expect(body.data.items.length).toBeGreaterThan(0);
+  });
+
+  it('mock 모드에서 세 번째 주문 상세 items가 채워진다', async () => {
+    vi.mocked(isApiMockEnabled).mockReturnValue(true);
+
+    const res = await GET(
+      new Request('http://localhost'),
+      makeParams(mockSellerOrders[2].id)
+    );
+    const body = (await res.json()) as { data: OrderDetailResponse };
+
+    expect(res.status).toBe(200);
+    expect(body.data.items.length).toBeGreaterThan(0);
   });
 
   it('UUID 형식이 아닌 orderId는 400을 반환한다', async () => {

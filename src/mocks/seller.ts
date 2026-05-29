@@ -14,8 +14,8 @@ import { mockOrderItems } from './orders';
 import { mockProducts } from './products';
 
 const MOCK_SELLER_ORDER_ID_1 = '00000000-0000-4000-8000-000000000701';
-const MOCK_SELLER_ORDER_ID_2 = '00000000-0000-4000-8000-000000000711';
-const MOCK_SELLER_ORDER_ID_3 = '00000000-0000-4000-8000-000000000712';
+const MOCK_SELLER_ORDER_ID_2 = '00000000-0000-4000-8000-000000000702';
+const MOCK_SELLER_ORDER_ID_3 = '00000000-0000-4000-8000-000000000703';
 
 export const mockSellerApplication: SellerApplicationResponse = {
   id: 'application_mock_1',
