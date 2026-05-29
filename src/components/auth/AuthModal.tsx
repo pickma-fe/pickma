@@ -254,12 +254,14 @@ function SignupForm({ next, onClose, onChangeView }: SignupFormProps) {
   }
 
   async function handleRequestVerification() {
+    const requestedEmail = getValues('email').trim();
     const valid = await trigger('email');
     if (!valid) return;
     try {
       setOtp('');
       setOtpError('');
-      await requestVerification({ email: getValues('email').trim() });
+      await requestVerification({ email: requestedEmail });
+      if (getValues('email').trim() !== requestedEmail) return;
       setVerificationState('otp-sent');
     } catch (err) {
       setError('email', { message: getAuthErrorMessage(err) });
@@ -267,9 +269,11 @@ function SignupForm({ next, onClose, onChangeView }: SignupFormProps) {
   }
 
   async function handleVerifyOtp() {
+    const requestedEmail = getValues('email').trim();
     try {
       setOtpError('');
-      const result = await verifyOtp({ email: getValues('email').trim(), otp });
+      const result = await verifyOtp({ email: requestedEmail, otp });
+      if (getValues('email').trim() !== requestedEmail) return;
       setVerificationToken(result.verificationToken);
       setVerificationState('verified');
       setOtp('');
