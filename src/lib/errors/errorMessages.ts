@@ -31,6 +31,22 @@ export const ERROR_MESSAGES: Record<ErrorCode, string> = {
   FILE_UPLOAD_NOT_ALLOWED: '파일 업로드 권한이 없습니다.',
   FILE_TYPE_NOT_ALLOWED: '허용되지 않는 파일 형식입니다.',
   FILE_TOO_LARGE: '파일 크기가 허용 한도를 초과했습니다.',
+  RATE_LIMIT_EXCEEDED: '요청이 너무 많습니다. 잠시 후 다시 시도해 주세요.',
+  AUTH_EMAIL_ALREADY_EXISTS: '이미 가입된 이메일입니다. 로그인해 주세요.',
+  AUTH_EMAIL_SEND_FAILED:
+    '인증 메일을 발송하지 못했습니다. 잠시 후 다시 시도해 주세요.',
+  AUTH_EMAIL_OTP_EXPIRED: '인증 코드가 만료되었습니다. 다시 요청해 주세요.',
+  AUTH_EMAIL_OTP_INVALID: '인증 코드가 올바르지 않습니다.',
+  AUTH_EMAIL_OTP_ATTEMPT_LIMIT_EXCEEDED:
+    '인증 시도 횟수를 초과했습니다. 다시 요청해 주세요.',
+  AUTH_EMAIL_VERIFICATION_TOKEN_EXPIRED:
+    '이메일 인증이 만료되었습니다. 다시 인증해 주세요.',
+  AUTH_EMAIL_VERIFICATION_TOKEN_INVALID:
+    '이메일 인증이 유효하지 않습니다. 다시 인증해 주세요.',
+  AUTH_EMAIL_SIGNUP_IN_PROGRESS:
+    '회원가입 요청을 처리 중입니다. 잠시 후 다시 시도해 주세요.',
+  AUTH_EMAIL_STORE_UNAVAILABLE:
+    '이메일 인증을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.',
   NOT_IMPLEMENTED: '아직 구현되지 않은 API입니다.',
   INTERNAL_SERVER_ERROR: '서버 오류가 발생했습니다.',
 };

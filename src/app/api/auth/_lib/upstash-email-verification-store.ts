@@ -73,11 +73,12 @@ export class UpstashEmailVerificationStore implements EmailVerificationStore {
       return {emailCount, ipCount}
     `;
 
-    const [emailCount, ipCount] = await redis.eval(
+    const evalResult = await redis.eval(
       luaScript,
       [emailKey, ipKey],
       [String(window)]
     );
+    const [emailCount, ipCount] = evalResult as [number, number];
 
     const emailExceeded = emailCount > this.config.maxRequestsPerEmail;
     const ipExceeded = ipCount > this.config.maxRequestsPerIp;
@@ -284,11 +285,12 @@ export class UpstashEmailVerificationStore implements EmailVerificationStore {
       return {1, 0}
     `;
 
-    const [code, retryAfter] = await redis.eval(
+    const evalResult2 = await redis.eval(
       lua,
       [tokenKey],
       [emailHash, String(now), String(lockTtl), String(lockExpiresAtMs)]
     );
+    const [code, retryAfter] = evalResult2 as [number, number];
 
     if (code === 0) return { ok: false };
     if (code === 2)
