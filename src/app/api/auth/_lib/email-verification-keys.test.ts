@@ -58,16 +58,19 @@ describe('redisKeys', () => {
 
   it('rateLimitEmail 키는 emailHash를 포함한다', () => {
     const key = redisKeys.rateLimitEmail('emailhash');
+    expect(key).toContain('emailhash');
     expect(key).toMatch(/^auth:email:signup:rate:email:/);
   });
 
   it('rateLimitIp 키는 ipHash를 포함한다', () => {
     const key = redisKeys.rateLimitIp('iphash');
+    expect(key).toContain('iphash');
     expect(key).toMatch(/^auth:email:signup:rate:ip:/);
   });
 
   it('attemptCount 키는 challengeId를 포함한다', () => {
     const key = redisKeys.attemptCount('chal-id');
+    expect(key).toContain('chal-id');
     expect(key).toMatch(/^auth:email:signup:attempt:/);
   });
 
