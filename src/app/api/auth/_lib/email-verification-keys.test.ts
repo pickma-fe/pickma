@@ -32,7 +32,7 @@ describe('hashValue', () => {
   });
 
   it('AUTH_EMAIL_HASH_SECRET 미설정 시 오류를 던진다', () => {
-    vi.unstubAllEnvs();
+    vi.stubEnv('AUTH_EMAIL_HASH_SECRET', '');
     expect(() => hashValue('any')).toThrow('AUTH_EMAIL_HASH_SECRET is not set');
   });
 });
