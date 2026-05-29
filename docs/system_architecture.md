@@ -408,6 +408,14 @@ sequenceDiagram
   - `processing` 상태로 30분 이상 잔류하는 주문은 운영 알람 대상이며 수동 확인이 필요하다.
   - 후속 고도화: T11 (outbox/webhook/idempotency), A-ORDER-01 `status=processing` filter (P1)
 
+### 7.1 정산대행 설계 원칙
+
+PickMa는 기본적으로 Toss 정산대행을 사용하지만, 다른 정산대행사 또는 자체 정산으로 전환이 가능하도록 설계한다.
+
+- 정산대행사 의존 코드는 adapter 계층으로 격리하고, 상위 도메인 로직이 provider에 직접 종속되지 않게 한다.
+- KYC(셀러 신원 확인)는 정산대행 서비스가 담당하는 구조를 전제로 하며, Toss든 자체 구현이든 이 전제가 유지되는 한 PickMa는 신분증 원본을 수집하지 않는다.
+- provider 교체 시 변경 범위: adapter 구현체, 환경변수, 외부 API 호출부에 한정한다. 주문/결제 도메인 로직과 DB 스키마는 영향받지 않는 것을 목표로 한다.
+
 ---
 
 ## 8. Mock 전략
