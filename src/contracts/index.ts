@@ -51,7 +51,6 @@ export type {
 export type {
   ResetPasswordRequest,
   SignInWithEmailRequest,
-  SignUpWithEmailRequest,
   UpdatePasswordRequest,
 } from './auth';
 export type { UserResponse } from './user';

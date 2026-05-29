@@ -1,10 +1,3 @@
-export interface SignUpWithEmailRequest {
-  email: string;
-  password: string;
-  name: string;
-  redirectPath?: string;
-}
-
 export interface SignInWithEmailRequest {
   email: string;
   password: string;

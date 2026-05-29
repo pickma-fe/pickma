@@ -5,7 +5,6 @@ import type {
   RequestEmailVerificationResponse,
   ResetPasswordRequest,
   SignInWithEmailRequest,
-  SignUpWithEmailRequest,
   UpdatePasswordRequest,
   VerifyEmailOtpRequest,
   VerifyEmailOtpResponse,
@@ -51,28 +50,6 @@ export const authApi = {
       })
       .then(({ error }) => {
         if (error) throw error;
-      });
-  },
-
-  signUpWithEmail({
-    email,
-    password,
-    name,
-    redirectPath,
-  }: SignUpWithEmailRequest): Promise<AuthResult> {
-    const supabase = createClient();
-    return supabase.auth
-      .signUp({
-        email,
-        password,
-        options: {
-          data: { name },
-          emailRedirectTo: buildRedirectTo(redirectPath),
-        },
-      })
-      .then(({ data, error }) => {
-        if (error) throw error;
-        return mapAuthResult(data.user, data.session);
       });
   },
 
