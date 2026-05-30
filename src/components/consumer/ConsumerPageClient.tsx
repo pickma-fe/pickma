@@ -31,8 +31,8 @@ import { ProductFilterSidebar } from './ProductFilterSidebar';
 import { PromotionCarousel } from './PromotionCarousel';
 
 interface ConsumerPageClientProps {
-  initialCategories: Category[];
-  initialProducts: PaginatedResult<Product>;
+  initialCategories?: Category[];
+  initialProducts?: PaginatedResult<Product>;
 }
 
 // Keep a light interval refetch because stock, reservation count, and closing
@@ -106,7 +106,10 @@ export function ConsumerPageClient({
       availableOnly: true,
     },
     {
-      initialData: shouldUseInitialProducts ? initialProducts : undefined,
+      initialData:
+        shouldUseInitialProducts && initialProducts
+          ? initialProducts
+          : undefined,
     }
   );
   const products = productList?.items;

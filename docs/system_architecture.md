@@ -578,7 +578,7 @@ CI 환경 변수는 실제 외부 서비스에 연결하지 않는 mock/test 값
 | ------------------------------------------- | ---------------------------------------- | ------------------------------------------ |
 | `API_MOCK_ENABLED`                          | `true`                                   | Route Handler mock mode                    |
 | `PAYMENT_MOCK`                              | `true`                                   | Toss API 미호출                            |
-| `NEXT_PUBLIC_APP_URL`                       | `http://localhost:3000`                  | 서버 API origin 고정용                     |
+| `NEXT_PUBLIC_APP_URL`                       | `http://localhost:3000`                  | 앱 URL                                     |
 | `NEXT_PUBLIC_SUPABASE_URL`                  | `http://127.0.0.1:54321`                 | test placeholder                           |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`      | `test-publishable-key`                   | test placeholder                           |
 | `SUPABASE_SECRET_KEY`                       | `test-secret-key`                        | test placeholder, secret 아님              |

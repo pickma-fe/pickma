@@ -8,20 +8,24 @@ import { categoryServerApi } from '@/api/categories/categoryServerApi';
 import { productServerApi } from '@/api/products/productServerApi';
 
 interface ConsumerPageInitialData {
-  initialCategories: Category[];
-  initialProducts: PaginatedResult<Product>;
+  initialCategories?: Category[];
+  initialProducts?: PaginatedResult<Product>;
 }
 
 export async function getConsumerPageInitialData(
   productListParams: ProductListParams
 ): Promise<ConsumerPageInitialData> {
-  const [initialProducts, initialCategories] = await Promise.all([
+  const [productsResult, categoriesResult] = await Promise.allSettled([
     productServerApi.getProducts(productListParams),
     categoryServerApi.getCategories(),
   ]);
 
   return {
-    initialProducts,
-    initialCategories,
+    initialProducts:
+      productsResult.status === 'fulfilled' ? productsResult.value : undefined,
+    initialCategories:
+      categoriesResult.status === 'fulfilled'
+        ? categoriesResult.value
+        : undefined,
   };
 }
