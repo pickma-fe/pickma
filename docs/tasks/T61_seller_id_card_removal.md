@@ -45,9 +45,10 @@
   - `docs/api_spec.md`: 판매자 신청 문서 타입 `business_license | food_service_permit | bank_account`로 갱신
   - `docs/erd.md`: 판매자 신청 문서 타입 `business_license | food_service_permit | bank_account`로 갱신
 
-  **DB 기준 제거 및 rename (DB reset 합의 전제)**
+  **DB 기준 제거 및 rename (`docs/migration_policy.md` 참조)**
   - `supabase/migrations/20260430000000_initial_schema.sql`: `seller_application_document_type` enum을 `business_license | food_service_permit | bank_account`로 재정의 (`id_card` 제거, `business_report` → `food_service_permit`, `bankbook` → `bank_account`)
-    - 초기 migration 수정은 팀 합의 및 DB reset이 명확히 결정된 경우에 한해 진행
+    - 초기 migration 수정은 팀 합의 및 DB reset이 명확히 결정된 경우에 한해 진행 (`docs/migration_policy.md` 예외 조건 확인)
+    - DB reset이 불가능한 경우: 신규 incremental migration으로 enum 값 rename 및 기존 `id_card` / `business_report` / `bankbook` row 마이그레이션 수행
   - `src/lib/supabase/database.ts`: Supabase typegen 결과 갱신 (typegen 재실행 또는 수동 수정)
   - 기존 `id_card` / `business_report` / `bankbook` row/object가 있다면 DB reset 또는 cleanup 절차로 제거
 
