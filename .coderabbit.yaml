@@ -247,6 +247,10 @@ reviews:
         - 주문 API (/api/orders):
           - 재고 부족 시 예약을 거부하는가
           - 주문 상태 전이가 docs/api_spec.md와 일치하는가
+        - 상품 API (/api/products):
+          - 상품 목록 필터/정렬은 DB query 단계에서 적용하고, 전체 조회 후 메모리 pagination을 되살리지 않는가
+          - discountOption 필터와 discountRate 정렬은 products.discount_rate DB 컬럼을 사용하는가
+          - originalPrice, availableStock, discountRate는 mapper에서 products.original_price, products.available_stock, products.discount_rate를 읽는가
         - Admin API는 /api/admin/*로 분리되고 requireAdmin()을 통과하는가
 
     - path: 'src/proxy.ts'
