@@ -1,7 +1,8 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { renderHook, waitFor } from '@testing-library/react';
 import { createElement } from 'react';
-import { describe, expect, it, vi } from 'vitest';
+import type { ReactNode } from 'react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { PaginatedResult } from '@/types/common';
 import type { Product } from '@/types/product';
@@ -45,13 +46,17 @@ function createWrapper() {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
-  function Wrapper({ children }: { children: React.ReactNode }) {
+  function Wrapper({ children }: { children: ReactNode }) {
     return createElement(QueryClientProvider, { client }, children);
   }
   return Wrapper;
 }
 
 describe('useProducts', () => {
+  beforeEach(() => {
+    vi.mocked(productApi.getProducts).mockReset();
+  });
+
   it('productApi.getProducts를 호출하고 결과를 반환한다', async () => {
     vi.mocked(productApi.getProducts).mockResolvedValue(mockResult);
 
@@ -81,5 +86,23 @@ describe('useProducts', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
     expect(result.current.data?.items[0].updatedAt).toBeInstanceOf(Date);
+  });
+
+  it('initialData가 있으면 mount 직후 refetch하지 않고 초기 데이터를 사용한다', async () => {
+    const { result } = renderHook(
+      () =>
+        useProducts(
+          { page: 1, pageSize: 20 },
+          {
+            initialData: mockResult,
+          }
+        ),
+      { wrapper: createWrapper() }
+    );
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(result.current.data?.items[0].id).toBe(mockProduct.id);
+    expect(productApi.getProducts).not.toHaveBeenCalled();
   });
 });

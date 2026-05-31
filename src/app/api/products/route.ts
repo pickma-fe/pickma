@@ -4,10 +4,10 @@ import { createServerClient } from '@/lib/supabase/server';
 import { isApiMockEnabled } from '@/app/api/_lib/mock';
 import { routeError, success } from '@/app/api/_lib/response';
 import { validateQuery } from '@/app/api/_lib/validation';
-import { mockProductDetailsMap, mockProductList } from '@/mocks/products';
+import { buildMockProductListResponse } from '@/mocks/productList';
 
 import { productListSchema } from './_lib/schemas';
-import { buildProductListResponse, getProducts } from './_lib/service';
+import { getProducts } from './_lib/service';
 
 export async function GET(request: NextRequest): Promise<Response> {
   try {
@@ -17,13 +17,7 @@ export async function GET(request: NextRequest): Promise<Response> {
     );
 
     if (isApiMockEnabled()) {
-      return success(
-        buildProductListResponse(
-          mockProductList.items,
-          params,
-          (product) => mockProductDetailsMap[product.id]?.store.region
-        )
-      );
+      return success(buildMockProductListResponse(params));
     }
 
     const supabase = await createServerClient();
