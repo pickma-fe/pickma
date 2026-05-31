@@ -10,7 +10,7 @@
   P2
 
 - 선행 조건:
-  - 선행 task: T02. 판매자 주문 관리 real API 연결, T03. 관리자 판매자 승인 화면 구현, T04. 관리자 가게 목록 real endpoint 및 화면 구현, T01. 결제 confirm 보상 정책 확정
+  - 선행 task: T01. 결제 confirm 보상 정책 확정, T02. 판매자 주문 관리 real API 연결, T03. 관리자 판매자 승인 화면 구현, T04. 관리자 가게 목록 real endpoint 및 화면 구현, T24. CI 기본 파이프라인 구축
 
 - 분류:
   테스트

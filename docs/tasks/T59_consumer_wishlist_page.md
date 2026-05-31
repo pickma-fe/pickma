@@ -10,7 +10,7 @@
   P2
 
 - 선행 조건:
-  - 선행 task: 없음
+  - 선행 task: T15 (TanStack Query key 및 invalidation factory 도입)
 
 - 분류:
   화면/UI

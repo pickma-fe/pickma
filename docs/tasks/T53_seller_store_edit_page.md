@@ -10,7 +10,7 @@
   P1
 
 - 선행 조건:
-  - 선행 task: T15 (TanStack Query key 및 invalidation factory 도입)
+  - 선행 task: T15 (TanStack Query key 및 invalidation factory 도입), T16 (upload URL purpose별 권한 정책 강화)
 
 - 분류:
   화면/UI

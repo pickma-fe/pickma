@@ -10,7 +10,7 @@
   P1
 
 - 선행 조건:
-  - 선행 task: T07. service role 사용 기준 및 owner scope 테스트 수립
+  - 선행 task: T07. service role 사용 기준 및 owner scope 테스트 수립, T61. 판매자 신청 서류 문서 타입 정리 (신분증 제거 및 타입명 통일)
 
 - 분류:
   보안
