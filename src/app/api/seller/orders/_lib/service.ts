@@ -131,6 +131,27 @@ export async function completeSellerOrder(
   }
 }
 
+export async function noShowSellerOrder(
+  storeId: string,
+  orderId: string
+): Promise<void> {
+  const supabase = createServiceRoleClient();
+
+  const { data, error } = await supabase
+    .from('orders')
+    .update({ status: 'no_show' })
+    .eq('id', orderId)
+    .eq('store_id', storeId)
+    .eq('status', 'ready')
+    .select('id');
+
+  if (error) throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
+
+  if (!data || data.length === 0) {
+    await assertOrderExists(storeId, orderId);
+  }
+}
+
 async function assertOrderExists(
   storeId: string,
   orderId: string

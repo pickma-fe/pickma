@@ -10,8 +10,12 @@ import type {
   SellerOnboardingStatusResponse,
 } from '@/contracts/seller-application';
 
-import { mockOrderDetail, mockOrders } from './orders';
+import { mockOrderItems } from './orders';
 import { mockProducts } from './products';
+
+const MOCK_SELLER_ORDER_ID_1 = '00000000-0000-4000-8000-000000000701';
+const MOCK_SELLER_ORDER_ID_2 = '00000000-0000-4000-8000-000000000702';
+const MOCK_SELLER_ORDER_ID_3 = '00000000-0000-4000-8000-000000000703';
 
 export const mockSellerApplication: SellerApplicationResponse = {
   id: 'application_mock_1',
@@ -128,17 +132,83 @@ export const mockSellerCreatedProduct: ProductListItemResponse = {
   name: '새 마감 할인 상품',
 };
 
-export const mockSellerOrders: OrderListItemResponse[] = mockOrders;
+export const mockSellerOrders: OrderListItemResponse[] = [
+  {
+    id: MOCK_SELLER_ORDER_ID_1,
+    orderNumber: 'PM20260429A1B2C3D4E5',
+    storeId: 'store_1',
+    storeName: '픽마 베이커리',
+    totalAmount: 12000,
+    discountAmount: 4800,
+    paymentAmount: 7200,
+    status: 'reserved',
+    pickupAt: '2026-04-29T11:30:00.000Z',
+    pickupServiceDate: '2026-04-29',
+    storeOrderNumber: '20260429-0000001',
+    pickupNumber: 'A-01',
+    expiresAt: '2026-04-29T10:10:00.000Z',
+    createdAt: '2026-04-29T10:00:00.000Z',
+    updatedAt: '2026-04-29T10:01:00.000Z',
+  },
+  {
+    id: MOCK_SELLER_ORDER_ID_2,
+    orderNumber: 'PM20260429F6A7B8C9D0',
+    storeId: 'store_1',
+    storeName: '픽마 베이커리',
+    totalAmount: 9800,
+    discountAmount: 3900,
+    paymentAmount: 5900,
+    status: 'no_show',
+    pickupAt: '2026-04-29T12:00:00.000Z',
+    pickupServiceDate: '2026-04-29',
+    storeOrderNumber: '20260429-0000002',
+    pickupNumber: 'A-02',
+    createdAt: '2026-04-29T10:10:00.000Z',
+    updatedAt: '2026-04-29T10:10:00.000Z',
+  },
+  {
+    id: MOCK_SELLER_ORDER_ID_3,
+    orderNumber: 'PM20260429E1F2A3B4C5',
+    storeId: 'store_1',
+    storeName: '픽마 베이커리',
+    totalAmount: 11000,
+    discountAmount: 3300,
+    paymentAmount: 7700,
+    status: 'completed',
+    pickupAt: '2026-04-28T13:00:00.000Z',
+    pickupServiceDate: '2026-04-28',
+    storeOrderNumber: '20260428-0000003',
+    pickupNumber: 'B-03',
+    createdAt: '2026-04-28T10:30:00.000Z',
+    updatedAt: '2026-04-28T13:05:00.000Z',
+  },
+];
 
 export const mockSellerOrderList: OrderListResponse = {
-  items: mockOrders,
+  items: mockSellerOrders,
   page: 1,
   pageSize: 20,
-  totalCount: mockOrders.length,
+  totalCount: mockSellerOrders.length,
   totalPages: 1,
 };
 
-export const mockSellerOrderDetail: OrderDetailResponse = mockOrderDetail;
+export const mockSellerOrderDetailsMap: Record<string, OrderDetailResponse> =
+  Object.fromEntries(
+    mockSellerOrders.map((order) => [
+      order.id,
+      {
+        ...order,
+        items: mockOrderItems.filter((item) => item.orderId === order.id),
+      },
+    ])
+  );
+
+export const mockSellerOrderDetail: OrderDetailResponse = {
+  ...mockSellerOrders[0],
+  items: mockOrderItems.filter(
+    (item) => item.orderId === mockSellerOrders[0].id
+  ),
+};
 
 type ReviewStatus = 'pending' | 'reviewing' | 'completed';
 type CertificationStatus = 'waiting' | 'approved' | 'rejected';
@@ -160,7 +230,6 @@ export interface MockStoreStepState {
   storeStatus: StoreStatus;
 }
 
-// 판매자 인증 초기 상태
 export const mockSellerAuthState: MockAuthStepState = {
   termsAgreed: false,
   businessInfoSubmitted: false,
@@ -170,14 +239,12 @@ export const mockSellerAuthState: MockAuthStepState = {
   rejectionReason: undefined,
 };
 
-// 가게 등록 초기 상태
 export const mockStoreRegisterState: MockStoreStepState = {
   storeInfoSubmitted: false,
   reviewStatus: 'pending',
   storeStatus: 'waiting',
 };
 
-// 테스트용 - 인증 완료 상태
 export const mockSellerAuthCompleted: MockAuthStepState = {
   termsAgreed: true,
   businessInfoSubmitted: true,
@@ -187,7 +254,6 @@ export const mockSellerAuthCompleted: MockAuthStepState = {
   rejectionReason: undefined,
 };
 
-// 테스트용 - 반려 상태
 export const mockSellerAuthRejected: MockAuthStepState = {
   termsAgreed: true,
   businessInfoSubmitted: true,
@@ -197,7 +263,6 @@ export const mockSellerAuthRejected: MockAuthStepState = {
   rejectionReason: '서류가 불명확합니다. 다시 제출해주세요.',
 };
 
-// 테스트용 - 심사 중 상태
 export const mockSellerAuthReviewing: MockAuthStepState = {
   termsAgreed: true,
   businessInfoSubmitted: true,
@@ -207,7 +272,6 @@ export const mockSellerAuthReviewing: MockAuthStepState = {
   rejectionReason: undefined,
 };
 
-// 테스트용 - 가게 등록 완료 상태
 export const mockStoreRegisterCompleted: MockStoreStepState = {
   storeInfoSubmitted: true,
   reviewStatus: 'completed',

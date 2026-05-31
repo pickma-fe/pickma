@@ -7,6 +7,7 @@ import { ERROR_CODE } from '@/lib/errors/errorCodes';
 import { requireSellerStore } from '@/app/api/_lib/auth';
 import { isApiMockEnabled } from '@/app/api/_lib/mock';
 import { mockSellerOrderList } from '@/mocks/seller';
+import { mockMyStore } from '@/mocks/stores';
 
 import { getSellerOrders } from './_lib/service';
 import { GET } from './route';
@@ -23,7 +24,7 @@ vi.mock('./_lib/service', () => ({
   getSellerOrders: vi.fn(),
 }));
 
-const STORE_ID = '00000000-0000-4000-8000-000000000031';
+const STORE_ID = mockMyStore.id;
 
 const sellerResult = {
   authUser: {},

@@ -77,7 +77,7 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 | T49 | Auth/Payment/Legal UI/UX 및 접근성 개선           | P2       | 진행 전 | 확인 필요    | T45, T27, T42      | [T49_auth_payment_legal_ui_accessibility_improvement.md](T49_auth_payment_legal_ui_accessibility_improvement.md) |
 | T50 | 판매자 심사 대기 화면 구현                        | P1       | 완료    | 180          | 없음               | [T50_seller_pending_page.md](T50_seller_pending_page.md)                                                         |
 | T51 | 판매자 대시보드 메인 화면 구현                    | P1       | 진행 전 | 확인 필요    | T10                | [T51_seller_dashboard_page.md](T51_seller_dashboard_page.md)                                                     |
-| T52 | 판매자 주문 상세 화면 구현                        | P1       | 진행 전 | 확인 필요    | T02                | [T52_seller_order_detail_page.md](T52_seller_order_detail_page.md)                                               |
+| T52 | 판매자 주문 상세 화면 구현                        | P1       | 완료    | 185          | T02                | [T52_seller_order_detail_page.md](T52_seller_order_detail_page.md)                                               |
 | T53 | 판매자 가게 정보 수정 화면 구현                   | P1       | 진행 전 | 확인 필요    | T15                | [T53_seller_store_edit_page.md](T53_seller_store_edit_page.md)                                                   |
 | T54 | 소비자 주문 내역 및 상세 화면 구현                | P1       | 진행 전 | 확인 필요    | T15                | [T54_consumer_orders_page.md](T54_consumer_orders_page.md)                                                       |
 | T55 | 소비자 프로필 수정 화면 구현                      | P2       | 완료    | 177          | 없음               | [T55_consumer_profile_edit_page.md](T55_consumer_profile_edit_page.md)                                           |
