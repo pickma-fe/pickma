@@ -277,6 +277,15 @@ reviews:
           - Cron cleanup endpoint는 CRON_SECRET bearer 인증을 확인하고, 인증 실패 시 cleanup을 실행하지 않는가
         - Admin API는 /api/admin/*로 분리되고 requireAdmin()을 통과하는가
 
+    - path: 'src/app/api/auth/**'
+      instructions: |
+        ## Auth email API 검토 기준
+        - email/password 회원가입은 requestEmailVerification → verifyEmailOtp → completeEmailSignup 선인증 흐름을 유지하는가.
+        - OTP challenge/token 상태는 Upstash Redis 저장소 기준으로 처리하고, request rate limit과 OTP attempt limit을 적용하는가.
+        - OTP 메일 발송은 Resend HTTP API 직접 호출 기준을 따르고, RESEND_API_KEY, AUTH_EMAIL_HASH_SECRET, Upstash token 등 secret을 응답이나 client bundle에 노출하지 않는가.
+        - auth.admin.createUser는 verification token 검증 이후 email_confirm: true로 호출되는가.
+        - auth email 오류는 docs/api_spec.md의 AUTH_EMAIL_* error code와 HTTP status로 매핑되는가.
+
     - path: 'src/proxy.ts'
       instructions: |
         ## Proxy 권한 체크 검토 기준
