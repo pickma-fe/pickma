@@ -17,6 +17,7 @@
 - 새 파일은 기존 folder convention에 맞춰 배치한다.
 - component는 `src/components/` 아래의 기존 category folder를 우선 사용한다.
 - API/Domain 작업은 `docs/system_architecture.md`, `docs/domain.md`, `docs/api_spec.md`를 따른다.
+- 결제 confirm/취소 흐름 변경 전에는 T01 보상 정책과 `docs/system_architecture.md`, `docs/api_spec.md`의 결제 명세를 확인한다.
 - 명시적 요청, 현재 설계 문서, 또는 명확한 필요가 없으면 package를 추가하지 않는다.
 
 ## 피해야 할 작업

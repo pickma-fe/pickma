@@ -234,6 +234,7 @@ reviews:
           - PickMa 내부 주문 식별자는 orderNumber이며, Toss 외부 필드명은 결제 API 내부에서만 다루는가
           - 클라이언트가 전달한 결제 금액을 DB의 주문 금액과 대조 검증하는가 (금액 위변조 방지)
           - 결제 완료 후 payment 저장, 주문 확정, 재고 확정 처리가 confirm_payment RPC로 원자적으로 처리되는가
+          - 결제 confirm 흐름 변경 시 T01 보상 정책을 유지하는가: Toss confirm 성공 후 confirm_payment RPC 실패 시 PAYMENT_MOCK=false는 callTossCancel 후 revert_payment_processing, PAYMENT_MOCK=true는 revert_payment_processing만 시도하는가
           - API_MOCK_ENABLED는 데이터 레이어 mock 여부를 제어하며 PAYMENT_MOCK 결제 분기와 별개로 취급되는가
         - 주문 API (/api/orders):
           - 재고 부족 시 예약을 거부하는가
