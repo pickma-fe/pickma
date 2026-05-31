@@ -241,6 +241,11 @@ reviews:
         - Zod 검증 실패 details가 field-level path/message로 변환되는가
         - 보안: TOSS_SECRET_KEY, SUPABASE_SERVICE_ROLE_KEY 등 환경 변수 값을 응답 body에 절대 포함하지 않는가
         - 보안: 에러 응답에 스택 트레이스, 내부 경로 등 민감 정보 포함 금지
+        - service role client 사용은 `docs/system_architecture.md`의 허용 케이스(RPC, 초기 row 생성, admin cross-user, Storage API)에 해당하는가
+        - owner-scoped 단순 조회/수정에 service role을 새로 도입하지 않는가
+        - auth helper가 리소스 scope에 맞는가: activeUser, seller, sellerStore, admin
+        - service에 params/body id를 넘기기 전에 authUser.id 또는 store.id 기반 owner/store/admin scope를 검증하는가
+        - service role 또는 owner-scoped route 변경 시 권한 실패/타 사용자 접근 차단 테스트가 함께 추가 또는 갱신되는가
         - 외부 API 호출 실패 시 적절한 HTTP 상태 코드로 응답하는가 (500 남발 금지)
         - 결제 API:
           - 주문 생성은 POST /api/orders, 결제 준비는 POST /api/payments/prepare, 결제 승인은 POST /api/payments/confirm 으로 분리되는가
