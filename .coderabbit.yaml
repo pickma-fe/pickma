@@ -91,6 +91,15 @@ reviews:
         - 기존 template 구조를 유지하면서 Task ID: 항목을 포함하는가.
         - 관련 docs 최신화 필요 여부와 docs/tasks 상태/GitHub Issue 번호 갱신 여부를 확인하게 하는가.
 
+    - path: '.github/workflows/**'
+      instructions: |
+        ## CI workflow 검토 기준
+        - 기본 CI가 lint, typecheck, test를 유지하는가.
+        - Vitest browser project 실행을 위해 Chromium 설치가 유지되는가.
+        - CI env는 외부 서비스에 연결하지 않는 mock/test placeholder 값을 사용하는가.
+        - E2E job은 T23 완료 전 기본 CI에 섞지 않는가.
+        - `npm run build` 추가 여부는 팀 결정/문서 갱신과 함께 다루는가.
+
     - path: 'docs/**'
       instructions: |
         ## 설계 문서 검토 기준
