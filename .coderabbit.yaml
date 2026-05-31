@@ -102,6 +102,14 @@ reviews:
         - Auth는 Supabase SDK 래퍼, 세션은 @supabase/ssr 기반 cookie session, proxy는 세션 refresh/보호 라우트 역할로 설명되는가.
         - Mock 환경 변수는 API_MOCK_ENABLED를 사용하는가.
 
+    - path: 'supabase/migrations/**'
+      instructions: |
+        ## Migration 검토 기준
+        - 스키마 변경은 `docs/migration_policy.md` 기준의 incremental migration으로 작성하는가.
+        - 원격 적용 이후의 초기 migration 직접 수정은 `docs/migration_policy.md`의 예외 조건에 해당하는가.
+        - migration 파일명은 `YYYYMMDDHHMMSS_<snake_case_name>.sql` 형식인가.
+        - migration은 단일 주제 변경을 담고, 필요한 경우 `IF NOT EXISTS` 등 idempotent guard를 포함하는가.
+
     - path: 'src/types/**'
       instructions: |
         ## Domain 타입 검토 기준
