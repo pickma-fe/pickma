@@ -408,6 +408,14 @@ sequenceDiagram
   - `processing` 상태로 30분 이상 잔류하는 주문은 운영 알람 대상이며 수동 확인이 필요하다.
   - 후속 고도화: T11 (outbox/webhook/idempotency), A-ORDER-01 `status=processing` filter (P1)
 
+### 7.1 정산대행 설계 원칙
+
+PickMa는 기본적으로 Toss 정산대행을 사용하지만, 다른 정산대행사 또는 자체 정산으로 전환이 가능하도록 설계한다.
+
+- 정산대행사 의존 코드는 adapter 계층으로 격리하고, 상위 도메인 로직이 provider에 직접 종속되지 않게 한다.
+- KYC(셀러 신원 확인)는 정산대행 서비스가 담당하는 구조를 전제로 하며, 이 전제가 유지되는 한 PickMa는 신분증 원본을 수집하지 않는다. PickMa가 KYC를 직접 수행하는 구조로 전환되는 경우에는 T44 결정을 재검토하고 PIPA 제23·24조 별도 동의 필요 여부를 다시 확인한다.
+- provider 교체 시 변경 범위: adapter 구현체, 환경변수, 외부 API 호출부에 한정한다. 주문/결제 도메인 로직과 DB 스키마는 영향받지 않는 것을 목표로 한다.
+
 ---
 
 ## 8. Mock 전략
@@ -641,6 +649,8 @@ Branch protection은 `dev` 대상 PR에서 `CI / Lint, typecheck, and test` 통�
 - product-images: `{storeId}/{uploadId}/{fileName}`
 - profile-images: `{userId}/{uploadId}/{fileName}`
 
+`seller-application-documents`에 저장 가능한 문서 타입은 사업자등록증(`business_license`), 영업신고증(`food_service_permit`), 통장사본(`bank_account`) 3종으로 한정한다. 신분증(`id_card`)은 T44 결정으로 수집 대상에서 제외된다 (T61에서 코드/DB 기준 제거).
+
 ### 14.2 Orphan cleanup 방식
 
 클라이언트 best-effort와 서버 주기적 orphan 스캔의 hybrid 방식을 채택한다.
@@ -689,17 +699,17 @@ Branch protection은 `dev` 대상 PR에서 `CI / Lint, typecheck, and test` 통�
 
 ### 14.5 향후 재검토 사항
 
-- Toss 지급대행/KYC 책임 범위 확정 시 서류 보관 의무 재검토. 세부 정책은 T44에서 결정한다.
+- **[T44 결정 완료]** PickMa는 별도 정산대행 서비스(현재 Toss)를 사용하는 구조이며, 해당 서비스가 셀러 신원 확인(KYC)을 담당한다. 따라서 PickMa가 신분증 원본을 직접 보관할 의무가 없다. 판매자 신청 서류를 사업자등록증·영업신고증·통장사본 3종으로 한정하고 신분증(`id_card`)을 제외한다. 코드/DB 기준 제거는 T61에서 진행한다.
 - 분쟁 대응에 필요한 최소 메타데이터 범위 확인 (운영/CS 정책).
 - public bucket(store-images, product-images, profile-images) orphan 처리는 P3에서 결정.
 
 ---
 
-## 14. service role 사용 기준
+## 15. service role 사용 기준
 
 `createServiceRoleClient()`는 RLS를 우회하므로 남용하면 사용자·판매자·관리자 데이터 노출 위험이 생긴다. 반드시 아래 허용 케이스에 해당할 때만 사용한다.
 
-### 14.1 허용 케이스
+### 15.1 허용 케이스
 
 | 케이스                | 설명                                                          | 예시                                                           |
 | --------------------- | ------------------------------------------------------------- | -------------------------------------------------------------- |
@@ -708,7 +718,7 @@ Branch protection은 `dev` 대상 PR에서 `CI / Lint, typecheck, and test` 통�
 | admin cross-user 조작 | admin이 타 사용자 데이터 조회/변경                            | `getPendingSellerApplications`, `approveSellerApplication`     |
 | Storage API           | Supabase Storage에는 RLS가 없어 service role 필수             | `createSignedUploadUrl`, Storage orphan cleanup                |
 
-### 14.2 금지 케이스
+### 15.2 금지 케이스
 
 단순 owner-scoped SELECT는 service role을 사용하지 않는다. `createServerClient()` + RLS 정책으로 처리한다.
 
@@ -716,7 +726,7 @@ Branch protection은 `dev` 대상 PR에서 `CI / Lint, typecheck, and test` 통�
 - `products.store_id ∈ 내 가게` 기준 판매자 상품 조회
 - `users.id = auth.uid()` 기준 프로필 조회/수정
 
-### 14.3 RLS 전환 후보 목록
+### 15.3 RLS 전환 후보 목록
 
 현재 service role을 사용하지만 RLS+server client로 전환 가능한 후보다. 전환 전 해당 테이블의 RLS 정책 추가가 전제 조건이며, 실제 전환은 후속 task에서 수행한다.
 
@@ -733,11 +743,11 @@ Branch protection은 `dev` 대상 PR에서 `CI / Lint, typecheck, and test` 통�
 
 ---
 
-## 15. Route Handler 보안 checklist
+## 16. Route Handler 보안 checklist
 
 신규 Route Handler를 구현하거나 기존 Route Handler를 수정할 때 아래 항목을 확인한다.
 
-### 15.1 auth helper 선택 기준
+### 16.1 auth helper 선택 기준
 
 | 조건                           | 사용할 helper                                           |
 | ------------------------------ | ------------------------------------------------------- |
@@ -747,18 +757,18 @@ Branch protection은 `dev` 대상 PR에서 `CI / Lint, typecheck, and test` 통�
 | 관리자 전용                    | `requireAdmin()`                                        |
 | 판매자 신청 자격 확인          | `requireActiveUser()` + `checkApplicationEligibility()` |
 
-### 15.2 owner scope 검증 원칙
+### 16.2 owner scope 검증 원칙
 
 - auth helper가 반환한 `authUser.id` / `store.id`를 service에 직접 전달해 소유권 필터를 적용한다.
 - service 내부에서 params의 id를 무검증으로 사용하지 않는다. Route Handler에서 auth → params → service 순서로 검증한다.
 - 민감 리소스(admin 전용, 개인 문서, 결제)는 auth를 params/body 검증보다 먼저 수행하는 것을 권장한다.
 
-### 15.3 응답 민감도 원칙
+### 16.3 응답 민감도 원칙
 
 - 에러 응답에 DB 쿼리 오류 메시지, 내부 파일 경로, 타 사용자 ID 등 민감 정보를 포함하지 않는다.
 - `routeError(error)`는 `AppError`만 클라이언트에 노출하고, 그 외는 `INTERNAL_SERVER_ERROR`로 처리한다.
 
-### 15.4 P0/P1 API owner scope 테스트 커버리지
+### 16.4 P0/P1 API owner scope 테스트 커버리지
 
 | API                                                          | 우선순위 | 필요 scope               | 현재 테스트 | T07 조치               | 후속 task               |
 | ------------------------------------------------------------ | -------- | ------------------------ | ----------- | ---------------------- | ----------------------- |

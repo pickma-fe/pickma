@@ -54,22 +54,22 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 | T26 | 운영 화면 summary/list API 분리                   | P2       | 진행 전 | 확인 필요    | T04                | [T26_admin_seller_summary_list_api_split.md](T26_admin_seller_summary_list_api_split.md)                         |
 | T27 | Auth 이메일/Supabase SMTP/rate limit 정책 정리    | P0       | 완료    | 186          | 없음               | [T27_auth_email_smtp_rate_limit_policy.md](T27_auth_email_smtp_rate_limit_policy.md)                             |
 | T28 | 판매자 상품 수정 진입점 결정 및 구현              | P2       | 진행 전 | 확인 필요    | T15                | [T28_seller_product_edit_entrypoint.md](T28_seller_product_edit_entrypoint.md)                                   |
-| T29 | 판매자 제출 문서 확인 UX 개선                     | P2       | 진행 전 | 확인 필요    | T06, T44           | [T29_seller_document_review_ux.md](T29_seller_document_review_ux.md)                                             |
+| T29 | 판매자 제출 문서 확인 UX 개선                     | P2       | 진행 전 | 확인 필요    | T06, T44, T61      | [T29_seller_document_review_ux.md](T29_seller_document_review_ux.md)                                             |
 | T30 | AI 추천 1차 설계                                  | P2       | 진행 전 | 확인 필요    | T25, T05           | [T30_ai_recommendation_first_design.md](T30_ai_recommendation_first_design.md)                                   |
 | T31 | 주문 취소/환불 API 구현                           | P3       | 진행 전 | 확인 필요    | T11, T02           | [T31_order_cancel_refund_api.md](T31_order_cancel_refund_api.md)                                                 |
 | T32 | 정산/수수료 시스템 설계                           | P3       | 진행 전 | 확인 필요    | T31                | [T32_settlement_fee_system_design.md](T32_settlement_fee_system_design.md)                                       |
 | T33 | 네이티브 앱 결제 방식 재검토                      | P3       | 진행 전 | 확인 필요    | T01                | [T33_native_app_payment_review.md](T33_native_app_payment_review.md)                                             |
 | T34 | 리뷰/평점 도메인 설계                             | P3       | 진행 전 | 확인 필요    | 없음               | [T34_review_rating_domain_design.md](T34_review_rating_domain_design.md)                                         |
 | T35 | AppError 객체 인수 리팩터링                       | P3       | 진행 전 | 확인 필요    | 없음               | [T35_apperror_object_argument_refactor.md](T35_apperror_object_argument_refactor.md)                             |
-| T36 | 판매자 신청 서류 수정/재업로드 정책               | P3       | 진행 전 | 확인 필요    | T06, T44           | [T36_seller_application_document_reupload_policy.md](T36_seller_application_document_reupload_policy.md)         |
+| T36 | 판매자 신청 서류 수정/재업로드 정책               | P3       | 진행 전 | 확인 필요    | T06, T44, T61      | [T36_seller_application_document_reupload_policy.md](T36_seller_application_document_reupload_policy.md)         |
 | T37 | 운영 CS/모니터링/관리자 권한 정책 정리            | P3       | 진행 전 | 확인 필요    | T01, T06           | [T37_ops_cs_monitoring_admin_permission_policy.md](T37_ops_cs_monitoring_admin_permission_policy.md)             |
 | T38 | 판매자 랜딩/온보딩 CTA 정리                       | P2       | 진행 전 | 확인 필요    | T10                | [T38_seller_landing_onboarding_cta.md](T38_seller_landing_onboarding_cta.md)                                     |
 | T39 | public 이미지 자산 구조 및 Footer badge 크기 정리 | P1       | 진행 전 | 확인 필요    | T18                | [T39_public_image_asset_footer_badge_cleanup.md](T39_public_image_asset_footer_badge_cleanup.md)                 |
 | T40 | Storage orphan cleanup API 및 hook 통합           | P1       | 진행 전 | 확인 필요    | T06                | [T40_storage_orphan_cleanup_api_hook.md](T40_storage_orphan_cleanup_api_hook.md)                                 |
 | T41 | Storage lifecycle 주기적 orphan scanner           | P2       | 진행 전 | 확인 필요    | T40, T43           | [T41_storage_lifecycle_cron.md](T41_storage_lifecycle_cron.md)                                                   |
-| T42 | 법적 고지 페이지 및 동의 흐름 구현                | P1       | 진행 전 | 161          | T44                | [T42_legal_compliance_pages.md](T42_legal_compliance_pages.md)                                                   |
+| T42 | 법적 고지 페이지 및 동의 흐름 구현                | P1       | 진행 전 | 161          | T44, T61           | [T42_legal_compliance_pages.md](T42_legal_compliance_pages.md)                                                   |
 | T43 | Vercel 배포 설정 및 Cron 환경 구성                | P2       | 진행 전 | 확인 필요    | 없음               | [T43_vercel_deployment_config.md](T43_vercel_deployment_config.md)                                               |
-| T44 | 판매자 신분증 원본 처리 및 KYC 보관 정책 결정     | P0       | 진행 전 | 확인 필요    | T06                | [T44_seller_id_document_kyc_policy.md](T44_seller_id_document_kyc_policy.md)                                     |
+| T44 | 판매자 신분증 원본 처리 및 KYC 보관 정책 결정     | P0       | 완료    | 191          | T06                | [T44_seller_id_document_kyc_policy.md](T44_seller_id_document_kyc_policy.md)                                     |
 | T45 | UI/UX 및 접근성 baseline 기준 수립                | P1       | 진행 전 | 확인 필요    | T09                | [T45_ui_accessibility_baseline_policy.md](T45_ui_accessibility_baseline_policy.md)                               |
 | T46 | Consumer UI/UX 및 접근성 개선                     | P2       | 진행 전 | 확인 필요    | T45, T12, T13      | [T46_consumer_ui_accessibility_improvement.md](T46_consumer_ui_accessibility_improvement.md)                     |
 | T47 | Seller UI/UX 및 접근성 개선                       | P2       | 진행 전 | 확인 필요    | T45, T28, T29, T38 | [T47_seller_ui_accessibility_improvement.md](T47_seller_ui_accessibility_improvement.md)                         |
@@ -86,12 +86,13 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 | T58 | 관리자 대시보드 통계 화면 구현                    | P1       | 진행 전 | 확인 필요    | T07                | [T58_admin_dashboard_statistics.md](T58_admin_dashboard_statistics.md)                                           |
 | T59 | 소비자 찜 목록 화면 및 API 구현                   | P2       | 진행 전 | 확인 필요    | 없음               | [T59_consumer_wishlist_page.md](T59_consumer_wishlist_page.md)                                                   |
 | T60 | Auth 비밀번호 정책 강화                           | P1       | 진행 전 | 확인 필요    | T27                | [T60_auth_password_policy.md](T60_auth_password_policy.md)                                                       |
+| T61 | 판매자 신청 서류 문서 타입 정리 (신분증 제거 및 타입명 통일) | P1       | 진행 전 | 확인 필요    | T44                | [T61_seller_id_card_removal.md](T61_seller_id_card_removal.md)                                                   |
 
 ## 추천 진행 흐름
 
 1. 운영 정책과 기준 문서 확정: T01, T06, T07, T08, T19, T27, T44
 2. 인벤토리, 개발 하네스, 공통 정리: T09, T24, T17, T18, T20, T39, T43, T45
-3. 핵심 API/화면 구조 안정화: T02, T03, T04, T05, T10, T11, T12, T13, T14, T15, T16, T40, T42
+3. 핵심 API/화면 구조 안정화: T02, T03, T04, T05, T10, T11, T12, T13, T14, T15, T16, T40, T61, T42
 4. 미구현 핵심 화면 구현: T50, T51, T52, T53, T54, T58
 5. 심화 기능 구현: T21, T22, T23, T25, T26, T28, T29, T30, T38, T41, T55, T56, T59
 6. 사용자 흐름별 UI/UX 및 접근성 개선: T46, T47, T48, T49
