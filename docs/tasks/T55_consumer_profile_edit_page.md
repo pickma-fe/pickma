@@ -51,3 +51,10 @@
   - 실제 로그인 provider가 있으면 내 정보 화면에 해당 로그인 방식을 표시한다.
   - 회원 탈퇴 시 계정이 비활성화되고 로그아웃된다.
   - 비로그인 사용자는 `/mypage/profile` 접근 시 로그인 guard 흐름을 따른다.
+
+- 구현 결과:
+  - `/mypage/profile` 페이지와 `ProfileEditPageContent` 구현.
+  - `useUpdateMe`와 `userApi.updateMe`를 연결해 닉네임, 연락처, 프로필 이미지를 수정.
+  - 로그인 provider가 없을 때 특정 provider를 단정하지 않도록 표시 로직 정리.
+  - `useDeleteMe`와 로그아웃 흐름을 연결해 회원 탈퇴 후 홈으로 이동.
+  - `ProfileEditPageContent.test.tsx`로 provider 표시와 회원 탈퇴 흐름을 검증.

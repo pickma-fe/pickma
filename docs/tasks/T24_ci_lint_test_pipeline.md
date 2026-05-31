@@ -60,3 +60,10 @@
   - CI 통과 없이 merge하지 않는 branch protection 정책이 있다.
   - 필요한 env 문서가 있다.
   - E2E job은 T23 완료 후 추가되며, 이 task 완료 기준에 포함하지 않는다.
+
+- 구현 결과:
+  - `.github/workflows/ci.yml` 추가. PR과 `dev`/`main` push에서 lint, typecheck, test를 실행.
+  - Vitest browser project 실행을 위해 CI에서 Chromium을 설치하도록 구성.
+  - CI 환경 변수는 외부 서비스에 연결하지 않는 mock/test placeholder 값으로 정리.
+  - `docs/system_architecture.md` CI/CD 섹션에 기본 job, env, build 제외, branch protection 기준 문서화.
+  - E2E job은 T23 완료 후 별도 job 또는 workflow로 추가하도록 분리.

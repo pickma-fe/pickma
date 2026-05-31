@@ -58,3 +58,9 @@
   - 이후 task 진행 중 문서를 함께 갱신하는 운영 규칙이 이미 문서화되어 있음을 확인한다.
   - doc drift는 이번 task에서 `rg` 수동 검증으로 확인하고, 지속형 자동화는 T24에서 다룬다.
   - T50–T59 task 문서가 `docs/tasks/`에 존재하고 README.md에 등록된다.
+
+- 구현 결과:
+  - `docs/domain.md`, `docs/prd.md`, `docs/erd.md`, `docs/api_spec.md`, `docs/ia.md`의 심화 착수 전 baseline drift를 정리.
+  - `docs/tasks/T50`–`T59` task 문서를 추가하고 `docs/tasks/README.md` task board에 등록.
+  - task 완료 시 관련 `docs/*` 최신화 필요 여부를 확인하는 운영 규칙이 `AGENTS.md`와 `docs/tasks/README.md`에 유지됨을 확인.
+  - 지속형 doc drift 자동화는 T24 또는 별도 후속 task 범위로 분리.

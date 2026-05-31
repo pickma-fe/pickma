@@ -50,3 +50,9 @@
 - 확인 필요 사항:
   - 거절 사유를 화면에 표시할지 여부
   - 재신청 가능 조건 및 UX 흐름
+
+- 구현 결과:
+  - `/seller/pending` 페이지와 `PendingContent`, `PendingView`, `RejectedView` 컴포넌트 구현.
+  - `useSellerOnboardingStatus`를 통해 pending/rejected/approved 상태를 조회하고 상태별 화면을 표시.
+  - rejected 상태에서는 `latestRejectReason`을 표시하고, 재신청은 후속 정책/UX 확정 전까지 안내 중심으로 처리.
+  - 개발 확인용 query(`status`, `reason`)로 pending/rejected 화면을 확인할 수 있는 경로를 제공.
