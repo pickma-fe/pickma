@@ -89,3 +89,4 @@ Domain 로직이 들어가는 layer는 `contracts`를 직접 import하지 않는
 - Route Handler 전용 backend helper는 `src/app/api/_lib` 또는 `src/app/api/{resource}/_lib` 아래에 둔다.
 - Route Handler helper 파일(`service.ts`, `mapper.ts`, `schemas.ts`)은 resource folder 내부 `_lib/` 아래에 둔다. 파일명 자체에는 `_` prefix를 붙이지 않는다.
 - Storage cleanup 또는 민감 파일 처리 변경 시 `docs/system_architecture.md`의 Storage lifecycle 정책을 확인하고, client best-effort cleanup과 서버 cleanup 책임을 분리한다.
+- 판매자 신청 서류/KYC 변경 시 T44/T61 기준을 확인하고, 신분증 원본(`id_card`) 수집을 되살리지 않는다.

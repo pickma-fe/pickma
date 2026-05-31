@@ -110,6 +110,7 @@ reviews:
         - Supabase DB 접근은 src/api -> /api/* Route Handler -> Supabase 경유로 설명되는가.
         - Auth는 Supabase SDK 래퍼, 세션은 @supabase/ssr 기반 cookie session, proxy는 세션 refresh/보호 라우트 역할로 설명되는가.
         - Mock 환경 변수는 API_MOCK_ENABLED를 사용하는가.
+        - 판매자 신청 서류와 법적 동의 문서는 T44/T61 기준(사업자등록증, 영업신고증, 통장사본 3종; 신분증 원본 미수집)과 충돌하지 않는가.
 
     - path: 'supabase/migrations/**'
       instructions: |
@@ -129,6 +130,7 @@ reviews:
         - DB/API/Domain 상태값이 1:1 대응이라고 강제하지 않는가
         - 계산 필드(isSoldOut, isExpired, availableStock 등)가 Domain 의도와 맞는가
         - src/types/supabase.ts는 Supabase CLI generated file로 취급되고 직접 수정되지 않는가
+        - 판매자 신청 문서 타입 변경 시 T61 기준인 business_license, food_service_permit, bank_account 3종으로 정리하고 id_card 수집을 되살리지 않는가
 
     - path: 'src/contracts/**'
       instructions: |
@@ -139,6 +141,7 @@ reviews:
         - 날짜는 ISO string인가
         - response envelope, pagination, validation issue 타입이 docs/api_spec.md와 일치하는가
         - Domain Date 객체나 UI 전용 타입이 섞이지 않았는가
+        - 판매자 신청 문서 DTO 변경 시 T61 기준인 business_license, food_service_permit, bank_account 3종으로 정리하고 id_card 수집을 되살리지 않는가
 
     - path: 'src/lib/**'
       instructions: |
@@ -226,6 +229,7 @@ reviews:
         - 상품 CRUD: 본인 가게(store_id) 상품만 수정/삭제 가능한가
         - 픽업 완료·노쇼 처리: 본인 가게 주문만 처리 가능한가
         - 예약이 존재하는 상품(reserved/ready 주문이 있는 경우) 삭제 시도 시 거부하는가
+        - 판매자 신청/서류 UI 변경 시 T44/T61 기준을 따라 신분증 원본 업로드 필드를 새로 만들거나 유지하지 않는가
 
     - path: 'src/app/(admin)/**'
       instructions: |
@@ -285,6 +289,19 @@ reviews:
         - OTP 메일 발송은 Resend HTTP API 직접 호출 기준을 따르고, RESEND_API_KEY, AUTH_EMAIL_HASH_SECRET, Upstash token 등 secret을 응답이나 client bundle에 노출하지 않는가.
         - auth.admin.createUser는 verification token 검증 이후 email_confirm: true로 호출되는가.
         - auth email 오류는 docs/api_spec.md의 AUTH_EMAIL_* error code와 HTTP status로 매핑되는가.
+
+    - path: 'src/app/api/seller-applications/**'
+      instructions: |
+        ## Seller application API 검토 기준
+        - 판매자 신청 문서 타입은 T61 기준인 business_license, food_service_permit, bank_account 3종으로 정리되는가.
+        - id_card, business_report, bankbook 기준을 새로 추가하거나 강화하지 않는가.
+        - seller-application-documents bucket에 신분증 원본 수집 경로가 되살아나지 않는가.
+
+    - path: 'src/app/api/files/upload-url/**'
+      instructions: |
+        ## Upload URL API 검토 기준
+        - seller_application_document 목적의 documentType은 T61 기준 3종으로 제한되는가.
+        - id_card upload URL 발급을 허용하지 않는가.
 
     - path: 'src/proxy.ts'
       instructions: |
