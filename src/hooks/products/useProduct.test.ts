@@ -122,9 +122,7 @@ describe('useProduct', () => {
     expect(productApi.getProduct).not.toHaveBeenCalled();
   });
 
-  it('queryKey가 queryKeys.products.detail(id)와 일치한다', async () => {
-    vi.mocked(productApi.getProduct).mockResolvedValue(mockDetail);
-
+  it('queryKey가 queryKeys.products.detail(id)와 일치한다', () => {
     const client = new QueryClient({
       defaultOptions: { queries: { retry: false } },
     });
