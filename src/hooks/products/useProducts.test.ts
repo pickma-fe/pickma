@@ -105,4 +105,14 @@ describe('useProducts', () => {
     expect(result.current.data?.items[0].id).toBe(mockProduct.id);
     expect(productApi.getProducts).not.toHaveBeenCalled();
   });
+
+  it('enabled가 false이면 상품 목록을 요청하지 않는다', () => {
+    const { result } = renderHook(
+      () => useProducts({ page: 1, pageSize: 20 }, { enabled: false }),
+      { wrapper: createWrapper() }
+    );
+
+    expect(result.current.fetchStatus).toBe('idle');
+    expect(productApi.getProducts).not.toHaveBeenCalled();
+  });
 });

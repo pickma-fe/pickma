@@ -235,6 +235,20 @@ describe('getProducts', () => {
     expect(supabase._chain.ilike).not.toHaveBeenCalled();
   });
 
+  it('가격대 파라미터가 있으면 discount_price 필터를 적용한다', async () => {
+    const supabase = buildSupabase({ data: [], error: null, count: 0 });
+
+    await getProducts(supabase, {
+      page: 1,
+      pageSize: 20,
+      minPrice: 10000,
+      maxPrice: 20000,
+    });
+
+    expect(supabase._chain.gte).toHaveBeenCalledWith('discount_price', 10000);
+    expect(supabase._chain.lt).toHaveBeenCalledWith('discount_price', 20000);
+  });
+
   it('keyword + discountOption 조합 시 ilike + gte 모두 DB 쿼리로 적용한다', async () => {
     const supabase = buildSupabase({ data: [baseRow], error: null, count: 1 });
 

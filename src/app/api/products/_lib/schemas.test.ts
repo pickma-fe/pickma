@@ -33,6 +33,21 @@ describe('productListSchema', () => {
     expect(result.data?.keyword).toBe('크루아상');
   });
 
+  it('가격대 파라미터를 숫자로 변환한다', () => {
+    const result = productListSchema.safeParse({
+      minPrice: '10000',
+      maxPrice: '20000',
+    });
+    expect(result.success).toBe(true);
+    expect(result.data?.minPrice).toBe(10000);
+    expect(result.data?.maxPrice).toBe(20000);
+  });
+
+  it('유효하지 않은 가격대 파라미터는 validation error를 반환한다', () => {
+    expect(productListSchema.safeParse({ minPrice: '-1' }).success).toBe(false);
+    expect(productListSchema.safeParse({ maxPrice: '0' }).success).toBe(false);
+  });
+
   it('keyword가 공백만 있으면 validation error를 반환한다', () => {
     expect(productListSchema.safeParse({ keyword: '   ' }).success).toBe(false);
   });

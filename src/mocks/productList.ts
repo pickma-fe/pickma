@@ -27,6 +27,15 @@ export function buildMockProductListResponse(
       (product) =>
         !keyword || product.name.toLowerCase().includes(keyword.toLowerCase())
     )
+    .filter(
+      (product) =>
+        params.minPrice === undefined ||
+        product.discountPrice >= params.minPrice
+    )
+    .filter(
+      (product) =>
+        params.maxPrice === undefined || product.discountPrice < params.maxPrice
+    )
     .filter((product) => matchesDiscountOption(product, discountOption));
   const sortedProducts = [...filteredProducts].sort((a, b) =>
     compareProducts(a, b, params)

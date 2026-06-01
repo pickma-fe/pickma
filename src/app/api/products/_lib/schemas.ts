@@ -15,6 +15,8 @@ export const productListSchema = z
     region: z.string().trim().min(1).optional(),
     categoryId: z.string().trim().min(1).optional(),
     keyword: z.string().trim().min(1).optional(),
+    minPrice: z.coerce.number().int().nonnegative().optional(),
+    maxPrice: z.coerce.number().int().positive().optional(),
     discountOption: z
       .enum(['all', 'over-40', '30-to-40', '20-to-30', 'under-20'])
       .optional(),
