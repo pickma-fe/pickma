@@ -22,20 +22,14 @@ const DOCUMENTS = [
     required: true,
   },
   {
-    id: 'idCard',
-    title: '대표자 신분증',
+    id: 'foodServicePermit',
+    title: '영업 허가증 (식품접객업)',
     description: 'PNG, JPG, JPEG, PDF (최대 10MB)',
     required: true,
   },
   {
-    id: 'bankbook',
+    id: 'bankAccount',
     title: '통장 사본',
-    description: 'PNG, JPG, JPEG, PDF (최대 10MB)',
-    required: true,
-  },
-  {
-    id: 'businessReport',
-    title: '영업 신고증',
     description: 'PNG, JPG, JPEG, PDF (최대 10MB)',
     required: true,
   },
@@ -43,9 +37,8 @@ const DOCUMENTS = [
 
 const INITIAL_FILES: Record<string, File | null> = {
   businessLicense: null,
-  idCard: null,
-  bankbook: null,
-  businessReport: null,
+  foodServicePermit: null,
+  bankAccount: null,
 };
 
 const ACCEPTED_TYPES = ['image/png', 'image/jpeg', 'application/pdf'];

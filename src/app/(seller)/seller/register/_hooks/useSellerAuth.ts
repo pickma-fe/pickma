@@ -109,13 +109,13 @@ export function useSellerAuth() {
     )
       return;
 
-    const { businessLicense, idCard, bankbook, businessReport } = files;
-    if (!businessLicense || !idCard || !bankbook || !businessReport) return;
+    const { businessLicense, foodServicePermit, bankAccount } = files;
+    if (!businessLicense || !foodServicePermit || !bankAccount) return;
 
     createSellerApplication(
       {
         ...businessInfo,
-        documents: { businessLicense, idCard, bankbook, businessReport },
+        documents: { businessLicense, foodServicePermit, bankAccount },
       },
       {
         onSuccess: () => {
