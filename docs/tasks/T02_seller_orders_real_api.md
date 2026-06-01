@@ -52,3 +52,9 @@
   - 주문 접수/준비 완료/픽업 완료가 성공/실패 상태를 표시한다.
   - UI에서 `@/mocks/orders`를 직접 import하지 않는다.
   - 관련 hook/component 테스트가 추가 또는 갱신된다.
+
+- 구현 결과:
+  - `OrderManageContent`가 `useSellerOrders`와 주문 상태 변경 hook(`useAcceptSellerOrder`, `useMarkSellerOrderReady`, `useCompleteSellerOrder`)을 사용하도록 real API 흐름에 연결.
+  - `OrderTable`은 판매자 주문 Domain/ViewModel 기준으로 목록, 상태별 액션, 로딩/에러/빈 상태를 렌더링.
+  - UI의 `@/mocks/orders` 직접 import 제거. mock fixture는 Route Handler mock 응답과 테스트 영역에만 남김.
+  - `src/hooks/seller/orders/sellerOrders.test.ts`로 목록 조회와 주문 상태 변경 hook의 query/mutation 동작 검증.

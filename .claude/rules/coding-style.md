@@ -29,6 +29,11 @@ paths:
 - 커스텀 CSS 최소화
 - 인라인 스타일 금지
 
+## Migration
+
+- 스키마 변경은 `docs/migration_policy.md`를 확인하고 incremental migration으로 작성한다.
+- 원격 적용 이후의 초기 migration 직접 수정은 정책 예외에 해당하는 경우로 제한한다.
+
 ## Import Layer 규칙
 
 ```

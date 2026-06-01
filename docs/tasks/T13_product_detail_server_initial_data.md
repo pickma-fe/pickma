@@ -1,7 +1,7 @@
 # T13. 상품 상세 Server Component 초기 데이터 전환
 
 - 상태:
-  진행 중
+  완료
 
 - GitHub Issue:
   167
@@ -47,3 +47,10 @@
 - 완료 기준:
   - 상품 상세 핵심 정보가 서버 HTML에 포함된다.
   - client side effect가 별도 컴포넌트로 분리된다.
+
+- 구현 결과:
+  - PR #171 (`feat: 상품 상세 초기 데이터를 서버에서 조회`)에서 구현 완료.
+  - `products/[productId]/page.tsx`에서 상품 상세 초기 데이터를 서버에서 조회하고, client container/TanStack Query에 initial data로 전달.
+  - server API origin 기준을 `NEXT_PUBLIC_APP_URL`로 정리하고, error envelope fallback을 보강.
+  - merge commit: `2468c5af7a8cd5b1b12a5793911cdc201bf4fbf9`
+  - 검증: PR 기준 page/serverApiClient/useProduct targeted test, `npm run typecheck`, `npm run lint`, `npm run build` 통과.

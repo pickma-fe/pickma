@@ -10,7 +10,7 @@
   P1
 
 - 선행 조건:
-  - 선행 task: T10 (판매자 운영 상태 정책 및 구현)
+  - 선행 task: T10 (판매자 운영 상태 정책 및 구현), T15 (TanStack Query key 및 invalidation factory 도입)
 
 - 분류:
   화면/UI

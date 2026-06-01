@@ -17,6 +17,8 @@ paths:
 - 관련 파일만 수정
 - 새 파일은 `docs/system_architecture.md`, `docs/domain.md`, `docs/api_spec.md`의 위치 규칙을 따른다.
 - API/Domain 관련 구현 전에는 위 문서들의 현재 설계를 확인한다.
+- 결제 confirm/취소 흐름 변경 전에는 T01 보상 정책과 `docs/system_architecture.md`, `docs/api_spec.md`의 결제 명세를 확인한다.
+- Auth email/password 흐름 변경 전에는 T27 선인증 정책과 `docs/system_architecture.md`, `docs/api_spec.md`의 auth 명세를 확인한다.
 - 패키지 추가는 사용자 요청 또는 설계 문서상 필요한 경우에만 한다.
 
 ## 금지 사항

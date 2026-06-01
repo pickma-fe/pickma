@@ -51,3 +51,9 @@
 - 확인 필요 사항:
   - 주문 처리 버튼의 확인 모달 여부
   - 픽업번호 확인 UX (QR/입력 방식 등)
+
+- 구현 결과:
+  - `/seller/orders/[id]` 페이지와 `OrderDetailContent` 구현.
+  - `useSellerOrder`로 주문 상세를 조회하고 상품, 수량, 픽업 시간, 픽업 번호, 주문 상태를 표시.
+  - 상태별 액션으로 접수, 준비 완료, 픽업 완료, 미수령 처리를 연결.
+  - `sellerOrderApi`, seller order hook, mapper, 테스트를 확장해 상세 조회와 상태 변경 흐름을 검증.
