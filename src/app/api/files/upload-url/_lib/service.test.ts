@@ -117,11 +117,11 @@ describe('createFileUploadUrl', () => {
           fileName: 'doc.pdf',
           fileSize: 1024,
           mimeType: 'application/pdf',
-          documentType: 'id_card',
+          documentType: 'food_service_permit',
         },
         USER_ID
       );
-      expect(result.storagePath).toContain('/id_card/');
+      expect(result.storagePath).toContain('/food_service_permit/');
     });
 
     it('seller_product_image에 storeId 주입 시 path prefix로 사용', async () => {
@@ -192,7 +192,7 @@ describe('createFileUploadUrl', () => {
             fileName: 'doc.pdf',
             fileSize: 1024,
             mimeType: 'application/pdf',
-            documentType: 'bankbook',
+            documentType: 'bank_account',
           },
           USER_ID
         )
@@ -257,7 +257,7 @@ describe('createFileUploadUrl', () => {
             fileName: 'large.pdf',
             fileSize: 10 * 1024 * 1024 + 1,
             mimeType: 'application/pdf',
-            documentType: 'business_report',
+            documentType: 'bank_account',
           },
           USER_ID
         )

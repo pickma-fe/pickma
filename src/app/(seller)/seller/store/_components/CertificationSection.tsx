@@ -9,9 +9,8 @@ interface CertificationSectionProps {
 
 const REGISTER_CERTS = [
   { label: '사업자 등록증', key: 'businessLicense' },
-  { label: '대표자 신분증', key: 'idCard' },
-  { label: '통장 사본', key: 'bankbook' },
-  { label: '영업 신고증', key: 'businessReport' },
+  { label: '영업 허가증 (식품접객업)', key: 'foodServicePermit' },
+  { label: '통장 사본', key: 'bankAccount' },
 ];
 
 const STORE_CERTS = [

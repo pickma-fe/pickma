@@ -1,8 +1,7 @@
 export type SellerApplicationDocumentType =
   | 'business_license'
-  | 'id_card'
-  | 'bankbook'
-  | 'business_report';
+  | 'food_service_permit'
+  | 'bank_account';
 
 export interface SellerApplicationDocumentResponse {
   id: string;

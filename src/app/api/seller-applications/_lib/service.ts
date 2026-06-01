@@ -7,9 +7,8 @@ import { toSellerApplicationResponse } from './mapper';
 
 const REQUIRED_DOCUMENT_TYPES = [
   'business_license',
-  'id_card',
-  'bankbook',
-  'business_report',
+  'food_service_permit',
+  'bank_account',
 ] as const;
 
 function validateDocumentStoragePath(

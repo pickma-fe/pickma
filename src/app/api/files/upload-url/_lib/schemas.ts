@@ -11,9 +11,8 @@ const FILE_UPLOAD_PURPOSES = [
 
 const SELLER_APPLICATION_DOCUMENT_TYPES = [
   'business_license',
-  'id_card',
-  'bankbook',
-  'business_report',
+  'food_service_permit',
+  'bank_account',
 ] as const;
 
 export const createFileUploadUrlSchema = z

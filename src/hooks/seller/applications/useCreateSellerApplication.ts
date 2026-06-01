@@ -12,9 +12,8 @@ import { sellerApplicationApi } from '@/api/seller-applications/sellerApplicatio
 
 type DocumentFiles = {
   businessLicense: File;
-  idCard: File;
-  bankbook: File;
-  businessReport: File;
+  foodServicePermit: File;
+  bankAccount: File;
 };
 
 export type CreateSellerApplicationInput = Omit<
@@ -27,9 +26,8 @@ export type CreateSellerApplicationInput = Omit<
 const DOC_TYPE_MAP: Record<keyof DocumentFiles, SellerApplicationDocumentType> =
   {
     businessLicense: 'business_license',
-    idCard: 'id_card',
-    bankbook: 'bankbook',
-    businessReport: 'business_report',
+    foodServicePermit: 'food_service_permit',
+    bankAccount: 'bank_account',
   };
 
 export function useCreateSellerApplication() {

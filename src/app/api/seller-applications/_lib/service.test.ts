@@ -21,25 +21,18 @@ const VALID_DOCUMENTS = [
     size: 1024,
   },
   {
-    type: 'id_card' as const,
-    storagePath: `${USER_ID}/upload-2/id_card/id.jpg`,
-    originalFileName: 'id.jpg',
-    contentType: 'image/jpeg',
+    type: 'food_service_permit' as const,
+    storagePath: `${USER_ID}/upload-2/food_service_permit/permit.pdf`,
+    originalFileName: 'permit.pdf',
+    contentType: 'application/pdf',
     size: 512,
   },
   {
-    type: 'bankbook' as const,
-    storagePath: `${USER_ID}/upload-3/bankbook/bank.png`,
+    type: 'bank_account' as const,
+    storagePath: `${USER_ID}/upload-3/bank_account/bank.png`,
     originalFileName: 'bank.png',
     contentType: 'image/png',
     size: 2048,
-  },
-  {
-    type: 'business_report' as const,
-    storagePath: `${USER_ID}/upload-4/business_report/report.pdf`,
-    originalFileName: 'report.pdf',
-    contentType: 'application/pdf',
-    size: 4096,
   },
 ];
 
@@ -141,7 +134,7 @@ describe('createSellerApplication', () => {
     const result = await createSellerApplication(USER_ID, VALID_BODY);
     expect(result.id).toBe('app-1');
     expect(result.status).toBe('pending');
-    expect(result.documents).toHaveLength(4);
+    expect(result.documents).toHaveLength(3);
   });
 
   it('storage list를 각 문서의 폴더와 파일명으로 호출한다', async () => {
@@ -154,7 +147,7 @@ describe('createSellerApplication', () => {
 
     const listMock = mock.storage.from.mock.results[0]?.value
       .list as ReturnType<typeof vi.fn>;
-    expect(listMock).toHaveBeenCalledTimes(4);
+    expect(listMock).toHaveBeenCalledTimes(3);
     VALID_DOCUMENTS.forEach((doc) => {
       const segments = doc.storagePath.split('/');
       const folder = segments.slice(0, -1).join('/');
@@ -243,7 +236,7 @@ describe('createSellerApplication', () => {
         documents: [
           {
             ...VALID_DOCUMENTS[0],
-            storagePath: `${USER_ID}/upload-1/id_card/license.pdf`,
+            storagePath: `${USER_ID}/upload-1/wrong_type/license.pdf`,
           },
           ...VALID_DOCUMENTS.slice(1),
         ],

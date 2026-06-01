@@ -32,7 +32,7 @@ CREATE TYPE payment_status AS ENUM ('pending', 'paid', 'failed', 'cancelled', 'r
 CREATE TYPE social_provider AS ENUM ('google', 'kakao');
 CREATE TYPE seller_application_status AS ENUM ('pending', 'approved', 'rejected');
 CREATE TYPE menu_item_status AS ENUM ('active', 'inactive');
-CREATE TYPE seller_application_document_type AS ENUM ('business_license', 'id_card', 'bankbook', 'business_report');
+CREATE TYPE seller_application_document_type AS ENUM ('business_license', 'food_service_permit', 'bank_account');
 
 -- ============================================================
 -- Tables
@@ -961,14 +961,14 @@ DECLARE
   v_doc            jsonb;
 BEGIN
   IF jsonb_typeof(p_documents) <> 'array'
-     OR jsonb_array_length(p_documents) <> 4 THEN
+     OR jsonb_array_length(p_documents) <> 3 THEN
     RAISE EXCEPTION 'INVALID_APPLICATION_DOCUMENTS';
   END IF;
 
   IF (
     SELECT COUNT(DISTINCT (elem->>'type')::seller_application_document_type)
     FROM jsonb_array_elements(p_documents) AS elem
-  ) <> 4 THEN
+  ) <> 3 THEN
     RAISE EXCEPTION 'INVALID_APPLICATION_DOCUMENTS';
   END IF;
 

@@ -32,17 +32,13 @@ const INITIAL_CERTIFICATIONS: Record<string, CertificationData> = {
     status: true,
     imageUrl: '/images/mock/documents/business-license.jpeg',
   },
-  idCard: {
+  foodServicePermit: {
     status: true,
-    imageUrl: '/images/mock/documents/id-card.jpeg',
+    imageUrl: '/images/mock/documents/food-service-permit.jpeg',
   },
-  bankbook: {
+  bankAccount: {
     status: true,
-    imageUrl: '/images/mock/documents/bankbook.jpeg',
-  },
-  businessReport: {
-    status: true,
-    imageUrl: '/images/mock/documents/business-report.jpeg',
+    imageUrl: '/images/mock/documents/bank-account.jpeg',
   },
   salesLicense: {
     status: false,
@@ -57,18 +53,16 @@ const INITIAL_CERTIFICATIONS: Record<string, CertificationData> = {
 
 const CERT_KEY_MAP: Record<string, string> = {
   '사업자 등록증': 'businessLicense',
-  '대표자 신분증': 'idCard',
-  '통장 사본': 'bankbook',
-  '영업 신고증': 'businessReport',
+  '영업 허가증 (식품접객업)': 'foodServicePermit',
+  '통장 사본': 'bankAccount',
   '통신판매업 신고증': 'salesLicense',
   '위생교육 수료증': 'hygieneLicense',
 };
 
 const REGISTER_CERTS = [
   '사업자 등록증',
-  '대표자 신분증',
+  '영업 허가증 (식품접객업)',
   '통장 사본',
-  '영업 신고증',
 ];
 
 export function StoreInfoContent() {
@@ -82,9 +76,8 @@ export function StoreInfoContent() {
 
   const certificationStatus = {
     businessLicense: certifications.businessLicense.status,
-    idCard: certifications.idCard.status,
-    bankbook: certifications.bankbook.status,
-    businessReport: certifications.businessReport.status,
+    foodServicePermit: certifications.foodServicePermit.status,
+    bankAccount: certifications.bankAccount.status,
     salesLicense: certifications.salesLicense.status,
     hygieneLicense: certifications.hygieneLicense.status,
   };

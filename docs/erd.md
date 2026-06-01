@@ -124,7 +124,7 @@
 | `size`               | int          | NOT NULL, CHECK size > 0              | 파일 크기(bytes) |
 | `created_at`         | timestamp    | NOT NULL, DEFAULT now()               | 생성일시         |
 
-**CHECK:** `type IN ('business_license', 'id_card', 'bankbook', 'business_report')`
+**CHECK:** `type IN ('business_license', 'food_service_permit', 'bank_account')`
 
 **UNIQUE:** `(application_id, type)`
 
