@@ -44,9 +44,8 @@ const validInput = {
   businessCategory: '한식',
   documents: {
     businessLicense: makeFile('business_license.pdf'),
-    idCard: makeFile('id_card.pdf'),
-    bankbook: makeFile('bankbook.pdf'),
-    businessReport: makeFile('business_report.pdf'),
+    foodServicePermit: makeFile('food_service_permit.pdf'),
+    bankAccount: makeFile('bank_account.pdf'),
   },
 };
 
@@ -57,14 +56,13 @@ describe('useCreateSellerApplication', () => {
     vi.clearAllMocks();
   });
 
-  it('4개 문서를 업로드한 뒤 createSellerApplication을 올바른 body로 호출한다', async () => {
+  it('3개 문서를 업로드한 뒤 createSellerApplication을 올바른 body로 호출한다', async () => {
     vi.mocked(
       fileApi.uploadFile as (p: string, f: File, o: object) => Promise<string>
     )
       .mockResolvedValueOnce('path/business_license')
-      .mockResolvedValueOnce('path/id_card')
-      .mockResolvedValueOnce('path/bankbook')
-      .mockResolvedValueOnce('path/business_report');
+      .mockResolvedValueOnce('path/food_service_permit')
+      .mockResolvedValueOnce('path/bank_account');
     vi.mocked(sellerApplicationApi.createSellerApplication).mockResolvedValue(
       mockApplication
     );
@@ -78,7 +76,7 @@ describe('useCreateSellerApplication', () => {
       await result.current.mutateAsync(validInput);
     });
 
-    expect(fileApi.uploadFile).toHaveBeenCalledTimes(4);
+    expect(fileApi.uploadFile).toHaveBeenCalledTimes(3);
     expect(fileApi.uploadFile).toHaveBeenCalledWith(
       'seller_application_document',
       validInput.documents.businessLicense,
@@ -95,16 +93,12 @@ describe('useCreateSellerApplication', () => {
             contentType: 'application/pdf',
           }),
           expect.objectContaining({
-            type: 'id_card',
-            storagePath: 'path/id_card',
+            type: 'food_service_permit',
+            storagePath: 'path/food_service_permit',
           }),
           expect.objectContaining({
-            type: 'bankbook',
-            storagePath: 'path/bankbook',
-          }),
-          expect.objectContaining({
-            type: 'business_report',
-            storagePath: 'path/business_report',
+            type: 'bank_account',
+            storagePath: 'path/bank_account',
           }),
         ]),
       })

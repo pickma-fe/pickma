@@ -11,25 +11,18 @@ const VALID_DOCUMENTS = [
     size: 1024,
   },
   {
-    type: 'id_card' as const,
-    storagePath: 'user-1/upload-2/id_card/file.jpg',
-    originalFileName: 'id.jpg',
-    contentType: 'image/jpeg',
+    type: 'food_service_permit' as const,
+    storagePath: 'user-1/upload-2/food_service_permit/file.pdf',
+    originalFileName: 'permit.pdf',
+    contentType: 'application/pdf',
     size: 512,
   },
   {
-    type: 'bankbook' as const,
-    storagePath: 'user-1/upload-3/bankbook/file.png',
+    type: 'bank_account' as const,
+    storagePath: 'user-1/upload-3/bank_account/file.png',
     originalFileName: 'bank.png',
     contentType: 'image/png',
     size: 2048,
-  },
-  {
-    type: 'business_report' as const,
-    storagePath: 'user-1/upload-4/business_report/file.pdf',
-    originalFileName: 'report.pdf',
-    contentType: 'application/pdf',
-    size: 4096,
   },
 ];
 
@@ -49,10 +42,10 @@ describe('createSellerApplicationSchema', () => {
     expect(result.success).toBe(true);
   });
 
-  it('documents가 4개 미만이면 실패', () => {
+  it('documents가 3개 미만이면 실패', () => {
     const result = createSellerApplicationSchema.safeParse({
       ...VALID_BODY,
-      documents: VALID_DOCUMENTS.slice(0, 3),
+      documents: VALID_DOCUMENTS.slice(0, 2),
     });
     expect(result.success).toBe(false);
   });
@@ -60,7 +53,7 @@ describe('createSellerApplicationSchema', () => {
   it('documents에 중복 타입이 있으면 실패', () => {
     const result = createSellerApplicationSchema.safeParse({
       ...VALID_BODY,
-      documents: [...VALID_DOCUMENTS.slice(0, 3), { ...VALID_DOCUMENTS[0] }],
+      documents: [...VALID_DOCUMENTS.slice(0, 2), { ...VALID_DOCUMENTS[0] }],
     });
     expect(result.success).toBe(false);
   });
