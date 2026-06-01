@@ -11,7 +11,7 @@ export function useCancelPayment() {
   return useMutation<void, Error, string>({
     mutationFn: (paymentId) => paymentApi.cancelPayment(paymentId),
     onSuccess: () => {
-      invalidateTargets.afterCancelOrder.forEach((queryKey) => {
+      invalidateTargets.afterCancelPayment.forEach((queryKey) => {
         void queryClient.invalidateQueries({ queryKey });
       });
     },

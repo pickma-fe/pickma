@@ -52,9 +52,10 @@ export const queryKeys = {
 
   admin: {
     sellers: {
-      all: () => ['sellers'] as const,
-      pending: () => ['sellers', 'pending'] as const,
-      pendingList: (params: object) => ['sellers', 'pending', params] as const,
+      all: () => ['admin', 'sellers'] as const,
+      pending: () => ['admin', 'sellers', 'pending'] as const,
+      pendingList: (params: object) =>
+        ['admin', 'sellers', 'pending', params] as const,
     },
   },
 } as const;
@@ -63,9 +64,11 @@ export const invalidateTargets = {
   afterPaymentSuccess: [
     queryKeys.orders.lists(),
     queryKeys.products.lists(),
+    queryKeys.products.details(),
     queryKeys.products.sellerList(),
   ],
   afterCreateOrder: [queryKeys.orders.lists(), queryKeys.products.lists()],
   afterCancelOrder: [queryKeys.orders.lists()],
   afterConfirmPayment: [queryKeys.orders.lists(), queryKeys.orders.details()],
+  afterCancelPayment: [queryKeys.orders.lists(), queryKeys.orders.details()],
 } as const;

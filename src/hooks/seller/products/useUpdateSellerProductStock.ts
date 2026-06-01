@@ -15,9 +15,12 @@ export function useUpdateSellerProductStock() {
 
   return useMutation<void, Error, UpdateStockVariables>({
     mutationFn: ({ id, stock }) => sellerProductApi.updateStock(id, stock),
-    onSuccess: () => {
+    onSuccess: (_data, { id }) => {
       void queryClient.invalidateQueries({
         queryKey: queryKeys.products.sellerList(),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.products.detail(id),
       });
     },
   });

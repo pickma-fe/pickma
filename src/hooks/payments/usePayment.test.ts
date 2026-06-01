@@ -138,6 +138,7 @@ describe('usePayment', () => {
 
     await expect(promise).resolves.toEqual({ orderNumber: 'PM2026TEST' });
 
+    expect(invalidateTargets.afterPaymentSuccess.length).toBeGreaterThan(0);
     invalidateTargets.afterPaymentSuccess.forEach((queryKey) => {
       expect(mockInvalidateQueries).toHaveBeenCalledWith({ queryKey });
     });
