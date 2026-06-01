@@ -4,9 +4,8 @@ import type { CreateSellerApplicationRequest } from '@/contracts/seller-applicat
 
 const DOCUMENT_TYPES = [
   'business_license',
-  'id_card',
-  'bankbook',
-  'business_report',
+  'food_service_permit',
+  'bank_account',
 ] as const;
 
 const documentSchema = z.object({
@@ -25,7 +24,7 @@ export const createSellerApplicationSchema = z
     businessAddress: z.string().min(1),
     businessType: z.string().min(1),
     businessCategory: z.string().min(1),
-    documents: z.array(documentSchema).length(4),
+    documents: z.array(documentSchema).length(3),
   })
   .strict()
   .superRefine((data, ctx) => {
@@ -36,7 +35,7 @@ export const createSellerApplicationSchema = z
         code: z.ZodIssueCode.custom,
         path: ['documents'],
         message:
-          'documents는 business_license, id_card, bankbook, business_report를 각각 1개씩 포함해야 합니다.',
+          'documents는 business_license, food_service_permit, bank_account를 각각 1개씩 포함해야 합니다.',
       });
     }
   }) satisfies z.ZodType<CreateSellerApplicationRequest>;
