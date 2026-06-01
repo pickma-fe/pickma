@@ -208,6 +208,89 @@ describe('POST /api/files/upload-url', () => {
     );
   });
 
+  it('purpose=store_image에서 requireSeller가 FORBIDDEN을 throw하면 403을 반환한다', async () => {
+    vi.mocked(isApiMockEnabled).mockReturnValue(false);
+    vi.mocked(requireSeller).mockRejectedValue(
+      new AppError(ERROR_CODE.FORBIDDEN, 403)
+    );
+
+    const res = await POST(
+      makePostRequest({
+        purpose: 'store_image',
+        fileName: 'store.jpg',
+        fileSize: 1024,
+        mimeType: 'image/jpeg',
+      })
+    );
+    const resBody = (await res.json()) as { error: { code: string } };
+
+    expect(res.status).toBe(403);
+    expect(resBody.error.code).toBe('FORBIDDEN');
+  });
+
+  it('purpose=seller_product_image에서 requireSellerStore가 STORE_NOT_FOUND를 throw하면 404를 반환한다', async () => {
+    vi.mocked(isApiMockEnabled).mockReturnValue(false);
+    vi.mocked(requireSellerStore).mockRejectedValue(
+      new AppError(ERROR_CODE.STORE_NOT_FOUND, 404)
+    );
+
+    const res = await POST(
+      makePostRequest({
+        purpose: 'seller_product_image',
+        fileName: 'product.jpg',
+        fileSize: 1024,
+        mimeType: 'image/jpeg',
+      })
+    );
+    const resBody = (await res.json()) as { error: { code: string } };
+
+    expect(res.status).toBe(404);
+    expect(resBody.error.code).toBe('STORE_NOT_FOUND');
+  });
+
+  it('purpose=seller_product_image에서 requireSellerStore가 STORE_NOT_APPROVED를 throw하면 403을 반환한다', async () => {
+    vi.mocked(isApiMockEnabled).mockReturnValue(false);
+    vi.mocked(requireSellerStore).mockRejectedValue(
+      new AppError(ERROR_CODE.STORE_NOT_APPROVED, 403)
+    );
+
+    const res = await POST(
+      makePostRequest({
+        purpose: 'seller_product_image',
+        fileName: 'product.jpg',
+        fileSize: 1024,
+        mimeType: 'image/jpeg',
+      })
+    );
+    const resBody = (await res.json()) as { error: { code: string } };
+
+    expect(res.status).toBe(403);
+    expect(resBody.error.code).toBe('STORE_NOT_APPROVED');
+  });
+
+  it('purpose=seller_application_document에서 eligibility reason이 seller_already_registered이면 409를 반환한다', async () => {
+    vi.mocked(isApiMockEnabled).mockReturnValue(false);
+    vi.mocked(requireActiveUser).mockResolvedValue(activeUserResult);
+    vi.mocked(checkApplicationEligibility).mockResolvedValue({
+      eligible: false,
+      reason: 'seller_already_registered',
+    });
+
+    const res = await POST(
+      makePostRequest({
+        purpose: 'seller_application_document',
+        fileName: 'doc.pdf',
+        fileSize: 2048,
+        mimeType: 'application/pdf',
+        documentType: 'business_license',
+      })
+    );
+    const resBody = (await res.json()) as { error: { code: string } };
+
+    expect(res.status).toBe(409);
+    expect(resBody.error.code).toBe('SELLER_ALREADY_REGISTERED');
+  });
+
   it('requireActiveUser가 실패하면 error envelope를 반환한다', async () => {
     vi.mocked(isApiMockEnabled).mockReturnValue(false);
     vi.mocked(requireActiveUser).mockRejectedValue(
