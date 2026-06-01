@@ -12,7 +12,7 @@ vi.mock('../_lib/signup-service', () => ({
   completeEmailSignup: mockCompleteEmailSignup,
 }));
 
-import { GET, POST } from './route';
+import { POST } from './route';
 
 function makeRequest(body: unknown) {
   return new NextRequest('http://localhost/api/auth/email-signup', {
@@ -102,13 +102,5 @@ describe('POST /api/auth/email-signup', () => {
       VALID_BODY.password,
       VALID_BODY.name
     );
-  });
-});
-
-describe('GET /api/auth/email-signup', () => {
-  it('501을 반환한다', async () => {
-    const res = GET();
-
-    expect(res.status).toBe(501);
   });
 });
