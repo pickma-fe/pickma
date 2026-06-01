@@ -1,10 +1,17 @@
 # T16. upload URL purpose별 권한 정책 강화
 
 - 상태:
-  진행 전
+  완료
 
 - GitHub Issue:
-  확인 필요
+  198
+
+- 구현 결과:
+  - `docs/api_spec.md`에 purpose별 권한 정책 표 및 `store_image` 정책 이유 추가
+  - `service.ts`의 `seller_product_image` storeId fallback 제거, storeId 없으면 `INTERNAL_SERVER_ERROR` throw
+  - `service.test.ts` fallback 테스트를 throw 케이스로 교체, bucket 라우팅 테스트에 storeId 추가
+  - `route.test.ts`에 권한 실패 케이스 4개 추가 (FORBIDDEN, STORE_NOT_FOUND, STORE_NOT_APPROVED, SELLER_ALREADY_REGISTERED)
+  - 전체 테스트 통과: service 16개, route 12개
 
 - 우선순위:
   P1
