@@ -236,7 +236,7 @@ describe('createSellerApplication', () => {
         documents: [
           {
             ...VALID_DOCUMENTS[0],
-            storagePath: `${USER_ID}/upload-1/id_card/license.pdf`,
+            storagePath: `${USER_ID}/upload-1/wrong_type/license.pdf`,
           },
           ...VALID_DOCUMENTS.slice(1),
         ],
