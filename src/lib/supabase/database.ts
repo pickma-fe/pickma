@@ -786,9 +786,8 @@ export type Database = {
       product_status: 'active' | 'closed';
       seller_application_document_type:
         | 'business_license'
-        | 'id_card'
-        | 'bankbook'
-        | 'business_report';
+        | 'food_service_permit'
+        | 'bank_account';
       seller_application_status: 'pending' | 'approved' | 'rejected';
       social_provider: 'google' | 'kakao';
       store_status: 'approved' | 'inactive';
@@ -945,9 +944,8 @@ export const Constants = {
       product_status: ['active', 'closed'],
       seller_application_document_type: [
         'business_license',
-        'id_card',
-        'bankbook',
-        'business_report',
+        'food_service_permit',
+        'bank_account',
       ],
       seller_application_status: ['pending', 'approved', 'rejected'],
       social_provider: ['google', 'kakao'],
