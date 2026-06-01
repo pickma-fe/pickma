@@ -4,6 +4,7 @@ import { createElement } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { SellerApplication } from '@/types/seller-application';
+import { queryKeys } from '@/lib/queryKeys';
 import { fileApi } from '@/api/files/fileApi';
 import { sellerApplicationApi } from '@/api/seller-applications/sellerApplicationApi';
 
@@ -122,7 +123,7 @@ describe('useCreateSellerApplication', () => {
     expect(sellerApplicationApi.createSellerApplication).not.toHaveBeenCalled();
   });
 
-  it('성공 시 onboarding-status 쿼리를 무효화한다', async () => {
+  it('성공 시 seller.onboardingStatus 쿼리를 무효화한다', async () => {
     vi.mocked(
       fileApi.uploadFile as (p: string, f: File, o: object) => Promise<string>
     ).mockResolvedValue('mock-path');
@@ -141,7 +142,7 @@ describe('useCreateSellerApplication', () => {
     });
 
     expect(invalidateSpy).toHaveBeenCalledWith({
-      queryKey: ['sellers', 'onboarding-status'],
+      queryKey: queryKeys.seller.onboardingStatus(),
     });
   });
 });

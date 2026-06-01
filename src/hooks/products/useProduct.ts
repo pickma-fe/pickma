@@ -3,6 +3,7 @@
 import { useQuery } from '@tanstack/react-query';
 
 import type { ProductDetail } from '@/types/product';
+import { queryKeys } from '@/lib/queryKeys';
 import { productApi } from '@/api/products/productApi';
 
 interface UseProductOptions {
@@ -14,7 +15,7 @@ export function useProduct(id: string, options: UseProductOptions = {}) {
     options.initialData?.id === id ? options.initialData : undefined;
 
   return useQuery<ProductDetail>({
-    queryKey: ['products', 'detail', id],
+    queryKey: queryKeys.products.detail(id),
     queryFn: () => productApi.getProduct(id),
     enabled: Boolean(id),
     initialData,

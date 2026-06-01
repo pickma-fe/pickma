@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import type { MenuItem } from '@/types/menu-item';
 import type { CreateMenuItemRequest } from '@/contracts/menu-item';
+import { queryKeys } from '@/lib/queryKeys';
 import { sellerMenuItemApi } from '@/api/seller/menu-items/sellerMenuItemApi';
 
 export function useCreateSellerMenuItem() {
@@ -13,7 +14,7 @@ export function useCreateSellerMenuItem() {
     mutationFn: (body) => sellerMenuItemApi.createMenuItem(body),
     onSuccess: () => {
       void queryClient.invalidateQueries({
-        queryKey: ['menu-items', 'seller'],
+        queryKey: queryKeys.seller.menuItems.all(),
       });
     },
   });

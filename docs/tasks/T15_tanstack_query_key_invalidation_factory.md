@@ -1,10 +1,10 @@
 # T15. TanStack Query key 및 invalidation factory 도입
 
 - 상태:
-  진행 전
+  완료
 
 - GitHub Issue:
-  확인 필요
+  190
 
 - 우선순위:
   P1

@@ -7,6 +7,7 @@ import { useState } from 'react';
 import type { PaginatedResult } from '@/types/common';
 import type { Product } from '@/types/product';
 import type { ProductListParams } from '@/contracts/product';
+import { queryKeys } from '@/lib/queryKeys';
 import { productApi } from '@/api/products/productApi';
 
 interface UseProductsOptions {
@@ -27,7 +28,7 @@ export function useProducts(
   );
 
   return useQuery<PaginatedResult<Product>>({
-    queryKey: ['products', 'list', params],
+    queryKey: queryKeys.products.list(params),
     queryFn: () => productApi.getProducts(params),
     initialData: options?.initialData,
     initialDataUpdatedAt,

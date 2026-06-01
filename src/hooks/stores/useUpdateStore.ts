@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import type { UpdateStoreInput, MyStore } from '@/types/store';
 import type { UpdateStoreRequest } from '@/contracts/store';
+import { queryKeys } from '@/lib/queryKeys';
 import { fileApi } from '@/api/files/fileApi';
 import { storeApi } from '@/api/stores/storeApi';
 
@@ -25,7 +26,7 @@ export function useUpdateStore() {
       return storeApi.updateStore(toUpdateStoreRequest(input));
     },
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['stores', 'my'] });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.stores.my() });
     },
   });
 }

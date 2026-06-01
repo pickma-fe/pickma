@@ -2,6 +2,7 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
+import { invalidateTargets } from '@/lib/queryKeys';
 import { orderApi } from '@/api/orders/orderApi';
 
 export function useCancelOrder() {
@@ -10,7 +11,9 @@ export function useCancelOrder() {
   return useMutation<void, Error, string>({
     mutationFn: (orderId) => orderApi.cancelOrder(orderId),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['orders', 'list'] });
+      invalidateTargets.afterCancelOrder.forEach((queryKey) => {
+        void queryClient.invalidateQueries({ queryKey });
+      });
     },
   });
 }

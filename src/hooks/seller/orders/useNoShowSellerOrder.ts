@@ -2,6 +2,7 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
+import { queryKeys } from '@/lib/queryKeys';
 import { sellerOrderApi } from '@/api/seller/orders/sellerOrderApi';
 
 export function useNoShowSellerOrder() {
@@ -10,7 +11,9 @@ export function useNoShowSellerOrder() {
   return useMutation<void, Error, string>({
     mutationFn: (orderId) => sellerOrderApi.noShowOrder(orderId),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['seller', 'orders'] });
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.seller.orders.all(),
+      });
     },
   });
 }

@@ -3,6 +3,7 @@ import { act, renderHook, waitFor } from '@testing-library/react';
 import { createElement } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import { queryKeys } from '@/lib/queryKeys';
 import { authApi } from '@/api/auth/authApi';
 
 import { useSignOut } from './useSignOut';
@@ -24,7 +25,7 @@ describe('useSignOut', () => {
     vi.clearAllMocks();
   });
 
-  it('성공 시 ["users", "me"] 쿼리를 remove한다', async () => {
+  it('성공 시 users.me 쿼리를 remove한다', async () => {
     vi.mocked(authApi.signOut).mockResolvedValue(undefined);
 
     const { Wrapper, client } = createWrapper();
@@ -36,7 +37,7 @@ describe('useSignOut', () => {
       await result.current.mutateAsync();
     });
 
-    expect(removeSpy).toHaveBeenCalledWith({ queryKey: ['users', 'me'] });
+    expect(removeSpy).toHaveBeenCalledWith({ queryKey: queryKeys.users.me() });
   });
 
   it('실패 시 error를 throw한다', async () => {

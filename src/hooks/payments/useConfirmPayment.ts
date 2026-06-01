@@ -3,6 +3,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import type { ConfirmPaymentRequest } from '@/contracts/payment';
+import { invalidateTargets } from '@/lib/queryKeys';
 import { paymentApi } from '@/api/payments/paymentApi';
 
 export function useConfirmPayment() {
@@ -11,8 +12,9 @@ export function useConfirmPayment() {
   return useMutation<void, Error, ConfirmPaymentRequest>({
     mutationFn: (body) => paymentApi.confirmPayment(body),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['orders', 'list'] });
-      void queryClient.invalidateQueries({ queryKey: ['orders', 'detail'] });
+      invalidateTargets.afterConfirmPayment.forEach((queryKey) => {
+        void queryClient.invalidateQueries({ queryKey });
+      });
     },
   });
 }

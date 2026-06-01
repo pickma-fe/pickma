@@ -4,6 +4,7 @@ import { createElement } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import type { AuthResult } from '@/types/auth';
+import { queryKeys } from '@/lib/queryKeys';
 import { authApi } from '@/api/auth/authApi';
 
 import { useEmailLogin } from './useEmailLogin';
@@ -33,7 +34,7 @@ describe('useEmailLogin', () => {
     vi.clearAllMocks();
   });
 
-  it('성공 시 ["users", "me"] 쿼리를 invalidate한다', async () => {
+  it('성공 시 users.me 쿼리를 invalidate한다', async () => {
     vi.mocked(authApi.signInWithEmail).mockResolvedValue(mockAuthResult);
 
     const { Wrapper, client } = createWrapper();
@@ -49,7 +50,7 @@ describe('useEmailLogin', () => {
     });
 
     expect(invalidateSpy).toHaveBeenCalledWith({
-      queryKey: ['users', 'me'],
+      queryKey: queryKeys.users.me(),
     });
   });
 

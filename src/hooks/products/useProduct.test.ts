@@ -4,6 +4,7 @@ import { createElement } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { ProductDetail } from '@/types/product';
+import { queryKeys } from '@/lib/queryKeys';
 import { productApi } from '@/api/products/productApi';
 
 import { useProduct } from './useProduct';
@@ -119,5 +120,21 @@ describe('useProduct', () => {
 
     expect(result.current.fetchStatus).toBe('idle');
     expect(productApi.getProduct).not.toHaveBeenCalled();
+  });
+
+  it('queryKey가 queryKeys.products.detail(id)와 일치한다', async () => {
+    vi.mocked(productApi.getProduct).mockResolvedValue(mockDetail);
+
+    const client = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+    const Wrapper = ({ children }: { children: React.ReactNode }) =>
+      createElement(QueryClientProvider, { client }, children);
+
+    const id = '00000000-0000-4000-8000-000000000051';
+    renderHook(() => useProduct(id), { wrapper: Wrapper });
+
+    const queries = client.getQueryCache().getAll();
+    expect(queries[0].queryKey).toEqual(queryKeys.products.detail(id));
   });
 });

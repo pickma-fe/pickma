@@ -4,6 +4,7 @@ import { createElement } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import type { User } from '@/types/user';
+import { queryKeys } from '@/lib/queryKeys';
 import { ApiError } from '@/api/apiClient';
 import { userApi } from '@/api/users/userApi';
 
@@ -40,7 +41,7 @@ describe('useMe', () => {
     vi.clearAllMocks();
   });
 
-  it('성공 시 ["users", "me"] queryKey로 User를 반환한다', async () => {
+  it('성공 시 users.me queryKey로 User를 반환한다', async () => {
     vi.mocked(userApi.getMe).mockResolvedValue(mockUser);
 
     const { result } = renderHook(() => useMe(), { wrapper: createWrapper() });
@@ -88,5 +89,20 @@ describe('useMe', () => {
     expect(vi.mocked(userApi.getMe).mock.calls.length).toBeGreaterThanOrEqual(
       4
     );
+  });
+
+  it('queryKey가 queryKeys.users.me()와 일치한다', async () => {
+    vi.mocked(userApi.getMe).mockResolvedValue(mockUser);
+
+    const client = new QueryClient({
+      defaultOptions: { queries: { retryDelay: 0 } },
+    });
+    const Wrapper = ({ children }: { children: React.ReactNode }) =>
+      createElement(QueryClientProvider, { client }, children);
+
+    renderHook(() => useMe(), { wrapper: Wrapper });
+
+    const queries = client.getQueryCache().getAll();
+    expect(queries[0].queryKey).toEqual(queryKeys.users.me());
   });
 });

@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import type { CreateSellerProductInput, Product } from '@/types/product';
 import type { CreateSellerProductRequest } from '@/contracts/product';
+import { queryKeys } from '@/lib/queryKeys';
 import { sellerProductApi } from '@/api/seller/products/sellerProductApi';
 
 function toCreateSellerProductRequest(
@@ -20,7 +21,7 @@ export function useCreateSellerProduct() {
       sellerProductApi.createProduct(toCreateSellerProductRequest(input)),
     onSuccess: () => {
       void queryClient.invalidateQueries({
-        queryKey: ['products', 'seller', 'list'],
+        queryKey: queryKeys.products.sellerList(),
       });
     },
   });

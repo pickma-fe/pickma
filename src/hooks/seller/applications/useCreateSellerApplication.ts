@@ -7,6 +7,7 @@ import type {
   SellerApplicationDocumentType,
 } from '@/types/seller-application';
 import type { CreateSellerApplicationRequest } from '@/contracts/seller-application';
+import { queryKeys } from '@/lib/queryKeys';
 import { fileApi } from '@/api/files/fileApi';
 import { sellerApplicationApi } from '@/api/seller-applications/sellerApplicationApi';
 
@@ -62,7 +63,7 @@ export function useCreateSellerApplication() {
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({
-        queryKey: ['sellers', 'onboarding-status'],
+        queryKey: queryKeys.seller.onboardingStatus(),
       });
     },
   });

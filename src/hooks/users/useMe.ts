@@ -3,12 +3,13 @@
 import { useQuery } from '@tanstack/react-query';
 
 import type { User } from '@/types/user';
+import { queryKeys } from '@/lib/queryKeys';
 import { ApiError } from '@/api/apiClient';
 import { userApi } from '@/api/users/userApi';
 
 export function useMe() {
   return useQuery<User>({
-    queryKey: ['users', 'me'],
+    queryKey: queryKeys.users.me(),
     queryFn: () => userApi.getMe(),
     retry: (failureCount, error) => {
       if (

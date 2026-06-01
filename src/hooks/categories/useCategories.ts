@@ -5,6 +5,7 @@ import type { UseQueryResult } from '@tanstack/react-query';
 import { useState } from 'react';
 
 import type { Category } from '@/types/category';
+import { queryKeys } from '@/lib/queryKeys';
 import { categoryApi } from '@/api/categories/categoryApi';
 
 interface UseCategoriesOptions {
@@ -24,7 +25,7 @@ export function useCategories(
   );
 
   return useQuery<Category[]>({
-    queryKey: ['categories', 'list', 'all'],
+    queryKey: queryKeys.categories.list(),
     queryFn: () => categoryApi.getCategories(),
     initialData: options?.initialData,
     initialDataUpdatedAt,

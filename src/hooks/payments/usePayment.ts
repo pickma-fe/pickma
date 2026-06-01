@@ -4,6 +4,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { useRef, useState } from 'react';
 
+import { invalidateTargets } from '@/lib/queryKeys';
 import { paymentApi } from '@/api/payments/paymentApi';
 
 export function usePayment() {
@@ -57,8 +58,8 @@ export function usePayment() {
               reject(new Error('payment_failed'));
               return;
             }
-            void queryClient.invalidateQueries({
-              queryKey: ['orders', 'list'],
+            invalidateTargets.afterPaymentSuccess.forEach((queryKey) => {
+              void queryClient.invalidateQueries({ queryKey });
             });
             router.push(
               `/order/complete?orderNumber=${encodeURIComponent(msgOrderNumber)}`

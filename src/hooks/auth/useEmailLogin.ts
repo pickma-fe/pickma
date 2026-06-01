@@ -3,8 +3,9 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import type { AuthResult } from '@/types/auth';
+import type { SignInWithEmailRequest } from '@/contracts/auth';
+import { queryKeys } from '@/lib/queryKeys';
 import { authApi } from '@/api/auth/authApi';
-import type { SignInWithEmailRequest } from '@/contracts';
 
 export function useEmailLogin() {
   const queryClient = useQueryClient();
@@ -12,7 +13,7 @@ export function useEmailLogin() {
   return useMutation<AuthResult, Error, SignInWithEmailRequest>({
     mutationFn: (data) => authApi.signInWithEmail(data),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['users', 'me'] });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.users.me() });
     },
   });
 }

@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import type { MenuItem } from '@/types/menu-item';
 import type { UpdateMenuItemRequest } from '@/contracts/menu-item';
+import { queryKeys } from '@/lib/queryKeys';
 import { sellerMenuItemApi } from '@/api/seller/menu-items/sellerMenuItemApi';
 
 interface UpdateSellerMenuItemVariables {
@@ -18,10 +19,10 @@ export function useUpdateSellerMenuItem() {
     mutationFn: ({ id, body }) => sellerMenuItemApi.updateMenuItem(id, body),
     onSuccess: () => {
       void queryClient.invalidateQueries({
-        queryKey: ['menu-items', 'seller'],
+        queryKey: queryKeys.seller.menuItems.all(),
       });
       void queryClient.invalidateQueries({
-        queryKey: ['products', 'seller', 'list'],
+        queryKey: queryKeys.products.sellerList(),
       });
     },
   });
