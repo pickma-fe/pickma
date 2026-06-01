@@ -39,9 +39,9 @@ export const productListSchema = z
     (params) =>
       params.minPrice === undefined ||
       params.maxPrice === undefined ||
-      params.minPrice <= params.maxPrice,
+      params.minPrice < params.maxPrice,
     {
-      message: 'minPrice는 maxPrice보다 클 수 없습니다.',
+      message: 'minPrice는 maxPrice보다 작아야 합니다.',
       path: ['minPrice'],
     }
   )

@@ -63,7 +63,7 @@ export async function getProducts(
   }
 
   if (params.maxPrice !== undefined) {
-    query = query.lte('discount_price', params.maxPrice);
+    query = query.lt('discount_price', params.maxPrice);
   }
 
   if (params.availableOnly) {

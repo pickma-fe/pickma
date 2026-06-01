@@ -45,7 +45,7 @@ describe('buildMockProductListResponse', () => {
     expect(result.totalPages).toBeGreaterThan(1);
   });
 
-  it('가격대 필터는 단일 조건과 최대 가격 포함 조건을 반영한다', () => {
+  it('가격대 필터는 단일 조건과 최대 가격 미만 조건을 반영한다', () => {
     const baseProduct = {
       id: 'product-1',
       storeId: 'store-1',
@@ -88,10 +88,7 @@ describe('buildMockProductListResponse', () => {
       [baseProduct, maxBoundaryProduct, overMaxProduct]
     );
 
-    expect(result.items.map((product) => product.id)).toEqual([
-      'product-1',
-      'product-2',
-    ]);
+    expect(result.items.map((product) => product.id)).toEqual(['product-1']);
   });
 
   it('availableOnly=false여도 비활성 상품은 제외한다', () => {

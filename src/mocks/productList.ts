@@ -34,8 +34,7 @@ export function buildMockProductListResponse(
     )
     .filter(
       (product) =>
-        params.maxPrice === undefined ||
-        product.discountPrice <= params.maxPrice
+        params.maxPrice === undefined || product.discountPrice < params.maxPrice
     )
     .filter((product) => matchesDiscountOption(product, discountOption));
   const sortedProducts = [...filteredProducts].sort((a, b) =>

@@ -68,9 +68,13 @@ describe('productListSchema', () => {
     expect(productListSchema.safeParse({ maxPrice: '0' }).success).toBe(false);
   });
 
-  it('minPrice가 maxPrice보다 크면 validation error를 반환한다', () => {
+  it('minPrice가 maxPrice 이상이면 validation error를 반환한다', () => {
     expect(
       productListSchema.safeParse({ minPrice: '30000', maxPrice: '20000' })
+        .success
+    ).toBe(false);
+    expect(
+      productListSchema.safeParse({ minPrice: '20000', maxPrice: '20000' })
         .success
     ).toBe(false);
   });
