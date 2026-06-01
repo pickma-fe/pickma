@@ -92,8 +92,6 @@ describe('useMe', () => {
   });
 
   it('queryKey가 queryKeys.users.me()와 일치한다', async () => {
-    vi.mocked(userApi.getMe).mockResolvedValue(mockUser);
-
     const client = new QueryClient({
       defaultOptions: { queries: { retryDelay: 0 } },
     });
@@ -104,5 +102,6 @@ describe('useMe', () => {
 
     const queries = client.getQueryCache().getAll();
     expect(queries[0].queryKey).toEqual(queryKeys.users.me());
+    expect(queries[0].queryKey).toEqual(['users', 'me']);
   });
 });
