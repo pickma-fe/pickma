@@ -322,9 +322,8 @@ export type FileUploadPurpose =
 
 export type SellerApplicationDocumentType =
   | 'business_license'
-  | 'id_card'
-  | 'bankbook'
-  | 'business_report';
+  | 'food_service_permit'
+  | 'bank_account';
 
 export interface CreateFileUploadUrlRequest {
   purpose: FileUploadPurpose;
@@ -809,7 +808,7 @@ DB source:
 
 ### 7.1 `POST /api/seller-applications`
 
-판매자 신청은 가게 등록과 분리한다. 신청자는 사업자 정보와 문서 4종을 제출하고, 관리자가 승인하면 `users.role`이 `seller`로 전환된다.
+판매자 신청은 가게 등록과 분리한다. 신청자는 사업자 정보와 문서 3종을 제출하고, 관리자가 승인하면 `users.role`이 `seller`로 전환된다.
 
 Request:
 
@@ -822,7 +821,7 @@ export interface CreateSellerApplicationRequest {
   businessType: string;
   businessCategory: string;
   documents: Array<{
-    type: 'business_license' | 'id_card' | 'bankbook' | 'business_report';
+    type: 'business_license' | 'food_service_permit' | 'bank_account';
     storagePath: string;
     originalFileName: string;
     contentType: string;
@@ -854,7 +853,7 @@ export interface SellerApplicationResponse {
 export interface SellerApplicationDocumentResponse {
   id: string;
   applicationId: string;
-  type: 'business_license' | 'id_card' | 'bankbook' | 'business_report';
+  type: 'business_license' | 'food_service_permit' | 'bank_account';
   storagePath: string;
   originalFileName: string;
   contentType: string;
@@ -869,7 +868,7 @@ Behavior:
 - 이미 `seller` role이면 신청할 수 없다.
 - pending 또는 approved 신청이 있으면 신청할 수 없다.
 - rejected 신청만 있으면 재신청할 수 있으며, 기존 row를 수정하지 않고 새 row를 생성한다.
-- `business_license`, `id_card`, `bankbook`, `business_report` 4종 문서가 모두 필요하다.
+- `business_license`, `food_service_permit`, `bank_account` 3종 문서가 모두 필요하다.
 - 문서 파일은 private bucket `seller-application-documents`에 업로드된 storage path여야 한다.
 - 신청자 기본 정보(`email`, `name`, `phone`)는 `users`를 join해 조회하고, 신청서에는 사업자 정보 snapshot만 저장한다.
 
