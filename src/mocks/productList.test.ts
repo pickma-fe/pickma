@@ -45,6 +45,55 @@ describe('buildMockProductListResponse', () => {
     expect(result.totalPages).toBeGreaterThan(1);
   });
 
+  it('가격대 필터는 단일 조건과 최대 가격 포함 조건을 반영한다', () => {
+    const baseProduct = {
+      id: 'product-1',
+      storeId: 'store-1',
+      storeName: '활성 매장',
+      menuItemId: 'menu-1',
+      name: '가격 테스트 상품',
+      originalPrice: 30000,
+      discountPrice: 10000,
+      discountRate: 20,
+      stock: 3,
+      reservedStock: 0,
+      availableStock: 3,
+      isSoldOut: false,
+      isExpired: false,
+      displayStatus: 'available',
+      endAt: new Date('2026-05-29T10:00:00.000Z').toISOString(),
+      pickupStartTime: '09:00:00',
+      pickupEndTime: '10:00:00',
+      status: 'active',
+      updatedAt: new Date('2026-05-29T03:00:00.000Z').toISOString(),
+    } as const;
+    const maxBoundaryProduct = {
+      ...baseProduct,
+      id: 'product-2',
+      discountPrice: 20000,
+    } as const;
+    const overMaxProduct = {
+      ...baseProduct,
+      id: 'product-3',
+      discountPrice: 20001,
+    } as const;
+
+    const result = buildMockProductListResponse(
+      {
+        page: 1,
+        pageSize: 10,
+        minPrice: 10000,
+        maxPrice: 20000,
+      },
+      [baseProduct, maxBoundaryProduct, overMaxProduct]
+    );
+
+    expect(result.items.map((product) => product.id)).toEqual([
+      'product-1',
+      'product-2',
+    ]);
+  });
+
   it('availableOnly=false여도 비활성 상품은 제외한다', () => {
     const activeProduct = {
       id: 'active-product',

@@ -43,9 +43,36 @@ describe('productListSchema', () => {
     expect(result.data?.maxPrice).toBe(20000);
   });
 
+  it('빈 가격대 파라미터는 undefined로 처리한다', () => {
+    const result = productListSchema.safeParse({
+      minPrice: '',
+      maxPrice: '   ',
+    });
+    expect(result.success).toBe(true);
+    expect(result.data?.minPrice).toBeUndefined();
+    expect(result.data?.maxPrice).toBeUndefined();
+  });
+
+  it('가격대 단일 파라미터를 허용한다', () => {
+    const minOnly = productListSchema.safeParse({ minPrice: '10000' });
+    const maxOnly = productListSchema.safeParse({ maxPrice: '20000' });
+
+    expect(minOnly.success).toBe(true);
+    expect(minOnly.data?.minPrice).toBe(10000);
+    expect(maxOnly.success).toBe(true);
+    expect(maxOnly.data?.maxPrice).toBe(20000);
+  });
+
   it('유효하지 않은 가격대 파라미터는 validation error를 반환한다', () => {
     expect(productListSchema.safeParse({ minPrice: '-1' }).success).toBe(false);
     expect(productListSchema.safeParse({ maxPrice: '0' }).success).toBe(false);
+  });
+
+  it('minPrice가 maxPrice보다 크면 validation error를 반환한다', () => {
+    expect(
+      productListSchema.safeParse({ minPrice: '30000', maxPrice: '20000' })
+        .success
+    ).toBe(false);
   });
 
   it('keyword가 공백만 있으면 validation error를 반환한다', () => {

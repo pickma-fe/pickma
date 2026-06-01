@@ -32,7 +32,13 @@ function getSearchPage(
 }
 
 function getSearchPrice(value: string | undefined): number | undefined {
-  const price = Number(value);
+  const trimmedValue = value?.trim();
+
+  if (!trimmedValue) {
+    return undefined;
+  }
+
+  const price = Number(trimmedValue);
 
   if (!Number.isInteger(price) || price < 0) {
     return undefined;
