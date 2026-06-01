@@ -41,11 +41,22 @@ function getSearchPrice(value: string | undefined): number | undefined {
   return price;
 }
 
+function getSearchPageKey(
+  searchParams: Awaited<SearchPageProps['searchParams']>
+): string {
+  return new URLSearchParams(
+    Object.entries(searchParams).filter(
+      (entry): entry is [string, string] => typeof entry[1] === 'string'
+    )
+  ).toString();
+}
+
 export default async function SearchPage({ searchParams }: SearchPageProps) {
   const resolvedSearchParams = await searchParams;
 
   return (
     <SearchResultPageContent
+      key={getSearchPageKey(resolvedSearchParams)}
       initialKeyword={getSearchKeyword(resolvedSearchParams)}
       initialRegion={resolvedSearchParams.region}
       initialCategoryId={resolvedSearchParams.categoryId}
