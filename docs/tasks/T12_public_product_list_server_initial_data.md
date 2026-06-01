@@ -1,7 +1,7 @@
 # T12. 공개 상품 목록 Server Component 초기 데이터 전환
 
 - 상태:
-  진행 중
+  완료
 
 - GitHub Issue:
   165
@@ -49,3 +49,10 @@
   - 초기 상품 목록이 서버 렌더링 경로에서 준비된다.
   - 상호작용 영역만 client component로 남는다.
   - refetch 정책이 문서화되거나 코드 주석으로 설명된다.
+
+- 구현 결과:
+  - PR #188 (`feat: 공개 상품 목록 서버 초기 데이터 적용`)에서 구현 완료.
+  - `/` 페이지를 Server Component 초기 데이터 조회 경로로 전환하고, 상품/카테고리 데이터를 client filter shell에 `initialData`로 전달.
+  - browser-only 검색/필터 상태는 client shell에 유지하고, server API wrapper와 TanStack Query `initialData` stale/refetch 정책을 정리.
+  - merge commit: `ad127533e17d6a344b693777175bd58ce51e1815`
+  - 검증: PR 기준 targeted test, `npm run lint`, `npm run typecheck`, `npm run build` 통과.

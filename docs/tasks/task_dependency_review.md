@@ -19,7 +19,8 @@
 - T04 → T07: admin store real endpoint는 service role/owner scope 기준 이후 구현.
 - T10 → T08: 운영 상태 schema 변경은 incremental migration 정책 이후 구현.
 - T11 → T01: outbox/webhook/idempotency는 결제 보상 정책 이후 설계.
-- T12 → T05, T56 → T05/T12: 공개 상품 목록과 검색은 DB pagination 복구 이후 확장.
+- T12 → T05: 공개 상품 목록 Server Component 전환은 DB pagination 복구 이후 완료.
+- T56 → T05/T12: 검색 결과 화면은 DB pagination과 공개 상품 목록 server initial data 흐름을 기준으로 확장.
 - T14 → T07: role-aware guard는 service role/owner scope 기준 이후 정리.
 - T15 → T02: 기존 판매자 주문 real API 연결 흐름을 기준으로 query key/invalidation factory 도입.
 - T29/T36/T42 → T44/T61: 판매자 서류 UX와 법적 동의 흐름은 신분증 수집 폐지와 3종 서류 기준 정리 이후 진행.
@@ -30,7 +31,7 @@
 
 - P0 중 즉시 착수 가능: T09.
 - P0 중 T07 완료로 착수 가능: T03, T04.
-- 진행 중: T12, T13.
+- T12, T13 완료로 T46의 consumer 화면 기반 조건과 T56의 공개 상품 목록 기반 조건 일부가 충족됨.
 - P1 중 T61 완료 전 차단: T16, T42.
 - T15 완료 전 차단: T51, T53, T54, T59.
-- P2/P3 중 상위 정책 또는 기반 task 대기: T21, T22, T23, T25, T26, T28, T29, T30, T31, T32, T36, T38, T41, T46, T47, T48, T49, T56, T57.
+- P2/P3 중 상위 정책 또는 기반 task 대기: T21, T22, T23, T25, T26, T28, T29, T30, T31, T32, T36, T38, T41, T46, T47, T48, T49, T57.
