@@ -65,6 +65,7 @@ describe('createFileUploadUrl', () => {
     });
 
     it('seller_product_image → product-images bucket', async () => {
+      const storeId = 'store-00000000-0000-4000-8000-000000000002';
       await createFileUploadUrl(
         {
           purpose: 'seller_product_image',
@@ -72,7 +73,8 @@ describe('createFileUploadUrl', () => {
           fileSize: 1024,
           mimeType: 'image/png',
         },
-        USER_ID
+        USER_ID,
+        storeId
       );
       expect(
         vi.mocked(createServiceRoleClient)().storage.from
@@ -139,17 +141,21 @@ describe('createFileUploadUrl', () => {
       expect(result.storagePath).toMatch(new RegExp(`^${storeId}/`));
     });
 
-    it('seller_product_image에 storeId 없으면 userId로 폴백', async () => {
-      const result = await createFileUploadUrl(
-        {
-          purpose: 'seller_product_image',
-          fileName: 'item.jpg',
-          fileSize: 1024,
-          mimeType: 'image/jpeg',
-        },
-        USER_ID
+    it('seller_product_image에 storeId 없으면 INTERNAL_SERVER_ERROR를 throw한다', async () => {
+      await expect(
+        createFileUploadUrl(
+          {
+            purpose: 'seller_product_image',
+            fileName: 'item.jpg',
+            fileSize: 1024,
+            mimeType: 'image/jpeg',
+          },
+          USER_ID
+        )
+      ).rejects.toSatisfy(
+        (e: unknown) =>
+          e instanceof AppError && e.code === ERROR_CODE.INTERNAL_SERVER_ERROR
       );
-      expect(result.storagePath).toMatch(new RegExp(`^${USER_ID}/`));
     });
 
     it('fileName 특수문자를 언더스코어로 치환', async () => {

@@ -55,8 +55,10 @@ function buildStoragePath(
     case 'store_image':
       return `${userId}/${uploadId}/${safeFileName}`;
     case 'seller_product_image': {
-      const storePrefix = storeId ?? userId;
-      return `${storePrefix}/${uploadId}/${safeFileName}`;
+      if (!storeId) {
+        throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
+      }
+      return `${storeId}/${uploadId}/${safeFileName}`;
     }
     case 'profile_image':
       return `${userId}/${uploadId}/${safeFileName}`;
