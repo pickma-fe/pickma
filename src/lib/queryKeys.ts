@@ -57,6 +57,10 @@ export const queryKeys = {
       pendingList: (params: object) =>
         ['admin', 'sellers', 'pending', params] as const,
     },
+    stores: {
+      all: () => ['admin', 'stores'] as const,
+      list: (params: object) => ['admin', 'stores', 'list', params] as const,
+    },
   },
 } as const;
 
