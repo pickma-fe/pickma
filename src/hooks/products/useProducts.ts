@@ -13,9 +13,6 @@ import { productApi } from '@/api/products/productApi';
 interface UseProductsOptions {
   initialData?: PaginatedResult<Product>;
 }
-
-// Keep SSR initial data fresh briefly to avoid hydration refetch; stock/closing
-// changes are still handled by the page-level 60s interval.
 const INITIAL_PRODUCT_LIST_STALE_TIME_MS = 30_000;
 
 export function useProducts(

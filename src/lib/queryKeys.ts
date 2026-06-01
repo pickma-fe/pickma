@@ -44,10 +44,10 @@ export const queryKeys = {
       detail: (id: string) => ['seller', 'orders', 'detail', id] as const,
     },
     menuItems: {
-      all: () => ['menu-items', 'seller'] as const,
-      list: (params: object) => ['menu-items', 'seller', params] as const,
+      all: () => ['seller', 'menu-items'] as const,
+      list: (params: object) => ['seller', 'menu-items', params] as const,
     },
-    onboardingStatus: () => ['sellers', 'onboarding-status'] as const,
+    onboardingStatus: () => ['seller', 'onboarding-status'] as const,
   },
 
   admin: {
@@ -71,8 +71,17 @@ export const invalidateTargets = {
     queryKeys.products.details(),
     queryKeys.products.sellerList(),
   ],
-  afterCreateOrder: [queryKeys.orders.lists(), queryKeys.products.lists()],
-  afterCancelOrder: [queryKeys.orders.lists()],
-  afterConfirmPayment: [queryKeys.orders.lists(), queryKeys.orders.details()],
+  afterCreateOrder: [
+    queryKeys.orders.lists(),
+    queryKeys.products.lists(),
+    queryKeys.products.details(),
+  ],
+  afterCancelOrder: [queryKeys.orders.lists(), queryKeys.orders.details()],
+  afterConfirmPayment: [
+    queryKeys.orders.lists(),
+    queryKeys.orders.details(),
+    queryKeys.products.lists(),
+    queryKeys.products.details(),
+  ],
   afterCancelPayment: [queryKeys.orders.lists(), queryKeys.orders.details()],
 } as const;

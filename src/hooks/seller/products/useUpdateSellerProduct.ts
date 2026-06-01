@@ -22,6 +22,9 @@ export function useUpdateSellerProduct() {
         queryKey: queryKeys.products.sellerList(),
       });
       void queryClient.invalidateQueries({
+        queryKey: queryKeys.products.lists(),
+      });
+      void queryClient.invalidateQueries({
         queryKey: queryKeys.products.detail(product.id),
       });
     },
