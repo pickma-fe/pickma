@@ -10,6 +10,7 @@ import type { ProductListParams } from '@/contracts/product';
 import { productApi } from '@/api/products/productApi';
 
 interface UseProductsOptions {
+  enabled?: boolean;
   initialData?: PaginatedResult<Product>;
 }
 
@@ -29,6 +30,7 @@ export function useProducts(
   return useQuery<PaginatedResult<Product>>({
     queryKey: ['products', 'list', params],
     queryFn: () => productApi.getProducts(params),
+    enabled: options?.enabled ?? true,
     initialData: options?.initialData,
     initialDataUpdatedAt,
     refetchOnMount: hasInitialData ? false : undefined,

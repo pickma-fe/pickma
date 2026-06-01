@@ -13,6 +13,8 @@ export interface ProductListParams {
   region?: string;
   categoryId?: string;
   keyword?: string;
+  minPrice?: number;
+  maxPrice?: number;
   discountOption?: ProductDiscountOption;
   sort?: 'endAt' | 'discountRate' | 'discountPrice';
   order?: 'asc' | 'desc';

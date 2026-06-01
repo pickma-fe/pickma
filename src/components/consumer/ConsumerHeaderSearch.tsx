@@ -48,8 +48,8 @@ export function ConsumerHeaderSearch({
 
       <div className="min-w-0 flex-1">
         <Input
-          aria-label="상품 또는 가게 검색"
-          placeholder="상품명, 가게명으로 검색하세요"
+          aria-label="상품 검색"
+          placeholder="상품명을 검색하세요"
           value={keyword}
           onChange={(event) => onKeywordChange(event.target.value)}
           className="h-11 w-full"
