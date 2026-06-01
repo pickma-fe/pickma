@@ -86,7 +86,7 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 | T58 | 관리자 대시보드 통계 화면 구현                               | P1       | 진행 전 | 확인 필요    | T07                     | [T58_admin_dashboard_statistics.md](T58_admin_dashboard_statistics.md)                                           |
 | T59 | 소비자 찜 목록 화면 및 API 구현                              | P2       | 진행 전 | 확인 필요    | T15                     | [T59_consumer_wishlist_page.md](T59_consumer_wishlist_page.md)                                                   |
 | T60 | Auth 비밀번호 정책 강화                                      | P1       | 진행 전 | 확인 필요    | T27                     | [T60_auth_password_policy.md](T60_auth_password_policy.md)                                                       |
-| T61 | 판매자 신청 서류 문서 타입 정리 (신분증 제거 및 타입명 통일) | P1       | 진행 중 | 195          | T44                     | [T61_seller_id_card_removal.md](T61_seller_id_card_removal.md)                                                   |
+| T61 | 판매자 신청 서류 문서 타입 정리 (신분증 제거 및 타입명 통일) | P1       | 완료    | 195          | T44                     | [T61_seller_id_card_removal.md](T61_seller_id_card_removal.md)                                                   |
 
 ## 추천 진행 흐름
 
