@@ -1,10 +1,10 @@
 # T09. 501 API 및 UI 노출 목록 정리
 
 - 상태:
-  진행 전
+  진행 중
 
 - GitHub Issue:
-  확인 필요
+  201
 
 - 우선순위:
   P0
@@ -35,7 +35,7 @@
   - 현재 UI에서 노출되는 버튼/링크와 연결 여부를 확인한다.
   - P0 구현 대상과 P2/P3 미노출 대상을 분리한다.
   - 노출 금지 또는 disabled reason 정책을 정한다.
-  - `rg "NOT_IMPLEMENTED"` 기반으로 501 endpoint 목록과 UI 연결 여부를 비교하는 check script를 추가한다.
+  - 501 endpoint 목록과 담당 task를 `docs/api_spec.md` 13절에 문서화한다.
 
 - 관련 파일/영역:
   - `src/app/api/orders/[orderId]/cancel/route.ts`
@@ -48,6 +48,8 @@
   낮음
 
 - 완료 기준:
-  - 최신 501 목록과 UI 노출 여부가 문서화된다.
+  - 최신 501 목록, UI 노출 여부, 담당 task가 `docs/api_spec.md` 13절에 문서화된다.
+  - 501 연결 액션의 숨김/disabled/준비 상태 정책이 공유 agent 지침과 구현 규칙에 반영된다.
   - 실운영 화면에 실패가 확정된 액션이 무방비로 노출되지 않는다.
-  - `rg "NOT_IMPLEMENTED"` 기반 501 check script가 존재하거나 CI에 포함된다.
+  - auth dummy GET handler 3개가 제거된다.
+  - 수동 검증: `rg "NOT_IMPLEMENTED" src/app/api` 결과가 `docs/api_spec.md` 13절 목록과 일치한다.

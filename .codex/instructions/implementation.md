@@ -20,6 +20,7 @@
 - 결제 confirm/취소 흐름 변경 전에는 T01 보상 정책과 `docs/system_architecture.md`, `docs/api_spec.md`의 결제 명세를 확인한다.
 - Auth email/password 흐름 변경 전에는 T27 선인증 정책과 `docs/system_architecture.md`, `docs/api_spec.md`의 auth 명세를 확인한다.
 - 명시적 요청, 현재 설계 문서, 또는 명확한 필요가 없으면 package를 추가하지 않는다.
+- real mode에서 501(`NOT_IMPLEMENTED`)을 반환하는 endpoint에 연결된 UI 액션은 활성 상태로 운영 화면에 노출하지 않는다. 미구현 endpoint 목록은 `docs/api_spec.md` 13절을 확인한다.
 
 ## 피해야 할 작업
 

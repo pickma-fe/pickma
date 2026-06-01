@@ -283,6 +283,7 @@ reviews:
           - `DELETE /api/files`는 requireActiveUser() 인증 후 userId prefix 등으로 소유권을 검증하고, service role client로 storage 삭제를 수행하는가
           - Cron cleanup endpoint는 CRON_SECRET bearer 인증을 확인하고, 인증 실패 시 cleanup을 실행하지 않는가
         - Admin API는 /api/admin/*로 분리되고 requireAdmin()을 통과하는가
+        - 501(NOT_IMPLEMENTED) endpoint에 연결된 버튼/링크가 활성 상태로 운영 UI에 새로 노출되지 않는가 (미구현 endpoint 목록: docs/api_spec.md 13절)
 
     - path: 'src/app/api/auth/**'
       instructions: |
