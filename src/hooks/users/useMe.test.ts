@@ -91,7 +91,7 @@ describe('useMe', () => {
     );
   });
 
-  it('queryKey가 queryKeys.users.me()와 일치한다', async () => {
+  it('queryKey가 queryKeys.users.me()와 일치한다', () => {
     const client = new QueryClient({
       defaultOptions: { queries: { retryDelay: 0 } },
     });
