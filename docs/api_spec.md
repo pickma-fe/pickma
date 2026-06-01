@@ -357,6 +357,17 @@ Behavior:
 - `profile_image`는 로그인 active user가 호출할 수 있다.
 - `seller_application_document`는 판매자 신청 생성 가능 상태의 active user만 호출할 수 있다. 이미 seller이거나 pending/approved 신청이 있으면 실패한다.
 
+Purpose별 권한 정책:
+
+| purpose                       | required role | store 조건                                      | 추가 조건                                    |
+| ----------------------------- | ------------- | ----------------------------------------------- | -------------------------------------------- |
+| `profile_image`               | active user   | 없음                                            | 없음                                         |
+| `seller_application_document` | active user   | 없음                                            | pending/approved 신청 없음, seller role 아님 |
+| `store_image`                 | seller        | 없음 (store 생성 전 업로드 허용)                | 없음                                         |
+| `seller_product_image`        | seller        | store 존재 및 `stores.status = 'approved'` 필수 | 없음                                         |
+
+`store_image`에 store 존재 체크를 하지 않는 이유: seller 승인 시 store가 자동 생성되지 않으며, store 최초 생성 시 이미지를 업로드해야 하므로 이 시점에 store가 아직 존재하지 않는다. `seller_product_image`는 상품 등록이 store 생성 이후에만 가능하므로 store 존재가 보장된다.
+
 클라이언트 API helper는 `createUploadUrl → signed URL 업로드 → storagePath 반환` 흐름을 감싼다. TanStack Query mutation은 도메인 hook에서 전체 submit 단위로 관리한다.
 
 ---
