@@ -38,7 +38,7 @@ const footerNavSections: FooterNavSection[] = [
     items: [
       { label: '회사 소개', href: '/about' },
       { label: '이용약관', href: '/terms' },
-      { label: '개인정보처리방침', href: '/privacy' },
+      { label: '개인정보처리방침', href: '/privacy-policy' },
       { label: '위치기반서비스', href: '/location-policy' },
     ],
   },

@@ -3,9 +3,10 @@
 import { Dialog, DialogPanel, DialogTitle } from '@headlessui/react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { XIcon } from 'lucide-react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod';
 
 import { getAuthErrorMessage } from '@/lib/errors/authErrorMessage';
@@ -47,6 +48,13 @@ const signupSchema = z
     email: trimmedEmail,
     password: z.string().min(8, '비밀번호는 8자 이상으로 입력해 주세요.'),
     passwordConfirm: z.string(),
+    termsAgreed: z
+      .boolean()
+      .refine((value) => value, '이용약관에 동의해 주세요.'),
+    privacyAgreed: z
+      .boolean()
+      .refine((value) => value, '개인정보 수집·이용에 동의해 주세요.'),
+    marketingAgreed: z.boolean(),
   })
   .refine((data) => data.password === data.passwordConfirm, {
     message: '비밀번호가 일치하지 않습니다.',
@@ -243,8 +251,25 @@ function SignupForm({ next, onClose, onChangeView }: SignupFormProps) {
     setError,
     trigger,
     getValues,
+    setValue,
+    control,
     formState: { errors, isSubmitting },
-  } = useForm<SignupFields>({ resolver: zodResolver(signupSchema) });
+  } = useForm<SignupFields>({
+    resolver: zodResolver(signupSchema),
+    defaultValues: {
+      termsAgreed: false,
+      privacyAgreed: false,
+      marketingAgreed: false,
+    },
+  });
+
+  const termsAgreed = useWatch({ control, name: 'termsAgreed' });
+  const privacyAgreed = useWatch({ control, name: 'privacyAgreed' });
+  const marketingAgreed = useWatch({ control, name: 'marketingAgreed' });
+  const allTermsAgreed = Boolean(
+    termsAgreed && privacyAgreed && marketingAgreed
+  );
+  const allRequiredTermsAgreed = Boolean(termsAgreed && privacyAgreed);
 
   function handleEmailChange() {
     setVerificationState('idle');
@@ -298,6 +323,12 @@ function SignupForm({ next, onClose, onChangeView }: SignupFormProps) {
     } catch (err) {
       setError('root', { message: getAuthErrorMessage(err) });
     }
+  }
+
+  function handleAllTermsChange(checked: boolean) {
+    setValue('termsAgreed', checked, { shouldValidate: true });
+    setValue('privacyAgreed', checked, { shouldValidate: true });
+    setValue('marketingAgreed', checked, { shouldValidate: true });
   }
 
   return (
@@ -385,12 +416,79 @@ function SignupForm({ next, onClose, onChangeView }: SignupFormProps) {
           error={errors.passwordConfirm?.message}
           {...register('passwordConfirm')}
         />
+        <div className="space-y-2 rounded-md border border-gray-200 p-3">
+          <label className="flex items-center gap-2 text-sm font-semibold text-gray-900">
+            <input
+              type="checkbox"
+              checked={allTermsAgreed}
+              onChange={(event) => handleAllTermsChange(event.target.checked)}
+              className="text-primary-500 focus:ring-primary-500 h-4 w-4 rounded border-gray-300 focus:ring-offset-0"
+            />
+            전체 동의
+          </label>
+          <label className="flex items-start gap-2 text-sm text-gray-700">
+            <input
+              type="checkbox"
+              className="text-primary-500 focus:ring-primary-500 mt-0.5 h-4 w-4 rounded border-gray-300 focus:ring-offset-0"
+              {...register('termsAgreed')}
+            />
+            <span>
+              <Link
+                href="/terms"
+                target="_blank"
+                className="font-medium underline underline-offset-2"
+              >
+                이용약관
+              </Link>
+              에 동의합니다. <span className="text-red-500">(필수)</span>
+            </span>
+          </label>
+          {errors.termsAgreed && (
+            <p className="pl-6 text-xs text-red-500">
+              {errors.termsAgreed.message}
+            </p>
+          )}
+          <label className="flex items-start gap-2 text-sm text-gray-700">
+            <input
+              type="checkbox"
+              className="text-primary-500 focus:ring-primary-500 mt-0.5 h-4 w-4 rounded border-gray-300 focus:ring-offset-0"
+              {...register('privacyAgreed')}
+            />
+            <span>
+              <Link
+                href="/privacy-policy"
+                target="_blank"
+                className="font-medium underline underline-offset-2"
+              >
+                개인정보 수집·이용
+              </Link>
+              에 동의합니다. <span className="text-red-500">(필수)</span>
+            </span>
+          </label>
+          {errors.privacyAgreed && (
+            <p className="pl-6 text-xs text-red-500">
+              {errors.privacyAgreed.message}
+            </p>
+          )}
+          <label className="flex items-start gap-2 text-sm text-gray-700">
+            <input
+              type="checkbox"
+              className="text-primary-500 focus:ring-primary-500 mt-0.5 h-4 w-4 rounded border-gray-300 focus:ring-offset-0"
+              {...register('marketingAgreed')}
+            />
+            <span>마케팅 정보 수신에 동의합니다. (선택)</span>
+          </label>
+        </div>
         {errors.root && (
           <p className="text-sm text-red-500">{errors.root.message}</p>
         )}
         <Button
           type="submit"
-          disabled={isSubmitting || verificationState !== 'verified'}
+          disabled={
+            isSubmitting ||
+            verificationState !== 'verified' ||
+            !allRequiredTermsAgreed
+          }
           color="primary"
           className="w-full text-sm"
         >
