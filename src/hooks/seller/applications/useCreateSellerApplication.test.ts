@@ -125,6 +125,33 @@ describe('useCreateSellerApplication', () => {
     expect(sellerApplicationApi.createSellerApplication).not.toHaveBeenCalled();
   });
 
+  it('상위에서 받은 서류 동의값을 덮어쓰지 않는다', async () => {
+    vi.mocked(
+      fileApi.uploadFile as (p: string, f: File, o: object) => Promise<string>
+    ).mockResolvedValue('mock-path');
+    vi.mocked(sellerApplicationApi.createSellerApplication).mockResolvedValue(
+      mockApplication
+    );
+
+    const { wrapper } = createWrapper();
+    const { result } = renderHook(() => useCreateSellerApplication(), {
+      wrapper,
+    });
+
+    await act(async () => {
+      await result.current.mutateAsync({
+        ...validInput,
+        documentConsentAgreed: false,
+      });
+    });
+
+    expect(sellerApplicationApi.createSellerApplication).toHaveBeenCalledWith(
+      expect.objectContaining({
+        documentConsentAgreed: false,
+      })
+    );
+  });
+
   it('성공 시 seller.onboardingStatus 쿼리를 무효화한다', async () => {
     vi.mocked(
       fileApi.uploadFile as (p: string, f: File, o: object) => Promise<string>

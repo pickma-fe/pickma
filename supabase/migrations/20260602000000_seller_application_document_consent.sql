@@ -67,8 +67,6 @@ BEGIN
 END;
 $$;
 
-REVOKE EXECUTE ON FUNCTION create_seller_application(uuid, text, text, text, text, text, text, jsonb) FROM PUBLIC;
-REVOKE EXECUTE ON FUNCTION create_seller_application(uuid, text, text, text, text, text, text, jsonb) FROM service_role;
 DROP FUNCTION IF EXISTS create_seller_application(uuid, text, text, text, text, text, text, jsonb);
 REVOKE EXECUTE ON FUNCTION create_seller_application(uuid, text, text, text, text, text, text, jsonb, boolean) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION create_seller_application(uuid, text, text, text, text, text, text, jsonb, boolean) TO service_role;

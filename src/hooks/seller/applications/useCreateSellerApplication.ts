@@ -58,7 +58,6 @@ export function useCreateSellerApplication() {
 
       return sellerApplicationApi.createSellerApplication({
         ...rest,
-        documentConsentAgreed: true,
         documents: uploadedDocs,
       });
     },
