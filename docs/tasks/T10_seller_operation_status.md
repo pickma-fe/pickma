@@ -1,10 +1,10 @@
 # T10. 판매자 운영 상태 정책 및 구현
 
 - 상태:
-  진행 전
+  완료
 
 - GitHub Issue:
-  확인 필요
+  205
 
 - 우선순위:
   P1
@@ -53,3 +53,15 @@
   - 판매자가 UI에서 운영 상태를 변경할 수 있다.
   - 운영 중지 가게의 상품 주문 생성이 막힌다.
   - 관련 문서와 테스트가 갱신된다.
+
+- 구현 결과:
+  - DB: `store_status` enum `'approved'` → `'active'` rename, `store_operation_status` enum(`open|closed`) 신규, `stores.operation_status` 컬럼 추가, RLS/RPC 갱신 (`20260602112417_store_operation_status.sql`)
+  - `StoreStatus = 'active' | 'inactive'`, `OperationStatus = 'open' | 'closed'` 타입 추가
+  - `canSell = role === 'seller' && status === 'active' && operationStatus === 'open'`
+  - `STORE_NOT_APPROVED` → `STORE_INACTIVE (403)` 완전 교체
+  - `/api/stores/me` GET/PATCH: `requireSellerStore()` → `requireSeller()` 전환 (`operationStatus` 변경 차단은 service 레이어)
+  - 상품 공개 조회(`getProducts`, `getProductById`): `stores.status='active' AND stores.operation_status='open'` 필터
+  - `create_order` RPC: `s.status = 'active' AND s.operation_status = 'open'` 조건으로 운영 중지 가게 주문 차단
+  - 판매자 가게 정보 화면: 운영 상태 토글 버튼 추가 (영업 시작/영업 종료), inactive 가게는 비활성 텍스트 표시
+  - 관련 테스트, seed, ERD, migration_policy, domain.md, api_spec.md, system_architecture.md 갱신
+  - GitHub Issue: #205
