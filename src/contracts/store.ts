@@ -8,6 +8,7 @@ export interface UpdateStoreRequest {
   image?: string;
   openTime?: string;
   closeTime?: string;
+  operationStatus?: 'open' | 'closed';
 }
 
 export interface CreateStoreRequest {
@@ -36,7 +37,8 @@ export interface StoreResponse {
   image?: string;
   openTime?: string;
   closeTime?: string;
-  status: 'approved' | 'inactive';
+  status: 'active' | 'inactive';
+  operationStatus: 'open' | 'closed';
   canSell: boolean;
   createdAt: string;
   updatedAt: string;

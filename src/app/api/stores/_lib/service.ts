@@ -40,7 +40,7 @@ export async function createStore(
       image: body.image ?? null,
       open_time: body.openTime ? body.openTime.slice(0, 8) : null,
       close_time: body.closeTime ? body.closeTime.slice(0, 8) : null,
-      status: 'approved' as const,
+      status: 'active' as const,
     })
     .select('*')
     .single();
@@ -63,6 +63,19 @@ export async function updateMyStore(
 ): Promise<StoreResponse> {
   const supabase = await createServerClient();
 
+  if (body.operationStatus !== undefined) {
+    const { data: current, error: fetchError } = await supabase
+      .from('stores')
+      .select('status')
+      .eq('user_id', userId)
+      .maybeSingle();
+
+    if (fetchError) throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
+    if (!current) throw new AppError(ERROR_CODE.STORE_NOT_FOUND, 404);
+    if (current.status === 'inactive')
+      throw new AppError(ERROR_CODE.STORE_INACTIVE, 403);
+  }
+
   const { data: row, error } = await supabase
     .from('stores')
     .update({
@@ -81,6 +94,9 @@ export async function updateMyStore(
       ...(body.closeTime !== undefined && {
         close_time: body.closeTime.slice(0, 8),
       }),
+      ...(body.operationStatus !== undefined && {
+        operation_status: body.operationStatus,
+      }),
     })
     .eq('user_id', userId)
     .select('*')
@@ -89,7 +105,10 @@ export async function updateMyStore(
   if (error) throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
   if (!row) throw new AppError(ERROR_CODE.STORE_NOT_FOUND, 404);
 
-  const canSell = userRole === 'seller' && row.status === 'approved';
+  const canSell =
+    userRole === 'seller' &&
+    row.status === 'active' &&
+    row.operation_status === 'open';
   return mapStoreRow(row, canSell);
 }
 
@@ -108,6 +127,9 @@ export async function getMyStore(
   if (error) throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
   if (data === null) throw new AppError(ERROR_CODE.STORE_NOT_FOUND, 404);
 
-  const canSell = userRole === 'seller' && data.status === 'approved';
+  const canSell =
+    userRole === 'seller' &&
+    data.status === 'active' &&
+    data.operation_status === 'open';
   return mapStoreRow(data, canSell);
 }

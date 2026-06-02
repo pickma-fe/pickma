@@ -18,6 +18,7 @@ export function mapStoreRow(row: StoresRow, canSell: boolean): StoreResponse {
     openTime: row.open_time ?? undefined,
     closeTime: row.close_time ?? undefined,
     status: row.status,
+    operationStatus: row.operation_status,
     canSell,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
