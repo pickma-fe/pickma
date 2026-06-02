@@ -41,6 +41,7 @@ const VALID_BODY = {
   businessAddress: '서울시 강남구 테스트로 1',
   businessType: '음식업',
   businessCategory: '한식',
+  documentConsentAgreed: true,
   documents: [
     {
       type: 'business_license',

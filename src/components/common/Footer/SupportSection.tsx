@@ -18,11 +18,11 @@ export function SupportSection() {
         </div>
         <div className="mt-2 space-y-6 border-t border-transparent pt-2 lg:mt-4 lg:space-y-4 lg:border-gray-200 lg:pt-4">
           <a
-            href="mailto:support@example.com"
+            href="mailto:support@pickma.kr"
             className="flex items-center gap-2"
           >
             <MailIcon size={16} />
-            support@example.com
+            support@pickma.kr
           </a>
           <p className="flex items-center gap-2">
             <MessageCircleMoreIcon size={16} />

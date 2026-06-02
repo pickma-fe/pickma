@@ -27,6 +27,7 @@ const VALID_BODY = {
   verificationToken: 'valid-token',
   password: 'password123',
   name: '테스트',
+  marketingAgreed: true,
 };
 
 describe('POST /api/auth/email-signup', () => {
@@ -100,7 +101,8 @@ describe('POST /api/auth/email-signup', () => {
       VALID_BODY.email,
       VALID_BODY.verificationToken,
       VALID_BODY.password,
-      VALID_BODY.name
+      VALID_BODY.name,
+      VALID_BODY.marketingAgreed
     );
   });
 });

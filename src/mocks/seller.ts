@@ -27,6 +27,8 @@ export const mockSellerApplication: SellerApplicationResponse = {
   businessAddress: '서울시 테스트구 테스트로 1',
   businessType: '식품',
   businessCategory: '베이커리',
+  documentConsentAgreed: true,
+  documentConsentAgreedAt: '2026-05-18T00:00:00.000Z',
   documents: [
     {
       id: 'doc_mock_1',

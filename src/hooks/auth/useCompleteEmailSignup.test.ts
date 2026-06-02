@@ -24,6 +24,7 @@ const mockRequest = {
   password: 'password123',
   name: '홍길동',
   verificationToken: 'token_abc',
+  marketingAgreed: false,
 };
 
 function createWrapper() {

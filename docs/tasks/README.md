@@ -67,7 +67,7 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 | T39 | public 이미지 자산 구조 및 Footer badge 크기 정리            | P1       | 진행 전 | 확인 필요    | T18                     | [T39_public_image_asset_footer_badge_cleanup.md](T39_public_image_asset_footer_badge_cleanup.md)                 |
 | T40 | Storage orphan cleanup API 및 hook 통합                      | P1       | 진행 전 | 확인 필요    | T06                     | [T40_storage_orphan_cleanup_api_hook.md](T40_storage_orphan_cleanup_api_hook.md)                                 |
 | T41 | Storage lifecycle 주기적 orphan scanner                      | P2       | 진행 전 | 확인 필요    | T40, T43                | [T41_storage_lifecycle_cron.md](T41_storage_lifecycle_cron.md)                                                   |
-| T42 | 법적 고지 페이지 및 동의 흐름 구현                           | P1       | 진행 전 | 확인 필요    | T44, T61                | [T42_legal_compliance_pages.md](T42_legal_compliance_pages.md)                                                   |
+| T42 | 법적 고지 페이지 및 동의 흐름 구현                           | P1       | 완료    | 204          | T44, T61                | [T42_legal_compliance_pages.md](T42_legal_compliance_pages.md)                                                   |
 | T43 | Vercel 배포 설정 및 Cron 환경 구성                           | P2       | 진행 전 | 확인 필요    | T24                     | [T43_vercel_deployment_config.md](T43_vercel_deployment_config.md)                                               |
 | T44 | 판매자 신분증 원본 처리 및 KYC 보관 정책 결정                | P0       | 완료    | 191          | T06                     | [T44_seller_id_document_kyc_policy.md](T44_seller_id_document_kyc_policy.md)                                     |
 | T45 | UI/UX 및 접근성 baseline 기준 수립                           | P1       | 진행 전 | 확인 필요    | T09                     | [T45_ui_accessibility_baseline_policy.md](T45_ui_accessibility_baseline_policy.md)                               |
@@ -94,7 +94,7 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 
 1. 즉시 착수 가능한 P0: T03, T04
 2. P1 공통 기반과 정책 정리: T17, T18, T20, T11, T14, T15, T60, T58
-3. P1 차단 해소 후 핵심 API/화면 구현: T40, T42, T45, T39, T51, T54, T53
+3. P1 차단 해소 후 핵심 API/화면 구현: T40, T45, T39, T51, T54, T53
 4. P2 기능 확장과 운영 기반: T43, T21, T22, T25, T26, T28, T29, T38, T59, T30, T23, T41
 5. 사용자 흐름별 UI/UX 및 접근성 개선: T46, T47, T48, T49
 6. 확장 단계 검토: T31, T32, T33, T34, T35, T36, T37, T57

@@ -56,7 +56,7 @@ describe('completeEmailSignup', () => {
     );
 
     await expect(
-      completeEmailSignup(EMAIL, TOKEN, PASSWORD, NAME)
+      completeEmailSignup(EMAIL, TOKEN, PASSWORD, NAME, false)
     ).rejects.toMatchObject({
       code: ERROR_CODE.AUTH_EMAIL_STORE_UNAVAILABLE,
       statusCode: 503,
@@ -71,7 +71,7 @@ describe('completeEmailSignup', () => {
     });
 
     await expect(
-      completeEmailSignup(EMAIL, TOKEN, PASSWORD, NAME)
+      completeEmailSignup(EMAIL, TOKEN, PASSWORD, NAME, false)
     ).rejects.toMatchObject({
       code: ERROR_CODE.AUTH_EMAIL_SIGNUP_IN_PROGRESS,
       statusCode: 409,
@@ -82,7 +82,7 @@ describe('completeEmailSignup', () => {
     mockStore.beginSignupWithVerificationToken.mockResolvedValue({ ok: false });
 
     await expect(
-      completeEmailSignup(EMAIL, TOKEN, PASSWORD, NAME)
+      completeEmailSignup(EMAIL, TOKEN, PASSWORD, NAME, false)
     ).rejects.toMatchObject({
       code: ERROR_CODE.AUTH_EMAIL_VERIFICATION_TOKEN_INVALID,
       statusCode: 400,
@@ -96,7 +96,7 @@ describe('completeEmailSignup', () => {
     });
 
     await expect(
-      completeEmailSignup(EMAIL, TOKEN, PASSWORD, NAME)
+      completeEmailSignup(EMAIL, TOKEN, PASSWORD, NAME, false)
     ).rejects.toMatchObject({
       code: ERROR_CODE.AUTH_EMAIL_ALREADY_EXISTS,
       statusCode: 409,
@@ -111,7 +111,7 @@ describe('completeEmailSignup', () => {
     });
 
     await expect(
-      completeEmailSignup(EMAIL, TOKEN, PASSWORD, NAME)
+      completeEmailSignup(EMAIL, TOKEN, PASSWORD, NAME, false)
     ).rejects.toMatchObject({
       code: ERROR_CODE.INTERNAL_SERVER_ERROR,
       statusCode: 500,
@@ -124,7 +124,7 @@ describe('completeEmailSignup', () => {
     mockDeleteUser.mockResolvedValue({ error: null });
 
     await expect(
-      completeEmailSignup(EMAIL, TOKEN, PASSWORD, NAME)
+      completeEmailSignup(EMAIL, TOKEN, PASSWORD, NAME, false)
     ).rejects.toMatchObject({
       code: ERROR_CODE.INTERNAL_SERVER_ERROR,
     });
@@ -137,7 +137,7 @@ describe('completeEmailSignup', () => {
     mockDeleteUser.mockResolvedValue({ error: new Error('Delete failed') });
 
     await expect(
-      completeEmailSignup(EMAIL, TOKEN, PASSWORD, NAME)
+      completeEmailSignup(EMAIL, TOKEN, PASSWORD, NAME, false)
     ).rejects.toMatchObject({
       code: ERROR_CODE.INTERNAL_SERVER_ERROR,
     });
@@ -145,8 +145,25 @@ describe('completeEmailSignup', () => {
   });
 
   it('성공 시 token을 소비한다', async () => {
-    await completeEmailSignup(EMAIL, TOKEN, PASSWORD, NAME);
+    await completeEmailSignup(EMAIL, TOKEN, PASSWORD, NAME, false);
 
     expect(mockStore.completeSignupWithVerificationToken).toHaveBeenCalled();
+    expect(mockInsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        marketing_agreed: false,
+        marketing_agreed_at: null,
+      })
+    );
+  });
+
+  it('마케팅 수신 동의 시 users에 동의 상태와 시각을 저장한다', async () => {
+    await completeEmailSignup(EMAIL, TOKEN, PASSWORD, NAME, true);
+
+    expect(mockInsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        marketing_agreed: true,
+        marketing_agreed_at: expect.any(String),
+      })
+    );
   });
 });

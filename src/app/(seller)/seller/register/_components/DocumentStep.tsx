@@ -1,13 +1,17 @@
 'use client';
 
 import { FileIcon, UploadIcon, X } from 'lucide-react';
+import Link from 'next/link';
 import { useState } from 'react';
 
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/common/Button/Button';
 
 interface DocumentStepProps {
-  onSubmit: (files: Record<string, File | null>) => void;
+  onSubmit: (
+    files: Record<string, File | null>,
+    documentConsentAgreed: true
+  ) => void;
   savedFiles?: Record<string, File | null> | null;
   isViewMode?: boolean;
   isPending?: boolean;
@@ -23,7 +27,7 @@ const DOCUMENTS = [
   },
   {
     id: 'foodServicePermit',
-    title: '영업 허가증 (식품접객업)',
+    title: '영업신고증',
     description: 'PNG, JPG, JPEG, PDF (최대 10MB)',
     required: true,
   },
@@ -69,6 +73,7 @@ export function DocumentStep({
   );
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isDragging, setIsDragging] = useState<Record<string, boolean>>({});
+  const [documentConsentAgreed, setDocumentConsentAgreed] = useState(false);
 
   const [originalFiles, setOriginalFiles] = useState<Record<
     string,
@@ -127,13 +132,17 @@ export function DocumentStep({
       if (!files[doc.id])
         newErrors[doc.id] = '필수 서류입니다. 파일을 첨부해주세요.';
     });
+    if (!documentConsentAgreed) {
+      newErrors.documentConsent =
+        '판매자 심사용 서류 수집·이용에 동의해주세요.';
+    }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = () => {
     if (validate()) {
-      onSubmit(files);
+      onSubmit(files, true);
       setIsEditing(false);
       setOriginalFiles(null);
     }
@@ -149,6 +158,7 @@ export function DocumentStep({
       setFiles(originalFiles);
     }
     setErrors({});
+    setDocumentConsentAgreed(false);
     setOriginalFiles(null);
     setIsEditing(false);
   };
@@ -285,6 +295,39 @@ export function DocumentStep({
         </ul>
       </div>
 
+      <div className="rounded-lg border border-gray-200 p-4">
+        <label className="flex items-start gap-3 text-sm text-gray-700">
+          <input
+            type="checkbox"
+            checked={documentConsentAgreed}
+            onChange={(event) => setDocumentConsentAgreed(event.target.checked)}
+            className="text-primary-500 focus:ring-primary-500 mt-0.5 h-4 w-4 rounded border-gray-300 focus:ring-offset-0"
+          />
+          <span>
+            사업자등록증, 영업신고증, 통장사본을 판매자 심사와 서비스 제공을
+            위해 수집·이용하는 데 동의합니다.
+            <span className="ml-1 text-red-500">(필수)</span>
+          </span>
+        </label>
+        <p className="mt-2 pl-7 text-xs text-gray-500">
+          신분증 원본, 민감정보, 고유식별정보는 수집하지 않습니다. 자세한 보유
+          기간과 철회 안내는{' '}
+          <Link
+            href="/privacy-policy"
+            target="_blank"
+            className="text-primary-600 underline underline-offset-2"
+          >
+            개인정보처리방침
+          </Link>
+          을 확인해주세요.
+        </p>
+        {errors.documentConsent && (
+          <p className="mt-2 pl-7 text-xs text-red-500">
+            {errors.documentConsent}
+          </p>
+        )}
+      </div>
+
       {errorMessage && (
         <p role="alert" className="text-sm text-red-500">
           {errorMessage}
@@ -297,7 +340,10 @@ export function DocumentStep({
             취소
           </Button>
         )}
-        <Button onClick={handleSubmit} disabled={!isAllUploaded || isPending}>
+        <Button
+          onClick={handleSubmit}
+          disabled={!isAllUploaded || !documentConsentAgreed || isPending}
+        >
           {isPending ? '제출 중...' : '서류 제출하기'}
         </Button>
       </div>

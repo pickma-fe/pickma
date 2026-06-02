@@ -78,6 +78,7 @@ export async function createSellerApplication(
       p_business_address: body.businessAddress,
       p_business_type: body.businessType,
       p_business_category: body.businessCategory,
+      p_document_consent_agreed: body.documentConsentAgreed,
       p_documents: body.documents.map((doc) => ({
         type: doc.type,
         storage_path: doc.storagePath,

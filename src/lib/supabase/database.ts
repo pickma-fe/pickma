@@ -439,6 +439,8 @@ export type Database = {
           business_type: string;
           company_name: string;
           created_at: string;
+          document_consent_agreed: boolean;
+          document_consent_agreed_at: string | null;
           id: string;
           reject_reason: string | null;
           representative_name: string;
@@ -454,6 +456,8 @@ export type Database = {
           business_type: string;
           company_name: string;
           created_at?: string;
+          document_consent_agreed?: boolean;
+          document_consent_agreed_at?: string | null;
           id?: string;
           reject_reason?: string | null;
           representative_name: string;
@@ -469,6 +473,8 @@ export type Database = {
           business_type?: string;
           company_name?: string;
           created_at?: string;
+          document_consent_agreed?: boolean;
+          document_consent_agreed_at?: string | null;
           id?: string;
           reject_reason?: string | null;
           representative_name?: string;
@@ -621,6 +627,8 @@ export type Database = {
           created_at: string;
           email: string;
           id: string;
+          marketing_agreed: boolean;
+          marketing_agreed_at: string | null;
           name: string;
           phone: string | null;
           profile_image: string | null;
@@ -632,6 +640,8 @@ export type Database = {
           created_at?: string;
           email: string;
           id: string;
+          marketing_agreed?: boolean;
+          marketing_agreed_at?: string | null;
           name: string;
           phone?: string | null;
           profile_image?: string | null;
@@ -643,6 +653,8 @@ export type Database = {
           created_at?: string;
           email?: string;
           id?: string;
+          marketing_agreed?: boolean;
+          marketing_agreed_at?: string | null;
           name?: string;
           phone?: string | null;
           profile_image?: string | null;
@@ -750,6 +762,7 @@ export type Database = {
           p_business_number: string;
           p_business_type: string;
           p_company_name: string;
+          p_document_consent_agreed: boolean;
           p_documents: Json;
           p_representative_name: string;
           p_user_id: string;

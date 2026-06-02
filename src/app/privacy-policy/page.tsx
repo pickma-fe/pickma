@@ -1,0 +1,145 @@
+import type { Metadata } from 'next';
+
+import { Footer } from '@/components/common/Footer/Footer';
+import { ConsumerHeader } from '@/components/consumer/ConsumerHeader';
+
+export const metadata: Metadata = {
+  title: '개인정보처리방침 | PickMa',
+  description: 'PickMa 개인정보처리방침',
+};
+
+const privacySections = [
+  {
+    title: '제1조 개인정보의 처리 목적',
+    items: [
+      'PickMa는 회원 가입 및 본인 확인, 상품 예약과 픽업, 결제 처리, 주문 관리, 고객 문의 대응을 위해 개인정보를 처리합니다.',
+      '판매자 회원의 경우 판매자 자격 심사, 가게 등록 및 운영, 주문 처리, 정산 관련 확인을 위해 개인정보와 판매자 제출 서류를 처리합니다.',
+      '서비스 품질 개선, 부정 이용 방지, 분쟁 처리, 법령상 의무 이행을 위해 필요한 범위에서 개인정보를 처리합니다.',
+    ],
+  },
+  {
+    title: '제2조 처리하는 개인정보 항목',
+    items: [
+      '일반 회원 필수 항목: 이름, 이메일, 연락처, 로그인 식별 정보',
+      '판매자 회원 필수 항목: 이름, 이메일, 연락처, 사업장 정보, 사업자등록증, 영업신고증, 통장사본',
+      '예약 및 결제 처리 항목: 예약 상품, 예약 수량, 픽업 시간, 주문 상태, 결제 금액, 결제 승인 정보',
+      '서비스 이용 과정에서 접속 기록, 기기 정보, IP 주소, 쿠키, 서비스 이용 기록이 자동으로 생성되어 수집될 수 있습니다.',
+      'PickMa는 판매자 심사 과정에서 신분증 원본, 주민등록번호 등 고유식별정보와 민감정보를 수집하지 않습니다.',
+    ],
+  },
+  {
+    title: '제3조 개인정보의 처리 및 보유 기간',
+    items: [
+      '회원 정보는 회원 탈퇴 시까지 보관하며, 탈퇴 후에는 관계 법령에 따라 보관해야 하는 정보를 제외하고 지체 없이 파기합니다.',
+      '판매자 제출 서류는 판매자 활동 기간 동안 보관하며, 판매자 자격 종료 또는 회원 탈퇴 후 30일 이내 삭제합니다.',
+      '반려 또는 거부된 판매자 제출 서류는 거부 확정 후 30일 이내 삭제합니다.',
+      '계약 또는 청약철회 등에 관한 기록, 대금결제 및 재화 등의 공급에 관한 기록은 전자상거래법에 따라 5년간 보관합니다.',
+      '소비자 불만 또는 분쟁 처리에 관한 기록은 전자상거래법에 따라 3년간 보관합니다.',
+    ],
+  },
+  {
+    title: '제4조 개인정보의 제3자 제공',
+    items: [
+      'PickMa는 이용자의 동의가 있거나 법령에 특별한 규정이 있는 경우를 제외하고 개인정보를 제3자에게 제공하지 않습니다.',
+      '결제 처리 과정에서 Toss Payments에 주문 정보, 결제 금액, 결제 승인에 필요한 정보가 제공될 수 있습니다.',
+      '수사기관, 법원, 행정기관 등 관계 기관이 법령에 근거하여 요청하는 경우 필요한 범위에서 개인정보를 제공할 수 있습니다.',
+    ],
+  },
+  {
+    title: '제5조 개인정보 처리업무의 위탁',
+    items: [
+      'Supabase: 회원 인증, 데이터베이스, 파일 Storage 인프라 제공 및 운영',
+      'Vercel: 서비스 배포, 서버 호스팅 및 운영 인프라 제공',
+      'Toss Payments: 결제 승인, 결제 취소, 결제 관련 기록 처리',
+      'PickMa는 위탁계약 또는 서비스 이용 조건에 따라 개인정보가 안전하게 처리되도록 관리합니다.',
+    ],
+  },
+  {
+    title: '제6조 개인정보의 파기 절차 및 방법',
+    items: [
+      'PickMa는 개인정보 보유 기간이 경과하거나 처리 목적이 달성된 경우 해당 개인정보를 지체 없이 파기합니다.',
+      '전자적 파일 형태의 개인정보는 복구 또는 재생되지 않도록 안전한 방법으로 삭제합니다.',
+      '종이 문서가 발생하는 경우 분쇄 또는 소각 방식으로 파기합니다.',
+      '관계 법령에 따라 보관해야 하는 정보는 다른 개인정보와 분리하여 보관합니다.',
+    ],
+  },
+  {
+    title: '제7조 정보주체와 법정대리인의 권리 및 행사 방법',
+    items: [
+      '이용자는 언제든지 본인의 개인정보에 대한 열람, 정정, 삭제, 처리 정지를 요청할 수 있습니다.',
+      '권리 행사는 고객센터 또는 이메일 문의를 통해 요청할 수 있으며, PickMa는 본인 확인 후 관계 법령에 따라 처리합니다.',
+      '법령상 보관 의무가 있거나 다른 이용자의 권익을 침해할 우려가 있는 경우 요청이 제한될 수 있습니다.',
+      '회원 탈퇴, 동의 철회, 마케팅 수신 거부는 서비스 내 제공되는 기능 또는 고객센터를 통해 요청할 수 있습니다.',
+    ],
+  },
+  {
+    title: '제8조 개인정보의 안전성 확보 조치',
+    items: [
+      'PickMa는 개인정보 접근 권한을 필요한 인원과 시스템으로 제한합니다.',
+      '개인정보가 저장되는 시스템에 대한 접근 기록을 관리하고, 권한 없는 접근을 방지하기 위해 필요한 보호 조치를 적용합니다.',
+      '판매자 제출 서류는 정해진 목적과 기간 내에서만 처리하며, 불필요한 원본 신분증 또는 고유식별정보를 수집하지 않습니다.',
+    ],
+  },
+  {
+    title: '제9조 개인정보 보호책임자 및 문의처',
+    items: [
+      '개인정보 보호책임자: PickMa 운영팀',
+      '문의 이메일: support@pickma.kr',
+      '개인정보 관련 문의, 불만 처리, 피해 구제 요청은 위 연락처로 접수할 수 있습니다.',
+    ],
+  },
+  {
+    title: '제10조 개인정보처리방침의 변경',
+    items: [
+      'PickMa는 관계 법령 또는 서비스 정책 변경에 따라 본 개인정보처리방침을 변경할 수 있습니다.',
+      '개인정보처리방침이 변경되는 경우 시행일, 변경 내용 및 사유를 서비스 화면 또는 공지사항을 통해 안내합니다.',
+      '본 개인정보처리방침은 2026년 6월 2일부터 적용됩니다.',
+    ],
+  },
+];
+
+function getPrivacyItemKey(sectionTitle: string, item: string): string {
+  let hash = 0;
+  for (const char of item) {
+    hash = (hash * 31 + char.charCodeAt(0)) % 1_000_000;
+  }
+  return `${sectionTitle}-${hash}`;
+}
+
+export default function PrivacyPolicyPage() {
+  return (
+    <>
+      <ConsumerHeader />
+      <main className="mx-auto w-full max-w-4xl px-5 py-12 sm:px-6 lg:px-8">
+        <div className="mb-10">
+          <p className="text-primary-600 text-sm font-semibold">PickMa Legal</p>
+          <h1 className="mt-2 text-3xl font-bold text-gray-900">
+            개인정보처리방침
+          </h1>
+          <p className="mt-4 text-sm leading-6 text-gray-600">
+            PickMa는 개인정보보호법 등 관계 법령을 준수하며, 이용자의 개인정보를
+            안전하게 처리하기 위해 다음과 같이 개인정보처리방침을
+            수립·공개합니다.
+          </p>
+          <p className="mt-2 text-sm text-gray-500">시행일: 2026년 6월 2일</p>
+        </div>
+
+        <div className="space-y-8">
+          {privacySections.map((section) => (
+            <section key={section.title} className="space-y-3">
+              <h2 className="text-lg font-semibold text-gray-900">
+                {section.title}
+              </h2>
+              <ul className="list-disc space-y-2 pl-5 text-sm leading-6 text-gray-600">
+                {section.items.map((item) => (
+                  <li key={getPrivacyItemKey(section.title, item)}>{item}</li>
+                ))}
+              </ul>
+            </section>
+          ))}
+        </div>
+      </main>
+      <Footer />
+    </>
+  );
+}

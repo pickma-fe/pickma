@@ -9,7 +9,8 @@ export async function completeEmailSignup(
   email: string,
   verificationToken: string,
   password: string,
-  name: string
+  name: string,
+  marketingAgreed: boolean
 ): Promise<void> {
   const store = getEmailVerificationStore();
   const emailHash = hashValue(email);
@@ -69,9 +70,13 @@ export async function completeEmailSignup(
     throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
   }
 
-  const { error: insertError } = await supabase
-    .from('users')
-    .insert({ id: authUserId, email, name });
+  const { error: insertError } = await supabase.from('users').insert({
+    id: authUserId,
+    email,
+    name,
+    marketing_agreed: marketingAgreed,
+    marketing_agreed_at: marketingAgreed ? new Date().toISOString() : null,
+  });
 
   if (insertError) {
     const { error: deleteError } =

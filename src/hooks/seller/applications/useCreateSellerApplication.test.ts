@@ -43,6 +43,7 @@ const validInput = {
   businessAddress: '서울특별시 강남구 테헤란로 123',
   businessType: '음식점',
   businessCategory: '한식',
+  documentConsentAgreed: true,
   documents: {
     businessLicense: makeFile('business_license.pdf'),
     foodServicePermit: makeFile('food_service_permit.pdf'),
@@ -86,6 +87,7 @@ describe('useCreateSellerApplication', () => {
     expect(sellerApplicationApi.createSellerApplication).toHaveBeenCalledWith(
       expect.objectContaining({
         businessNumber: validInput.businessNumber,
+        documentConsentAgreed: true,
         documents: expect.arrayContaining([
           expect.objectContaining({
             type: 'business_license',
@@ -121,6 +123,35 @@ describe('useCreateSellerApplication', () => {
     });
 
     expect(sellerApplicationApi.createSellerApplication).not.toHaveBeenCalled();
+  });
+
+  it('상위에서 받은 서류 동의값을 덮어쓰지 않는다', async () => {
+    // false는 API schema에서 거부되는 값이며, 이 테스트는 hook이
+    // 사용자 선택값을 임의로 true로 바꾸지 않는지만 검증한다.
+    vi.mocked(
+      fileApi.uploadFile as (p: string, f: File, o: object) => Promise<string>
+    ).mockResolvedValue('mock-path');
+    vi.mocked(sellerApplicationApi.createSellerApplication).mockResolvedValue(
+      mockApplication
+    );
+
+    const { wrapper } = createWrapper();
+    const { result } = renderHook(() => useCreateSellerApplication(), {
+      wrapper,
+    });
+
+    await act(async () => {
+      await result.current.mutateAsync({
+        ...validInput,
+        documentConsentAgreed: false,
+      });
+    });
+
+    expect(sellerApplicationApi.createSellerApplication).toHaveBeenCalledWith(
+      expect.objectContaining({
+        documentConsentAgreed: false,
+      })
+    );
   });
 
   it('성공 시 seller.onboardingStatus 쿼리를 무효화한다', async () => {
