@@ -10,7 +10,7 @@
   P2
 
 - 선행 조건:
-  - 선행 task: T11. 결제 outbox/webhook/idempotency 설계
+  - 선행 task: T11. 결제 outbox/webhook/idempotency 설계, T62. payment_events 테이블 migration 및 이벤트 contract 구현
 
 - 분류:
   기능
@@ -31,6 +31,7 @@
   이벤트/outbox 없이 realtime을 붙이면 잘못된 중간 상태나 재시도 상태가 사용자에게 전파될 수 있다.
 
 - 작업 내용:
+  - `payment_events` 테이블 INSERT 구독을 기반으로 채널 구조를 설계한다 (T62 완료 전제).
   - `notifications` 테이블 또는 Supabase Realtime 채널 구조를 설계한다.
   - 사용자별/판매자별 채널 구독 범위를 정한다.
   - 주문 접수, 준비 완료, 픽업 완료, 결제 실패/보정 필요 이벤트를 정의한다.

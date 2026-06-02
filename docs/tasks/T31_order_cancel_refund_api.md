@@ -10,7 +10,7 @@
   P3
 
 - 선행 조건:
-  - 선행 task: T11. 결제 outbox/webhook/idempotency 설계, T02. 판매자 주문 관리 real API 연결
+  - 선행 task: T11. 결제 outbox/webhook/idempotency 설계, T02. 판매자 주문 관리 real API 연결, T62. payment_events 테이블 migration 및 이벤트 contract 구현
 
 - 분류:
   기능
@@ -34,6 +34,7 @@
   - 취소 가능 상태와 시간 정책을 정한다.
   - `PATCH /api/orders/:id/cancel`, `POST /api/payments/:id/cancel`을 구현한다.
   - Toss cancel API 연동과 재고 복구를 atomic하게 처리한다.
+  - 취소 완료 시 `payment_cancelled` 이벤트를 `payment_events`에 atomic하게 기록한다 (T62 완료 전제).
   - 고객/관리자 UI에 취소/환불 상태를 표시한다.
 
 - 관련 파일/영역:
