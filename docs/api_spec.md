@@ -815,10 +815,15 @@ Toss가 호출하는 결제 상태 동기화 endpoint이다. 구현 우선순위
 
 **검증 방식**
 
-| eventType                | 검증 방법                                                                  |
-| ------------------------ | -------------------------------------------------------------------------- |
-| `PAYMENT_STATUS_CHANGED` | HMAC 서명 없음. payload의 `orderNumber`, `amount`를 DB와 교차 검증 + HTTPS |
-| `DEPOSIT_CALLBACK`       | payload의 `secret` 필드를 `payments.pg_response.secret`에 저장된 값과 비교 |
+Toss webhook body 구조 (이벤트별 상이):
+
+- `PAYMENT_STATUS_CHANGED`: `{ eventType, createdAt, data: { paymentKey, orderId, totalAmount, status, ... } }` — 결제 정보는 `data` 안에 위치
+- `DEPOSIT_CALLBACK`: `{ createdAt, secret, status, orderId, transactionKey }` — 필드가 루트에 위치
+
+| eventType                | 검증 방법                                                                                           |
+| ------------------------ | --------------------------------------------------------------------------------------------------- |
+| `PAYMENT_STATUS_CHANGED` | HMAC 서명 없음. `body.data.orderId`(=orderNumber), `body.data.totalAmount`를 DB와 교차 검증 + HTTPS |
+| `DEPOSIT_CALLBACK`       | `body.secret`을 `payments.pg_response.secret`과 비교. `body.orderId`(=orderNumber)로 대상 결제 조회 |
 
 `TOSS_WEBHOOK_SECRET` 환경변수는 사용하지 않는다.
 

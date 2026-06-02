@@ -30,8 +30,8 @@
 - 작업 내용:
   - `POST /api/payments/webhook` Route Handler 구현
   - 이벤트별 검증 방식 구현:
-    - `PAYMENT_STATUS_CHANGED`: `orderNumber`, `amount`를 DB와 교차 검증 + HTTPS
-    - `DEPOSIT_CALLBACK`: payload `secret`을 `payments.pg_response.secret`과 비교
+    - `PAYMENT_STATUS_CHANGED`: `body.data.orderId`(=orderNumber), `body.data.totalAmount`를 DB와 교차 검증 + HTTPS (body 구조: `{ eventType, createdAt, data: Payment객체 }`)
+    - `DEPOSIT_CALLBACK`: `body.secret`을 `payments.pg_response.secret`과 비교, `body.orderId`(=orderNumber)로 결제 조회 (body 구조: `{ createdAt, secret, status, orderId, transactionKey }`)
   - Idempotency 처리: `tosspayments-webhook-transmission-id` → `provider_event_id`, `(provider, provider_event_id)` unique index로 중복 차단
   - `payment_webhook_received` 이벤트 INSERT 및 처리 상태 갱신
   - 허용 이벤트 타입: `PAYMENT_STATUS_CHANGED`, `DEPOSIT_CALLBACK`

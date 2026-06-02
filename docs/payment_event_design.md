@@ -111,10 +111,40 @@ DB에는 `payments(provider, provider_payment_key)` partial unique index가 이�
 
 Toss webhook은 이벤트별로 다른 검증 방식을 사용한다.
 
-| eventType                | 검증 방법                                                                                       |
-| ------------------------ | ----------------------------------------------------------------------------------------------- |
-| `PAYMENT_STATUS_CHANGED` | HMAC 서명 없음. payload의 `orderNumber`, `amount`를 DB `orders`, `payments`와 교차 검증 + HTTPS |
-| `DEPOSIT_CALLBACK`       | payload의 `secret` 필드를 `payments.pg_response.secret`에 저장된 값과 비교                      |
+Toss webhook body는 이벤트별로 구조가 다르다.
+
+`PAYMENT_STATUS_CHANGED`:
+
+```jsonc
+{
+  "eventType": "PAYMENT_STATUS_CHANGED",
+  "createdAt": "<ISO string>",
+  "data": {
+    "paymentKey": "<string>", // provider_key
+    "orderId": "<string>", // PickMa orderNumber
+    "totalAmount": 15000, // 검증 대상 금액
+    "status": "<string>",
+    // ...Payment 객체 나머지 필드
+  },
+}
+```
+
+`DEPOSIT_CALLBACK`:
+
+```jsonc
+{
+  "createdAt": "<ISO string>",
+  "secret": "<string>", // payments.pg_response.secret과 비교
+  "status": "DONE",
+  "orderId": "<string>", // PickMa orderNumber
+  "transactionKey": "<string>",
+}
+```
+
+| eventType                | 검증 방법                                                                                                                |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------ |
+| `PAYMENT_STATUS_CHANGED` | HMAC 서명 없음. `body.data.orderId`(=orderNumber), `body.data.totalAmount`를 DB `orders`, `payments`와 교차 검증 + HTTPS |
+| `DEPOSIT_CALLBACK`       | `body.secret`을 `payments.pg_response.secret`에 저장된 값과 비교. `body.orderId`(=orderNumber)로 대상 결제 조회          |
 
 `TOSS_WEBHOOK_SECRET` 환경변수는 사용하지 않는다. Toss는 `PAYMENT_STATUS_CHANGED`에 HMAC 서명을 제공하지 않는다.
 
