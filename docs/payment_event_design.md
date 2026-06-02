@@ -25,6 +25,7 @@ CREATE TABLE payment_events (
   id                  uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
   order_id            uuid        NOT NULL REFERENCES orders(id),
   order_number        text        NOT NULL,
+  store_id            uuid        REFERENCES stores(id),    -- 판매자 Realtime 필터용
   payment_id          uuid        REFERENCES payments(id),  -- 결제 완료 전에는 NULL
   event_type          text        NOT NULL,
   provider            text,                                 -- 'toss' 등 결제 provider
@@ -43,6 +44,8 @@ CREATE UNIQUE INDEX payment_events_provider_event_uniq
   ON payment_events (provider, provider_event_id)
   WHERE provider_event_id IS NOT NULL;
 ```
+
+`store_id`는 Supabase Realtime 판매자 채널 필터(`store_id=eq.{storeId}`)에 사용한다. `payment_compensation_failed`, `payment_stuck_processing`처럼 store 맥락이 없는 이벤트는 NULL이다.
 
 `payment_id`는 `payment_confirmed` 이후 채워진다. `payment_compensation_failed`는 `confirm_payment` RPC 실패 후에 발생하므로 payment row가 없을 수 있다.
 
@@ -189,7 +192,13 @@ Supabase Realtime으로 `payment_events` 테이블 INSERT를 구독한다.
 | 판매자      | `payment_confirmed`                                       | 신규 주문 알림 |
 | 관리자      | `payment_compensation_failed`, `payment_stuck_processing` | 운영 알람      |
 
-채널 필터는 `order_id` 또는 `store_id`(payload에 포함) 기준으로 격리한다. 구현 상세는 T22에서 결정한다.
+채널 필터:
+
+- 소비자: `order_id=eq.{orderId}` (자기 주문만 구독)
+- 판매자: `store_id=eq.{storeId}` (DB column 기준 Realtime 필터)
+- 관리자: 이벤트 타입 필터 (`event_type=in.(payment_compensation_failed,payment_stuck_processing)`)
+
+`store_id`는 `payment_events` column으로 저장된다. 구현 상세는 T22에서 결정한다.
 
 ---
 

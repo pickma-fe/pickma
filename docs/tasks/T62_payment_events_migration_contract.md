@@ -43,7 +43,7 @@
   중간
 
 - 완료 기준:
-  - `payment_events` 테이블이 migration으로 생성된다.
+  - `payment_events` 테이블이 migration으로 생성된다 (`store_id` column 포함).
   - 이벤트 타입이 공통 contract에 정의된다.
-  - 결제 확정 시 `payment_confirmed` 이벤트가 atomic하게 삽입된다.
+  - 결제 확정 시 `payment_confirmed` 이벤트가 `store_id`와 함께 atomic하게 삽입된다.
   - T22(Realtime 구독), T31(취소 이벤트), T43(Cron 감지)가 이 테이블을 사용할 수 있다.
