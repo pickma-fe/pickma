@@ -27,7 +27,10 @@ export async function PATCH(request: NextRequest): Promise<Response> {
     const body = await validateBody(updateStoreSchema, request);
 
     if (isApiMockEnabled()) {
-      return success({ ...mockMyStore, ...body });
+      const merged = { ...mockMyStore, ...body };
+      const canSell =
+        merged.status === 'active' && merged.operationStatus === 'open';
+      return success({ ...merged, canSell });
     }
 
     const { serviceUser } = await requireSeller();
