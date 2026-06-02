@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { StoreResponse } from '@/contracts/store';
 import { AppError } from '@/lib/errors/appError';
 import { ERROR_CODE } from '@/lib/errors/errorCodes';
-import { requireSellerStore } from '@/app/api/_lib/auth';
+import { requireSeller } from '@/app/api/_lib/auth';
 import { isApiMockEnabled } from '@/app/api/_lib/mock';
 
 import { GET, PATCH } from './route';
@@ -14,7 +14,7 @@ vi.mock('@/app/api/_lib/mock', () => ({
 }));
 
 vi.mock('@/app/api/_lib/auth', () => ({
-  requireSellerStore: vi.fn(),
+  requireSeller: vi.fn(),
 }));
 
 vi.mock('../_lib/service', () => ({
@@ -32,10 +32,9 @@ const mockServiceUser = {
   updatedAt: '2026-01-01T00:00:00Z',
 };
 
-const mockRequireSellerStore = {
-  authUser: {} as Awaited<ReturnType<typeof requireSellerStore>>['authUser'],
+const mockRequireSeller = {
+  authUser: {} as Awaited<ReturnType<typeof requireSeller>>['authUser'],
   serviceUser: mockServiceUser,
-  store: { id: 'store-1' },
 };
 
 describe('GET /api/stores/me', () => {
@@ -60,7 +59,7 @@ describe('GET /api/stores/me', () => {
   describe('real 모드', () => {
     beforeEach(() => {
       vi.mocked(isApiMockEnabled).mockReturnValue(false);
-      vi.mocked(requireSellerStore).mockResolvedValue(mockRequireSellerStore);
+      vi.mocked(requireSeller).mockResolvedValue(mockRequireSeller);
     });
 
     it('service가 가게를 반환하면 200을 반환한다', async () => {
@@ -80,7 +79,7 @@ describe('GET /api/stores/me', () => {
     });
 
     it('FORBIDDEN throw 시 403을 반환한다', async () => {
-      vi.mocked(requireSellerStore).mockRejectedValue(
+      vi.mocked(requireSeller).mockRejectedValue(
         new AppError(ERROR_CODE.FORBIDDEN, 403)
       );
       const res = await GET();
@@ -115,7 +114,7 @@ describe('PATCH /api/stores/me', () => {
   describe('real 모드', () => {
     beforeEach(() => {
       vi.mocked(isApiMockEnabled).mockReturnValue(false);
-      vi.mocked(requireSellerStore).mockResolvedValue(mockRequireSellerStore);
+      vi.mocked(requireSeller).mockResolvedValue(mockRequireSeller);
     });
 
     it('service가 가게를 반환하면 200을 반환한다', async () => {

@@ -215,20 +215,20 @@ describe('requireSellerStore', () => {
   });
 
   it.each(['inactive'] as const)(
-    'seller이고 store status가 %s면 STORE_NOT_APPROVED를 던진다',
+    'seller이고 store status가 %s면 STORE_INACTIVE를 던진다',
     async (status) => {
       setupUser('seller', { data: { id: 'store-1', status }, error: null });
 
       await expect(requireSellerStore()).rejects.toMatchObject({
-        code: 'STORE_NOT_APPROVED',
+        code: 'STORE_INACTIVE',
         statusCode: 403,
       });
     }
   );
 
-  it('seller이고 approved store가 있으면 결과를 반환한다', async () => {
+  it('seller이고 active store가 있으면 결과를 반환한다', async () => {
     setupUser('seller', {
-      data: { id: 'store-1', status: 'approved' },
+      data: { id: 'store-1', status: 'active' },
       error: null,
     });
 

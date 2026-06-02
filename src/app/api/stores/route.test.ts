@@ -24,7 +24,8 @@ vi.mock('./_lib/service', () => ({
 const USER_ID = '00000000-0000-4000-8000-000000000021';
 const store = {
   id: 'store-1',
-  status: 'approved',
+  status: 'active',
+  operationStatus: 'open',
   canSell: true,
 } as StoreResponse;
 
@@ -54,14 +55,14 @@ describe('POST /api/stores', () => {
     vi.clearAllMocks();
   });
 
-  it('mock 모드에서는 validation 통과 후 mockApprovedStore(status=approved)를 반환한다', async () => {
+  it('mock 모드에서는 validation 통과 후 mockApprovedStore를 반환한다', async () => {
     vi.mocked(isApiMockEnabled).mockReturnValue(true);
 
     const res = await POST(makeRequest(validBody) as never);
     const body = (await res.json()) as { data: StoreResponse };
 
     expect(res.status).toBe(201);
-    expect(body.data.status).toBe('approved');
+    expect(body.data.status).toBe('active');
     expect(requireSeller).not.toHaveBeenCalled();
   });
 
