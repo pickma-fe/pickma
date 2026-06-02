@@ -215,6 +215,8 @@ const eslintConfig = defineConfig([
             { target: './hooks', from: ['./components', './app'] },
             { target: './components', from: ['./app'] },
             // 신규: mocks outbound 금지 (app/api는 ignores로 제외)
+            { target: './types', from: ['./mocks'] },
+            { target: './lib', from: ['./mocks'] },
             { target: './api', from: ['./mocks'] },
             { target: './stores', from: ['./mocks'] },
             { target: './hooks', from: ['./mocks'] },
