@@ -63,20 +63,9 @@ export async function updateMyStore(
 ): Promise<StoreResponse> {
   const supabase = await createServerClient();
 
-  if (body.operationStatus !== undefined) {
-    const { data: current, error: fetchError } = await supabase
-      .from('stores')
-      .select('status')
-      .eq('user_id', userId)
-      .maybeSingle();
+  const isChangingOperationStatus = body.operationStatus !== undefined;
 
-    if (fetchError) throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
-    if (!current) throw new AppError(ERROR_CODE.STORE_NOT_FOUND, 404);
-    if (current.status === 'inactive')
-      throw new AppError(ERROR_CODE.STORE_INACTIVE, 403);
-  }
-
-  const { data: row, error } = await supabase
+  const baseQuery = supabase
     .from('stores')
     .update({
       ...(body.name !== undefined && { name: body.name }),
@@ -94,15 +83,31 @@ export async function updateMyStore(
       ...(body.closeTime !== undefined && {
         close_time: body.closeTime.slice(0, 8),
       }),
-      ...(body.operationStatus !== undefined && {
+      ...(isChangingOperationStatus && {
         operation_status: body.operationStatus,
       }),
     })
-    .eq('user_id', userId)
-    .select('*')
-    .single();
+    .eq('user_id', userId);
 
-  if (error) throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
+  const filteredQuery = isChangingOperationStatus
+    ? baseQuery.eq('status', 'active')
+    : baseQuery;
+
+  const { data: row, error } = await filteredQuery.select('*').single();
+
+  if (error) {
+    if (isChangingOperationStatus && error.code === 'PGRST116') {
+      const { data: existing } = await supabase
+        .from('stores')
+        .select('status')
+        .eq('user_id', userId)
+        .maybeSingle();
+
+      if (!existing) throw new AppError(ERROR_CODE.STORE_NOT_FOUND, 404);
+      throw new AppError(ERROR_CODE.STORE_INACTIVE, 403);
+    }
+    throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
+  }
   if (!row) throw new AppError(ERROR_CODE.STORE_NOT_FOUND, 404);
 
   const canSell =
