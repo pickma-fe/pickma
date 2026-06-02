@@ -4,7 +4,7 @@ import { createServerClient } from '@/lib/supabase/server';
 import { createServiceRoleClient } from '@/lib/supabase/service';
 import { mapStoreRow } from '@/app/api/stores/_lib/mapper';
 
-import { createStore, getMyStore } from './service';
+import { createStore, getMyStore, updateMyStore } from './service';
 
 vi.mock('@/lib/supabase/server');
 vi.mock('@/lib/supabase/service');
@@ -206,6 +206,31 @@ type ServerClientRow = Omit<typeof mockRow, 'status'> & {
   status: 'active' | 'inactive';
 };
 
+type UpdateClientRow = Omit<typeof mockRow, 'status' | 'operation_status'> & {
+  status: 'active' | 'inactive';
+  operation_status: 'open' | 'closed';
+};
+
+function makeUpdateMockClient(
+  updateResult: {
+    data: UpdateClientRow | null;
+    error: { code: string } | null;
+  },
+  fallbackResult: {
+    data: { status: 'active' | 'inactive' } | null;
+    error: null;
+  } = { data: null, error: null }
+) {
+  const chain = {
+    update: vi.fn().mockReturnThis(),
+    select: vi.fn().mockReturnThis(),
+    eq: vi.fn().mockReturnThis(),
+    single: vi.fn().mockResolvedValue(updateResult),
+    maybeSingle: vi.fn().mockResolvedValue(fallbackResult),
+  };
+  return { from: vi.fn().mockReturnValue(chain) };
+}
+
 function makeServerClient(result: {
   data: ServerClientRow | null;
   error: { code: string } | null;
@@ -225,6 +250,59 @@ function makeServerClient(result: {
     }),
   };
 }
+
+describe('updateMyStore', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(mapStoreRow).mockReturnValue(mockStoreResponse);
+  });
+
+  it('operationStatus: closed 변경 성공 시 mapStoreRow(row, false)를 호출한다', async () => {
+    const closedRow = { ...mockRow, operation_status: 'closed' as const };
+    const client = makeUpdateMockClient({ data: closedRow, error: null });
+    vi.mocked(createServerClient).mockResolvedValue(
+      client as unknown as Awaited<ReturnType<typeof createServerClient>>
+    );
+    await updateMyStore('user-1', 'seller', { operationStatus: 'closed' });
+    expect(mapStoreRow).toHaveBeenCalledWith(closedRow, false);
+  });
+
+  it('inactive 가게에서 operationStatus 변경 시도 시 STORE_INACTIVE를 던진다', async () => {
+    const client = makeUpdateMockClient(
+      { data: null, error: { code: 'PGRST116' } },
+      { data: { ...mockRow, status: 'inactive' as const }, error: null }
+    );
+    vi.mocked(createServerClient).mockResolvedValue(
+      client as unknown as Awaited<ReturnType<typeof createServerClient>>
+    );
+    await expect(
+      updateMyStore('user-1', 'seller', { operationStatus: 'closed' })
+    ).rejects.toMatchObject({ code: 'STORE_INACTIVE', statusCode: 403 });
+  });
+
+  it('operationStatus 변경 시 가게가 없으면 STORE_NOT_FOUND를 던진다', async () => {
+    const client = makeUpdateMockClient(
+      { data: null, error: { code: 'PGRST116' } },
+      { data: null, error: null }
+    );
+    vi.mocked(createServerClient).mockResolvedValue(
+      client as unknown as Awaited<ReturnType<typeof createServerClient>>
+    );
+    await expect(
+      updateMyStore('user-1', 'seller', { operationStatus: 'open' })
+    ).rejects.toMatchObject({ code: 'STORE_NOT_FOUND', statusCode: 404 });
+  });
+
+  it('inactive 가게에서 operationStatus 외 정보 수정은 허용하고 mapStoreRow(row, false)를 호출한다', async () => {
+    const inactiveRow = { ...mockRow, status: 'inactive' as const };
+    const client = makeUpdateMockClient({ data: inactiveRow, error: null });
+    vi.mocked(createServerClient).mockResolvedValue(
+      client as unknown as Awaited<ReturnType<typeof createServerClient>>
+    );
+    await updateMyStore('user-1', 'seller', { name: '새이름' });
+    expect(mapStoreRow).toHaveBeenCalledWith(inactiveRow, false);
+  });
+});
 
 describe('getMyStore', () => {
   beforeEach(() => {
