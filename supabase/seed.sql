@@ -298,9 +298,9 @@ FROM (
 ) AS seed;
 
 -- Products: base public samples and visibility filter samples
--- 000000000053, 00000000005e: closed approved-store products
+-- 000000000053, 00000000005e: closed active/open-store products
 -- 000000000054, 00000000005f: active inactive-store products
--- 00000000005d: expired approved-store product
+-- 00000000005d: expired active/open-store product
 INSERT INTO public.products (id, store_id, menu_item_id, category_id, discount_price, stock, reserved_stock, end_at, pickup_start_time, pickup_end_time, status) VALUES
   ('00000000-0000-4000-8000-000000000051',
    '00000000-0000-4000-8000-000000000031',
