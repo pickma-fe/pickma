@@ -126,6 +126,8 @@ describe('useCreateSellerApplication', () => {
   });
 
   it('상위에서 받은 서류 동의값을 덮어쓰지 않는다', async () => {
+    // false는 API schema에서 거부되는 값이며, 이 테스트는 hook이
+    // 사용자 선택값을 임의로 true로 바꾸지 않는지만 검증한다.
     vi.mocked(
       fileApi.uploadFile as (p: string, f: File, o: object) => Promise<string>
     ).mockResolvedValue('mock-path');

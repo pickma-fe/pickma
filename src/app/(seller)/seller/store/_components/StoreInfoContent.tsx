@@ -53,17 +53,13 @@ const INITIAL_CERTIFICATIONS: Record<string, CertificationData> = {
 
 const CERT_KEY_MAP: Record<string, string> = {
   '사업자 등록증': 'businessLicense',
-  '영업 허가증 (식품접객업)': 'foodServicePermit',
+  영업신고증: 'foodServicePermit',
   '통장 사본': 'bankAccount',
   '통신판매업 신고증': 'salesLicense',
   '위생교육 수료증': 'hygieneLicense',
 };
 
-const REGISTER_CERTS = [
-  '사업자 등록증',
-  '영업 허가증 (식품접객업)',
-  '통장 사본',
-];
+const REGISTER_CERTS = ['사업자 등록증', '영업신고증', '통장 사본'];
 
 export function StoreInfoContent() {
   const { data: storeInfo, isLoading, isError } = useMyStore();

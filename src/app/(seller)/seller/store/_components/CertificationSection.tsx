@@ -9,7 +9,7 @@ interface CertificationSectionProps {
 
 const REGISTER_CERTS = [
   { label: '사업자 등록증', key: 'businessLicense' },
-  { label: '영업 허가증 (식품접객업)', key: 'foodServicePermit' },
+  { label: '영업신고증', key: 'foodServicePermit' },
   { label: '통장 사본', key: 'bankAccount' },
 ];
 

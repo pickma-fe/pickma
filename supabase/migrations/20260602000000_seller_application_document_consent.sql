@@ -45,7 +45,7 @@ BEGIN
   ) VALUES (
     p_user_id, 'pending', p_business_number, p_company_name, p_representative_name,
     p_business_address, p_business_type, p_business_category,
-    true, now()
+    p_document_consent_agreed, now()
   )
   RETURNING id INTO v_application_id;
 

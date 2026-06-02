@@ -98,6 +98,14 @@ const privacySections = [
   },
 ];
 
+function getPrivacyItemKey(sectionTitle: string, item: string): string {
+  let hash = 0;
+  for (const char of item) {
+    hash = (hash * 31 + char.charCodeAt(0)) % 1_000_000;
+  }
+  return `${sectionTitle}-${hash}`;
+}
+
 export default function PrivacyPolicyPage() {
   return (
     <>
@@ -124,7 +132,7 @@ export default function PrivacyPolicyPage() {
               </h2>
               <ul className="list-disc space-y-2 pl-5 text-sm leading-6 text-gray-600">
                 {section.items.map((item) => (
-                  <li key={item}>{item}</li>
+                  <li key={getPrivacyItemKey(section.title, item)}>{item}</li>
                 ))}
               </ul>
             </section>

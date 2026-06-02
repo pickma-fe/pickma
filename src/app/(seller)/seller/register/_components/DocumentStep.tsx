@@ -26,7 +26,7 @@ const DOCUMENTS = [
   },
   {
     id: 'foodServicePermit',
-    title: '영업 허가증 (식품접객업)',
+    title: '영업신고증',
     description: 'PNG, JPG, JPEG, PDF (최대 10MB)',
     required: true,
   },
