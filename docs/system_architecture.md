@@ -448,6 +448,14 @@ src/mocks/
 - Phase 1에서는 도메인별 단일 mock 파일로 시작한다.
 - mock 케이스가 많아지면 후속 PR에서 `src/mocks/{domain}/` 폴더로 분리한다.
 
+### import 정책
+
+- `src/mocks`는 Route Handler mock fixture 전용 위치다.
+- `src/components`, `src/hooks`, `src/stores`, `src/api` (클라이언트), `src/app` 페이지/레이아웃에서 `src/mocks`를 직접 import하지 않는다.
+- 앱 화면의 mock 데이터 소비는 Route Handler mock 응답(`isApiMockEnabled()`), story fixture, test fixture 경계를 통해서만 이루어진다.
+- 직접 import 허용 범위: `src/app/api/**` Route Handler, `*.test.ts`, `*.test.tsx`, `*.stories.ts`, `*.stories.tsx`
+- 위반은 ESLint `no-restricted-imports` + `import/no-restricted-paths` rule로 자동 감지한다.
+
 ---
 
 ## 9. 폴더 구조
