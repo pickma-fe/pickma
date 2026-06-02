@@ -53,7 +53,7 @@ export function OperationInfoSection({
                 variant="outline"
                 color={isOpen ? 'gray' : 'primary'}
                 onClick={onToggleOperation}
-                disabled={isToggling}
+                disabled={isToggling || !onToggleOperation}
               >
                 {isOpen ? '영업 종료' : '영업 시작'}
               </Button>
