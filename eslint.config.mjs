@@ -149,6 +149,94 @@ const eslintConfig = defineConfig([
       'sort-exports/sort-exports': 'off',
     },
   },
+  // mock outbound 제한: Route Handler(src/app/api/**), test, story 파일 제외
+  {
+    files: ['src/**/*.ts', 'src/**/*.tsx'],
+    ignores: [
+      'src/**/*.test.ts',
+      'src/**/*.test.tsx',
+      'src/**/*.stories.ts',
+      'src/**/*.stories.tsx',
+      'src/app/api/**',
+      'src/mocks/**',
+    ],
+    rules: {
+      'import/no-restricted-paths': [
+        'error',
+        {
+          basePath: './src',
+          zones: [
+            // 기존 zones 전체 (flat config override 방지)
+            {
+              target: './types',
+              from: [
+                './contracts',
+                './lib',
+                './api',
+                './stores',
+                './hooks',
+                './components',
+                './app',
+              ],
+            },
+            {
+              target: './contracts',
+              from: [
+                './lib',
+                './mocks',
+                './api',
+                './stores',
+                './hooks',
+                './components',
+                './app',
+              ],
+            },
+            {
+              target: './lib',
+              from: ['./api', './stores', './hooks', './components', './app'],
+            },
+            {
+              target: './mocks',
+              from: [
+                './types',
+                './lib',
+                './api',
+                './stores',
+                './hooks',
+                './components',
+                './app',
+              ],
+            },
+            {
+              target: './api',
+              from: ['./stores', './hooks', './components', './app'],
+            },
+            { target: './stores', from: ['./hooks', './components', './app'] },
+            { target: './hooks', from: ['./components', './app'] },
+            { target: './components', from: ['./app'] },
+            // 신규: mocks outbound 금지 (app/api는 ignores로 제외)
+            { target: './api', from: ['./mocks'] },
+            { target: './stores', from: ['./mocks'] },
+            { target: './hooks', from: ['./mocks'] },
+            { target: './components', from: ['./mocks'] },
+            { target: './app', from: ['./mocks'] },
+          ],
+        },
+      ],
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['@/mocks', '@/mocks/*'],
+              message:
+                'mocks는 Route Handler(src/app/api/**)와 test/story 파일에서만 import할 수 있습니다.',
+            },
+          ],
+        },
+      ],
+    },
+  },
   // index.ts barrel 파일만 export 순서 강제
   {
     files: ['**/index.ts', '**/index.tsx'],
