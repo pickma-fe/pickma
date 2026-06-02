@@ -33,7 +33,9 @@ const mockServiceUser = {
 };
 
 const mockRequireSeller = {
-  authUser: {} as Awaited<ReturnType<typeof requireSeller>>['authUser'],
+  authUser: { id: mockServiceUser.id } as Awaited<
+    ReturnType<typeof requireSeller>
+  >['authUser'],
   serviceUser: mockServiceUser,
 };
 
@@ -66,6 +68,10 @@ describe('GET /api/stores/me', () => {
       vi.mocked(getMyStore).mockResolvedValue({} as StoreResponse);
       const res = await GET();
       expect(res.status).toBe(200);
+      expect(getMyStore).toHaveBeenCalledWith(
+        mockServiceUser.id,
+        mockServiceUser.role
+      );
     });
 
     it('STORE_NOT_FOUND throw 시 404를 반환한다', async () => {
@@ -121,6 +127,11 @@ describe('PATCH /api/stores/me', () => {
       vi.mocked(updateMyStore).mockResolvedValue({} as StoreResponse);
       const res = await PATCH(makeRequest({ name: '수정된 가게' }));
       expect(res.status).toBe(200);
+      expect(updateMyStore).toHaveBeenCalledWith(
+        mockServiceUser.id,
+        mockServiceUser.role,
+        expect.objectContaining({ name: '수정된 가게' })
+      );
     });
 
     it('빈 body 요청 시 400을 반환한다', async () => {
