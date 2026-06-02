@@ -104,13 +104,13 @@ export interface PaginatedResult<T> {
 
 API contract의 status 값은 JSON-safe string이며, DB 저장 값과 Domain Type 값이 1:1 대응한다고 가정하지 않는다.
 
-| 대상    | API/DB 기준 값                                                                                                   | Domain 기준 값/파생값                                                                                          |
-| ------- | ---------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| User    | `active`, `suspended`, `deleted`                                                                                 | 동일                                                                                                           |
-| Store   | `approved`, `inactive`                                                                                           | 신규 가게는 `approved`로 생성. `canSell = role === 'seller' && status === 'approved'`                          |
-| Product | `active`, `closed`                                                                                               | `status: active \| closed`, `isSoldOut`, `isExpired`, `displayStatus` 파생                                     |
-| Order   | `payment_pending`, `processing`, `reserved`, `accepted`, `ready`, `completed`, `cancelled`, `no_show`, `expired` | `paymentPending`, `processing`, `reserved`, `accepted`, `ready`, `completed`, `cancelled`, `noShow`, `expired` |
-| Payment | `pending`, `paid`, `failed`, `cancelled`, `refunded`                                                             | 동일                                                                                                           |
+| 대상    | API/DB 기준 값                                                                                                   | Domain 기준 값/파생값                                                                                                  |
+| ------- | ---------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| User    | `active`, `suspended`, `deleted`                                                                                 | 동일                                                                                                                   |
+| Store   | `status: active \| inactive`, `operation_status: open \| closed`                                                 | 신규 가게는 `active/open`으로 생성. `canSell = role === 'seller' && status === 'active' && operationStatus === 'open'` |
+| Product | `active`, `closed`                                                                                               | `status: active \| closed`, `isSoldOut`, `isExpired`, `displayStatus` 파생                                             |
+| Order   | `payment_pending`, `processing`, `reserved`, `accepted`, `ready`, `completed`, `cancelled`, `no_show`, `expired` | `paymentPending`, `processing`, `reserved`, `accepted`, `ready`, `completed`, `cancelled`, `noShow`, `expired`         |
+| Payment | `pending`, `paid`, `failed`, `cancelled`, `refunded`                                                             | 동일                                                                                                                   |
 
 Product `displayStatus` 계산 기준:
 
@@ -353,18 +353,18 @@ Behavior:
 - `seller_application_document`는 private bucket `seller-application-documents`에 저장한다.
 - `store_image`, `seller_product_image`, `profile_image`는 각각 public bucket `store-images`, `product-images`, `profile-images`에 저장한다.
 - `store_image`는 `requireSeller()` 통과 사용자가 호출할 수 있다.
-- `seller_product_image`는 `requireSellerStore()` 통과 사용자가 호출할 수 있다.
+- `seller_product_image`는 `requireSellerStore()`(`stores.status = 'active'`) 통과 사용자가 호출할 수 있다.
 - `profile_image`는 로그인 active user가 호출할 수 있다.
 - `seller_application_document`는 판매자 신청 생성 가능 상태의 active user만 호출할 수 있다. 이미 seller이거나 pending/approved 신청이 있으면 실패한다.
 
 Purpose별 권한 정책:
 
-| purpose                       | required role | store 조건                                      | 추가 조건                                    |
-| ----------------------------- | ------------- | ----------------------------------------------- | -------------------------------------------- |
-| `profile_image`               | active user   | 없음                                            | 없음                                         |
-| `seller_application_document` | active user   | 없음                                            | pending/approved 신청 없음, seller role 아님 |
-| `store_image`                 | seller        | 없음 (store 생성 전 업로드 허용)                | 없음                                         |
-| `seller_product_image`        | seller        | store 존재 및 `stores.status = 'approved'` 필수 | 없음                                         |
+| purpose                       | required role | store 조건                                    | 추가 조건                                    |
+| ----------------------------- | ------------- | --------------------------------------------- | -------------------------------------------- |
+| `profile_image`               | active user   | 없음                                          | 없음                                         |
+| `seller_application_document` | active user   | 없음                                          | pending/approved 신청 없음, seller role 아님 |
+| `store_image`                 | seller        | 없음 (store 생성 전 업로드 허용)              | 없음                                         |
+| `seller_product_image`        | seller        | store 존재 및 `stores.status = 'active'` 필수 | 없음                                         |
 
 `store_image`에 store 존재 체크를 하지 않는 이유: seller 승인 시 store가 자동 생성되지 않으며, store 최초 생성 시 이미지를 업로드해야 하므로 이 시점에 store가 아직 존재하지 않는다. `seller_product_image`는 상품 등록이 store 생성 이후에만 가능하므로 store 존재가 보장된다.
 
@@ -939,7 +939,7 @@ Behavior:
 
 - `seller` role 사용자만 호출할 수 있다.
 - 로그인 사용자가 이미 가게를 가지고 있으면 실패한다.
-- 생성된 가게 status는 `approved`이다.
+- 생성된 가게 status는 `active`, operation_status는 `open`이다.
 - DB unique 충돌(`user_id` 중복, `business_number` 중복 모두 포함)은 `STORE_ALREADY_EXISTS (409)`로 반환한다.
 - 판매자 승인 전 사용자는 가게를 등록할 수 없다.
 
@@ -967,6 +967,7 @@ DB source:
   - `image?`: string — 이미지 URL
   - `openTime?`: string — 영업 시작 시간 (ISO time 형식, 저장 시 `HH:mm:ss`로 정규화)
   - `closeTime?`: string — 영업 종료 시간 (ISO time 형식, 저장 시 `HH:mm:ss`로 정규화)
+  - `operationStatus?`: `'open' | 'closed'` — 판매자 운영 상태 토글. `status = 'inactive'` 가게는 변경 불가 (`STORE_INACTIVE 403`)
 - Validation:
   - 필드 미제공 시 `VALIDATION_ERROR (400)`
   - 문자열 필드 trim 후 빈 문자열 불가
@@ -1119,7 +1120,7 @@ Admin API는 `/api/admin/*`로 분리한다. 모든 Admin API는 `requireAdmin()
 | A-STORE-04 | 전체 가게 조회 | GET    | `/api/admin/stores`                 | P0       |
 | A-STORE-05 | 가게 상태 변경 | PATCH  | `/api/admin/stores/:storeId/status` | P1       |
 
-가게 승인/거절 API는 신규 실행 범위가 아니다. 가게는 seller 승인 후 등록 시 `approved` 상태로 생성한다.
+가게 승인/거절 API는 신규 실행 범위가 아니다. 가게는 seller 승인 후 등록 시 `active` 상태로 생성한다.
 
 ### 10.3 Users
 
@@ -1203,7 +1204,7 @@ RPC에서 raise하는 예외는 아래 정책으로 API error code로 변환한�
 | `CATEGORY_NOT_FOUND`                    | 404  | 카테고리를 찾을 수 없습니다.                                   |
 | `MENU_ITEM_NOT_FOUND`                   | 404  | 메뉴 아이템을 찾을 수 없습니다.                                |
 | `MENU_ITEM_INACTIVE`                    | 409  | 판매 중지된 메뉴 아이템입니다.                                 |
-| `STORE_NOT_APPROVED`                    | 403  | 승인된 가게만 사용할 수 있습니다.                              |
+| `STORE_INACTIVE`                        | 403  | 비활성화된 가게입니다.                                         |
 | `STORE_ALREADY_EXISTS`                  | 409  | 이미 등록된 가게가 있습니다.                                   |
 | `SELLER_APPLICATION_NOT_FOUND`          | 404  | 판매자 신청을 찾을 수 없습니다.                                |
 | `APPLICATION_ALREADY_SUBMITTED`         | 409  | 진행 중이거나 승인된 판매자 신청이 있습니다.                   |
