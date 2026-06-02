@@ -78,6 +78,16 @@ CREATE UNIQUE INDEX payment_events_provider_event_uniq
 - `failureStage='toss_cancel'`: Toss 승인 결제가 남아 있을 수 있다. 운영자는 Toss 결제 상태를 확인하고 취소/환불 또는 주문 복구를 결정한다.
 - `failureStage='revert_processing'`: Toss cancel은 성공했을 수 있으나 주문이 `processing`에 잔류한다. 운영자는 주문 상태 복구를 우선 확인한다.
 
+### 이벤트 타입별 INSERT 기본 `status`
+
+| event_type                    | INSERT 시 status | 비고                                              |
+| ----------------------------- | ---------------- | ------------------------------------------------- |
+| `payment_confirmed`           | `processed`      | INSERT 즉시 완결                                  |
+| `payment_compensation_failed` | `processed`      | INSERT 즉시 완결, 수동 대응 필요 기록용           |
+| `payment_stuck_processing`    | `processed`      | INSERT 즉시 완결                                  |
+| `payment_webhook_received`    | `pending`        | 처리 완료 후 `processed`, 실패 시 `failed`로 갱신 |
+| `payment_cancelled`           | `processed`      | INSERT 즉시 완결                                  |
+
 ---
 
 ## 4. Confirm Idempotency
