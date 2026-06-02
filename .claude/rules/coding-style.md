@@ -45,9 +45,15 @@ api/ ← types/, contracts/, lib/ 만
 stores/ ← types/, lib/, api/ 만 필요 시
 hooks/ ← types/, lib/, api/, stores/ 만
 components/ ← types/, lib/, stores/, hooks/ 만
-app/api/    ← contracts/, lib/ (+ app/api/_lib/, app/api/{resource}/_lib/)
+app/api/    ← contracts/, lib/, mocks/ (+ app/api/_lib/, app/api/{resource}/_lib/)
 app/        ← 전부 가능 (app/api/_lib/, app/api/{resource}/_lib/ 제외)
 ```
+
+### mocks/ import 정책
+
+- 허용: `app/api/**` Route Handler, `*.test.ts`, `*.test.tsx`, `*.stories.ts`, `*.stories.tsx`
+- 금지: `components/`, `hooks/`, `stores/`, `api/` (클라이언트 레이어), `app/` 페이지/레이아웃
+- ESLint `no-restricted-imports` + `import/no-restricted-paths` rule로 자동 감지
 
 - Domain 로직이 들어가는 layer에서는 `contracts/`를 직접 import하지 않는다.
 - Contract DTO는 API 경계, mapper, mock fixture에서만 사용한다.
