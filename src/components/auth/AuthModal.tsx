@@ -315,6 +315,7 @@ function SignupForm({ next, onClose, onChangeView }: SignupFormProps) {
         verificationToken,
         password: data.password,
         name: data.name,
+        marketingAgreed: data.marketingAgreed,
       });
       if (result.session) {
         onClose();

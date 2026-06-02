@@ -185,6 +185,7 @@ export interface CompleteEmailSignupRequest {
   password: string;
   name: string;
   verificationToken: string;
+  marketingAgreed: boolean;
 }
 ```
 
@@ -247,7 +248,7 @@ Behavior:
 - 이미 `signup_in_progress`이면 `AUTH_EMAIL_SIGNUP_IN_PROGRESS` 409 (error details에 `retryAfterSeconds` 포함)
 - `auth.admin.createUser({ email, password, email_confirm: true, user_metadata: { name } })`
 - `auth.admin.createUser()` conflict → token을 `consumed`로 닫고 `AUTH_EMAIL_ALREADY_EXISTS` 409
-- `public.users` row 생성 (`id`, `email`, `name`, role/status 기본값)
+- `public.users` row 생성 (`id`, `email`, `name`, `marketing_agreed`, `marketing_agreed_at`, role/status 기본값)
 - `public.users` 생성 실패 + 보상 삭제 성공 → token `verified`로 되돌려 재시도 가능
 - `public.users` 생성 실패 + 보상 삭제 실패 → token `consumed`로 닫고 `INTERNAL_SERVER_ERROR`
 - 성공 시 token `status = 'consumed'`

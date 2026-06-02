@@ -36,4 +36,5 @@ export interface CompleteEmailSignupRequest {
   verificationToken: string;
   password: string;
   name: string;
+  marketingAgreed: boolean;
 }

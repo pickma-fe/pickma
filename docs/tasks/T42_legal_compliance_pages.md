@@ -62,7 +62,7 @@
 - 완료 기준:
   - `/privacy-policy`, `/terms` 페이지가 공개 접근 가능하고 법적 필수 항목을 포함한다.
   - Footer에 두 페이지 링크가 노출된다.
-  - 회원가입 시 필수/선택 동의 체크박스가 구분되고, 미동의 시 가입이 차단된다.
+  - 회원가입 시 필수/선택 동의 체크박스가 구분되고, 필수 미동의 시 가입이 차단되며 선택 마케팅 수신 동의 여부가 저장된다.
   - 판매자 신청 서류 제출 단계에서 3종 서류 수집·이용 동의가 존재하고, 미동의 시 제출이 차단된다.
 
 - 구현 결과:
@@ -70,6 +70,7 @@
   - `/terms` 페이지 구현 완료 (`src/app/terms/page.tsx`)
   - Footer 개인정보처리방침 링크를 `/privacy-policy`로 업데이트 (`src/components/common/Footer/FooterGroup.tsx`)
   - AuthModal 회원가입 폼에 필수/선택 동의 체크박스 추가 (`src/components/auth/AuthModal.tsx`)
+  - 이메일 회원가입 API에서 마케팅 수신 동의 여부를 `users.marketing_agreed`, `users.marketing_agreed_at`에 저장
   - DocumentStep에 판매자 서류 수집·이용 동의 검증 및 제출 전달 로직 추가 (`src/app/(seller)/seller/register/_components/DocumentStep.tsx`)
-  - 판매자 신청 API 요청에 서류 수집·이용 동의 필드 추가 및 DB 저장 migration 작성 (`supabase/migrations/20260602000000_seller_application_document_consent.sql`)
+  - 판매자 신청 API 요청에 서류 수집·이용 동의 필드 추가 및 DB 저장 migration 작성 (`supabase/migrations/20260602144859_seller_application_document_consent.sql`)
   - 완료 기준 모두 충족 확인

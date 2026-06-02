@@ -13,11 +13,15 @@ export async function POST(request: NextRequest): Promise<Response> {
   }
 
   try {
-    const { email, verificationToken, password, name } = await validateBody(
-      completeEmailSignupSchema,
-      request
+    const { email, verificationToken, password, name, marketingAgreed } =
+      await validateBody(completeEmailSignupSchema, request);
+    await completeEmailSignup(
+      email,
+      verificationToken,
+      password,
+      name,
+      marketingAgreed
     );
-    await completeEmailSignup(email, verificationToken, password, name);
     return success(null);
   } catch (e) {
     return routeError(e);

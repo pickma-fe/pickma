@@ -1,3 +1,7 @@
+ALTER TABLE users
+  ADD COLUMN IF NOT EXISTS marketing_agreed boolean NOT NULL DEFAULT false,
+  ADD COLUMN IF NOT EXISTS marketing_agreed_at timestamptz;
+
 ALTER TABLE seller_applications
   ADD COLUMN IF NOT EXISTS document_consent_agreed boolean NOT NULL DEFAULT false,
   ADD COLUMN IF NOT EXISTS document_consent_agreed_at timestamptz;

@@ -9,6 +9,8 @@ type UsersRow = Database['public']['Tables']['users']['Row'];
 const baseRow: UsersRow = {
   id: 'user-1',
   email: 'test@example.com',
+  marketing_agreed: false,
+  marketing_agreed_at: null,
   name: '홍길동',
   phone: null,
   profile_image: null,

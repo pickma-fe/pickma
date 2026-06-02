@@ -1,6 +1,7 @@
 'use client';
 
 import { FileIcon, UploadIcon, X } from 'lucide-react';
+import Link from 'next/link';
 import { useState } from 'react';
 
 import { cn } from '@/lib/utils';
@@ -309,7 +310,16 @@ export function DocumentStep({
           </span>
         </label>
         <p className="mt-2 pl-7 text-xs text-gray-500">
-          신분증 원본, 민감정보, 고유식별정보는 수집하지 않습니다.
+          신분증 원본, 민감정보, 고유식별정보는 수집하지 않습니다. 자세한 보유
+          기간과 철회 안내는{' '}
+          <Link
+            href="/privacy-policy"
+            target="_blank"
+            className="text-primary-600 underline underline-offset-2"
+          >
+            개인정보처리방침
+          </Link>
+          을 확인해주세요.
         </p>
         {errors.documentConsent && (
           <p className="mt-2 pl-7 text-xs text-red-500">
