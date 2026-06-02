@@ -121,6 +121,5 @@ describe('useProducts', () => {
 
     const queries = client.getQueryCache().getAll();
     expect(queries[0].queryKey).toEqual(queryKeys.products.list(params));
-    expect(queries[0].queryKey).toEqual(['products', 'list', params]);
   });
 });

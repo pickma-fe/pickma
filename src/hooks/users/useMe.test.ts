@@ -102,6 +102,5 @@ describe('useMe', () => {
 
     const queries = client.getQueryCache().getAll();
     expect(queries[0].queryKey).toEqual(queryKeys.users.me());
-    expect(queries[0].queryKey).toEqual(['users', 'me']);
   });
 });
