@@ -33,8 +33,20 @@ END $$;
 ALTER TABLE stores
   ADD COLUMN IF NOT EXISTS operation_status store_operation_status NOT NULL DEFAULT 'open';
 
--- 4. authenticated 사용자에게 UPDATE 권한 추가 (PATCH /api/stores/me 용)
-GRANT UPDATE ON public.stores TO authenticated;
+-- 4. authenticated 사용자에게 UPDATE 권한 추가 (PATCH /api/stores/me 용, status 제외)
+REVOKE UPDATE ON public.stores FROM authenticated;
+GRANT UPDATE (
+  name,
+  phone,
+  address,
+  address_detail,
+  region,
+  description,
+  image,
+  open_time,
+  close_time,
+  operation_status
+) ON public.stores TO authenticated;
 
 -- 5. 인덱스 교체: region+status → region+status+operation_status
 DROP INDEX IF EXISTS idx_stores_region_status;
