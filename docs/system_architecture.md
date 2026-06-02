@@ -141,11 +141,11 @@ Client
        -> 성공 시 verification token 생성 (hash 저장, challenge status = 'verified')
        -> raw verification token 1회 반환
   5. Client: OTP input 숨김, "인증 완료" 표시, verification token React local state에 저장
-  6. POST /api/auth/email-signup (verification token + email + password + name)
+  6. POST /api/auth/email-signup (verification token + email + password + name + marketingAgreed)
        -> verification token hash + emailHash + expiry + status 검증
        -> verified → signup_in_progress 원자적 전환 (동시 제출 방지)
        -> auth.admin.createUser({ email, password, email_confirm: true, user_metadata: { name } })
-       -> public.users row 생성 (id, email, name, role/status 기본값)
+       -> public.users row 생성 (id, email, name, marketing_agreed, marketing_agreed_at, role/status 기본값)
        -> 실패 시 Auth user 보상 삭제 + token 처리 (상세는 아래)
        -> 성공 시 token status = 'consumed'
   7. Client: completeEmailSignup 성공 후 signInWithPassword로 세션 생성 → next 이동
