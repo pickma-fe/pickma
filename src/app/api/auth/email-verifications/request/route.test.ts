@@ -12,7 +12,7 @@ vi.mock('../../_lib/email-verification-service', () => ({
   requestEmailVerification: mockRequestEmailVerification,
 }));
 
-import { GET, POST } from './route';
+import { POST } from './route';
 
 function makeRequest(body: unknown) {
   return new NextRequest(
@@ -85,13 +85,5 @@ describe('POST /api/auth/email-verifications/request', () => {
     expect(res.status).toBe(200);
     expect(body.data.challengeId).toBe('test-challenge-id');
     expect(body.data.expiresAt).toBe(expiresAt.toISOString());
-  });
-});
-
-describe('GET /api/auth/email-verifications/request', () => {
-  it('501을 반환한다', async () => {
-    const res = GET();
-
-    expect(res.status).toBe(501);
   });
 });

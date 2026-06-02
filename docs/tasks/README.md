@@ -34,7 +34,7 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 | T06 | Storage orphan 및 개인정보 cleanup 정책 확정                 | P0       | 완료    | 161          | 없음                    | [T06_storage_orphan_privacy_cleanup_policy.md](T06_storage_orphan_privacy_cleanup_policy.md)                     |
 | T07 | service role 사용 기준 및 owner scope 테스트 수립            | P0       | 완료    | 175          | 없음                    | [T07_service_role_owner_scope_tests.md](T07_service_role_owner_scope_tests.md)                                   |
 | T08 | incremental migration 전환 결정                              | P0       | 완료    | 178          | 없음                    | [T08_incremental_migration_policy.md](T08_incremental_migration_policy.md)                                       |
-| T09 | 501 API 및 UI 노출 목록 정리                                 | P0       | 진행 전 | 확인 필요    | 없음                    | [T09_api_501_ui_exposure_inventory.md](T09_api_501_ui_exposure_inventory.md)                                     |
+| T09 | 501 API 및 UI 노출 목록 정리                                 | P0       | 완료    | 201          | 없음                    | [T09_api_501_ui_exposure_inventory.md](T09_api_501_ui_exposure_inventory.md)                                     |
 | T10 | 판매자 운영 상태 정책 및 구현                                | P1       | 진행 전 | 확인 필요    | T08                     | [T10_seller_operation_status.md](T10_seller_operation_status.md)                                                 |
 | T11 | 결제 outbox/webhook/idempotency 설계                         | P1       | 진행 전 | 확인 필요    | T01                     | [T11_payment_outbox_webhook_idempotency.md](T11_payment_outbox_webhook_idempotency.md)                           |
 | T12 | 공개 상품 목록 Server Component 초기 데이터 전환             | P1       | 완료    | 165          | T05                     | [T12_public_product_list_server_initial_data.md](T12_public_product_list_server_initial_data.md)                 |
@@ -81,7 +81,7 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 | T53 | 판매자 가게 정보 수정 화면 구현                              | P1       | 진행 전 | 확인 필요    | T15, T16                | [T53_seller_store_edit_page.md](T53_seller_store_edit_page.md)                                                   |
 | T54 | 소비자 주문 내역 및 상세 화면 구현                           | P1       | 진행 전 | 확인 필요    | T15                     | [T54_consumer_orders_page.md](T54_consumer_orders_page.md)                                                       |
 | T55 | 소비자 프로필 수정 화면 구현                                 | P2       | 완료    | 177          | 없음                    | [T55_consumer_profile_edit_page.md](T55_consumer_profile_edit_page.md)                                           |
-| T56 | 상품/가게 검색 결과 화면 구현                                | P2       | 진행 전 | 확인 필요    | T05, T12                | [T56_search_result_page.md](T56_search_result_page.md)                                                           |
+| T56 | 상품 검색 결과 화면 구현                                     | P2       | 완료    | 194          | T05, T12                | [T56_search_result_page.md](T56_search_result_page.md)                                                           |
 | T57 | 관리자 사용자·상품·주문 관리 화면 구현                       | P3       | 진행 전 | 확인 필요    | T04                     | [T57_admin_users_products_orders_pages.md](T57_admin_users_products_orders_pages.md)                             |
 | T58 | 관리자 대시보드 통계 화면 구현                               | P1       | 진행 전 | 확인 필요    | T07                     | [T58_admin_dashboard_statistics.md](T58_admin_dashboard_statistics.md)                                           |
 | T59 | 소비자 찜 목록 화면 및 API 구현                              | P2       | 진행 전 | 확인 필요    | T15                     | [T59_consumer_wishlist_page.md](T59_consumer_wishlist_page.md)                                                   |
@@ -95,6 +95,6 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 1. 즉시 착수 가능한 P0: T09, T03, T04
 2. P1 공통 기반과 정책 정리: T17, T18, T20, T10, T11, T14, T15, T60, T58
 3. P1 차단 해소 후 핵심 API/화면 구현: T16, T40, T42, T45, T39, T51, T54, T53
-4. P2 기능 확장과 운영 기반: T43, T21, T56, T22, T25, T26, T28, T29, T38, T59, T30, T23, T41
+4. P2 기능 확장과 운영 기반: T43, T21, T22, T25, T26, T28, T29, T38, T59, T30, T23, T41
 5. 사용자 흐름별 UI/UX 및 접근성 개선: T46, T47, T48, T49
 6. 확장 단계 검토: T31, T32, T33, T34, T35, T36, T37, T57

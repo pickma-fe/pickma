@@ -58,6 +58,14 @@ export async function getProducts(
     query = query.ilike('menu_items.name', `%${escapeILikePattern(keyword)}%`);
   }
 
+  if (params.minPrice !== undefined) {
+    query = query.gte('discount_price', params.minPrice);
+  }
+
+  if (params.maxPrice !== undefined) {
+    query = query.lt('discount_price', params.maxPrice);
+  }
+
   if (params.availableOnly) {
     query = query.gt('end_at', new Date().toISOString());
   }

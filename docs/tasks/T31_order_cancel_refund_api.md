@@ -48,3 +48,4 @@
 - 완료 기준:
   - 고객 또는 운영자가 정책에 맞게 주문/결제를 취소할 수 있다.
   - 재고와 결제 상태가 불일치하지 않는다.
+  - `PATCH /api/orders/{orderId}/cancel`, `POST /api/payments/{paymentId}/cancel` endpoint가 구현되고 `NOT_IMPLEMENTED` 반환 코드가 제거된다.

@@ -107,7 +107,17 @@ describe('useProducts', () => {
     expect(productApi.getProducts).not.toHaveBeenCalled();
   });
 
-  it('queryKey가 queryKeys.products.list(params)와 일치한다', async () => {
+  it('enabled가 false이면 상품 목록을 요청하지 않는다', () => {
+    const { result } = renderHook(
+      () => useProducts({ page: 1, pageSize: 20 }, { enabled: false }),
+      { wrapper: createWrapper() }
+    );
+
+    expect(result.current.fetchStatus).toBe('idle');
+    expect(productApi.getProducts).not.toHaveBeenCalled();
+  });
+
+  it('queryKey가 queryKeys.products.list(params)와 일치한다', () => {
     vi.mocked(productApi.getProducts).mockResolvedValue(mockResult);
 
     const client = new QueryClient({

@@ -46,3 +46,4 @@
 - 완료 기준:
   - 판매자가 기존 상품을 명확한 진입점에서 수정할 수 있다.
   - 등록/수정 form 재사용 범위가 정리된다.
+  - `PATCH /api/seller/products/{productId}/stock` endpoint가 구현되고 `NOT_IMPLEMENTED` 반환 코드가 제거된다. (T09 기준: 재고 조정 기능 범위 포함 여부는 T28 실행 시 재확인)

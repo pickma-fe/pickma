@@ -54,6 +54,7 @@ function buildChain(result: {
     gt: vi.fn(),
     gte: vi.fn(),
     lt: vi.fn(),
+    lte: vi.fn(),
     ilike: vi.fn(),
     order: vi.fn(),
     range: vi.fn().mockResolvedValue(result),
@@ -70,6 +71,7 @@ function buildChain(result: {
   chain.gt.mockReturnValue(chain);
   chain.gte.mockReturnValue(chain);
   chain.lt.mockReturnValue(chain);
+  chain.lte.mockReturnValue(chain);
   chain.ilike.mockReturnValue(chain);
   chain.order.mockReturnValue(chain);
   return chain;
@@ -233,6 +235,52 @@ describe('getProducts', () => {
     await getProducts(supabase, { page: 1, pageSize: 20 });
 
     expect(supabase._chain.ilike).not.toHaveBeenCalled();
+  });
+
+  it('가격대 파라미터가 있으면 discount_price 필터를 적용한다', async () => {
+    const supabase = buildSupabase({ data: [], error: null, count: 0 });
+
+    await getProducts(supabase, {
+      page: 1,
+      pageSize: 20,
+      minPrice: 10000,
+      maxPrice: 20000,
+    });
+
+    expect(supabase._chain.gte).toHaveBeenCalledWith('discount_price', 10000);
+    expect(supabase._chain.lt).toHaveBeenCalledWith('discount_price', 20000);
+  });
+
+  it('minPrice만 있으면 최소 가격 필터만 적용한다', async () => {
+    const supabase = buildSupabase({ data: [], error: null, count: 0 });
+
+    await getProducts(supabase, {
+      page: 1,
+      pageSize: 20,
+      minPrice: 10000,
+    });
+
+    expect(supabase._chain.gte).toHaveBeenCalledWith('discount_price', 10000);
+    expect(supabase._chain.lt).not.toHaveBeenCalledWith(
+      'discount_price',
+      expect.any(Number)
+    );
+  });
+
+  it('maxPrice만 있으면 최대 가격 미만 필터만 적용한다', async () => {
+    const supabase = buildSupabase({ data: [], error: null, count: 0 });
+
+    await getProducts(supabase, {
+      page: 1,
+      pageSize: 20,
+      maxPrice: 20000,
+    });
+
+    expect(supabase._chain.gte).not.toHaveBeenCalledWith(
+      'discount_price',
+      expect.any(Number)
+    );
+    expect(supabase._chain.lt).toHaveBeenCalledWith('discount_price', 20000);
   });
 
   it('keyword + discountOption 조합 시 ilike + gte 모두 DB 쿼리로 적용한다', async () => {

@@ -11,6 +11,7 @@ import { queryKeys } from '@/lib/queryKeys';
 import { productApi } from '@/api/products/productApi';
 
 interface UseProductsOptions {
+  enabled?: boolean;
   initialData?: PaginatedResult<Product>;
 }
 const INITIAL_PRODUCT_LIST_STALE_TIME_MS = 30_000;
@@ -27,6 +28,7 @@ export function useProducts(
   return useQuery<PaginatedResult<Product>>({
     queryKey: queryKeys.products.list(params),
     queryFn: () => productApi.getProducts(params),
+    enabled: options?.enabled ?? true,
     initialData: options?.initialData,
     initialDataUpdatedAt,
     refetchOnMount: hasInitialData ? false : undefined,
