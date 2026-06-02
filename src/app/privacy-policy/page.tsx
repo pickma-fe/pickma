@@ -84,7 +84,7 @@ const privacySections = [
     title: '제9조 개인정보 보호책임자 및 문의처',
     items: [
       '개인정보 보호책임자: PickMa 운영팀',
-      '문의 이메일: support@example.com',
+      '문의 이메일: support@pickma.kr',
       '개인정보 관련 문의, 불만 처리, 피해 구제 요청은 위 연락처로 접수할 수 있습니다.',
     ],
   },

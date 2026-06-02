@@ -73,8 +73,11 @@ export function RegisterContent() {
     handleCloseModal();
   };
 
-  const onDocumentComplete = (files: Record<string, File | null>) => {
-    handleDocumentComplete(files, handleCloseModal);
+  const onDocumentComplete = (
+    files: Record<string, File | null>,
+    documentConsentAgreed: true
+  ) => {
+    handleDocumentComplete(files, documentConsentAgreed, handleCloseModal);
   };
 
   const onStoreInfoComplete = (data: StoreInfoData) => {

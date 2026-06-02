@@ -23,6 +23,10 @@ export function toSellerApplicationResponse(
     businessAddress: row.business_address,
     businessType: row.business_type,
     businessCategory: row.business_category,
+    documentConsentAgreed: row.document_consent_agreed,
+    ...(row.document_consent_agreed_at !== null && {
+      documentConsentAgreedAt: row.document_consent_agreed_at,
+    }),
     ...(row.reject_reason !== null && { rejectReason: row.reject_reason }),
     ...(row.reviewed_at !== null && { reviewedAt: row.reviewed_at }),
     documents: documents.map(toSellerApplicationDocumentResponse),

@@ -28,6 +28,8 @@ export interface SellerApplication {
   businessAddress: string;
   businessType: string;
   businessCategory: string;
+  documentConsentAgreed: boolean;
+  documentConsentAgreedAt?: Date;
   rejectReason?: string;
   reviewedAt?: Date;
   documents: SellerApplicationDocument[];

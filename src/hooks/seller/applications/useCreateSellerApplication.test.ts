@@ -43,6 +43,7 @@ const validInput = {
   businessAddress: '서울특별시 강남구 테헤란로 123',
   businessType: '음식점',
   businessCategory: '한식',
+  documentConsentAgreed: true,
   documents: {
     businessLicense: makeFile('business_license.pdf'),
     foodServicePermit: makeFile('food_service_permit.pdf'),
@@ -86,6 +87,7 @@ describe('useCreateSellerApplication', () => {
     expect(sellerApplicationApi.createSellerApplication).toHaveBeenCalledWith(
       expect.objectContaining({
         businessNumber: validInput.businessNumber,
+        documentConsentAgreed: true,
         documents: expect.arrayContaining([
           expect.objectContaining({
             type: 'business_license',

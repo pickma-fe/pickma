@@ -1,8 +1,8 @@
 'use client';
 
-import { Dialog, DialogPanel, DialogTitle } from '@headlessui/react';
+import { Checkbox, Dialog, DialogPanel, DialogTitle } from '@headlessui/react';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { XIcon } from 'lucide-react';
+import { CheckIcon, XIcon } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -331,6 +331,13 @@ function SignupForm({ next, onClose, onChangeView }: SignupFormProps) {
     setValue('marketingAgreed', checked, { shouldValidate: true });
   }
 
+  function handleTermChange(
+    field: 'termsAgreed' | 'privacyAgreed' | 'marketingAgreed',
+    checked: boolean
+  ) {
+    setValue(field, checked, { shouldDirty: true, shouldValidate: true });
+  }
+
   return (
     <div className="space-y-4">
       <DialogTitle className="text-lg font-semibold">회원가입</DialogTitle>
@@ -417,21 +424,28 @@ function SignupForm({ next, onClose, onChangeView }: SignupFormProps) {
           {...register('passwordConfirm')}
         />
         <div className="space-y-2 rounded-md border border-gray-200 p-3">
-          <label className="flex items-center gap-2 text-sm font-semibold text-gray-900">
-            <input
-              type="checkbox"
+          <div className="flex items-center gap-2 text-sm font-semibold text-gray-900">
+            <Checkbox
               checked={allTermsAgreed}
-              onChange={(event) => handleAllTermsChange(event.target.checked)}
-              className="text-primary-500 focus:ring-primary-500 h-4 w-4 rounded border-gray-300 focus:ring-offset-0"
-            />
-            전체 동의
-          </label>
-          <label className="flex items-start gap-2 text-sm text-gray-700">
-            <input
-              type="checkbox"
-              className="text-primary-500 focus:ring-primary-500 mt-0.5 h-4 w-4 rounded border-gray-300 focus:ring-offset-0"
-              {...register('termsAgreed')}
-            />
+              onChange={handleAllTermsChange}
+              aria-label="회원가입 약관 전체 동의"
+              className="data-checked:bg-primary-500 data-checked:border-primary-500 focus-visible:ring-primary-500 flex h-4 w-4 items-center justify-center rounded border border-gray-300 bg-white focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:outline-none"
+            >
+              {allTermsAgreed && <CheckIcon className="h-3 w-3 text-white" />}
+            </Checkbox>
+            <span>전체 동의</span>
+          </div>
+          <div className="flex items-start gap-2 text-sm text-gray-700">
+            <Checkbox
+              checked={Boolean(termsAgreed)}
+              onChange={(checked) => handleTermChange('termsAgreed', checked)}
+              aria-label="이용약관 동의"
+              className="data-checked:bg-primary-500 data-checked:border-primary-500 focus-visible:ring-primary-500 mt-0.5 flex h-4 w-4 items-center justify-center rounded border border-gray-300 bg-white focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:outline-none"
+            >
+              {Boolean(termsAgreed) && (
+                <CheckIcon className="h-3 w-3 text-white" />
+              )}
+            </Checkbox>
             <span>
               <Link
                 href="/terms"
@@ -442,18 +456,23 @@ function SignupForm({ next, onClose, onChangeView }: SignupFormProps) {
               </Link>
               에 동의합니다. <span className="text-red-500">(필수)</span>
             </span>
-          </label>
+          </div>
           {errors.termsAgreed && (
             <p className="pl-6 text-xs text-red-500">
               {errors.termsAgreed.message}
             </p>
           )}
-          <label className="flex items-start gap-2 text-sm text-gray-700">
-            <input
-              type="checkbox"
-              className="text-primary-500 focus:ring-primary-500 mt-0.5 h-4 w-4 rounded border-gray-300 focus:ring-offset-0"
-              {...register('privacyAgreed')}
-            />
+          <div className="flex items-start gap-2 text-sm text-gray-700">
+            <Checkbox
+              checked={Boolean(privacyAgreed)}
+              onChange={(checked) => handleTermChange('privacyAgreed', checked)}
+              aria-label="개인정보 수집·이용 동의"
+              className="data-checked:bg-primary-500 data-checked:border-primary-500 focus-visible:ring-primary-500 mt-0.5 flex h-4 w-4 items-center justify-center rounded border border-gray-300 bg-white focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:outline-none"
+            >
+              {Boolean(privacyAgreed) && (
+                <CheckIcon className="h-3 w-3 text-white" />
+              )}
+            </Checkbox>
             <span>
               <Link
                 href="/privacy-policy"
@@ -464,20 +483,27 @@ function SignupForm({ next, onClose, onChangeView }: SignupFormProps) {
               </Link>
               에 동의합니다. <span className="text-red-500">(필수)</span>
             </span>
-          </label>
+          </div>
           {errors.privacyAgreed && (
             <p className="pl-6 text-xs text-red-500">
               {errors.privacyAgreed.message}
             </p>
           )}
-          <label className="flex items-start gap-2 text-sm text-gray-700">
-            <input
-              type="checkbox"
-              className="text-primary-500 focus:ring-primary-500 mt-0.5 h-4 w-4 rounded border-gray-300 focus:ring-offset-0"
-              {...register('marketingAgreed')}
-            />
+          <div className="flex items-start gap-2 text-sm text-gray-700">
+            <Checkbox
+              checked={Boolean(marketingAgreed)}
+              onChange={(checked) =>
+                handleTermChange('marketingAgreed', checked)
+              }
+              aria-label="마케팅 정보 수신 동의"
+              className="data-checked:bg-primary-500 data-checked:border-primary-500 focus-visible:ring-primary-500 mt-0.5 flex h-4 w-4 items-center justify-center rounded border border-gray-300 bg-white focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:outline-none"
+            >
+              {Boolean(marketingAgreed) && (
+                <CheckIcon className="h-3 w-3 text-white" />
+              )}
+            </Checkbox>
             <span>마케팅 정보 수신에 동의합니다. (선택)</span>
-          </label>
+          </div>
         </div>
         {errors.root && (
           <p className="text-sm text-red-500">{errors.root.message}</p>

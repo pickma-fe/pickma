@@ -100,6 +100,7 @@ export function useSellerAuth() {
 
   const handleDocumentComplete = (
     files: Record<string, File | null>,
+    documentConsentAgreed: true,
     onClose: () => void
   ) => {
     if (
@@ -115,6 +116,7 @@ export function useSellerAuth() {
     createSellerApplication(
       {
         ...businessInfo,
+        documentConsentAgreed,
         documents: { businessLicense, foodServicePermit, bankAccount },
       },
       {

@@ -14,6 +14,8 @@ const MOCK_RESPONSE: SellerApplicationResponse = {
   businessAddress: '서울시 강남구',
   businessType: '소매업',
   businessCategory: '식품',
+  documentConsentAgreed: true,
+  documentConsentAgreedAt: '2026-05-01T00:00:00Z',
   documents: [
     {
       id: 'doc-1',
@@ -36,6 +38,7 @@ describe('mapSellerApplication', () => {
     expect(result.createdAt).toBeInstanceOf(Date);
     expect(result.updatedAt).toBeInstanceOf(Date);
     expect(result.documents[0]?.createdAt).toBeInstanceOf(Date);
+    expect(result.documentConsentAgreedAt).toBeInstanceOf(Date);
   });
 
   it('rejectReason이 없으면 해당 필드를 포함하지 않는다', () => {

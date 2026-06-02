@@ -15,6 +15,8 @@ const APPLICATION_ROW = {
   business_address: '서울시 강남구',
   business_type: '소매업',
   business_category: '식품',
+  document_consent_agreed: true,
+  document_consent_agreed_at: '2026-05-01T00:00:00Z',
   reject_reason: null,
   reviewed_at: null,
   created_at: '2026-05-01T00:00:00Z',

@@ -7,7 +7,10 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/common/Button/Button';
 
 interface DocumentStepProps {
-  onSubmit: (files: Record<string, File | null>) => void;
+  onSubmit: (
+    files: Record<string, File | null>,
+    documentConsentAgreed: true
+  ) => void;
   savedFiles?: Record<string, File | null> | null;
   isViewMode?: boolean;
   isPending?: boolean;
@@ -138,7 +141,7 @@ export function DocumentStep({
 
   const handleSubmit = () => {
     if (validate()) {
-      onSubmit(files);
+      onSubmit(files, true);
       setIsEditing(false);
       setOriginalFiles(null);
     }

@@ -33,6 +33,8 @@ const MOCK_RESPONSE: SellerApplicationResponse = {
   businessAddress: '서울시 강남구',
   businessType: '소매업',
   businessCategory: '식품',
+  documentConsentAgreed: true,
+  documentConsentAgreedAt: '2026-05-01T00:00:00Z',
   documents: [],
   createdAt: '2026-05-01T00:00:00Z',
   updatedAt: '2026-05-01T00:00:00Z',
@@ -57,6 +59,7 @@ describe('sellerApplicationApi', () => {
       businessAddress: '서울시 강남구',
       businessType: '소매업',
       businessCategory: '식품',
+      documentConsentAgreed: true,
       documents: [],
     };
 

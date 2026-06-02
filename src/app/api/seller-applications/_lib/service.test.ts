@@ -43,6 +43,7 @@ const VALID_BODY = {
   businessAddress: '서울시 강남구',
   businessType: '소매업',
   businessCategory: '식품',
+  documentConsentAgreed: true,
   documents: VALID_DOCUMENTS,
 };
 
@@ -56,6 +57,8 @@ const MOCK_APPLICATION = {
   business_address: VALID_BODY.businessAddress,
   business_type: VALID_BODY.businessType,
   business_category: VALID_BODY.businessCategory,
+  document_consent_agreed: true,
+  document_consent_agreed_at: '2026-05-01T00:00:00Z',
   reject_reason: null,
   reviewed_at: null,
   created_at: '2026-05-01T00:00:00Z',
@@ -134,7 +137,25 @@ describe('createSellerApplication', () => {
     const result = await createSellerApplication(USER_ID, VALID_BODY);
     expect(result.id).toBe('app-1');
     expect(result.status).toBe('pending');
+    expect(result.documentConsentAgreed).toBe(true);
+    expect(result.documentConsentAgreedAt).toBe('2026-05-01T00:00:00Z');
     expect(result.documents).toHaveLength(3);
+  });
+
+  it('RPC에 판매자 서류 수집·이용 동의값을 전달한다', async () => {
+    const mock = buildStorageMock();
+    vi.mocked(createServiceRoleClient).mockReturnValue(
+      mock as unknown as ReturnType<typeof createServiceRoleClient>
+    );
+
+    await createSellerApplication(USER_ID, VALID_BODY);
+
+    expect(mock.rpc).toHaveBeenCalledWith(
+      'create_seller_application',
+      expect.objectContaining({
+        p_document_consent_agreed: true,
+      })
+    );
   });
 
   it('storage list를 각 문서의 폴더와 파일명으로 호출한다', async () => {

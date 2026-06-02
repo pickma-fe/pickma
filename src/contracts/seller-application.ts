@@ -21,6 +21,7 @@ export interface CreateSellerApplicationRequest {
   businessAddress: string;
   businessType: string;
   businessCategory: string;
+  documentConsentAgreed: boolean;
   documents: Array<{
     type: SellerApplicationDocumentType;
     storagePath: string;
@@ -40,6 +41,8 @@ export interface SellerApplicationResponse {
   businessAddress: string;
   businessType: string;
   businessCategory: string;
+  documentConsentAgreed: boolean;
+  documentConsentAgreedAt?: string;
   rejectReason?: string;
   reviewedAt?: string;
   documents: SellerApplicationDocumentResponse[];

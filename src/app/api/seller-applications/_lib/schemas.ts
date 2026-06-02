@@ -24,6 +24,7 @@ export const createSellerApplicationSchema = z
     businessAddress: z.string().min(1),
     businessType: z.string().min(1),
     businessCategory: z.string().min(1),
+    documentConsentAgreed: z.literal(true),
     documents: z.array(documentSchema).length(3),
   })
   .strict()

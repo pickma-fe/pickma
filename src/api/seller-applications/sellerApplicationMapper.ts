@@ -20,6 +20,10 @@ export function mapSellerApplication(
     businessAddress: dto.businessAddress,
     businessType: dto.businessType,
     businessCategory: dto.businessCategory,
+    documentConsentAgreed: dto.documentConsentAgreed,
+    ...(dto.documentConsentAgreedAt !== undefined && {
+      documentConsentAgreedAt: new Date(dto.documentConsentAgreedAt),
+    }),
     ...(dto.rejectReason !== undefined && { rejectReason: dto.rejectReason }),
     ...(dto.reviewedAt !== undefined && {
       reviewedAt: new Date(dto.reviewedAt),
