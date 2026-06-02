@@ -406,7 +406,8 @@ sequenceDiagram
     - cancel 실패 → 결제 승인 상태 유지, 주문 `processing` 잔류 (운영 알람 대상)
     - cancel 성공 + revert 실패 → 결제 취소, 주문 `processing` 잔류 (운영 알람 대상)
   - `processing` 상태로 30분 이상 잔류하는 주문은 운영 알람 대상이며 수동 확인이 필요하다.
-  - 후속 고도화: T11 (outbox/webhook/idempotency), A-ORDER-01 `status=processing` filter (P1)
+  - 결제 이벤트 모델(outbox/webhook/idempotency) 설계: `docs/payment_event_design.md`. 구현은 T62(`payment_events` 테이블 migration + `payment_confirmed` 이벤트 INSERT), T63(webhook Route Handler)에서 진행한다.
+  - A-ORDER-01 `status=processing` filter 스펙: `docs/api_spec.md` 10.4절 (P1)
 
 ### 7.1 정산대행 설계 원칙
 
