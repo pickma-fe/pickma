@@ -1,10 +1,10 @@
 # T11. 결제 outbox/webhook/idempotency 설계
 
 - 상태:
-  진행 전
+  완료
 
 - GitHub Issue:
-  확인 필요
+  209
 
 - 우선순위:
   P1
@@ -49,3 +49,10 @@
 - 완료 기준:
   - 결제 이벤트/재시도/웹훅 설계 문서가 있다.
   - 추후 구현할 schema/API task가 분리되어 있다.
+
+- 구현 결과:
+  - 설계 문서: `docs/payment_event_design.md` (이벤트 모델, webhook 정책, idempotency 기준, T22 Realtime 구독 모델)
+  - `docs/api_spec.md` 6.5절: webhook 이벤트별 검증 방식, idempotency, 허용 이벤트/결제수단 구체화
+  - `docs/system_architecture.md` 7절: 이벤트 모델 참조 및 후속 task 명시
+  - 후속 구현 task: T62(`payment_events` migration + contract), T63(webhook Route Handler)
+  - T22/T31 선행 조건에 T62 추가
