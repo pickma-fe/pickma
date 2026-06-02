@@ -1,4 +1,5 @@
-export type StoreStatus = 'approved' | 'inactive';
+export type StoreStatus = 'active' | 'inactive';
+export type OperationStatus = 'open' | 'closed';
 
 export interface UpdateStoreInput {
   name?: string;
@@ -10,6 +11,7 @@ export interface UpdateStoreInput {
   image?: string;
   openTime?: string;
   closeTime?: string;
+  operationStatus?: OperationStatus;
 }
 
 export interface CreateStoreInput {
@@ -39,6 +41,7 @@ export interface Store {
   openTime?: string;
   closeTime?: string;
   status: StoreStatus;
+  operationStatus: OperationStatus;
   createdAt: Date;
   updatedAt: Date;
 }

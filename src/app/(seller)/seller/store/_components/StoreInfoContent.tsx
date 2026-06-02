@@ -67,7 +67,7 @@ const REGISTER_CERTS = [
 
 export function StoreInfoContent() {
   const { data: storeInfo, isLoading, isError } = useMyStore();
-  const { mutate: updateStore } = useUpdateStore();
+  const { mutate: updateStore, isPending: isUpdating } = useUpdateStore();
   const [activeModal, setActiveModal] = useState<ModalType>(null);
   const [selectedCertification, setSelectedCertification] = useState<
     string | null
@@ -94,6 +94,13 @@ export function StoreInfoContent() {
   const handleViewCertification = (label: string) => {
     setSelectedCertification(label);
     setActiveModal('viewCertification');
+  };
+
+  const handleToggleOperation = () => {
+    if (!storeInfo) return;
+    updateStore({
+      operationStatus: storeInfo.operationStatus === 'open' ? 'closed' : 'open',
+    });
   };
 
   const handleStoreEdit = (data: StoreEditData) => {
@@ -213,7 +220,11 @@ export function StoreInfoContent() {
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
         <BasicInfoSection storeInfo={storeInfo} />
-        <OperationInfoSection storeInfo={storeInfo} />
+        <OperationInfoSection
+          storeInfo={storeInfo}
+          onToggleOperation={handleToggleOperation}
+          isToggling={isUpdating}
+        />
       </div>
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">

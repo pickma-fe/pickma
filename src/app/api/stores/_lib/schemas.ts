@@ -13,6 +13,7 @@ export const updateStoreSchema = z
     image: z.string().trim().min(1).optional(),
     openTime: z.iso.time().optional(),
     closeTime: z.iso.time().optional(),
+    operationStatus: z.enum(['open', 'closed']).optional(),
   })
   .refine((data) => Object.values(data).some((v) => v !== undefined), {
     message: '수정할 필드가 없습니다.',

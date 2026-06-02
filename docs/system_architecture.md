@@ -297,7 +297,7 @@ src/app/api/
 - `requireActiveUser()`: 로그인된 active 사용자 확인.
 - `requireAdmin()`: `users.role = 'admin'` 확인.
 - `requireSeller()`: `users.role = 'seller'` 확인. 승인된 판매자이지만 아직 가게가 없는 상태를 허용한다.
-- `requireSellerStore()`: `requireSeller()` 이후 내 가게 존재와 `stores.status = 'approved'`를 확인한다.
+- `requireSellerStore()`: `requireSeller()` 이후 내 가게 존재와 `stores.status = 'active'`를 확인한다. `operation_status`는 확인하지 않으며, 소비자 공개 조회와 주문 생성 차단은 각 service/RPC에서 별도로 처리한다.
 
 상품/주문처럼 가게 소유권이 필요한 seller API는 `requireSellerStore()`를 사용한다. 가게 등록, seller onboarding 상태 조회처럼 가게가 아직 없을 수 있는 흐름은 `requireSeller()` 또는 `requireActiveUser()`를 사용한다.
 

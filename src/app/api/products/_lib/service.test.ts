@@ -113,14 +113,15 @@ describe('getProducts', () => {
     expect(supabase._chain.eq).toHaveBeenCalledWith('status', 'active');
   });
 
-  it('stores.status = approved 필터를 적용한다', async () => {
+  it('stores.status = active 및 stores.operation_status = open 필터를 적용한다', async () => {
     const supabase = buildSupabase({ data: [], error: null, count: 0 });
 
     await getProducts(supabase, { page: 1, pageSize: 20 });
 
+    expect(supabase._chain.eq).toHaveBeenCalledWith('stores.status', 'active');
     expect(supabase._chain.eq).toHaveBeenCalledWith(
-      'stores.status',
-      'approved'
+      'stores.operation_status',
+      'open'
     );
   });
 
@@ -431,14 +432,15 @@ describe('getProductById', () => {
     expect(supabase._chain.eq).toHaveBeenCalledWith('status', 'active');
   });
 
-  it('stores.status = approved 필터를 적용한다', async () => {
+  it('stores.status = active 및 stores.operation_status = open 필터를 적용한다', async () => {
     const supabase = buildSupabase({ data: baseRow, error: null });
 
     await getProductById(supabase, '00000000-0000-4000-8000-000000000051');
 
+    expect(supabase._chain.eq).toHaveBeenCalledWith('stores.status', 'active');
     expect(supabase._chain.eq).toHaveBeenCalledWith(
-      'stores.status',
-      'approved'
+      'stores.operation_status',
+      'open'
     );
   });
 

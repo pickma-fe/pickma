@@ -8,7 +8,7 @@ export const ERROR_MESSAGES: Record<ErrorCode, string> = {
   PRODUCT_NOT_FOUND: '상품을 찾을 수 없습니다.',
   ORDER_NOT_FOUND: '주문을 찾을 수 없습니다.',
   STORE_NOT_FOUND: '가게를 찾을 수 없습니다.',
-  STORE_NOT_APPROVED: '승인된 가게만 사용할 수 있습니다.',
+  STORE_INACTIVE: '비활성화된 가게입니다.',
   CATEGORY_NOT_FOUND: '카테고리를 찾을 수 없습니다.',
   MENU_ITEM_NOT_FOUND: '메뉴를 찾을 수 없습니다.',
   MENU_ITEM_INACTIVE: '판매 중지된 메뉴는 사용할 수 없습니다.',

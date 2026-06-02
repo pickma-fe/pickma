@@ -40,7 +40,7 @@ export async function createStore(
       image: body.image ?? null,
       open_time: body.openTime ? body.openTime.slice(0, 8) : null,
       close_time: body.closeTime ? body.closeTime.slice(0, 8) : null,
-      status: 'approved' as const,
+      status: 'active' as const,
     })
     .select('*')
     .single();
@@ -53,7 +53,8 @@ export async function createStore(
   }
   if (!row) throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
 
-  return mapStoreRow(row, true);
+  const canSell = row.status === 'active' && row.operation_status === 'open';
+  return mapStoreRow(row, canSell);
 }
 
 export async function updateMyStore(
@@ -63,7 +64,9 @@ export async function updateMyStore(
 ): Promise<StoreResponse> {
   const supabase = await createServerClient();
 
-  const { data: row, error } = await supabase
+  const isChangingOperationStatus = body.operationStatus !== undefined;
+
+  const baseQuery = supabase
     .from('stores')
     .update({
       ...(body.name !== undefined && { name: body.name }),
@@ -81,15 +84,38 @@ export async function updateMyStore(
       ...(body.closeTime !== undefined && {
         close_time: body.closeTime.slice(0, 8),
       }),
+      ...(isChangingOperationStatus && {
+        operation_status: body.operationStatus,
+      }),
     })
-    .eq('user_id', userId)
-    .select('*')
-    .single();
+    .eq('user_id', userId);
 
-  if (error) throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
+  const filteredQuery = isChangingOperationStatus
+    ? baseQuery.eq('status', 'active')
+    : baseQuery;
+
+  const { data: row, error } = await filteredQuery.select('*').single();
+
+  if (error) {
+    if (isChangingOperationStatus && error.code === 'PGRST116') {
+      const { data: existing, error: fetchError } = await supabase
+        .from('stores')
+        .select('status')
+        .eq('user_id', userId)
+        .maybeSingle();
+
+      if (fetchError) throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
+      if (!existing) throw new AppError(ERROR_CODE.STORE_NOT_FOUND, 404);
+      throw new AppError(ERROR_CODE.STORE_INACTIVE, 403);
+    }
+    throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
+  }
   if (!row) throw new AppError(ERROR_CODE.STORE_NOT_FOUND, 404);
 
-  const canSell = userRole === 'seller' && row.status === 'approved';
+  const canSell =
+    userRole === 'seller' &&
+    row.status === 'active' &&
+    row.operation_status === 'open';
   return mapStoreRow(row, canSell);
 }
 
@@ -108,6 +134,9 @@ export async function getMyStore(
   if (error) throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
   if (data === null) throw new AppError(ERROR_CODE.STORE_NOT_FOUND, 404);
 
-  const canSell = userRole === 'seller' && data.status === 'approved';
+  const canSell =
+    userRole === 'seller' &&
+    data.status === 'active' &&
+    data.operation_status === 'open';
   return mapStoreRow(data, canSell);
 }

@@ -563,6 +563,7 @@ export type Database = {
           image: string | null;
           name: string;
           open_time: string | null;
+          operation_status: Database['public']['Enums']['store_operation_status'];
           phone: string;
           region: string;
           status: Database['public']['Enums']['store_status'];
@@ -580,6 +581,7 @@ export type Database = {
           image?: string | null;
           name: string;
           open_time?: string | null;
+          operation_status?: Database['public']['Enums']['store_operation_status'];
           phone: string;
           region: string;
           status?: Database['public']['Enums']['store_status'];
@@ -597,6 +599,7 @@ export type Database = {
           image?: string | null;
           name?: string;
           open_time?: string | null;
+          operation_status?: Database['public']['Enums']['store_operation_status'];
           phone?: string;
           region?: string;
           status?: Database['public']['Enums']['store_status'];
@@ -790,7 +793,8 @@ export type Database = {
         | 'bank_account';
       seller_application_status: 'pending' | 'approved' | 'rejected';
       social_provider: 'google' | 'kakao';
-      store_status: 'approved' | 'inactive';
+      store_operation_status: 'open' | 'closed';
+      store_status: 'active' | 'inactive';
       user_role: 'customer' | 'seller' | 'admin';
       user_status: 'active' | 'suspended' | 'deleted';
     };
@@ -949,7 +953,8 @@ export const Constants = {
       ],
       seller_application_status: ['pending', 'approved', 'rejected'],
       social_provider: ['google', 'kakao'],
-      store_status: ['approved', 'inactive'],
+      store_operation_status: ['open', 'closed'],
+      store_status: ['active', 'inactive'],
       user_role: ['customer', 'seller', 'admin'],
       user_status: ['active', 'suspended', 'deleted'],
     },

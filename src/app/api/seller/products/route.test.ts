@@ -67,14 +67,14 @@ describe('GET /api/seller/products', () => {
   it('requireSellerStore가 실패하면 error envelope를 반환한다', async () => {
     vi.mocked(isApiMockEnabled).mockReturnValue(false);
     vi.mocked(requireSellerStore).mockRejectedValue(
-      new AppError(ERROR_CODE.STORE_NOT_APPROVED, 403)
+      new AppError(ERROR_CODE.STORE_INACTIVE, 403)
     );
 
     const res = await GET();
     const body = (await res.json()) as { error: { code: string } };
 
     expect(res.status).toBe(403);
-    expect(body.error.code).toBe('STORE_NOT_APPROVED');
+    expect(body.error.code).toBe('STORE_INACTIVE');
   });
 });
 

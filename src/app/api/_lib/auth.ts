@@ -110,8 +110,8 @@ export async function requireSellerStore(): Promise<RequireSellerStoreResult> {
     throw new AppError(ERROR_CODE.STORE_NOT_FOUND, 404);
   }
 
-  if (store.status !== 'approved') {
-    throw new AppError(ERROR_CODE.STORE_NOT_APPROVED, 403);
+  if (store.status !== 'active') {
+    throw new AppError(ERROR_CODE.STORE_INACTIVE, 403);
   }
 
   return { authUser, serviceUser, store: { id: store.id } };

@@ -44,7 +44,8 @@ export async function getProducts(
     .from('products')
     .select(PRODUCT_SELECT, { count: 'exact' })
     .eq('status', 'active')
-    .eq('stores.status', 'approved');
+    .eq('stores.status', 'active')
+    .eq('stores.operation_status', 'open');
 
   if (region) {
     query = query.eq('stores.region', region);
@@ -130,7 +131,8 @@ export async function getProductById(
     .select(PRODUCT_SELECT)
     .eq('id', productId)
     .eq('status', 'active')
-    .eq('stores.status', 'approved')
+    .eq('stores.status', 'active')
+    .eq('stores.operation_status', 'open')
     .single();
 
   if (error) {

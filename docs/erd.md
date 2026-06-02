@@ -60,25 +60,26 @@
 
 ## 2.3 stores (가게)
 
-| 컬럼명            | 타입         | 제약조건                        | 설명           |
-| ----------------- | ------------ | ------------------------------- | -------------- |
-| `id`              | uuid         | PK                              | 가게 ID        |
-| `user_id`         | uuid         | FK → users.id, UNIQUE, NOT NULL | 소유자 ID      |
-| `name`            | varchar(100) | NOT NULL                        | 가게명         |
-| `description`     | text         |                                 | 가게 소개      |
-| `business_number` | varchar(20)  | UNIQUE, NOT NULL                | 사업자등록번호 |
-| `phone`           | varchar(20)  | NOT NULL                        | 연락처         |
-| `address`         | varchar(255) | NOT NULL                        | 주소           |
-| `address_detail`  | varchar(255) |                                 | 상세 주소      |
-| `region`          | varchar(50)  | NOT NULL                        | 지역           |
-| `image`           | varchar(500) |                                 | 이미지         |
-| `open_time`       | time         |                                 | 영업 시작      |
-| `close_time`      | time         |                                 | 영업 종료      |
-| `status`          | enum         | NOT NULL, DEFAULT 'approved'    | 상태           |
-| `created_at`      | timestamp    | NOT NULL, DEFAULT now()         | 생성일시       |
-| `updated_at`      | timestamp    | NOT NULL, DEFAULT now()         | 수정일시       |
+| 컬럼명             | 타입         | 제약조건                        | 설명                                    |
+| ------------------ | ------------ | ------------------------------- | --------------------------------------- |
+| `id`               | uuid         | PK                              | 가게 ID                                 |
+| `user_id`          | uuid         | FK → users.id, UNIQUE, NOT NULL | 소유자 ID                               |
+| `name`             | varchar(100) | NOT NULL                        | 가게명                                  |
+| `description`      | text         |                                 | 가게 소개                               |
+| `business_number`  | varchar(20)  | UNIQUE, NOT NULL                | 사업자등록번호                          |
+| `phone`            | varchar(20)  | NOT NULL                        | 연락처                                  |
+| `address`          | varchar(255) | NOT NULL                        | 주소                                    |
+| `address_detail`   | varchar(255) |                                 | 상세 주소                               |
+| `region`           | varchar(50)  | NOT NULL                        | 지역                                    |
+| `image`            | varchar(500) |                                 | 이미지                                  |
+| `open_time`        | time         |                                 | 영업 시작                               |
+| `close_time`       | time         |                                 | 영업 종료                               |
+| `status`           | enum         | NOT NULL, DEFAULT 'active'      | 관리자 승인 상태 (`active`\|`inactive`) |
+| `operation_status` | enum         | NOT NULL, DEFAULT 'open'        | 판매자 운영 상태 (`open`\|`closed`)     |
+| `created_at`       | timestamp    | NOT NULL, DEFAULT now()         | 생성일시                                |
+| `updated_at`       | timestamp    | NOT NULL, DEFAULT now()         | 수정일시                                |
 
-신규 설계에서는 가게 등록을 seller 승인 이후에만 허용하고, 새 가게는 `approved` 상태로 생성한다. `pending`/`rejected`는 기존 구현/데이터 호환 또는 후속 마이그레이션 검토 대상으로 남긴다.
+신규 설계에서는 가게 등록을 seller 승인 이후에만 허용하고, 새 가게는 `active` 상태로 생성한다. `operation_status`는 판매자가 당일 운영 여부를 직접 제어하는 필드이며, `inactive` 가게는 `operation_status` 변경 불가.
 
 ---
 

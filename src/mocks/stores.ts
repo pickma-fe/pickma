@@ -13,7 +13,8 @@ export const mockMyStore: StoreResponse = {
   image: '/images/mock/stores/bakery.png',
   openTime: '09:00:00',
   closeTime: '22:00:00',
-  status: 'approved',
+  status: 'active',
+  operationStatus: 'open',
   canSell: true,
   createdAt: '2026-04-01T00:00:00.000Z',
   updatedAt: '2026-04-20T00:00:00.000Z',
@@ -24,6 +25,7 @@ export const mockApprovedStore: StoreResponse = {
   id: 'store_approved_1',
   userId: 'user_seller_2',
   name: '픽마 델리',
-  status: 'approved',
+  status: 'active',
+  operationStatus: 'open',
   canSell: true,
 };

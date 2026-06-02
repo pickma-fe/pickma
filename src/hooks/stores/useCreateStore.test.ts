@@ -47,7 +47,8 @@ const validInput = {
 const mockStore = {
   id: 'store-1',
   name: '픽마 베이커리',
-  status: 'approved',
+  status: 'active',
+  operationStatus: 'open',
   canSell: true,
 } as MyStore;
 

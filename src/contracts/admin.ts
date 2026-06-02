@@ -12,7 +12,8 @@ export interface AdminStoreResponse {
   addressDetail?: string;
   region: string;
   image?: string;
-  status: 'approved' | 'inactive';
+  status: 'active' | 'inactive';
+  operationStatus: 'open' | 'closed';
   createdAt: string;
   updatedAt: string;
 }

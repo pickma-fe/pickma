@@ -19,7 +19,8 @@ const baseRow: StoresRow = {
   image: null,
   open_time: null,
   close_time: null,
-  status: 'approved' as const,
+  status: 'active' as const,
+  operation_status: 'open' as const,
   created_at: '2026-01-01T00:00:00Z',
   updated_at: '2026-01-01T00:00:00Z',
 };
@@ -39,7 +40,8 @@ describe('mapStoreRow', () => {
       image: undefined,
       openTime: undefined,
       closeTime: undefined,
-      status: 'approved',
+      status: 'active',
+      operationStatus: 'open',
       canSell: false,
       createdAt: '2026-01-01T00:00:00Z',
       updatedAt: '2026-01-01T00:00:00Z',
@@ -77,7 +79,7 @@ describe('mapStoreRow', () => {
   it('canSell 파라미터를 DTO에 그대로 반영한다', () => {
     expect(mapStoreRow(baseRow, false).canSell).toBe(false);
     expect(mapStoreRow(baseRow, true).canSell).toBe(true);
-    expect(mapStoreRow({ ...baseRow, status: 'approved' }, true).canSell).toBe(
+    expect(mapStoreRow({ ...baseRow, status: 'active' }, true).canSell).toBe(
       true
     );
   });
