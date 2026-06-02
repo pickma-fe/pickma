@@ -64,6 +64,13 @@ INSERT INTO auth.users (
    'authenticated', 'authenticated',
    'seller6@pickma-seed.local', '',
    now(), '{"provider":"email","providers":["email"]}', '{}',
+   now(), now()),
+  -- seller7: operation_status=closed 가게 소유자 (T10 검증용)
+  ('00000000-0000-4000-8000-000000000028',
+   '00000000-0000-4000-8000-000000000000',
+   'authenticated', 'authenticated',
+   'seller7@pickma-seed.local', '',
+   now(), '{"provider":"email","providers":["email"]}', '{}',
    now(), now());
 
 INSERT INTO public.users (id, email, name, role, status) VALUES
@@ -73,7 +80,8 @@ INSERT INTO public.users (id, email, name, role, status) VALUES
   ('00000000-0000-4000-8000-000000000024', 'customer1@pickma-seed.local', '씨드 고객1', 'customer', 'active'),
   ('00000000-0000-4000-8000-000000000025', 'seller4@pickma-seed.local', '씨드 판매자4', 'seller', 'active'),
   ('00000000-0000-4000-8000-000000000026', 'seller5@pickma-seed.local', '씨드 판매자5', 'seller', 'active'),
-  ('00000000-0000-4000-8000-000000000027', 'seller6@pickma-seed.local', '씨드 판매자6', 'seller', 'active');
+  ('00000000-0000-4000-8000-000000000027', 'seller6@pickma-seed.local', '씨드 판매자6', 'seller', 'active'),
+  ('00000000-0000-4000-8000-000000000028', 'seller7@pickma-seed.local', '씨드 판매자7', 'seller', 'active');
 
 -- Stores: 5 active+open, 1 inactive, 1 active+closed
 INSERT INTO public.stores (id, user_id, name, description, business_number, phone, address, address_detail, region, status) VALUES
