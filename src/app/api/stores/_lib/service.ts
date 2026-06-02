@@ -97,12 +97,13 @@ export async function updateMyStore(
 
   if (error) {
     if (isChangingOperationStatus && error.code === 'PGRST116') {
-      const { data: existing } = await supabase
+      const { data: existing, error: fetchError } = await supabase
         .from('stores')
         .select('status')
         .eq('user_id', userId)
         .maybeSingle();
 
+      if (fetchError) throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
       if (!existing) throw new AppError(ERROR_CODE.STORE_NOT_FOUND, 404);
       throw new AppError(ERROR_CODE.STORE_INACTIVE, 403);
     }

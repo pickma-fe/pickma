@@ -218,7 +218,7 @@ function makeUpdateMockClient(
   },
   fallbackResult: {
     data: { status: 'active' | 'inactive' } | null;
-    error: null;
+    error: { code: string } | null;
   } = { data: null, error: null }
 ) {
   const chain = {
@@ -291,6 +291,19 @@ describe('updateMyStore', () => {
     await expect(
       updateMyStore('user-1', 'seller', { operationStatus: 'open' })
     ).rejects.toMatchObject({ code: 'STORE_NOT_FOUND', statusCode: 404 });
+  });
+
+  it('operationStatus 변경 시 fallback 재조회 DB 오류면 INTERNAL_SERVER_ERROR를 던진다', async () => {
+    const client = makeUpdateMockClient(
+      { data: null, error: { code: 'PGRST116' } },
+      { data: null, error: { code: '42501' } }
+    );
+    vi.mocked(createServerClient).mockResolvedValue(
+      client as unknown as Awaited<ReturnType<typeof createServerClient>>
+    );
+    await expect(
+      updateMyStore('user-1', 'seller', { operationStatus: 'open' })
+    ).rejects.toMatchObject({ code: 'INTERNAL_SERVER_ERROR', statusCode: 500 });
   });
 
   it('inactive 가게에서 operationStatus 외 정보 수정은 허용하고 mapStoreRow(row, false)를 호출한다', async () => {
