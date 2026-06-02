@@ -2,6 +2,7 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
+import { queryKeys } from '@/lib/queryKeys';
 import { adminSellerApplicationApi } from '@/api/admin/sellers/adminSellerApplicationApi';
 
 export function useApproveSellerApplication() {
@@ -11,7 +12,7 @@ export function useApproveSellerApplication() {
     mutationFn: (id) => adminSellerApplicationApi.approveSellerApplication(id),
     onSuccess: () => {
       void queryClient.invalidateQueries({
-        queryKey: ['sellers', 'pending'],
+        queryKey: queryKeys.admin.sellers.pending(),
       });
     },
   });

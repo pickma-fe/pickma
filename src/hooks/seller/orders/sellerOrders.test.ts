@@ -3,6 +3,7 @@ import { act, renderHook, waitFor } from '@testing-library/react';
 import { createElement } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { queryKeys } from '@/lib/queryKeys';
 import { sellerOrderApi } from '@/api/seller/orders/sellerOrderApi';
 
 import { useAcceptSellerOrder } from './useAcceptSellerOrder';
@@ -55,7 +56,7 @@ describe('useSellerOrders', () => {
     renderHook(() => useSellerOrders(), { wrapper });
 
     const queries = queryClient.getQueryCache().getAll();
-    expect(queries[0].queryKey).toEqual(['seller', 'orders', 'list', {}]);
+    expect(queries[0].queryKey).toEqual(queryKeys.seller.orders.list({}));
   });
 
   it('params를 queryKey와 queryFn에 반영한다', async () => {
@@ -72,12 +73,7 @@ describe('useSellerOrders', () => {
     renderHook(() => useSellerOrders(params), { wrapper });
 
     const queries = queryClient.getQueryCache().getAll();
-    expect(queries[0].queryKey).toEqual([
-      'seller',
-      'orders',
-      'list',
-      { status: 'reserved' },
-    ]);
+    expect(queries[0].queryKey).toEqual(queryKeys.seller.orders.list(params));
     await waitFor(() =>
       expect(sellerOrderApi.getOrders).toHaveBeenCalledWith(params)
     );
@@ -104,12 +100,9 @@ describe('useSellerOrder', () => {
     renderHook(() => useSellerOrder(ORDER_ID), { wrapper });
 
     const queries = queryClient.getQueryCache().getAll();
-    expect(queries[0].queryKey).toEqual([
-      'seller',
-      'orders',
-      'detail',
-      ORDER_ID,
-    ]);
+    expect(queries[0].queryKey).toEqual(
+      queryKeys.seller.orders.detail(ORDER_ID)
+    );
     await waitFor(() =>
       expect(sellerOrderApi.getOrder).toHaveBeenCalledWith(ORDER_ID)
     );
@@ -135,7 +128,7 @@ describe('useAcceptSellerOrder', () => {
     expect(sellerOrderApi.acceptOrder).toHaveBeenCalledWith(ORDER_ID);
     expect(invalidateSpy).toHaveBeenCalledTimes(1);
     expect(invalidateSpy).toHaveBeenCalledWith({
-      queryKey: ['seller', 'orders'],
+      queryKey: queryKeys.seller.orders.all(),
     });
   });
 });
@@ -159,7 +152,7 @@ describe('useMarkSellerOrderReady', () => {
     expect(sellerOrderApi.markOrderReady).toHaveBeenCalledWith(ORDER_ID);
     expect(invalidateSpy).toHaveBeenCalledTimes(1);
     expect(invalidateSpy).toHaveBeenCalledWith({
-      queryKey: ['seller', 'orders'],
+      queryKey: queryKeys.seller.orders.all(),
     });
   });
 });
@@ -183,7 +176,7 @@ describe('useCompleteSellerOrder', () => {
     expect(sellerOrderApi.completeOrder).toHaveBeenCalledWith(ORDER_ID);
     expect(invalidateSpy).toHaveBeenCalledTimes(1);
     expect(invalidateSpy).toHaveBeenCalledWith({
-      queryKey: ['seller', 'orders'],
+      queryKey: queryKeys.seller.orders.all(),
     });
   });
 });

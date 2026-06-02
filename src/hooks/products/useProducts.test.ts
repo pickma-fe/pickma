@@ -6,6 +6,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { PaginatedResult } from '@/types/common';
 import type { Product } from '@/types/product';
+import { queryKeys } from '@/lib/queryKeys';
 import { productApi } from '@/api/products/productApi';
 
 import { useProducts } from './useProducts';
@@ -114,5 +115,21 @@ describe('useProducts', () => {
 
     expect(result.current.fetchStatus).toBe('idle');
     expect(productApi.getProducts).not.toHaveBeenCalled();
+  });
+
+  it('queryKey가 queryKeys.products.list(params)와 일치한다', () => {
+    vi.mocked(productApi.getProducts).mockResolvedValue(mockResult);
+
+    const client = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+    const Wrapper = ({ children }: { children: React.ReactNode }) =>
+      createElement(QueryClientProvider, { client }, children);
+
+    const params = { page: 1, pageSize: 20 };
+    renderHook(() => useProducts(params), { wrapper: Wrapper });
+
+    const queries = client.getQueryCache().getAll();
+    expect(queries[0].queryKey).toEqual(queryKeys.products.list(params));
   });
 });

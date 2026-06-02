@@ -2,6 +2,7 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
+import { queryKeys } from '@/lib/queryKeys';
 import { sellerProductApi } from '@/api/seller/products/sellerProductApi';
 
 export function useDeleteSellerProduct() {
@@ -11,10 +12,10 @@ export function useDeleteSellerProduct() {
     mutationFn: (id) => sellerProductApi.deleteProduct(id),
     onSuccess: (_data, id) => {
       void queryClient.invalidateQueries({
-        queryKey: ['products', 'seller', 'list'],
+        queryKey: queryKeys.products.sellerList(),
       });
       void queryClient.invalidateQueries({
-        queryKey: ['products', 'detail', id],
+        queryKey: queryKeys.products.detail(id),
       });
     },
   });

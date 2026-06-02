@@ -4,11 +4,12 @@ import { useQuery } from '@tanstack/react-query';
 
 import type { MenuItem } from '@/types/menu-item';
 import type { SellerMenuItemListParams } from '@/contracts/menu-item';
+import { queryKeys } from '@/lib/queryKeys';
 import { sellerMenuItemApi } from '@/api/seller/menu-items/sellerMenuItemApi';
 
 export function useSellerMenuItems(params?: SellerMenuItemListParams) {
   return useQuery<MenuItem[]>({
-    queryKey: ['menu-items', 'seller', params ?? {}],
+    queryKey: queryKeys.seller.menuItems.list(params ?? {}),
     queryFn: () => sellerMenuItemApi.getMenuItems(params),
   });
 }

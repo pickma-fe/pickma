@@ -2,6 +2,7 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
+import { invalidateTargets } from '@/lib/queryKeys';
 import { paymentApi } from '@/api/payments/paymentApi';
 
 export function useCancelPayment() {
@@ -10,7 +11,9 @@ export function useCancelPayment() {
   return useMutation<void, Error, string>({
     mutationFn: (paymentId) => paymentApi.cancelPayment(paymentId),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['orders', 'list'] });
+      invalidateTargets.afterCancelPayment.forEach((queryKey) => {
+        void queryClient.invalidateQueries({ queryKey });
+      });
     },
   });
 }

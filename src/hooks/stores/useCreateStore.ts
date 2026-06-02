@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import type { CreateStoreInput, MyStore } from '@/types/store';
 import type { CreateStoreRequest } from '@/contracts/store';
+import { queryKeys } from '@/lib/queryKeys';
 import { fileApi } from '@/api/files/fileApi';
 import { storeApi } from '@/api/stores/storeApi';
 
@@ -25,8 +26,8 @@ export function useCreateStore() {
       return storeApi.createStore(toCreateStoreRequest(input));
     },
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['stores', 'my'] });
-      void queryClient.invalidateQueries({ queryKey: ['users', 'me'] });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.stores.my() });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.users.me() });
     },
   });
 }

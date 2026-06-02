@@ -3,6 +3,7 @@ import { act, renderHook, waitFor } from '@testing-library/react';
 import { createElement } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { invalidateTargets } from '@/lib/queryKeys';
 import { paymentApi } from '@/api/payments/paymentApi';
 
 vi.mock('@/api/payments/paymentApi', () => ({
@@ -111,7 +112,7 @@ describe('usePayment', () => {
     ).rejects.toThrow('팝업이 차단되었습니다');
   });
 
-  it('success:true → resolve 후 orders query invalidate', async () => {
+  it('success:true → resolve 후 afterPaymentSuccess targets invalidate', async () => {
     const popup = makePopup();
     vi.stubGlobal('open', vi.fn().mockReturnValue(popup));
     const { result } = renderHook(() => usePayment(), {
@@ -136,9 +137,12 @@ describe('usePayment', () => {
     });
 
     await expect(promise).resolves.toEqual({ orderNumber: 'PM2026TEST' });
-    expect(mockInvalidateQueries).toHaveBeenCalledWith({
-      queryKey: ['orders', 'list'],
+
+    expect(invalidateTargets.afterPaymentSuccess.length).toBeGreaterThan(0);
+    invalidateTargets.afterPaymentSuccess.forEach((queryKey) => {
+      expect(mockInvalidateQueries).toHaveBeenCalledWith({ queryKey });
     });
+
     expect(mockRouterPush).toHaveBeenCalledWith(
       '/order/complete?orderNumber=PM2026TEST'
     );

@@ -4,6 +4,7 @@ import { createElement } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { MyStore } from '@/types/store';
+import { queryKeys } from '@/lib/queryKeys';
 import { fileApi } from '@/api/files/fileApi';
 import { storeApi } from '@/api/stores/storeApi';
 
@@ -129,7 +130,7 @@ describe('useCreateStore', () => {
     expect(storeApi.createStore).not.toHaveBeenCalled();
   });
 
-  it('성공 시 stores/my와 users/me 쿼리를 invalidate한다', async () => {
+  it('성공 시 stores.my와 users.me 쿼리를 invalidate한다', async () => {
     vi.mocked(storeApi.createStore).mockResolvedValue(mockStore);
 
     const { wrapper, queryClient } = createWrapper();
@@ -141,7 +142,11 @@ describe('useCreateStore', () => {
       await result.current.mutateAsync(validInput);
     });
 
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['stores', 'my'] });
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['users', 'me'] });
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.stores.my(),
+    });
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.users.me(),
+    });
   });
 });

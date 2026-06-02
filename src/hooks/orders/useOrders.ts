@@ -8,6 +8,7 @@ import type {
   ConsumerOrderListParams,
   OrderStatusParam,
 } from '@/contracts/order';
+import { queryKeys } from '@/lib/queryKeys';
 import { orderApi } from '@/api/orders/orderApi';
 
 const ORDER_STATUS_TO_PARAM: Record<
@@ -34,7 +35,7 @@ function toOrderListParams(
 
 export function useOrders(query: ConsumerOrderListQuery) {
   return useQuery<PaginatedResult<Omit<Order, 'items' | 'payment'>>>({
-    queryKey: ['orders', 'list', query],
+    queryKey: queryKeys.orders.list(query),
     queryFn: () => orderApi.getOrders(toOrderListParams(query)),
   });
 }

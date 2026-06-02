@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import type { Product } from '@/types/product';
 import type { UpdateSellerProductRequest } from '@/contracts/product';
+import { queryKeys } from '@/lib/queryKeys';
 import { sellerProductApi } from '@/api/seller/products/sellerProductApi';
 
 interface UpdateSellerProductVariables {
@@ -18,10 +19,13 @@ export function useUpdateSellerProduct() {
     mutationFn: ({ id, body }) => sellerProductApi.updateProduct(id, body),
     onSuccess: (product) => {
       void queryClient.invalidateQueries({
-        queryKey: ['products', 'seller', 'list'],
+        queryKey: queryKeys.products.sellerList(),
       });
       void queryClient.invalidateQueries({
-        queryKey: ['products', 'detail', product.id],
+        queryKey: queryKeys.products.lists(),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.products.detail(product.id),
       });
     },
   });

@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import type { User } from '@/types/user';
 import type { UpdateMeRequest } from '@/contracts/user';
+import { queryKeys } from '@/lib/queryKeys';
 import { fileApi } from '@/api/files/fileApi';
 import { userApi } from '@/api/users/userApi';
 
@@ -24,7 +25,7 @@ export function useUpdateMe() {
       return userApi.updateMe(data);
     },
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['users', 'me'] });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.users.me() });
     },
   });
 }

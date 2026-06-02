@@ -1,10 +1,10 @@
 # T15. TanStack Query key 및 invalidation factory 도입
 
 - 상태:
-  진행 전
+  완료
 
 - GitHub Issue:
-  확인 필요
+  190
 
 - 우선순위:
   P1
@@ -50,3 +50,41 @@
   - 주요 server state hook이 공통 query key factory를 사용한다.
   - 주문/결제/상품 mutation의 invalidate 대상이 일관된다.
   - 관련 hook 테스트가 갱신된다.
+
+- 구현 결과:
+  - `src/lib/queryKeys.ts` 신규 생성
+  - 전환된 hook 목록:
+    - `src/hooks/auth/` - useAuthSession, useEmailLogin, useEmailSignup, useCompleteEmailSignup, useSignOut
+    - `src/hooks/users/` - useMe, useUpdateMe
+    - `src/hooks/stores/` - useMyStore, useCreateStore, useUpdateStore
+    - `src/hooks/categories/` - useCategories
+    - `src/hooks/products/` - useProduct, useProducts, useCreateSellerProduct, useUpdateSellerProduct, useDeleteSellerProduct, useUpdateSellerProductStock, useSellerProducts
+    - `src/hooks/orders/` - useOrder, useOrders, useCreateOrder, useCancelOrder
+    - `src/hooks/payments/` - useConfirmPayment, useCancelPayment, usePayment
+    - `src/hooks/seller/orders/` - useSellerOrder, useSellerOrders, useAcceptSellerOrder, useMarkSellerOrderReady, useCompleteSellerOrder, useNoShowSellerOrder
+    - `src/hooks/seller/menu-items/` - useSellerMenuItems, useCreateSellerMenuItem, useUpdateSellerMenuItem, useDeleteSellerMenuItem
+    - `src/hooks/seller/onboarding/` - useSellerOnboardingStatus
+    - `src/hooks/seller/applications/` - useCreateSellerApplication
+    - `src/hooks/admin/sellers/` - useAdminPendingSellerApplications, useApproveSellerApplication, useRejectSellerApplication
+  - 확정된 key 구조:
+    - `['auth', 'session']`
+    - `['users', 'me']`
+    - `['stores', 'my']`
+    - `['categories', 'list', 'all']`
+    - `['products', 'list', params]`, `['products', 'detail', id]`, `['products', 'seller', 'list']`
+    - `['orders', 'list', query]`, `['orders', 'detail', id]`
+    - `['seller', 'orders', 'list', params]`, `['seller', 'orders', 'detail', id]`
+    - `['seller', 'menu-items', params]`
+    - `['seller', 'onboarding-status']`
+    - `['admin', 'sellers', 'pending', params]`
+    - `['admin', 'stores', 'list', params]`
+  - invalidateTargets 확정:
+    - `afterPaymentSuccess` - orders.lists, products.lists, products.details, products.sellerList
+    - `afterCreateOrder` - orders.lists, products.lists, products.details
+    - `afterCancelOrder` - orders.lists, orders.details
+    - `afterConfirmPayment` - orders.lists, orders.details, products.lists, products.details
+    - `afterCancelPayment` - orders.lists, orders.details
+  - 테스트 갱신 파일:
+    - useEmailLogin.test.ts, useSignOut.test.ts, useMe.test.ts
+    - useCreateStore.test.ts, useProduct.test.ts, useProducts.test.ts
+    - sellerOrders.test.ts, useCreateSellerApplication.test.ts, usePayment.test.ts

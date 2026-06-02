@@ -2,6 +2,7 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
+import { queryKeys } from '@/lib/queryKeys';
 import { sellerProductApi } from '@/api/seller/products/sellerProductApi';
 
 interface UpdateStockVariables {
@@ -14,9 +15,12 @@ export function useUpdateSellerProductStock() {
 
   return useMutation<void, Error, UpdateStockVariables>({
     mutationFn: ({ id, stock }) => sellerProductApi.updateStock(id, stock),
-    onSuccess: () => {
+    onSuccess: (_data, { id }) => {
       void queryClient.invalidateQueries({
-        queryKey: ['products', 'seller', 'list'],
+        queryKey: queryKeys.products.sellerList(),
+      });
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.products.detail(id),
       });
     },
   });

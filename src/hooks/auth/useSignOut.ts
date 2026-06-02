@@ -2,6 +2,7 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
+import { queryKeys } from '@/lib/queryKeys';
 import { authApi } from '@/api/auth/authApi';
 
 export function useSignOut() {
@@ -10,7 +11,7 @@ export function useSignOut() {
   return useMutation<void, Error, void>({
     mutationFn: () => authApi.signOut(),
     onSuccess: () => {
-      queryClient.removeQueries({ queryKey: ['users', 'me'] });
+      queryClient.removeQueries({ queryKey: queryKeys.users.me() });
     },
   });
 }
