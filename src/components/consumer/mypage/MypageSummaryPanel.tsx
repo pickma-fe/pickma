@@ -34,7 +34,7 @@ export function MypageSummaryPanel() {
         <div className="flex items-center justify-between px-6 pt-6">
           <h2 className="text-lg font-bold text-gray-900">내 정보</h2>
           <Link
-            href="/mypage/profile"
+            href="/mypage"
             className="text-primary-600 hover:text-primary-700 inline-flex items-center gap-1 text-sm font-medium"
           >
             수정하기
