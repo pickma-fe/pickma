@@ -150,5 +150,15 @@ describe('PATCH /api/stores/me', () => {
       const body = (await res.json()) as { error: { code: string } };
       expect(body.error.code).toBe('STORE_NOT_FOUND');
     });
+
+    it('FORBIDDEN throw 시 403을 반환한다', async () => {
+      vi.mocked(requireSeller).mockRejectedValue(
+        new AppError(ERROR_CODE.FORBIDDEN, 403)
+      );
+      const res = await PATCH(makeRequest({ name: '수정된 가게' }));
+      expect(res.status).toBe(403);
+      const body = (await res.json()) as { error: { code: string } };
+      expect(body.error.code).toBe('FORBIDDEN');
+    });
   });
 });

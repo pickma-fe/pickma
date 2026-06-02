@@ -53,7 +53,8 @@ export async function createStore(
   }
   if (!row) throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
 
-  return mapStoreRow(row, true);
+  const canSell = row.status === 'active' && row.operation_status === 'open';
+  return mapStoreRow(row, canSell);
 }
 
 export async function updateMyStore(
