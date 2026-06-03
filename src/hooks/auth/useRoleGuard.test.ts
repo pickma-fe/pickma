@@ -86,7 +86,9 @@ describe('useRoleGuard', () => {
     });
 
     await waitFor(() => expect(result.current.status).toBe('unauthorized'));
-    expect(result.current.error).toBeInstanceOf(ApiError);
+    if (result.current.status === 'unauthorized') {
+      expect(result.current.error).toBeInstanceOf(ApiError);
+    }
   });
 
   it('ApiError 403 → status: forbidden', async () => {
@@ -111,7 +113,9 @@ describe('useRoleGuard', () => {
     });
 
     await waitFor(() => expect(result.current.status).toBe('error'));
-    expect(result.current.error).toBeInstanceOf(ApiError);
+    if (result.current.status === 'error') {
+      expect(result.current.error).toBeInstanceOf(ApiError);
+    }
   });
 
   it('role 불일치 → status: forbidden', async () => {
@@ -122,7 +126,9 @@ describe('useRoleGuard', () => {
     });
 
     await waitFor(() => expect(result.current.status).toBe('forbidden'));
-    expect(result.current.user).toEqual(mockCustomer);
+    if (result.current.status === 'forbidden') {
+      expect(result.current.user).toEqual(mockCustomer);
+    }
   });
 
   it('role 일치 → status: ok, user 반환', async () => {
@@ -133,7 +139,9 @@ describe('useRoleGuard', () => {
     });
 
     await waitFor(() => expect(result.current.status).toBe('ok'));
-    expect(result.current.user).toEqual(mockSeller);
+    if (result.current.status === 'ok') {
+      expect(result.current.user).toEqual(mockSeller);
+    }
   });
 
   it('admin role guard — role 일치 → status: ok', async () => {
@@ -144,7 +152,9 @@ describe('useRoleGuard', () => {
     });
 
     await waitFor(() => expect(result.current.status).toBe('ok'));
-    expect(result.current.user).toEqual(mockAdmin);
+    if (result.current.status === 'ok') {
+      expect(result.current.user).toEqual(mockAdmin);
+    }
   });
 
   it('enabled=false → role 판정 skip, user와 refetch를 반환하며 status: ok', async () => {
@@ -155,7 +165,9 @@ describe('useRoleGuard', () => {
     });
 
     await waitFor(() => expect(result.current.status).toBe('ok'));
-    expect(result.current.user).toEqual(mockCustomer);
+    if (result.current.status === 'ok') {
+      expect(result.current.user).toEqual(mockCustomer);
+    }
     expect(typeof result.current.refetch).toBe('function');
   });
 
@@ -169,6 +181,8 @@ describe('useRoleGuard', () => {
     });
 
     await waitFor(() => expect(result.current.status).toBe('ok'));
-    expect(result.current.user).toBeUndefined();
+    if (result.current.status === 'ok') {
+      expect(result.current.user).toBeUndefined();
+    }
   });
 });

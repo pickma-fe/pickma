@@ -13,12 +13,25 @@ export type RoleGuardStatus =
   | 'forbidden'
   | 'error';
 
-export type RoleGuardResult = {
-  status: RoleGuardStatus;
+type RefetchFn = UseQueryResult<User>['refetch'];
+
+type RoleGuardResultLoading = { status: 'loading'; refetch: RefetchFn };
+type RoleGuardResultOk = {
+  status: 'ok';
+  user: User | undefined;
+  refetch: RefetchFn;
+};
+type RoleGuardResultFailed = {
+  status: 'unauthorized' | 'forbidden' | 'error';
   user?: User;
   error?: unknown;
-  refetch: UseQueryResult<User>['refetch'];
+  refetch: RefetchFn;
 };
+
+export type RoleGuardResult =
+  | RoleGuardResultLoading
+  | RoleGuardResultOk
+  | RoleGuardResultFailed;
 
 export function useRoleGuard(
   expectedRole: UserRole,

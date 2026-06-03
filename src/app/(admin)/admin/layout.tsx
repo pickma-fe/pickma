@@ -69,10 +69,13 @@ export default function AdminLayout({
     );
   }
 
+  const user = guard.user;
+  if (!user) return null;
+
   return (
     <div className="flex min-h-screen flex-col">
       <Header
-        user={guard.user!}
+        user={user}
         logoHref="/admin"
         menuItems={[
           {
