@@ -1,10 +1,10 @@
 # T14. seller/admin role-aware route guard 개선
 
 - 상태:
-  진행 전
+  완료
 
 - GitHub Issue:
-  확인 필요
+  212
 
 - 우선순위:
   P1
