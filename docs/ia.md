@@ -37,7 +37,7 @@
 |               | 개인정보       | `/privacy-policy`           | 개인정보처리방침                | 전체   | ✅ 완료 (T42)   |
 | 👤 마이페이지 | -              | `/mypage`                   | 내 정보 기본 화면               | 로그인 | ✅ 구현됨       |
 |               | 📋 내 예약     | `/mypage?view=reservations` | 주문 목록, 예약 상세, 픽업 정보 | 로그인 | ✅ 구현됨 (T54) |
-|               | ⚙️ 프로필 수정 | `/mypage/profile`           | 닉네임, 연락처 수정             | 로그인 | ✅ 구현됨       |
+|               | ⚙️ 프로필 수정 | `/mypage/profile`           | `/mypage`로 redirect            | 로그인 | ✅ 구현됨       |
 |               | ❤️ 찜 목록     | `/mypage/wishlist`          | 관심 가게 (상품 찜은 후속 task) | 로그인 | 🚧 미구현 (T59) |
 
 ## 2.2 판매자 영역 (`/seller`)
@@ -178,7 +178,7 @@
 /privacy-policy .............. 개인정보처리방침
 /mypage ...................... 내 정보 기본 화면
 /mypage?view=reservations .... 내 예약/주문 내역
-/mypage/profile .............. 프로필 수정
+/mypage/profile .............. /mypage redirect
 /mypage/wishlist ............. 찜 목록 [🚧 T59]
 (로그인) .................... 전역 모달 — 별도 URL 없음
 
