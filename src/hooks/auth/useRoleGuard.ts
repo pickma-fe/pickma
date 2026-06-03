@@ -31,6 +31,9 @@ export function useRoleGuard(
   }
 
   if (isError) {
+    if (!enabled) {
+      return { status: 'ok', user: undefined, refetch };
+    }
     if (
       error instanceof ApiError &&
       (error.statusCode === 401 || error.code === 'UNAUTHORIZED')

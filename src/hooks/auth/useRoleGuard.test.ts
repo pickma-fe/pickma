@@ -158,4 +158,17 @@ describe('useRoleGuard', () => {
     expect(result.current.user).toEqual(mockCustomer);
     expect(typeof result.current.refetch).toBe('function');
   });
+
+  it('enabled=false + 401 → redirect 없이 status: ok (공개 라우트 auth 에러 무시)', async () => {
+    vi.mocked(userApi.getMe).mockRejectedValue(
+      new ApiError(401, 'UNAUTHORIZED', '로그인이 필요합니다.')
+    );
+
+    const { result } = renderHook(() => useRoleGuard('seller', false), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => expect(result.current.status).toBe('ok'));
+    expect(result.current.user).toBeUndefined();
+  });
 });
