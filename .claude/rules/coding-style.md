@@ -43,7 +43,7 @@ mocks/ ← contracts/와 mocks 내부 파일만
 lib/ ← types/와 lib 내부 파일만
 api/ ← types/, contracts/, lib/ 만
 stores/ ← types/, lib/, api/ 만 필요 시
-hooks/ ← types/, lib/, api/, stores/ 만
+hooks/ ← types/, lib/, api/, stores/ 만 (hooks 내 단방향 composition 허용, 아래 규칙 참고)
 components/ ← types/, lib/, stores/, hooks/ 만
 app/api/    ← contracts/, lib/, mocks/ (+ app/api/_lib/, app/api/{resource}/_lib/)
 app/        ← 전부 가능 (app/api/_lib/, app/api/{resource}/_lib/ 제외)
@@ -54,6 +54,16 @@ app/        ← 전부 가능 (app/api/_lib/, app/api/{resource}/_lib/ 제외)
 - 허용: `app/api/**` Route Handler, `*.test.ts`, `*.test.tsx`, `*.stories.ts`, `*.stories.tsx`
 - 금지: `components/`, `hooks/`, `stores/`, `api/` (클라이언트 레이어), `app/` 페이지/레이아웃
 - ESLint `no-restricted-imports` + `import/no-restricted-paths` rule로 자동 감지
+
+### hooks 내 단방향 composition
+
+한 hook이 다른 hook을 내부에서 호출하는 hook composition은 다음 조건을 모두 충족할 때만 허용한다.
+
+- **단방향**: A → B 호출이면 B → A 호출은 없어야 한다 (circular dependency 금지).
+- **중복 구현 금지**: 피호출 hook의 queryKey, retry 정책, API 호출 로직을 호출 측에서 다시 구현하지 않는다. 상태 파생만 한다.
+- **ESLint `import/no-cycle`**: 기존 rule이 circular dependency를 자동 감지한다.
+
+예: `useRoleGuard` → `useMe` (단방향 composition, `useMe`의 queryKey/retry/API를 재구현하지 않음)
 
 - Domain 로직이 들어가는 layer에서는 `contracts/`를 직접 import하지 않는다.
 - Contract DTO는 API 경계, mapper, mock fixture에서만 사용한다.
