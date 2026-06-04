@@ -182,7 +182,7 @@
 /seller ...................... 판매자 홈/온보딩 CTA [🚧 T38]
 /seller/register ............. 판매자 신청
 /seller/pending .............. 심사 대기
-/seller/dashboard ............ 대시보드 [🚧 T51]
+/seller/dashboard ............ 대시보드 [✅ T51]
 /seller/menu ................. 메뉴 목록, 판매 등록
 /seller/menu/new ............. 메뉴 등록
 /seller/menu/[menuId]/edit ... 메뉴 수정
