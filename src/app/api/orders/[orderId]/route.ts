@@ -1,11 +1,12 @@
 import { ERROR_CODE } from '@/lib/errors/errorCodes';
 import { requireActiveUser } from '@/app/api/_lib/auth';
 import { isApiMockEnabled } from '@/app/api/_lib/mock';
+import { expireUserOrders } from '@/app/api/_lib/order-expiration';
 import { fail, routeError, success } from '@/app/api/_lib/response';
 import { mockOrderDetailsMap } from '@/mocks/orders';
 
 import { orderIdSchema } from '../_lib/schemas';
-import { expireUserOrders, getOrder } from '../_lib/service';
+import { getOrder } from '../_lib/service';
 
 export async function GET(
   _request: Request,
@@ -32,7 +33,7 @@ export async function GET(
 
   try {
     const { serviceUser } = await requireActiveUser();
-    await expireUserOrders(serviceUser.id);
+    await expireUserOrders();
     const data = await getOrder(serviceUser.id, parsed.data);
     return success(data);
   } catch (error) {

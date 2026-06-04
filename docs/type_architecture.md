@@ -293,6 +293,8 @@ Supabase Row / Join Result -> Contract DTO
 - join 결과에서 API에 필요한 값만 추출한다.
 - API 응답에 필요한 계산값을 만든다.
 - 날짜는 ISO string으로 반환한다.
+- 기본 위치: `src/app/api/{resource}/_lib/mapper.ts`.
+- 둘 이상의 resource가 같은 row → contract mapper를 공유해야 하면 `src/app/api/_lib/*-mapper.ts`에 둔다. resource-local mapper는 공통 mapper를 re-export할 수 있다.
 
 ### Client Mapper
 

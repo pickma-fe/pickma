@@ -6,8 +6,10 @@ import type {
 import { AppError } from '@/lib/errors/appError';
 import { ERROR_CODE } from '@/lib/errors/errorCodes';
 import { createServiceRoleClient } from '@/lib/supabase/service';
-
-import { mapOrderDetailRow, mapOrderListRow } from './mapper';
+import {
+  mapOrderDetailRow,
+  mapOrderListRow,
+} from '@/app/api/_lib/order-mapper';
 
 const ORDER_LIST_SELECT =
   'id, order_number, store_id, total_amount, discount_amount, payment_amount, status, pickup_at, pickup_service_date, store_order_number, pickup_number, expires_at, created_at, updated_at, stores(name)';

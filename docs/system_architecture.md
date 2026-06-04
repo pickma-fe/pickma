@@ -312,6 +312,14 @@ src/app/api/
 - `schemas.ts`는 해당 도메인 Route Handler의 Zod schema를 담당한다.
 - 파일명 앞에 `_`를 붙이지 않고, Next.js private folder인 `_lib/`만 사용한다.
 
+#### resource `_lib` 경계 원칙
+
+- **금지**: resource-local `_lib` → 다른 resource-local `_lib` 직접 import
+- **금지**: 전역 `src/app/api/_lib/` → resource-local `_lib` 직접 import
+- **허용**: resource-local `_lib` → `src/app/api/_lib/*`
+- 둘 이상의 resource route/service가 같은 row → contract mapper를 공유해야 하면 `src/app/api/_lib/*-mapper.ts`에 둔다. 예: `order-mapper.ts`, `payment-mapper.ts`, `user-mapper.ts`.
+- 공통 route helper(auth, response, validation, cross-resource 공유 로직)는 `src/app/api/_lib/`에 둔다.
+
 ### 5.3 서버 인증/권한 helper
 
 - `requireActiveUser()`: 로그인된 active 사용자 확인.

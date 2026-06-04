@@ -5,7 +5,7 @@ import type { PreparePaymentResponse } from '@/contracts/payment';
 import { AppError } from '@/lib/errors/appError';
 import { ERROR_CODE } from '@/lib/errors/errorCodes';
 import { requireActiveUser } from '@/app/api/_lib/auth';
-import { expireUserOrders } from '@/app/api/orders/_lib/service';
+import { expireUserOrders } from '@/app/api/_lib/order-expiration';
 
 import { POST } from './route';
 import { preparePayment } from '../_lib/service';
@@ -14,7 +14,7 @@ vi.mock('@/app/api/_lib/auth', () => ({
   requireActiveUser: vi.fn(),
 }));
 
-vi.mock('@/app/api/orders/_lib/service', () => ({
+vi.mock('@/app/api/_lib/order-expiration', () => ({
   expireUserOrders: vi.fn(),
 }));
 
@@ -77,7 +77,7 @@ describe('POST /api/payments/prepare', () => {
 
   it('expireUserOrders 후 preparePayment 호출', async () => {
     await POST(makeRequest(validBody));
-    expect(expireUserOrders).toHaveBeenCalledWith('user-1');
+    expect(expireUserOrders).toHaveBeenCalledWith();
     expect(preparePayment).toHaveBeenCalledWith(
       'user-1',
       validBody,

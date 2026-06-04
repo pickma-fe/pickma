@@ -2,12 +2,13 @@ import type { NextRequest } from 'next/server';
 
 import { requireActiveUser } from '@/app/api/_lib/auth';
 import { isApiMockEnabled } from '@/app/api/_lib/mock';
+import { expireUserOrders } from '@/app/api/_lib/order-expiration';
 import { routeError, success } from '@/app/api/_lib/response';
 import { validateBody, validateQuery } from '@/app/api/_lib/validation';
 import { mockCreatedOrder, mockOrderList } from '@/mocks/orders';
 
 import { createOrderSchema, orderListQuerySchema } from './_lib/schemas';
-import { createOrder, expireUserOrders, getOrders } from './_lib/service';
+import { createOrder, getOrders } from './_lib/service';
 
 export async function GET(request: NextRequest): Promise<Response> {
   if (isApiMockEnabled()) return success(mockOrderList);
@@ -17,7 +18,7 @@ export async function GET(request: NextRequest): Promise<Response> {
       request.nextUrl.searchParams
     );
     const { serviceUser } = await requireActiveUser();
-    await expireUserOrders(serviceUser.id);
+    await expireUserOrders();
     const data = await getOrders(serviceUser.id, params);
     return success(data);
   } catch (error) {
@@ -34,7 +35,7 @@ export async function POST(request: NextRequest): Promise<Response> {
 
     const body = await validateBody(createOrderSchema, request);
     const { serviceUser } = await requireActiveUser();
-    await expireUserOrders(serviceUser.id);
+    await expireUserOrders();
     const result = await createOrder(serviceUser.id, body);
     return success(result, 201);
   } catch (error) {
