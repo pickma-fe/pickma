@@ -2,7 +2,7 @@ import type { UserResponse } from '@/contracts/user';
 import { AppError } from '@/lib/errors/appError';
 import { ERROR_CODE } from '@/lib/errors/errorCodes';
 import { createServiceRoleClient } from '@/lib/supabase/service';
-import { mapUserRow } from '@/app/api/users/_lib/mapper';
+import { mapUserRow } from '@/app/api/_lib/user-mapper';
 
 import type { UpdateMeBody } from './schemas';
 

@@ -5,7 +5,7 @@ import { AppError } from '@/lib/errors/appError';
 import { ERROR_CODE } from '@/lib/errors/errorCodes';
 import type { Database } from '@/lib/supabase/database';
 import { createServiceRoleClient } from '@/lib/supabase/service';
-import { mapUserRow } from '@/app/api/users/_lib/mapper';
+import { mapUserRow } from '@/app/api/_lib/user-mapper';
 
 export async function getOrCreateUserByAuthUser(
   supabase: SupabaseClient<Database>,
