@@ -16,14 +16,11 @@ import { Section } from '@/components/common/Section/Section';
 
 const TODAY_PAGE_SIZE = 100;
 
-function getTodayRange(): { start: string; end: string } {
+function getTodayRange(): { start: Date; end: Date } {
   const now = new Date();
   const start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const end = new Date(start.getTime() + 24 * 60 * 60 * 1000);
-  return {
-    start: start.toISOString(),
-    end: end.toISOString(),
-  };
+  return { start, end };
 }
 
 const STATUS_CARDS = [
@@ -95,8 +92,7 @@ export function DashboardContent() {
   const todayOrders = (data?.items ?? []).filter((order) => {
     const createdAt = new Date(order.createdAt).getTime();
     return (
-      createdAt >= new Date(today.start).getTime() &&
-      createdAt < new Date(today.end).getTime()
+      createdAt >= today.start.getTime() && createdAt < today.end.getTime()
     );
   });
 
@@ -162,7 +158,7 @@ export function DashboardContent() {
             return (
               <Link
                 key={card.status}
-                href={`/seller/orders?status=${card.status}`}
+                href={`/seller/orders?status=${DOMAIN_STATUS_TO_CONTRACT[card.status]}`}
                 className="block"
               >
                 <Section
@@ -204,10 +200,10 @@ export function DashboardContent() {
         </h2>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {[
-            { label: '주문 관리', href: '/seller/orders' },
-            { label: '상품 관리', href: '/seller/products' },
-            { label: '메뉴 관리', href: '/seller/menu' },
             { label: '가게 정보', href: '/seller/store' },
+            { label: '메뉴 관리', href: '/seller/menu' },
+            { label: '상품 관리', href: '/seller/products' },
+            { label: '주문 관리', href: '/seller/orders' },
           ].map((item) => (
             <Link key={item.href} href={item.href}>
               <Button variant="outline" color="gray" className="w-full">
