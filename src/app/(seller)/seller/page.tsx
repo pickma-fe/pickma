@@ -21,10 +21,11 @@ export default function SellerPage() {
   const router = useRouter();
   const { data: user, isLoading: isUserLoading } = useMe();
   const { data: onboardingStatus, isLoading: isOnboardingLoading } =
-    useSellerOnboardingStatus();
+    useSellerOnboardingStatus({ enabled: Boolean(user) });
   const { openAuthModal } = useAuthModal();
 
-  const isLoading = isUserLoading || isOnboardingLoading;
+  // 비로그인이면 onboarding 로딩을 전체 로딩에 포함하지 않음
+  const isLoading = isUserLoading || (Boolean(user) && isOnboardingLoading);
 
   useEffect(() => {
     if (isLoading) return;
