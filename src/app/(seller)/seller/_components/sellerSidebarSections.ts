@@ -4,11 +4,23 @@ import {
   ClipboardList,
   Megaphone,
   UtensilsCrossed,
+  LayoutDashboard,
 } from 'lucide-react';
 
 import type { SidebarSection } from '@/components/common/Sidebar/Sidebar.types';
 
 export const sellerSidebarSections: SidebarSection[] = [
+  {
+    id: 'dashboard',
+    items: [
+      {
+        id: 'dashboard',
+        label: '대시보드',
+        icon: LayoutDashboard,
+        href: '/seller/dashboard',
+      },
+    ],
+  },
   {
     id: 'store',
     items: [
