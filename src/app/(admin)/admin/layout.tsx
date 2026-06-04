@@ -3,9 +3,8 @@
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
-import { ApiError } from '@/api/apiClient';
+import { useRoleGuard } from '@/hooks/auth/useRoleGuard';
 import { useSignOut } from '@/hooks/auth/useSignOut';
-import { useMe } from '@/hooks/users/useMe';
 import { Header } from '@/components/common/Header/Header';
 import { Sidebar } from '@/components/common/Sidebar/Sidebar';
 
@@ -16,7 +15,7 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { data: user, isLoading, isError, error, refetch } = useMe();
+  const guard = useRoleGuard('admin');
   const router = useRouter();
   const { mutateAsync: signOut } = useSignOut();
 
@@ -26,24 +25,22 @@ export default function AdminLayout({
   }
 
   useEffect(() => {
-    if (isLoading) return;
+    if (guard.status === 'loading') return;
 
-    if (isError) {
-      if (error instanceof ApiError && error.statusCode === 401) {
-        const currentPath = window.location.pathname + window.location.search;
-        router.push(`/?auth=required&next=${encodeURIComponent(currentPath)}`);
-      } else if (error instanceof ApiError && error.statusCode === 403) {
-        router.push('/');
-      }
+    if (guard.status === 'unauthorized') {
+      const next = encodeURIComponent(
+        window.location.pathname + window.location.search
+      );
+      router.push(`/?auth=required&next=${next}`);
       return;
     }
 
-    if (user?.role !== 'admin') {
+    if (guard.status === 'forbidden') {
       router.push('/');
     }
-  }, [isLoading, isError, error, user, router]);
+  }, [guard.status, router]);
 
-  if (isLoading) {
+  if (guard.status === 'loading') {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <span className="text-sm text-gray-500">로딩 중...</span>
@@ -51,15 +48,11 @@ export default function AdminLayout({
     );
   }
 
-  if (isError) {
-    const isAuthError =
-      error instanceof ApiError &&
-      (error.statusCode === 401 || error.statusCode === 403);
+  if (guard.status === 'unauthorized' || guard.status === 'forbidden') {
+    return null;
+  }
 
-    if (isAuthError) {
-      return null;
-    }
-
+  if (guard.status === 'error') {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-3">
         <span className="text-sm text-gray-500">
@@ -67,7 +60,7 @@ export default function AdminLayout({
         </span>
         <button
           type="button"
-          onClick={() => void refetch()}
+          onClick={() => void guard.refetch()}
           className="rounded-sm border border-gray-300 px-4 py-1.5 text-sm text-gray-700 hover:bg-gray-50"
         >
           다시 시도
@@ -76,9 +69,8 @@ export default function AdminLayout({
     );
   }
 
-  if (user?.role !== 'admin') {
-    return null;
-  }
+  const user = guard.user;
+  if (!user) return null;
 
   return (
     <div className="flex min-h-screen flex-col">

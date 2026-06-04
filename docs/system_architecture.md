@@ -110,7 +110,7 @@ export const config = {
 - 로그인 필요: `/order/:path*`, `/payment`, `/mypage/:path*`
 - 판매자 onboarding 흐름: `/seller/register`, `/seller/pending`은 로그인 사용자를 대상으로 하며, seller application 상태, `users.role`, 내 가게 존재 여부에 따라 seller 영역에서 분기한다.
 - 승인된 판매자 필요: `/seller/store/:path*`
-- 승인된 판매자와 승인된 가게 필요: `/seller/dashboard/:path*`, `/seller/products/:path*`, `/seller/orders/:path*`
+- 승인된 판매자와 승인된 가게 필요: `/seller/dashboard/:path*`, `/seller/products/:path*`, `/seller/orders/:path*`, `/seller/menu/:path*`
 - 관리자 필요: `/admin/:path*`
 
 미인증 redirect 권장안:
@@ -118,6 +118,26 @@ export const config = {
 - 소비자 보호 라우트: `/?auth=required&next={pathname}`
 - 판매자 보호 라우트: `/seller?auth=required&next={pathname}`
 - 관리자 보호 라우트: `/?auth=required&next={pathname}`
+
+#### 접근 제어 3계층 책임 분리
+
+proxy, layout, Route Handler는 서로 다른 책임을 가진다. 3개 계층이 함께 동작해야 안전한 접근 제어가 완성된다.
+
+| 계층                | 파일                                    | 책임                                                        | 신뢰 수준        |
+| ------------------- | --------------------------------------- | ----------------------------------------------------------- | ---------------- |
+| **Proxy**           | `src/proxy.ts`                          | 세션 refresh + 로그인 여부 1차 redirect (DB role 조회 없음) | 보조             |
+| **Layout (client)** | `seller/layout.tsx`, `admin/layout.tsx` | `useMe()` 기반 role 조기 검증 → UX redirect                 | 보조 (신뢰 불가) |
+| **Route Handler**   | `src/app/api/_lib/auth.ts`              | `requireSeller()` / `requireAdmin()` 최종 보안 검증         | **신뢰 기준**    |
+
+**Layout guard 정책** (T14 기준):
+
+- layout guard는 `users.role`만 조기 확인한다. store 존재 여부, `stores.status = 'active'`, `operation_status` 검증은 layout 책임이 아니며 Route Handler의 `requireSellerStore()`와 각 서비스 정책에서 처리한다.
+- `/seller/register`, `/seller/pending`은 onboarding 라우트로 seller role 없이 로그인 사용자가 접근할 수 있으므로 layout guard에서 제외한다.
+- `/seller/dashboard`, `/seller/products`, `/seller/orders`, `/seller/store`, `/seller/menu`는 seller role 필요 (`SELLER_MANAGEMENT_PREFIXES`).
+- 오류 redirect 대상:
+  - seller 관리 라우트: 미인증(401) → `/seller?auth=required&next=…`, 비seller(403/role 불일치) → `/seller`
+  - admin 라우트: 미인증(401) → `/?auth=required&next=…`, 비admin(403/role 불일치) → `/`
+- network/5xx 오류는 redirect 대상이 아니며, 오류 안내와 재시도 UI를 제공한다.
 
 ### 4.4 이메일 선인증 흐름 (email/password 회원가입)
 
