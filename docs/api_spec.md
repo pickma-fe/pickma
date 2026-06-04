@@ -802,9 +802,47 @@ DB source:
 
 ### 6.5 `POST /api/payments/webhook`
 
-- Toss가 호출하는 결제 상태 동기화 endpoint이다.
-- Toss MVP adapter 구현 시 운영 필수성을 재판정한다. 명세 기본 우선순위는 P1이다.
-- 서명/secret 검증과 멱등 처리가 필요하다.
+Toss가 호출하는 결제 상태 동기화 endpoint이다. 구현 우선순위: P1. 구현: T63. 설계 문서: `docs/payment_event_design.md`.
+
+**허용 이벤트 타입**
+
+| Toss eventType           | 처리 내용             |
+| ------------------------ | --------------------- |
+| `PAYMENT_STATUS_CHANGED` | 결제 상태 변화 동기화 |
+| `DEPOSIT_CALLBACK`       | 가상계좌 입금 확인    |
+
+허용 결제수단: `card`, `virtual_account`, `mobile`, `easy_pay`
+
+**검증 방식**
+
+Toss webhook body 구조 (이벤트별 상이):
+
+- `PAYMENT_STATUS_CHANGED`: `{ eventType, createdAt, data: { paymentKey, orderId, totalAmount, status, ... } }` — 결제 정보는 `data` 안에 위치
+- `DEPOSIT_CALLBACK`: `{ createdAt, secret, status, orderId, transactionKey }` — 필드가 루트에 위치
+
+| eventType                | 검증 방법                                                                                           |
+| ------------------------ | --------------------------------------------------------------------------------------------------- |
+| `PAYMENT_STATUS_CHANGED` | HMAC 서명 없음. `body.data.orderId`(=orderNumber), `body.data.totalAmount`를 DB와 교차 검증 + HTTPS |
+| `DEPOSIT_CALLBACK`       | `body.secret`을 `payments.pg_response.secret`과 비교. `body.orderId`(=orderNumber)로 대상 결제 조회 |
+
+`TOSS_WEBHOOK_SECRET` 환경변수는 사용하지 않는다.
+
+**Idempotency**
+
+- `tosspayments-webhook-transmission-id` 헤더를 `payment_events.provider_event_id`에 저장한다.
+- `(provider, provider_event_id)` unique index로 retry/중복 수신을 차단한다.
+- 중복 수신 시 `200 OK` 반환 (멱등 처리).
+
+**`DEPOSIT_CALLBACK` 검증을 위한 secret 저장**
+
+Toss confirm 응답에서 최소 필드만 `payments.pg_response` jsonb에 저장한다: `paymentKey`, `orderId`, `method`, `status`, `secret`. 카드번호, 계좌번호, 고객 식별성이 높은 상세 정보는 저장하지 않는다.
+
+**처리 흐름**
+
+1. `provider_event_id` 중복 확인 → 중복이면 `200 OK`
+2. `payment_webhook_received` 이벤트 INSERT (`status='pending'`)
+3. 이벤트 타입별 처리
+4. `status='processed'`, `processed_at=now()` 갱신
 
 ---
 
