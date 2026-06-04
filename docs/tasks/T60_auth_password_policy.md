@@ -63,3 +63,6 @@
   - `src/components/auth/AuthModal.tsx`: signupSchema 10자, placeholder 10자 이상
   - `src/app/api/auth/_lib/schemas.ts`: completeEmailSignupSchema 10자
   - 테스트: authErrorMessage 19개, email-signup route 6개 통과
+  - Supabase Auth Rate Limits 확인 (현재 값 유지):
+    - Rate limit for sign-ups and sign-ins: 30 requests / 5 min
+    - Rate limit for sending emails: 30 emails / h
