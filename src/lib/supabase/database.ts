@@ -249,6 +249,82 @@ export type Database = {
           },
         ];
       };
+      payment_events: {
+        Row: {
+          created_at: string;
+          error_message: string | null;
+          event_type: string;
+          id: string;
+          order_id: string;
+          order_number: string;
+          payload: Json | null;
+          payment_id: string | null;
+          processed_at: string | null;
+          provider: string | null;
+          provider_event_id: string | null;
+          provider_event_type: string | null;
+          provider_key: string | null;
+          status: string;
+          store_id: string | null;
+        };
+        Insert: {
+          created_at?: string;
+          error_message?: string | null;
+          event_type: string;
+          id?: string;
+          order_id: string;
+          order_number: string;
+          payload?: Json | null;
+          payment_id?: string | null;
+          processed_at?: string | null;
+          provider?: string | null;
+          provider_event_id?: string | null;
+          provider_event_type?: string | null;
+          provider_key?: string | null;
+          status?: string;
+          store_id?: string | null;
+        };
+        Update: {
+          created_at?: string;
+          error_message?: string | null;
+          event_type?: string;
+          id?: string;
+          order_id?: string;
+          order_number?: string;
+          payload?: Json | null;
+          payment_id?: string | null;
+          processed_at?: string | null;
+          provider?: string | null;
+          provider_event_id?: string | null;
+          provider_event_type?: string | null;
+          provider_key?: string | null;
+          status?: string;
+          store_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'payment_events_order_id_fkey';
+            columns: ['order_id'];
+            isOneToOne: false;
+            referencedRelation: 'orders';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'payment_events_payment_id_fkey';
+            columns: ['payment_id'];
+            isOneToOne: false;
+            referencedRelation: 'payments';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'payment_events_store_id_fkey';
+            columns: ['store_id'];
+            isOneToOne: false;
+            referencedRelation: 'stores';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       payments: {
         Row: {
           amount: number;
@@ -734,6 +810,7 @@ export type Database = {
           p_method: Database['public']['Enums']['payment_method'];
           p_method_detail: string;
           p_order_number: string;
+          p_pg_response: Json;
           p_provider: Database['public']['Enums']['payment_provider'];
           p_provider_order_id: string;
           p_provider_payment_key: string;
