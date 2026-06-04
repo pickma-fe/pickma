@@ -6,6 +6,7 @@ import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
+import { getAuthErrorMessage } from '@/lib/errors/authErrorMessage';
 import { useAuthSession } from '@/hooks/auth/useAuthSession';
 import { useUpdatePassword } from '@/hooks/auth/useUpdatePassword';
 import { Button, Input } from '@/components/common';
@@ -50,10 +51,8 @@ export default function ResetPasswordPage() {
     try {
       await updatePassword({ password: data.password });
       router.push('/');
-    } catch {
-      setError('root', {
-        message: '비밀번호를 변경하지 못했습니다. 다시 시도해 주세요.',
-      });
+    } catch (err) {
+      setError('root', { message: getAuthErrorMessage(err) });
     }
   }
 
