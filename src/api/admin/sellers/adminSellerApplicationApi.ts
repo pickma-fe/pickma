@@ -1,9 +1,7 @@
 import type { PaginatedResult } from '@/types/common';
+import type { AdminPendingSellerApplication } from '@/types/seller-application';
 import type {
-  AdminPendingSellerApplication,
-  AdminPendingSellerApplicationListParams,
-} from '@/types/seller-application';
-import type {
+  AdminPendingSellerApplicationListQuery,
   AdminPendingSellerApplicationListResponse,
   RejectSellerApplicationRequest,
 } from '@/contracts/admin';
@@ -13,7 +11,7 @@ import { mapAdminPendingSellerApplicationList } from './adminSellerApplicationMa
 
 export const adminSellerApplicationApi = {
   getPendingSellerApplications(
-    params: AdminPendingSellerApplicationListParams = {}
+    params: AdminPendingSellerApplicationListQuery = {}
   ): Promise<PaginatedResult<AdminPendingSellerApplication>> {
     return apiClient
       .get<AdminPendingSellerApplicationListResponse>(

@@ -2,12 +2,12 @@
 
 import { useMemo, useState } from 'react';
 
-import type {
-  AdminPendingSellerApplication,
-  AdminPendingSellerApplicationListParams,
-} from '@/types/seller-application';
+import type { AdminPendingSellerApplication } from '@/types/seller-application';
 import { useSellerApplicationDocumentReadUrl } from '@/hooks/admin/seller-application-documents/useSellerApplicationDocumentReadUrl';
-import { useAdminPendingSellerApplications } from '@/hooks/admin/sellers/useAdminPendingSellerApplications';
+import {
+  type AdminPendingSellerApplicationsQuery,
+  useAdminPendingSellerApplications,
+} from '@/hooks/admin/sellers/useAdminPendingSellerApplications';
 import { useApproveSellerApplication } from '@/hooks/admin/sellers/useApproveSellerApplication';
 import { useRejectSellerApplication } from '@/hooks/admin/sellers/useRejectSellerApplication';
 import { Button } from '@/components/common/Button/Button';
@@ -39,7 +39,7 @@ export function AdminSellerApprovalPageContent() {
   const [actionError, setActionError] = useState('');
   const [pendingActionId, setPendingActionId] = useState<string>();
 
-  const query = useMemo<AdminPendingSellerApplicationListParams>(
+  const query = useMemo<AdminPendingSellerApplicationsQuery>(
     () => ({
       page,
       pageSize: PAGE_SIZE,
