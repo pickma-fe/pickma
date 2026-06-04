@@ -74,7 +74,7 @@ describe('expireUserOrders', () => {
     await expect(expireUserOrders()).resolves.toBeUndefined();
   });
 
-  it('개별 expire_order 실패해도 throw 없이 다음 주문 cleanup 계속 시도한다', async () => {
+  it('개별 expire_order throw 실패해도 throw 없이 다음 주문 cleanup 계속 시도한다', async () => {
     const expiredOrders = [{ id: 'order-1' }, { id: 'order-2' }];
     vi.mocked(createServerClient).mockResolvedValue(
       makeServerClient(expiredOrders) as never
@@ -82,6 +82,23 @@ describe('expireUserOrders', () => {
     const rpcFn = vi
       .fn()
       .mockRejectedValueOnce(new Error('RPC error'))
+      .mockResolvedValueOnce({ data: null, error: null });
+    vi.mocked(createServiceRoleClient).mockReturnValue({
+      rpc: rpcFn,
+    } as never);
+
+    await expect(expireUserOrders()).resolves.toBeUndefined();
+    expect(rpcFn).toHaveBeenCalledTimes(2);
+  });
+
+  it('개별 expire_order error 필드 반환해도 throw 없이 다음 주문 cleanup 계속 시도한다', async () => {
+    const expiredOrders = [{ id: 'order-1' }, { id: 'order-2' }];
+    vi.mocked(createServerClient).mockResolvedValue(
+      makeServerClient(expiredOrders) as never
+    );
+    const rpcFn = vi
+      .fn()
+      .mockResolvedValueOnce({ data: null, error: { message: 'DB error' } })
       .mockResolvedValueOnce({ data: null, error: null });
     vi.mocked(createServiceRoleClient).mockReturnValue({
       rpc: rpcFn,

@@ -20,7 +20,10 @@ export async function expireUserOrders(): Promise<void> {
     const serviceSupabase = createServiceRoleClient();
     for (const order of expired) {
       try {
-        await serviceSupabase.rpc('expire_order', { p_order_id: order.id });
+        const { error: rpcError } = await serviceSupabase.rpc('expire_order', {
+          p_order_id: order.id,
+        });
+        if (rpcError) throw rpcError;
       } catch {
         // best-effort cleanup: 개별 실패는 주문 생성을 막지 않는다.
       }
