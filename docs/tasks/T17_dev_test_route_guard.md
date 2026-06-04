@@ -1,10 +1,10 @@
 # T17. dev-test route 제거 또는 dev-only guard
 
 - 상태:
-  진행 전
+  완료
 
 - GitHub Issue:
-  확인 필요
+  213
 
 - 우선순위:
   P1
