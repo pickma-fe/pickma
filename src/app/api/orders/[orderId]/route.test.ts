@@ -5,10 +5,11 @@ import { AppError } from '@/lib/errors/appError';
 import { ERROR_CODE } from '@/lib/errors/errorCodes';
 import { requireActiveUser } from '@/app/api/_lib/auth';
 import { isApiMockEnabled } from '@/app/api/_lib/mock';
+import { expireUserOrders } from '@/app/api/_lib/order-expiration';
 import { mockOrders } from '@/mocks/orders';
 
 import { GET } from './route';
-import { expireUserOrders, getOrder } from '../_lib/service';
+import { getOrder } from '../_lib/service';
 
 vi.mock('@/app/api/_lib/mock', () => ({
   isApiMockEnabled: vi.fn(),
@@ -18,8 +19,11 @@ vi.mock('@/app/api/_lib/auth', () => ({
   requireActiveUser: vi.fn(),
 }));
 
-vi.mock('../_lib/service', () => ({
+vi.mock('@/app/api/_lib/order-expiration', () => ({
   expireUserOrders: vi.fn(),
+}));
+
+vi.mock('../_lib/service', () => ({
   getOrder: vi.fn(),
 }));
 

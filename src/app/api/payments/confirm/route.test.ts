@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { AppError } from '@/lib/errors/appError';
 import { ERROR_CODE } from '@/lib/errors/errorCodes';
 import { requireActiveUser } from '@/app/api/_lib/auth';
-import { expireUserOrders } from '@/app/api/orders/_lib/service';
+import { expireUserOrders } from '@/app/api/_lib/order-expiration';
 
 import { POST } from './route';
 import { confirmPayment } from '../_lib/service';
@@ -13,7 +13,7 @@ vi.mock('@/app/api/_lib/auth', () => ({
   requireActiveUser: vi.fn(),
 }));
 
-vi.mock('@/app/api/orders/_lib/service', () => ({
+vi.mock('@/app/api/_lib/order-expiration', () => ({
   expireUserOrders: vi.fn(),
 }));
 
