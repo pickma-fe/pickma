@@ -25,7 +25,7 @@ export function getAuthErrorMessage(error: unknown): string {
   }
 
   if (hasStatus(error) && error.status === 429) {
-    return '요청 횟수가 너무 많습니다. 잠시 후 다시 시도해 주세요.';
+    return ERROR_MESSAGES.RATE_LIMIT_EXCEEDED;
   }
 
   const msg = error instanceof Error ? error.message.toLowerCase() : '';
@@ -52,7 +52,7 @@ export function getAuthErrorMessage(error: unknown): string {
     return '비밀번호는 10자 이상으로 입력해 주세요.';
   }
   if (msg.includes('rate limit') || msg.includes('too many')) {
-    return '요청 횟수가 너무 많습니다. 잠시 후 다시 시도해 주세요.';
+    return ERROR_MESSAGES.RATE_LIMIT_EXCEEDED;
   }
   if (msg.includes('same password') || msg.includes('different from the old')) {
     return '현재 사용 중인 비밀번호와 다른 비밀번호를 입력해 주세요.';

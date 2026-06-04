@@ -109,13 +109,13 @@ describe('getAuthErrorMessage', () => {
         status: 429,
       });
       expect(getAuthErrorMessage(error)).toBe(
-        '요청 횟수가 너무 많습니다. 잠시 후 다시 시도해 주세요.'
+        '요청이 너무 많습니다. 잠시 후 다시 시도해 주세요.'
       );
     });
 
     it('rate limit: message "too many requests"', () => {
       expect(getAuthErrorMessage(new Error('Too many requests'))).toBe(
-        '요청 횟수가 너무 많습니다. 잠시 후 다시 시도해 주세요.'
+        '요청이 너무 많습니다. 잠시 후 다시 시도해 주세요.'
       );
     });
 
