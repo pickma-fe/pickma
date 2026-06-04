@@ -1,10 +1,10 @@
 # T18. mock import 금지 기준 정리
 
 - 상태:
-  진행 전
+  완료
 
 - GitHub Issue:
-  확인 필요
+  211
 
 - 우선순위:
   P1
@@ -49,3 +49,9 @@
   - production app route/component에서 `@/mocks` 직접 import가 없다.
   - mock 사용 위치 기준이 문서화된다.
   - lint rule 또는 CI check로 위반이 자동 감지된다.
+
+- 구현 결과:
+  - `eslint.config.mjs`에 mock outbound 금지 flat config block 추가 (`no-restricted-imports` + `import/no-restricted-paths`)
+  - 허용: `src/app/api/**`, `*.test.*`, `*.stories.*` / 금지: 그 외 `src/**/*.{ts,tsx}`
+  - `.codex/instructions/coding-style.md`, `.claude/rules/coding-style.md` Import Layer 규칙에 mocks 정책 명시
+  - `docs/system_architecture.md` Section 8에 import 정책 추가

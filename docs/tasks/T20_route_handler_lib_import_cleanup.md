@@ -39,6 +39,7 @@
   - `src/lib`에 남아 있는 Route Handler 전용 backend helper가 있는지 확인하고, 필요한 경우 `src/app/api/_lib` 또는 resource-local `_lib`로 옮긴다.
   - `src/lib`에는 framework/backend와 분리 가능한 domain/shared library만 두는 기준을 문서화한다.
   - ESLint `import/no-restricted-paths` 또는 CI `rg` check로 resource `_lib` 횡단 import를 기계적으로 금지한다 (Harness H6).
+  - `eslint.config.mjs`의 글로벌 block과 mock outbound block에 중복된 layer zones 배열을 공통 상수로 분리한다 (T18 코드리뷰 Suggestions).
   - 관련 테스트 import 경로를 갱신한다.
 
 - 관련 파일/영역:
