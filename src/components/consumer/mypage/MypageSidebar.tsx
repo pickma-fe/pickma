@@ -32,7 +32,7 @@ const menuItems: SidebarItem[] = [
     id: 'reservations',
     label: '내 예약',
     icon: <CalendarCheck className="size-5" aria-hidden="true" />,
-    href: '/mypage?view=reservations',
+    href: '/mypage/orders',
   },
   {
     id: 'settings',
@@ -65,14 +65,11 @@ function isActiveItem(
   activeView: MypageSidebarView
 ): boolean {
   if (item.id === 'profile') {
-    return (
-      activeView === 'profile' &&
-      (pathname === '/mypage' || pathname === '/mypage/profile')
-    );
+    return activeView === 'profile' && pathname === '/mypage';
   }
 
   if (item.id === 'reservations') {
-    return activeView === 'reservations' && pathname === '/mypage';
+    return activeView === 'reservations' && pathname === '/mypage/orders';
   }
 
   return Boolean(item.href && pathname === item.href);
