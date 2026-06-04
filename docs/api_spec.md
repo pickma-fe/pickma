@@ -147,6 +147,8 @@ available otherwise
 
 Email/password auth wrapper 입력 DTO와 이메일 선인증 Route Handler contract는 모두 `src/contracts/auth.ts`에 둔다.
 
+password 필드는 최소 10자. 복잡도 요구 없음 (T60 정책).
+
 ```ts
 export interface SignInWithEmailRequest {
   email: string;
@@ -159,7 +161,7 @@ export interface ResetPasswordRequest {
 }
 
 export interface UpdatePasswordRequest {
-  password: string;
+  password: string; // min 10자
 }
 
 export interface RequestEmailVerificationRequest {
@@ -182,7 +184,7 @@ export interface VerifyEmailOtpResponse {
 
 export interface CompleteEmailSignupRequest {
   email: string;
-  password: string;
+  password: string; // min 10자
   name: string;
   verificationToken: string;
   marketingAgreed: boolean;

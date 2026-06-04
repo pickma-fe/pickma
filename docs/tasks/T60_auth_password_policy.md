@@ -1,10 +1,10 @@
 # T60. Auth 비밀번호 정책 강화
 
 - 상태:
-  진행 전
+  완료
 
 - GitHub Issue:
-  확인 필요
+  223
 
 - 우선순위:
   P1
@@ -52,3 +52,14 @@
   - 로그인 rate limit 발생 시 사용자에게 명확한 안내 메시지가 표시된다.
   - 비밀번호 재설정 시 동일 비밀번호 입력에 대한 명확한 에러 안내가 표시된다.
   - 정책 결정 내용이 문서화된다.
+
+- 구현 결과:
+  - 비밀번호 정책: 최소 10자, 복잡도 요구 없음 (NIST SP 800-63B Rev.4 방향)
+  - Supabase Dashboard 수동 적용 필요: Authentication → Password → Minimum password length: 10 (복잡도 옵션 비활성화)
+  - `src/lib/errors/authErrorMessage.ts`: Supabase Auth rate limit 에러(HTTP 429, "rate limit"/"too many" 메시지) → `'요청 횟수가 너무 많습니다. 잠시 후 다시 시도해 주세요.'`
+  - `src/lib/errors/authErrorMessage.ts`: 동일 비밀번호 에러("same password"/"different from the old") → `'현재 사용 중인 비밀번호와 다른 비밀번호를 입력해 주세요.'`
+  - `src/lib/errors/authErrorMessage.ts`: 기존 "8자" 안내 메시지를 10자 기준으로 수정
+  - `src/app/auth/reset-password/page.tsx`: catch 블록 고정 문자열 → `getAuthErrorMessage(err)` 일원화, resetPasswordSchema 10자
+  - `src/components/auth/AuthModal.tsx`: signupSchema 10자, placeholder 10자 이상
+  - `src/app/api/auth/_lib/schemas.ts`: completeEmailSignupSchema 10자
+  - 테스트: authErrorMessage 19개, email-signup route 6개 통과
