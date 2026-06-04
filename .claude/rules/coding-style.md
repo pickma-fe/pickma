@@ -69,6 +69,10 @@ app/        ← 전부 가능 (app/api/_lib/, app/api/{resource}/_lib/ 제외)
 - Contract DTO는 API 경계, mapper, mock fixture에서만 사용한다.
 - `src/lib`에는 framework/backend와 분리 가능한 domain/shared library만 둔다.
 - Route Handler 전용 backend helper는 `src/app/api/_lib` 또는 `src/app/api/{resource}/_lib` 아래에 둔다.
+- resource `_lib/`는 다른 resource `_lib/`를 직접 import하지 않는다. 공유 필요 시 `src/app/api/_lib/`로 분리한다.
+- 전역 `src/app/api/_lib/`도 resource `_lib/`를 직접 import하지 않는다.
+- 허용: resource-local `_lib` → `src/app/api/_lib/*`. 금지: resource-local `_lib` → 다른 resource-local `_lib`, 전역 `_lib` → resource-local `_lib`.
+- 둘 이상의 resource가 같은 row → contract mapper를 공유해야 하면 `src/app/api/_lib/*-mapper.ts`에 둔다.
 
 ## Import 순서
 

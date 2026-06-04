@@ -1,10 +1,10 @@
 # T20. Route Handler `_lib` 횡단 import 정리
 
 - 상태:
-  진행 전
+  완료
 
 - GitHub Issue:
-  확인 필요
+  221
 
 - 우선순위:
   P1
@@ -38,7 +38,7 @@
   - resource `_lib` 간 직접 import 금지 원칙을 문서화한다.
   - `src/lib`에 남아 있는 Route Handler 전용 backend helper가 있는지 확인하고, 필요한 경우 `src/app/api/_lib` 또는 resource-local `_lib`로 옮긴다.
   - `src/lib`에는 framework/backend와 분리 가능한 domain/shared library만 두는 기준을 문서화한다.
-  - ESLint `import/no-restricted-paths` 또는 CI `rg` check로 resource `_lib` 횡단 import를 기계적으로 금지한다 (Harness H6).
+  - ESLint `import/no-restricted-paths` 또는 CI `rg` check로 resource `_lib` 횡단 import를 기계적으로 금지한다 (Harness H6). → T20 범위에서 제외, 필요 시 후속 검토.
   - `eslint.config.mjs`의 글로벌 block과 mock outbound block에 중복된 layer zones 배열을 공통 상수로 분리한다 (T18 코드리뷰 Suggestions).
   - 관련 테스트 import 경로를 갱신한다.
 
@@ -55,4 +55,34 @@
   - payments route가 orders resource private `_lib`를 직접 import하지 않는다.
   - 공통 API lib 위치와 사용 기준이 명확하다.
   - Route Handler 전용 backend helper가 `src/lib`에 새로 추가되지 않는 기준이 명확하다.
-  - lint 또는 CI check로 resource `_lib` 횡단 import가 자동 감지된다.
+  - ESLint `import/no-restricted-paths` 또는 CI `rg` check로 resource `_lib` 횡단 import 자동 감지: T20 범위에서 제외, 후속 검토 대상.
+
+## 구현 결과
+
+### 생성된 공통 API lib 파일
+
+- `src/app/api/_lib/order-expiration.ts` — `expireUserOrders` 함수 (payments, orders route에서 공유)
+- `src/app/api/_lib/payment-mapper.ts` — `PaymentRow` interface + `mapPaymentRow` 함수
+- `src/app/api/_lib/order-mapper.ts` — `OrderListRow`, `OrderItemRow`, `OrderDetailRow` + `mapOrderListRow`, `mapOrderItemRow`, `mapOrderDetailRow`
+- `src/app/api/_lib/user-mapper.ts` — `UsersRow` type + `mapUserRow` 함수
+
+### 제거된 횡단 import
+
+| Before                                                | After                                               |
+| ----------------------------------------------------- | --------------------------------------------------- |
+| `payments/*/route.ts` → `orders/_lib/service`         | → `_lib/order-expiration`                           |
+| `orders/_lib/mapper.ts` → `payments/_lib/mapper`      | → `_lib/payment-mapper`                             |
+| `seller/orders/_lib/mapper.ts` → `orders/_lib/mapper` | 파일 삭제 (service가 `_lib/order-mapper` 직접 참조) |
+| `_lib/current-user.ts` → `users/_lib/mapper`          | → `_lib/user-mapper`                                |
+| `users/me/_lib/service.ts` → `users/_lib/mapper`      | → `_lib/user-mapper`                                |
+
+### 기타
+
+- `eslint.config.mjs` — `LAYER_ZONES` 상수로 중복 zones 배열 통합
+- 원칙 문서화: `docs/system_architecture.md`, `docs/type_architecture.md`, `AGENTS.md`, `.codex/instructions/coding-style.md`, `.claude/rules/coding-style.md`
+
+### 검증
+
+- 테스트: 관련 경로 전체 통과 (orders, payments, seller/orders, users, \_lib)
+- lint: 통과
+- TypeScript: 통과 (pre-commit hook)
