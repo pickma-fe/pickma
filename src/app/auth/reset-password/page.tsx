@@ -13,7 +13,7 @@ import { Button, Input } from '@/components/common';
 
 const resetPasswordSchema = z
   .object({
-    password: z.string().min(8, '비밀번호는 8자 이상으로 입력해 주세요.'),
+    password: z.string().min(10, '비밀번호는 10자 이상으로 입력해 주세요.'),
     passwordConfirm: z.string().min(1, '비밀번호 확인을 입력해 주세요.'),
   })
   .refine((data) => data.password === data.passwordConfirm, {
@@ -92,7 +92,7 @@ export default function ResetPasswordPage() {
           <Input
             label="새 비밀번호"
             type="password"
-            placeholder="8자 이상"
+            placeholder="10자 이상"
             error={errors.password?.message}
             {...register('password')}
           />

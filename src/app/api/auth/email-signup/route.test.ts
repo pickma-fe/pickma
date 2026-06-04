@@ -57,7 +57,7 @@ describe('POST /api/auth/email-signup', () => {
     expect(body.error.code).toBe(ERROR_CODE.VALIDATION_ERROR);
   });
 
-  it('비밀번호가 8자 미만이면 400을 반환한다', async () => {
+  it('비밀번호가 10자 미만이면 400을 반환한다', async () => {
     const res = await POST(makeRequest({ ...VALID_BODY, password: 'short' }));
     const body = await res.json();
 

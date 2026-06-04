@@ -46,7 +46,7 @@ const signupSchema = z
   .object({
     name: z.string().trim().min(1, '이름을 입력해 주세요.'),
     email: trimmedEmail,
-    password: z.string().min(8, '비밀번호는 8자 이상으로 입력해 주세요.'),
+    password: z.string().min(10, '비밀번호는 10자 이상으로 입력해 주세요.'),
     passwordConfirm: z.string(),
     termsAgreed: z
       .boolean()
@@ -413,7 +413,7 @@ function SignupForm({ next, onClose, onChangeView }: SignupFormProps) {
         <Input
           label="비밀번호"
           type="password"
-          placeholder="비밀번호 (8자 이상)"
+          placeholder="비밀번호 (10자 이상)"
           error={errors.password?.message}
           {...register('password')}
         />
