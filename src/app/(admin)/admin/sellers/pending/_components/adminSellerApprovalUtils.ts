@@ -9,7 +9,7 @@ export const SELLER_APPLICATION_DOCUMENT_LABELS: Record<
   bank_account: '통장 사본',
 };
 
-export function formatAdminDateTime(value: string): string {
+export function formatAdminDateTime(value: Date): string {
   return new Intl.DateTimeFormat('ko-KR', {
     timeZone: 'Asia/Seoul',
     year: 'numeric',
@@ -18,5 +18,5 @@ export function formatAdminDateTime(value: string): string {
     hour: '2-digit',
     minute: '2-digit',
     hour12: false,
-  }).format(new Date(value));
+  }).format(value);
 }

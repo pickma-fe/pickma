@@ -18,6 +18,15 @@ function sanitizePostgrestSearchValue(value: string): string {
 }
 
 function getKoreanDateRange(date: string): { start: string; end: string } {
+  const utcDate = new Date(`${date}T00:00:00Z`);
+
+  if (
+    Number.isNaN(utcDate.getTime()) ||
+    utcDate.toISOString().slice(0, 10) !== date
+  ) {
+    throw new AppError(ERROR_CODE.VALIDATION_ERROR, 400);
+  }
+
   const start = new Date(`${date}T00:00:00${KOREA_TIME_ZONE_OFFSET}`);
   const end = new Date(start);
   end.setUTCDate(end.getUTCDate() + 1);

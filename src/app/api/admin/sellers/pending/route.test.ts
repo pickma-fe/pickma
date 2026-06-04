@@ -95,6 +95,23 @@ describe('GET /api/admin/sellers/pending', () => {
     expect(body.error.code).toBe('VALIDATION_ERROR');
   });
 
+  it('존재하지 않는 createdDate는 400을 반환한다', async () => {
+    vi.mocked(isApiMockEnabled).mockReturnValue(false);
+    vi.mocked(requireAdmin).mockResolvedValue(adminResult);
+
+    const res = await GET(makeGetRequest('createdDate=2026-02-31'));
+    const body = (await res.json()) as {
+      statusCode: number;
+      error: { code: string };
+    };
+
+    expect(res.status).toBe(400);
+    expect(requireAdmin).toHaveBeenCalledOnce();
+    expect(getPendingSellerApplications).not.toHaveBeenCalled();
+    expect(body.statusCode).toBe(res.status);
+    expect(body.error.code).toBe('VALIDATION_ERROR');
+  });
+
   it('real 모드에서 권한 검사가 실패하면 query validation보다 403을 먼저 반환한다', async () => {
     vi.mocked(isApiMockEnabled).mockReturnValue(false);
     vi.mocked(requireAdmin).mockRejectedValue(

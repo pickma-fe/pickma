@@ -1,6 +1,6 @@
 'use client';
 
-import type { AdminPendingSellerApplicationResponse } from '@/contracts/admin';
+import type { AdminPendingSellerApplication } from '@/types/seller-application';
 import { Badge } from '@/components/common/Badge/Badge';
 import { Button } from '@/components/common/Button/Button';
 import { AdminTable } from '@/app/(admin)/admin/_components/AdminTable';
@@ -8,16 +8,16 @@ import { AdminTable } from '@/app/(admin)/admin/_components/AdminTable';
 import { formatAdminDateTime } from './adminSellerApprovalUtils';
 
 interface AdminSellerApprovalTableProps {
-  applications: AdminPendingSellerApplicationResponse[];
+  applications: AdminPendingSellerApplication[];
   isLoading: boolean;
   currentPage: number;
   totalPages: number;
   isActionPending: boolean;
   pendingActionId?: string;
   onPageChange: (page: number) => void;
-  onApprove: (application: AdminPendingSellerApplicationResponse) => void;
-  onReject: (application: AdminPendingSellerApplicationResponse) => void;
-  onOpenDetail: (application: AdminPendingSellerApplicationResponse) => void;
+  onApprove: (application: AdminPendingSellerApplication) => void;
+  onReject: (application: AdminPendingSellerApplication) => void;
+  onOpenDetail: (application: AdminPendingSellerApplication) => void;
 }
 
 export function AdminSellerApprovalTable({

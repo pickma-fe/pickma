@@ -1,11 +1,11 @@
 'use client';
 
-import type { AdminPendingSellerApplicationResponse } from '@/contracts/admin';
+import type { AdminPendingSellerApplication } from '@/types/seller-application';
 import { Button } from '@/components/common/Button/Button';
 import { Modal } from '@/components/common/Modal/Modal';
 
 interface AdminSellerApplicationApproveModalProps {
-  application?: AdminPendingSellerApplicationResponse;
+  application?: AdminPendingSellerApplication;
   isSubmitting: boolean;
   onClose: () => void;
   onSubmit: () => void;

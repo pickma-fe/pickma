@@ -244,6 +244,22 @@ describe('getPendingSellerApplications', () => {
     );
   });
 
+  it('존재하지 않는 createdDate면 VALIDATION_ERROR를 던진다', async () => {
+    const { client } = buildFilterableListClient();
+    vi.mocked(createServiceRoleClient).mockReturnValue(client);
+
+    await expect(
+      getPendingSellerApplications({
+        page: 1,
+        pageSize: 20,
+        createdDate: '2026-02-31',
+      })
+    ).rejects.toSatisfy(
+      (e: unknown) =>
+        e instanceof AppError && e.code === ERROR_CODE.VALIDATION_ERROR
+    );
+  });
+
   it('businessCategory가 있으면 ilike 조건을 적용한다', async () => {
     const { client, applicationQuery } = buildFilterableListClient();
     vi.mocked(createServiceRoleClient).mockReturnValue(client);

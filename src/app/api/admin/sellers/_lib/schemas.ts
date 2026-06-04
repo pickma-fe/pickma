@@ -2,6 +2,14 @@ import { z } from 'zod';
 
 import type { RejectSellerApplicationRequest } from '@/contracts/admin';
 
+function isValidCalendarDate(value: string): boolean {
+  const date = new Date(`${value}T00:00:00Z`);
+
+  return (
+    !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value
+  );
+}
+
 export const paramsIdSchema = z.object({ id: z.string().uuid() });
 
 export const rejectSellerApplicationSchema = z
@@ -17,6 +25,7 @@ export const pendingSellerApplicationsQuerySchema = z.object({
   createdDate: z
     .string()
     .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .refine(isValidCalendarDate)
     .optional(),
   businessCategory: z.string().trim().min(1).max(50).optional(),
 });

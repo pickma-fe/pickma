@@ -1,3 +1,5 @@
+import type { PaginatedResult } from '@/types/common';
+import type { AdminPendingSellerApplication } from '@/types/seller-application';
 import type {
   AdminPendingSellerApplicationListQuery,
   AdminPendingSellerApplicationListResponse,
@@ -5,14 +7,18 @@ import type {
 } from '@/contracts/admin';
 import { apiClient } from '@/api/apiClient';
 
+import { mapAdminPendingSellerApplicationList } from './adminSellerApplicationMapper';
+
 export const adminSellerApplicationApi = {
   getPendingSellerApplications(
     params: AdminPendingSellerApplicationListQuery = {}
-  ): Promise<AdminPendingSellerApplicationListResponse> {
-    return apiClient.get<AdminPendingSellerApplicationListResponse>(
-      '/api/admin/sellers/pending',
-      params
-    );
+  ): Promise<PaginatedResult<AdminPendingSellerApplication>> {
+    return apiClient
+      .get<AdminPendingSellerApplicationListResponse>(
+        '/api/admin/sellers/pending',
+        params
+      )
+      .then(mapAdminPendingSellerApplicationList);
   },
 
   approveSellerApplication(id: string): Promise<void> {

@@ -2,10 +2,8 @@
 
 import { useMemo, useState } from 'react';
 
-import type {
-  AdminPendingSellerApplicationListQuery,
-  AdminPendingSellerApplicationResponse,
-} from '@/contracts/admin';
+import type { AdminPendingSellerApplication } from '@/types/seller-application';
+import type { AdminPendingSellerApplicationListQuery } from '@/contracts/admin';
 import { useSellerApplicationDocumentReadUrl } from '@/hooks/admin/seller-application-documents/useSellerApplicationDocumentReadUrl';
 import { useAdminPendingSellerApplications } from '@/hooks/admin/sellers/useAdminPendingSellerApplications';
 import { useApproveSellerApplication } from '@/hooks/admin/sellers/useApproveSellerApplication';
@@ -26,11 +24,11 @@ export function AdminSellerApprovalPageContent() {
   const [selectedDate, setSelectedDate] = useState('');
   const [businessCategory, setBusinessCategory] = useState('');
   const [detailApplication, setDetailApplication] =
-    useState<AdminPendingSellerApplicationResponse>();
+    useState<AdminPendingSellerApplication>();
   const [approveApplication, setApproveApplication] =
-    useState<AdminPendingSellerApplicationResponse>();
+    useState<AdminPendingSellerApplication>();
   const [rejectApplication, setRejectApplication] =
-    useState<AdminPendingSellerApplicationResponse>();
+    useState<AdminPendingSellerApplication>();
   const [message, setMessage] = useState('');
   const [actionError, setActionError] = useState('');
   const [pendingActionId, setPendingActionId] = useState<string>();

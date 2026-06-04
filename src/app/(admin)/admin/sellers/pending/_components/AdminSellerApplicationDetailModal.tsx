@@ -2,7 +2,7 @@
 
 import { ExternalLink, FileText } from 'lucide-react';
 
-import type { AdminPendingSellerApplicationResponse } from '@/contracts/admin';
+import type { AdminPendingSellerApplication } from '@/types/seller-application';
 import { Button } from '@/components/common/Button/Button';
 import { Modal } from '@/components/common/Modal/Modal';
 
@@ -12,7 +12,7 @@ import {
 } from './adminSellerApprovalUtils';
 
 interface AdminSellerApplicationDetailModalProps {
-  application?: AdminPendingSellerApplicationResponse;
+  application?: AdminPendingSellerApplication;
   isDocumentLoading: boolean;
   onClose: () => void;
   onOpenDocument: (documentId: string) => void;

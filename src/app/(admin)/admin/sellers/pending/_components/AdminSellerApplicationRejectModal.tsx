@@ -2,12 +2,12 @@
 
 import { useState, type FormEvent } from 'react';
 
-import type { AdminPendingSellerApplicationResponse } from '@/contracts/admin';
+import type { AdminPendingSellerApplication } from '@/types/seller-application';
 import { Button } from '@/components/common/Button/Button';
 import { Modal } from '@/components/common/Modal/Modal';
 
 interface AdminSellerApplicationRejectModalProps {
-  application?: AdminPendingSellerApplicationResponse;
+  application?: AdminPendingSellerApplication;
   isSubmitting: boolean;
   onClose: () => void;
   onSubmit: (reason: string) => void;
@@ -74,7 +74,11 @@ export function AdminSellerApplicationRejectModal({
             />
           </label>
           {error && (
-            <p id="reject-reason-error" className="text-sm text-red-500">
+            <p
+              id="reject-reason-error"
+              role="alert"
+              className="text-sm text-red-500"
+            >
               {error}
             </p>
           )}
