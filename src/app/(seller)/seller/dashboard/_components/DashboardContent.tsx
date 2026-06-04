@@ -70,15 +70,6 @@ const STATUS_CARDS = [
 
 type DashboardOrderStatus = (typeof STATUS_CARDS)[number]['status'];
 
-const DOMAIN_STATUS_TO_CONTRACT = {
-  reserved: 'reserved',
-  accepted: 'accepted',
-  ready: 'ready',
-  completed: 'completed',
-  cancelled: 'cancelled',
-  noShow: 'no_show',
-} as const satisfies Record<DashboardOrderStatus, string>;
-
 export function DashboardContent() {
   const today = getTodayRange();
 
@@ -97,9 +88,7 @@ export function DashboardContent() {
   });
 
   const getCount = (status: DashboardOrderStatus): number => {
-    const contractStatus = DOMAIN_STATUS_TO_CONTRACT[status];
-    return todayOrders.filter((order) => order.status === contractStatus)
-      .length;
+    return todayOrders.filter((order) => order.status === status).length;
   };
 
   const todayTotal = todayOrders.length;
@@ -156,11 +145,7 @@ export function DashboardContent() {
             const count = getCount(card.status);
 
             return (
-              <Link
-                key={card.status}
-                href={`/seller/orders?status=${DOMAIN_STATUS_TO_CONTRACT[card.status]}`}
-                className="block"
-              >
+              <Link key={card.status} href="/seller/orders" className="block">
                 <Section
                   variant="card"
                   className="bg-white transition-all hover:ring-1 hover:ring-gray-300"

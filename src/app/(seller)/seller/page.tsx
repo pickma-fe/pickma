@@ -1,4 +1,3 @@
-// src/app/(seller)/seller/page.tsx
 'use client';
 
 import { CheckCircle, ChevronRight, Store } from 'lucide-react';
@@ -6,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
+import { useSellerOnboardingStatus } from '@/hooks/seller/onboarding/useSellerOnboardingStatus';
 import { useMe } from '@/hooks/users/useMe';
 import { useAuthModal } from '@/components/auth/useAuthModal';
 import { Button } from '@/components/common/Button/Button';
@@ -19,14 +19,21 @@ const BENEFITS = [
 
 export default function SellerPage() {
   const router = useRouter();
-  const { data: user, isLoading } = useMe();
+  const { data: user, isLoading: isUserLoading } = useMe();
+  const { data: onboardingStatus, isLoading: isOnboardingLoading } =
+    useSellerOnboardingStatus();
   const { openAuthModal } = useAuthModal();
 
+  const isLoading = isUserLoading || isOnboardingLoading;
+
   useEffect(() => {
-    if (!isLoading && user?.role === 'seller') {
-      router.replace('/seller/dashboard');
+    if (isLoading) return;
+    if (user?.role === 'seller') {
+      router.replace(
+        onboardingStatus?.hasStore ? '/seller/dashboard' : '/seller/store'
+      );
     }
-  }, [user, isLoading, router]);
+  }, [user, isLoading, onboardingStatus, router]);
 
   if (isLoading) {
     return (
