@@ -29,6 +29,9 @@ CREATE UNIQUE INDEX payment_events_provider_event_uniq
 -- 3. RLS 활성화 (별도 정책 없이 service_role bypass)
 ALTER TABLE payment_events ENABLE ROW LEVEL SECURITY;
 
+-- 4. service_role 테이블 권한 부여 (incremental migration은 기존 GRANT ALL ON ALL TABLES에 포함 안 됨)
+GRANT ALL ON TABLE payment_events TO service_role;
+
 -- ============================================================
 -- 4. confirm_payment RPC 갱신 (7-arg → 8-arg + payment_events atomic INSERT)
 -- ============================================================
