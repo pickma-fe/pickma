@@ -55,7 +55,7 @@
 
 - 구현 결과:
   - 비밀번호 정책: 최소 10자, 복잡도 요구 없음 (NIST SP 800-63B Rev.4 방향)
-  - Supabase Dashboard 수동 적용 필요: Authentication → Password → Minimum password length: 10 (복잡도 옵션 비활성화)
+  - Supabase Dashboard 수동 적용 완료: Authentication → Password → Minimum password length: 10, Password requirements: No required characters
   - `src/lib/errors/authErrorMessage.ts`: Supabase Auth rate limit 에러(HTTP 429, "rate limit"/"too many" 메시지) → `'요청 횟수가 너무 많습니다. 잠시 후 다시 시도해 주세요.'`
   - `src/lib/errors/authErrorMessage.ts`: 동일 비밀번호 에러("same password"/"different from the old") → `'현재 사용 중인 비밀번호와 다른 비밀번호를 입력해 주세요.'`
   - `src/lib/errors/authErrorMessage.ts`: 기존 "8자" 안내 메시지를 10자 기준으로 수정
