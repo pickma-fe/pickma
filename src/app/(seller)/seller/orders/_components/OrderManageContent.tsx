@@ -9,6 +9,7 @@ import {
   ShoppingBag,
   XCircle,
 } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 
 import type { SellerOrderListParams } from '@/contracts/order';
@@ -38,6 +39,22 @@ const DOMAIN_TO_CONTRACT_STATUS: Record<
   cancelled: 'cancelled',
   noShow: 'no_show',
 };
+
+const VALID_STATUSES: SellerOrderDisplayStatus[] = [
+  'reserved',
+  'accepted',
+  'ready',
+  'completed',
+  'cancelled',
+  'noShow',
+];
+
+function parseStatusParam(param: string | null): SellerOrderFilterStatus {
+  if (param && (VALID_STATUSES as string[]).includes(param)) {
+    return param as SellerOrderDisplayStatus;
+  }
+  return '전체';
+}
 
 const PAGE_SIZE = 20;
 
@@ -100,8 +117,12 @@ const STAT_CARDS: {
 ];
 
 export function OrderManageContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const initialStatus = parseStatusParam(searchParams.get('status'));
   const [selectedStatus, setSelectedStatus] =
-    useState<SellerOrderFilterStatus>('전체');
+    useState<SellerOrderFilterStatus>(initialStatus);
   const [searchKeyword, setSearchKeyword] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -199,6 +220,14 @@ export function OrderManageContent() {
   const handleStatusChange = (status: string) => {
     setSelectedStatus(status as SellerOrderFilterStatus);
     setCurrentPage(1);
+    // URL query 동기화
+    const params = new URLSearchParams(searchParams.toString());
+    if (status === '전체') {
+      params.delete('status');
+    } else {
+      params.set('status', status);
+    }
+    router.replace(`/seller/orders?${params.toString()}`);
   };
 
   const handleSearchChange = (keyword: string) => {
