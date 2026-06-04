@@ -84,6 +84,7 @@ export default function SellerLayout({
   }
 
   const user = guard.status === 'ok' ? guard.user : undefined;
+  const sellerUser = user?.role === 'seller' ? user : undefined;
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -115,7 +116,7 @@ export default function SellerLayout({
         }
       />
       <div className="flex flex-1">
-        {user && (
+        {sellerUser && (
           <div className="hidden pt-4 lg:block">
             <Sidebar sections={sellerSidebarSections} />
           </div>
