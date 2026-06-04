@@ -12,7 +12,7 @@ export async function POST(request: NextRequest): Promise<Response> {
   try {
     const body = await validateBody(confirmPaymentSchema, request);
     const { serviceUser } = await requireActiveUser();
-    await expireUserOrders(serviceUser.id);
+    await expireUserOrders();
     await confirmPayment(serviceUser.id, body);
     return success(null);
   } catch (error) {

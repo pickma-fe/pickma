@@ -66,7 +66,7 @@ describe('POST /api/payments/confirm', () => {
 
   it('expireUserOrders 후 confirmPayment 호출', async () => {
     await POST(makeRequest(validBody));
-    expect(expireUserOrders).toHaveBeenCalledWith('user-1');
+    expect(expireUserOrders).toHaveBeenCalledWith();
     expect(confirmPayment).toHaveBeenCalledWith('user-1', validBody);
     expect(
       vi.mocked(expireUserOrders).mock.invocationCallOrder[0]

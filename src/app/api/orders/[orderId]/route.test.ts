@@ -123,7 +123,7 @@ describe('GET /api/orders/:orderId', () => {
         makeParams(VALID_UUID)
       );
       expect(res.status).toBe(200);
-      expect(expireUserOrders).toHaveBeenCalledWith('user-1');
+      expect(expireUserOrders).toHaveBeenCalledWith();
       expect(getOrder).toHaveBeenCalledWith('user-1', VALID_UUID);
       expect(
         vi.mocked(expireUserOrders).mock.invocationCallOrder[0]

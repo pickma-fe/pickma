@@ -77,7 +77,7 @@ describe('POST /api/payments/prepare', () => {
 
   it('expireUserOrders 후 preparePayment 호출', async () => {
     await POST(makeRequest(validBody));
-    expect(expireUserOrders).toHaveBeenCalledWith('user-1');
+    expect(expireUserOrders).toHaveBeenCalledWith();
     expect(preparePayment).toHaveBeenCalledWith(
       'user-1',
       validBody,

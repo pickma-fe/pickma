@@ -33,7 +33,7 @@ export async function GET(
 
   try {
     const { serviceUser } = await requireActiveUser();
-    await expireUserOrders(serviceUser.id);
+    await expireUserOrders();
     const data = await getOrder(serviceUser.id, parsed.data);
     return success(data);
   } catch (error) {

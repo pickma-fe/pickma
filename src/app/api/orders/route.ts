@@ -18,7 +18,7 @@ export async function GET(request: NextRequest): Promise<Response> {
       request.nextUrl.searchParams
     );
     const { serviceUser } = await requireActiveUser();
-    await expireUserOrders(serviceUser.id);
+    await expireUserOrders();
     const data = await getOrders(serviceUser.id, params);
     return success(data);
   } catch (error) {
@@ -35,7 +35,7 @@ export async function POST(request: NextRequest): Promise<Response> {
 
     const body = await validateBody(createOrderSchema, request);
     const { serviceUser } = await requireActiveUser();
-    await expireUserOrders(serviceUser.id);
+    await expireUserOrders();
     const result = await createOrder(serviceUser.id, body);
     return success(result, 201);
   } catch (error) {
