@@ -201,9 +201,8 @@ export async function confirmPayment(
         });
       } catch {
         // cancel 실패: 결제 승인 + processing 잔류 — 30분 알람 대상
-        void supabase
-          .from('payment_events')
-          .insert({
+        await Promise.resolve(
+          supabase.from('payment_events').insert({
             order_id: order.id,
             order_number: body.orderNumber,
             store_id: order.store_id,
@@ -218,7 +217,7 @@ export async function confirmPayment(
               tossPaymentKey: confirmed.providerPaymentKey,
             } satisfies PaymentCompensationFailedPayload,
           })
-          .then(undefined, () => {});
+        ).catch(() => {});
         throw mapConfirmRpcError(rpcError.message);
       }
     }
@@ -229,9 +228,8 @@ export async function confirmPayment(
     );
     if (revertError) {
       // revert 실패: 결제는 취소됐지만 processing 잔류 — 30분 알람 대상
-      void supabase
-        .from('payment_events')
-        .insert({
+      await Promise.resolve(
+        supabase.from('payment_events').insert({
           order_id: order.id,
           order_number: body.orderNumber,
           store_id: order.store_id,
@@ -246,7 +244,7 @@ export async function confirmPayment(
             tossPaymentKey: confirmed.providerPaymentKey,
           } satisfies PaymentCompensationFailedPayload,
         })
-        .then(undefined, () => {});
+      ).catch(() => {});
     }
     throw mapConfirmRpcError(rpcError.message);
   }
