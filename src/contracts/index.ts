@@ -53,6 +53,12 @@ export type {
 } from './seller-application';
 export type { CreateStoreRequest, StoreResponse } from './store';
 export type {
+  PaymentCompensationFailedPayload,
+  PaymentEventRow,
+  PaymentEventStatus,
+  PaymentEventType,
+} from './payment-event';
+export type {
   ProductDetailResponse,
   ProductListItemResponse,
   ProductListParams,
