@@ -11,16 +11,21 @@ import { getPendingSellerApplications } from '../_lib/service';
 
 export async function GET(request: NextRequest): Promise<Response> {
   try {
+    const isMock = isApiMockEnabled();
+
+    if (!isMock) {
+      await requireAdmin();
+    }
+
     const query = validateQuery(
       pendingSellerApplicationsQuerySchema,
       request.nextUrl.searchParams
     );
 
-    if (isApiMockEnabled()) {
+    if (isMock) {
       return success(filterMockAdminPendingSellerApplications(query));
     }
 
-    await requireAdmin();
     const data = await getPendingSellerApplications(query);
     return success(data);
   } catch (error) {

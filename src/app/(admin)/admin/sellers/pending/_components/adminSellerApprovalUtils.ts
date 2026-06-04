@@ -11,6 +11,7 @@ export const SELLER_APPLICATION_DOCUMENT_LABELS: Record<
 
 export function formatAdminDateTime(value: string): string {
   return new Intl.DateTimeFormat('ko-KR', {
+    timeZone: 'Asia/Seoul',
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',

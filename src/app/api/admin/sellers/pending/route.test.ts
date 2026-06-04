@@ -78,7 +78,7 @@ describe('GET /api/admin/sellers/pending', () => {
     });
   });
 
-  it('real 모드에서 잘못된 query는 400을 반환한다', async () => {
+  it('real 모드에서 잘못된 query여도 requireAdmin을 먼저 호출한다', async () => {
     vi.mocked(isApiMockEnabled).mockReturnValue(false);
     vi.mocked(requireAdmin).mockResolvedValue(adminResult);
 
@@ -89,8 +89,29 @@ describe('GET /api/admin/sellers/pending', () => {
     };
 
     expect(res.status).toBe(400);
+    expect(requireAdmin).toHaveBeenCalledOnce();
+    expect(getPendingSellerApplications).not.toHaveBeenCalled();
     expect(body.statusCode).toBe(res.status);
     expect(body.error.code).toBe('VALIDATION_ERROR');
+  });
+
+  it('real 모드에서 권한 검사가 실패하면 query validation보다 403을 먼저 반환한다', async () => {
+    vi.mocked(isApiMockEnabled).mockReturnValue(false);
+    vi.mocked(requireAdmin).mockRejectedValue(
+      new AppError(ERROR_CODE.FORBIDDEN, 403)
+    );
+
+    const res = await GET(makeGetRequest('page=-1'));
+    const body = (await res.json()) as {
+      statusCode: number;
+      error: { code: string };
+    };
+
+    expect(res.status).toBe(403);
+    expect(requireAdmin).toHaveBeenCalledOnce();
+    expect(getPendingSellerApplications).not.toHaveBeenCalled();
+    expect(body.statusCode).toBe(res.status);
+    expect(body.error.code).toBe('FORBIDDEN');
   });
 
   it('requireAdmin이 실패하면 error envelope를 반환한다', async () => {

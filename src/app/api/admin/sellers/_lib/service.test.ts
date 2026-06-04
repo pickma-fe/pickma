@@ -40,6 +40,18 @@ const MOCK_USER = {
   phone: null,
 };
 
+interface ApplicationQuerySpies {
+  gte: ReturnType<typeof vi.fn>;
+  lt: ReturnType<typeof vi.fn>;
+  ilike: ReturnType<typeof vi.fn>;
+  or: ReturnType<typeof vi.fn>;
+  range: ReturnType<typeof vi.fn>;
+}
+
+interface UserLookupSpies {
+  or: ReturnType<typeof vi.fn>;
+}
+
 function buildListClient() {
   return {
     from: vi.fn().mockImplementation((table: string) => {
@@ -81,6 +93,81 @@ function buildListClient() {
   };
 }
 
+function buildFilterableListClient({
+  applications = [MOCK_APPLICATION],
+  count = applications.length,
+  keywordUsers = [MOCK_USER],
+}: {
+  applications?: (typeof MOCK_APPLICATION)[];
+  count?: number;
+  keywordUsers?: Array<Pick<typeof MOCK_USER, 'id'>>;
+} = {}): {
+  client: ReturnType<typeof createServiceRoleClient>;
+  applicationQuery: ApplicationQuerySpies;
+  keywordUserQuery: UserLookupSpies;
+} {
+  const applicationQuery: ApplicationQuerySpies = {
+    gte: vi.fn(),
+    lt: vi.fn(),
+    ilike: vi.fn(),
+    or: vi.fn(),
+    range: vi.fn(),
+  };
+  applicationQuery.gte.mockReturnValue(applicationQuery);
+  applicationQuery.lt.mockReturnValue(applicationQuery);
+  applicationQuery.ilike.mockReturnValue(applicationQuery);
+  applicationQuery.or.mockReturnValue(applicationQuery);
+  applicationQuery.range.mockResolvedValue({
+    data: applications,
+    count,
+    error: null,
+  });
+
+  const keywordUserQuery: UserLookupSpies = {
+    or: vi.fn().mockResolvedValue({
+      data: keywordUsers,
+      error: null,
+    }),
+  };
+  const usersSelect = vi.fn().mockImplementation((columns: string) => {
+    if (columns === 'id') return keywordUserQuery;
+
+    return {
+      in: vi.fn().mockResolvedValue({
+        data: [MOCK_USER],
+        error: null,
+      }),
+    };
+  });
+
+  const client = {
+    from: vi.fn().mockImplementation((table: string) => {
+      if (table === 'seller_applications') {
+        return {
+          select: vi.fn().mockReturnValue({
+            eq: vi.fn().mockReturnValue({
+              order: vi.fn().mockReturnValue(applicationQuery),
+            }),
+          }),
+        };
+      }
+      if (table === 'users') {
+        return { select: usersSelect };
+      }
+      return {
+        select: vi.fn().mockReturnValue({
+          in: vi.fn().mockResolvedValue({
+            data: [],
+            error: null,
+          }),
+        }),
+      };
+    }),
+  } as unknown as ReturnType<typeof createServiceRoleClient>;
+
+  return { client, applicationQuery, keywordUserQuery };
+}
+
 describe('getPendingSellerApplications', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -99,6 +186,96 @@ describe('getPendingSellerApplications', () => {
     expect(result.totalCount).toBe(1);
     expect(result.items[0].status).toBe('pending');
     expect(result.items[0].applicantEmail).toBe('test@example.com');
+  });
+
+  it('keyword가 있으면 user lookup과 seller application 검색 조건을 적용한다', async () => {
+    const { client, applicationQuery, keywordUserQuery } =
+      buildFilterableListClient();
+    vi.mocked(createServiceRoleClient).mockReturnValue(client);
+
+    await getPendingSellerApplications({
+      page: 1,
+      pageSize: 20,
+      keyword: '홍길동',
+    });
+
+    expect(keywordUserQuery.or).toHaveBeenCalledWith(
+      'email.ilike.%홍길동%,name.ilike.%홍길동%,phone.ilike.%홍길동%'
+    );
+    expect(applicationQuery.or).toHaveBeenCalledWith(
+      `company_name.ilike.%홍길동%,representative_name.ilike.%홍길동%,business_number.ilike.%홍길동%,user_id.in.(${USER_ID})`
+    );
+  });
+
+  it('keyword user match가 없어도 신청 snapshot 검색 조건은 유지한다', async () => {
+    const { client, applicationQuery } = buildFilterableListClient({
+      keywordUsers: [],
+    });
+    vi.mocked(createServiceRoleClient).mockReturnValue(client);
+
+    await getPendingSellerApplications({
+      page: 1,
+      pageSize: 20,
+      keyword: '상회',
+    });
+
+    expect(applicationQuery.or).toHaveBeenCalledWith(
+      'company_name.ilike.%상회%,representative_name.ilike.%상회%,business_number.ilike.%상회%'
+    );
+  });
+
+  it('createdDate가 있으면 KST 날짜 기준 UTC range를 적용한다', async () => {
+    const { client, applicationQuery } = buildFilterableListClient();
+    vi.mocked(createServiceRoleClient).mockReturnValue(client);
+
+    await getPendingSellerApplications({
+      page: 1,
+      pageSize: 20,
+      createdDate: '2026-06-04',
+    });
+
+    expect(applicationQuery.gte).toHaveBeenCalledWith(
+      'created_at',
+      '2026-06-03T15:00:00.000Z'
+    );
+    expect(applicationQuery.lt).toHaveBeenCalledWith(
+      'created_at',
+      '2026-06-04T15:00:00.000Z'
+    );
+  });
+
+  it('businessCategory가 있으면 ilike 조건을 적용한다', async () => {
+    const { client, applicationQuery } = buildFilterableListClient();
+    vi.mocked(createServiceRoleClient).mockReturnValue(client);
+
+    await getPendingSellerApplications({
+      page: 1,
+      pageSize: 20,
+      businessCategory: '베이커리',
+    });
+
+    expect(applicationQuery.ilike).toHaveBeenCalledWith(
+      'business_category',
+      '%베이커리%'
+    );
+  });
+
+  it('필터 결과가 0건이면 필터 기준 pagination을 반환한다', async () => {
+    const { client } = buildFilterableListClient({
+      applications: [],
+      count: 0,
+    });
+    vi.mocked(createServiceRoleClient).mockReturnValue(client);
+
+    const result = await getPendingSellerApplications({
+      page: 1,
+      pageSize: 20,
+      businessCategory: '없는 업종',
+    });
+
+    expect(result.items).toEqual([]);
+    expect(result.totalCount).toBe(0);
+    expect(result.totalPages).toBe(0);
   });
 });
 
