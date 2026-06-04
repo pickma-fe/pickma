@@ -145,7 +145,11 @@ export function DashboardContent() {
             const count = getCount(card.status);
 
             return (
-              <Link key={card.status} href="/seller/orders" className="block">
+              <Link
+                key={card.status}
+                href={`/seller/orders?status=${card.status}`}
+                className="block"
+              >
                 <Section
                   variant="card"
                   className="bg-white transition-all hover:ring-1 hover:ring-gray-300"

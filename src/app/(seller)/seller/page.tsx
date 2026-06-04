@@ -28,6 +28,10 @@ export default function SellerPage() {
 
   useEffect(() => {
     if (isLoading) return;
+    if (onboardingStatus?.applicationStatus === 'pending') {
+      router.replace('/seller/pending');
+      return;
+    }
     if (user?.role === 'seller') {
       router.replace(
         onboardingStatus?.hasStore ? '/seller/dashboard' : '/seller/store'
