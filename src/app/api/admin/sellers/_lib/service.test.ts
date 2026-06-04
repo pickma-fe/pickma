@@ -276,6 +276,19 @@ describe('getPendingSellerApplications', () => {
     );
   });
 
+  it('businessCategory가 sanitize 후 비어 있으면 ilike 조건을 적용하지 않는다', async () => {
+    const { client, applicationQuery } = buildFilterableListClient();
+    vi.mocked(createServiceRoleClient).mockReturnValue(client);
+
+    await getPendingSellerApplications({
+      page: 1,
+      pageSize: 20,
+      businessCategory: '%,()',
+    });
+
+    expect(applicationQuery.ilike).not.toHaveBeenCalled();
+  });
+
   it('필터 결과가 0건이면 필터 기준 pagination을 반환한다', async () => {
     const { client } = buildFilterableListClient({
       applications: [],

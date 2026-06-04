@@ -45,13 +45,22 @@ function getKoreanDateString(value: string): string {
   }).format(date);
 }
 
+function sanitizeMockSearchValue(value: string): string {
+  return value.replace(/[%,()]/g, ' ').trim();
+}
+
 function matchesPendingSellerApplicationQuery(
   application: AdminPendingSellerApplicationResponse,
   query: AdminPendingSellerApplicationListQuery
 ): boolean {
-  const keyword = query.keyword?.trim().toLowerCase();
+  const keyword = query.keyword
+    ? sanitizeMockSearchValue(query.keyword).toLowerCase()
+    : '';
+  const businessCategory = query.businessCategory
+    ? sanitizeMockSearchValue(query.businessCategory).toLowerCase()
+    : '';
   const matchesKeyword =
-    !keyword ||
+    keyword.length === 0 ||
     [
       application.companyName,
       application.representativeName,
@@ -68,10 +77,8 @@ function matchesPendingSellerApplicationQuery(
     !query.createdDate ||
     getKoreanDateString(application.createdAt) === query.createdDate;
   const matchesCategory =
-    !query.businessCategory ||
-    application.businessCategory
-      .toLowerCase()
-      .includes(query.businessCategory.trim().toLowerCase());
+    businessCategory.length === 0 ||
+    application.businessCategory.toLowerCase().includes(businessCategory);
 
   return matchesKeyword && matchesCreatedDate && matchesCategory;
 }

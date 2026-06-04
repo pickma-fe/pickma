@@ -51,6 +51,14 @@ export interface AdminPendingSellerApplication extends Omit<
   status: 'pending';
 }
 
+export interface AdminPendingSellerApplicationListParams {
+  page?: number;
+  pageSize?: number;
+  keyword?: string;
+  createdDate?: string;
+  businessCategory?: string;
+}
+
 export type SellerApplicationStatusForOnboarding =
   | 'none'
   | SellerApplicationStatus;

@@ -72,6 +72,9 @@ export async function getPendingSellerApplications(
   const searchValue = query.keyword
     ? sanitizePostgrestSearchValue(query.keyword)
     : '';
+  const businessCategoryValue = query.businessCategory
+    ? sanitizePostgrestSearchValue(query.businessCategory)
+    : '';
   const keywordMatchedUserIds =
     searchValue.length > 0 ? await getKeywordMatchedUserIds(searchValue) : [];
 
@@ -87,10 +90,10 @@ export async function getPendingSellerApplications(
     applicationQuery = applicationQuery.lt('created_at', end);
   }
 
-  if (query.businessCategory) {
+  if (businessCategoryValue.length > 0) {
     applicationQuery = applicationQuery.ilike(
       'business_category',
-      `%${sanitizePostgrestSearchValue(query.businessCategory)}%`
+      `%${businessCategoryValue}%`
     );
   }
 

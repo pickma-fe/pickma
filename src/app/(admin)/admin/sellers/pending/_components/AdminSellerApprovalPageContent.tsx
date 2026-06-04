@@ -2,8 +2,10 @@
 
 import { useMemo, useState } from 'react';
 
-import type { AdminPendingSellerApplication } from '@/types/seller-application';
-import type { AdminPendingSellerApplicationListQuery } from '@/contracts/admin';
+import type {
+  AdminPendingSellerApplication,
+  AdminPendingSellerApplicationListParams,
+} from '@/types/seller-application';
 import { useSellerApplicationDocumentReadUrl } from '@/hooks/admin/seller-application-documents/useSellerApplicationDocumentReadUrl';
 import { useAdminPendingSellerApplications } from '@/hooks/admin/sellers/useAdminPendingSellerApplications';
 import { useApproveSellerApplication } from '@/hooks/admin/sellers/useApproveSellerApplication';
@@ -23,6 +25,10 @@ export function AdminSellerApprovalPageContent() {
   const [searchKeyword, setSearchKeyword] = useState('');
   const [selectedDate, setSelectedDate] = useState('');
   const [businessCategory, setBusinessCategory] = useState('');
+  const [submittedSearchKeyword, setSubmittedSearchKeyword] = useState('');
+  const [submittedDate, setSubmittedDate] = useState('');
+  const [submittedBusinessCategory, setSubmittedBusinessCategory] =
+    useState('');
   const [detailApplication, setDetailApplication] =
     useState<AdminPendingSellerApplication>();
   const [approveApplication, setApproveApplication] =
@@ -33,19 +39,19 @@ export function AdminSellerApprovalPageContent() {
   const [actionError, setActionError] = useState('');
   const [pendingActionId, setPendingActionId] = useState<string>();
 
-  const query = useMemo<AdminPendingSellerApplicationListQuery>(
+  const query = useMemo<AdminPendingSellerApplicationListParams>(
     () => ({
       page,
       pageSize: PAGE_SIZE,
-      ...(searchKeyword.trim().length > 0 && {
-        keyword: searchKeyword.trim(),
+      ...(submittedSearchKeyword.trim().length > 0 && {
+        keyword: submittedSearchKeyword.trim(),
       }),
-      ...(selectedDate.length > 0 && { createdDate: selectedDate }),
-      ...(businessCategory.trim().length > 0 && {
-        businessCategory: businessCategory.trim(),
+      ...(submittedDate.length > 0 && { createdDate: submittedDate }),
+      ...(submittedBusinessCategory.trim().length > 0 && {
+        businessCategory: submittedBusinessCategory.trim(),
       }),
     }),
-    [page, searchKeyword, selectedDate, businessCategory]
+    [page, submittedSearchKeyword, submittedDate, submittedBusinessCategory]
   );
 
   const { data, isLoading, isError, refetch, isFetching } =
@@ -58,10 +64,20 @@ export function AdminSellerApprovalPageContent() {
   const isMutatingAction =
     approveMutation.isPending || rejectMutation.isPending;
 
+  function submitFilters() {
+    setSubmittedSearchKeyword(searchKeyword);
+    setSubmittedDate(selectedDate);
+    setSubmittedBusinessCategory(businessCategory);
+    setPage(1);
+  }
+
   function resetFilters() {
     setSearchKeyword('');
     setSelectedDate('');
     setBusinessCategory('');
+    setSubmittedSearchKeyword('');
+    setSubmittedDate('');
+    setSubmittedBusinessCategory('');
     setPage(1);
   }
 
@@ -144,18 +160,10 @@ export function AdminSellerApprovalPageContent() {
         searchKeyword={searchKeyword}
         selectedDate={selectedDate}
         businessCategory={businessCategory}
-        onSearchKeywordChange={(value) => {
-          setSearchKeyword(value);
-          setPage(1);
-        }}
-        onSelectedDateChange={(value) => {
-          setSelectedDate(value);
-          setPage(1);
-        }}
-        onBusinessCategoryChange={(value) => {
-          setBusinessCategory(value);
-          setPage(1);
-        }}
+        onSearchKeywordChange={setSearchKeyword}
+        onSelectedDateChange={setSelectedDate}
+        onBusinessCategoryChange={setBusinessCategory}
+        onSubmit={submitFilters}
         onReset={resetFilters}
       />
 
