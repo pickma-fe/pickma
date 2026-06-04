@@ -54,7 +54,7 @@ export default function SellerLayout({
     }
   }, [guard.status, router]);
 
-  if (guard.status === 'loading') {
+  if (guard.status === 'loading' && isManagement) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <span className="text-sm text-gray-500">로딩 중...</span>
@@ -83,7 +83,7 @@ export default function SellerLayout({
     );
   }
 
-  const user = guard.user;
+  const user = guard.status === 'ok' ? guard.user : undefined;
 
   return (
     <div className="flex min-h-screen flex-col">
