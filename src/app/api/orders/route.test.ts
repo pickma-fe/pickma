@@ -6,8 +6,9 @@ import { AppError } from '@/lib/errors/appError';
 import { ERROR_CODE } from '@/lib/errors/errorCodes';
 import { requireActiveUser } from '@/app/api/_lib/auth';
 import { isApiMockEnabled } from '@/app/api/_lib/mock';
+import { expireUserOrders } from '@/app/api/_lib/order-expiration';
 
-import { createOrder, expireUserOrders, getOrders } from './_lib/service';
+import { createOrder, getOrders } from './_lib/service';
 import { GET, POST } from './route';
 
 vi.mock('@/app/api/_lib/mock', () => ({
@@ -18,9 +19,12 @@ vi.mock('@/app/api/_lib/auth', () => ({
   requireActiveUser: vi.fn(),
 }));
 
+vi.mock('@/app/api/_lib/order-expiration', () => ({
+  expireUserOrders: vi.fn(),
+}));
+
 vi.mock('./_lib/service', () => ({
   createOrder: vi.fn(),
-  expireUserOrders: vi.fn(),
   getOrders: vi.fn(),
 }));
 
@@ -112,7 +116,7 @@ describe('GET /api/orders', () => {
       expect(res.status).toBe(200);
       const body = (await res.json()) as { statusCode: number; data: object };
       expect(body.statusCode).toBe(200);
-      expect(expireUserOrders).toHaveBeenCalledWith('user-1');
+      expect(expireUserOrders).toHaveBeenCalledWith();
       expect(getOrders).toHaveBeenCalledWith(
         'user-1',
         expect.objectContaining({ page: 1, pageSize: 20 })
@@ -220,9 +224,9 @@ describe('POST /api/orders', () => {
       expect(body.data.paymentAmount).toBeGreaterThan(0);
     });
 
-    it('성공 시 expireUserOrders(serviceUser.id) 후 createOrder(serviceUser.id, body) 호출', async () => {
+    it('성공 시 expireUserOrders() 후 createOrder(serviceUser.id, body) 호출', async () => {
       await POST(makePostRequest(validBody));
-      expect(expireUserOrders).toHaveBeenCalledWith('user-1');
+      expect(expireUserOrders).toHaveBeenCalledWith();
       expect(createOrder).toHaveBeenCalledWith('user-1', validBody);
 
       const expireCallOrder =

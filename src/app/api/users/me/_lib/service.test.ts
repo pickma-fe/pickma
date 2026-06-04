@@ -2,12 +2,12 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { Database } from '@/lib/supabase/database';
 import { createServiceRoleClient } from '@/lib/supabase/service';
-import { mapUserRow } from '@/app/api/users/_lib/mapper';
+import { mapUserRow } from '@/app/api/_lib/user-mapper';
 
 import { deleteUser, updateUser } from './service';
 
 vi.mock('@/lib/supabase/service');
-vi.mock('@/app/api/users/_lib/mapper');
+vi.mock('@/app/api/_lib/user-mapper');
 
 type UsersRow = Database['public']['Tables']['users']['Row'];
 

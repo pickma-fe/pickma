@@ -61,6 +61,3 @@ CLAUDE.local.md
 
 # Temporal files and directory
 temp/*
-
-# Local dev-only pages
-src/app/**/dev-test/

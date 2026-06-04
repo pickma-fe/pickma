@@ -43,7 +43,7 @@ mocks/ ← contracts/와 mocks 내부 파일만
 lib/ ← types/와 lib 내부 파일만
 api/ ← types/, contracts/, lib/ 만
 stores/ ← types/, lib/, api/ 만 필요 시
-hooks/ ← types/, lib/, api/, stores/ 만
+hooks/ ← types/, lib/, api/, stores/ 만 (hooks 내 단방향 composition 허용, 아래 규칙 참고)
 components/ ← types/, lib/, stores/, hooks/ 만
 app/api/    ← contracts/, lib/, mocks/ (+ app/api/_lib/, app/api/{resource}/_lib/)
 app/        ← 전부 가능 (app/api/_lib/, app/api/{resource}/_lib/ 제외)
@@ -55,10 +55,24 @@ app/        ← 전부 가능 (app/api/_lib/, app/api/{resource}/_lib/ 제외)
 - 금지: `components/`, `hooks/`, `stores/`, `api/` (클라이언트 레이어), `app/` 페이지/레이아웃
 - ESLint `no-restricted-imports` + `import/no-restricted-paths` rule로 자동 감지
 
+### hooks 내 단방향 composition
+
+한 hook이 다른 hook을 내부에서 호출하는 hook composition은 다음 조건을 모두 충족할 때만 허용한다.
+
+- **단방향**: A → B 호출이면 B → A 호출은 없어야 한다 (circular dependency 금지).
+- **중복 구현 금지**: 피호출 hook의 queryKey, retry 정책, API 호출 로직을 호출 측에서 다시 구현하지 않는다. 상태 파생만 한다.
+- **ESLint `import/no-cycle`**: 기존 rule이 circular dependency를 자동 감지한다.
+
+예: `useRoleGuard` → `useMe` (단방향 composition, `useMe`의 queryKey/retry/API를 재구현하지 않음)
+
 - Domain 로직이 들어가는 layer에서는 `contracts/`를 직접 import하지 않는다.
 - Contract DTO는 API 경계, mapper, mock fixture에서만 사용한다.
 - `src/lib`에는 framework/backend와 분리 가능한 domain/shared library만 둔다.
 - Route Handler 전용 backend helper는 `src/app/api/_lib` 또는 `src/app/api/{resource}/_lib` 아래에 둔다.
+- resource `_lib/`는 다른 resource `_lib/`를 직접 import하지 않는다. 공유 필요 시 `src/app/api/_lib/`로 분리한다.
+- 전역 `src/app/api/_lib/`도 resource `_lib/`를 직접 import하지 않는다.
+- 허용: resource-local `_lib` → `src/app/api/_lib/*`. 금지: resource-local `_lib` → 다른 resource-local `_lib`, 전역 `_lib` → resource-local `_lib`.
+- 둘 이상의 resource가 같은 row → contract mapper를 공유해야 하면 `src/app/api/_lib/*-mapper.ts`에 둔다.
 
 ## Import 순서
 

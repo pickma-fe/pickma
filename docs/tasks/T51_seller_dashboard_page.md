@@ -1,10 +1,10 @@
 # T51. 판매자 대시보드 메인 화면 구현
 
 - 상태:
-  진행 전
+  완료
 
 - GitHub Issue:
-  확인 필요
+  202
 
 - 우선순위:
   P1
@@ -51,3 +51,10 @@
   - `/seller/dashboard`와 `/seller` 통합 여부 (후속 IA 결정)
   - 대시보드 표시 데이터 범위 (오늘 기준 vs 최근 N일)
   - 매출 통계 포함 여부 (PRD S-DASH-02는 P2)
+
+- 구현 결과:
+  - `src/app/(seller)/seller/dashboard/page.tsx` 신규 구현
+  - `src/app/(seller)/seller/dashboard/_components/DashboardContent.tsx` 신규 구현
+  - 오늘의 주문 현황 상태별 카드 표시 (수락 대기 / 주문 승인 / 픽업 대기 / 픽업 완료 / 취소·환불 / 미수령)
+  - 주문 관리 / 상품 관리 / 메뉴 관리 / 가게 정보 빠른 이동 버튼 제공
+  - `/seller` 랜딩에서 seller role → `/seller/dashboard` 리다이렉트 로직 적용

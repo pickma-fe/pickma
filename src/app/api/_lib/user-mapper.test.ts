@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import type { Database } from '@/lib/supabase/database';
 
-import { mapUserRow } from './mapper';
+import { mapUserRow } from './user-mapper';
 
 type UsersRow = Database['public']['Tables']['users']['Row'];
 

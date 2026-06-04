@@ -7,6 +7,53 @@ import importPlugin from 'eslint-plugin-import';
 import sortExports from 'eslint-plugin-sort-exports';
 import storybook from 'eslint-plugin-storybook';
 
+const LAYER_ZONES = [
+  {
+    target: './types',
+    from: [
+      './contracts',
+      './lib',
+      './api',
+      './stores',
+      './hooks',
+      './components',
+      './app',
+    ],
+  },
+  {
+    target: './contracts',
+    from: [
+      './lib',
+      './mocks',
+      './api',
+      './stores',
+      './hooks',
+      './components',
+      './app',
+    ],
+  },
+  {
+    target: './lib',
+    from: ['./api', './stores', './hooks', './components', './app'],
+  },
+  {
+    target: './mocks',
+    from: [
+      './types',
+      './lib',
+      './api',
+      './stores',
+      './hooks',
+      './components',
+      './app',
+    ],
+  },
+  { target: './api', from: ['./stores', './hooks', './components', './app'] },
+  { target: './stores', from: ['./hooks', './components', './app'] },
+  { target: './hooks', from: ['./components', './app'] },
+  { target: './components', from: ['./app'] },
+];
+
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
@@ -93,55 +140,7 @@ const eslintConfig = defineConfig([
         'error',
         {
           basePath: './src',
-          zones: [
-            {
-              target: './types',
-              from: [
-                './contracts',
-                './lib',
-                './api',
-                './stores',
-                './hooks',
-                './components',
-                './app',
-              ],
-            },
-            {
-              target: './contracts',
-              from: [
-                './lib',
-                './mocks',
-                './api',
-                './stores',
-                './hooks',
-                './components',
-                './app',
-              ],
-            },
-            {
-              target: './lib',
-              from: ['./api', './stores', './hooks', './components', './app'],
-            },
-            {
-              target: './mocks',
-              from: [
-                './types',
-                './lib',
-                './api',
-                './stores',
-                './hooks',
-                './components',
-                './app',
-              ],
-            },
-            {
-              target: './api',
-              from: ['./stores', './hooks', './components', './app'],
-            },
-            { target: './stores', from: ['./hooks', './components', './app'] },
-            { target: './hooks', from: ['./components', './app'] },
-            { target: './components', from: ['./app'] },
-          ],
+          zones: [...LAYER_ZONES],
         },
       ],
 
@@ -167,53 +166,7 @@ const eslintConfig = defineConfig([
           basePath: './src',
           zones: [
             // 기존 zones 전체 (flat config override 방지)
-            {
-              target: './types',
-              from: [
-                './contracts',
-                './lib',
-                './api',
-                './stores',
-                './hooks',
-                './components',
-                './app',
-              ],
-            },
-            {
-              target: './contracts',
-              from: [
-                './lib',
-                './mocks',
-                './api',
-                './stores',
-                './hooks',
-                './components',
-                './app',
-              ],
-            },
-            {
-              target: './lib',
-              from: ['./api', './stores', './hooks', './components', './app'],
-            },
-            {
-              target: './mocks',
-              from: [
-                './types',
-                './lib',
-                './api',
-                './stores',
-                './hooks',
-                './components',
-                './app',
-              ],
-            },
-            {
-              target: './api',
-              from: ['./stores', './hooks', './components', './app'],
-            },
-            { target: './stores', from: ['./hooks', './components', './app'] },
-            { target: './hooks', from: ['./components', './app'] },
-            { target: './components', from: ['./app'] },
+            ...LAYER_ZONES,
             // 신규: mocks outbound 금지 (app/api는 ignores로 제외)
             { target: './types', from: ['./mocks'] },
             { target: './lib', from: ['./mocks'] },
