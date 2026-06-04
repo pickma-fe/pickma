@@ -185,4 +185,16 @@ describe('useRoleGuard', () => {
       expect(result.current.user).toBeUndefined();
     }
   });
+
+  it('enabled=false + 5xx → status: error (서버 오류는 ok로 삼키지 않음)', async () => {
+    vi.mocked(userApi.getMe).mockRejectedValue(
+      new ApiError(500, 'INTERNAL_SERVER_ERROR', '서버 오류')
+    );
+
+    const { result } = renderHook(() => useRoleGuard('seller', false), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => expect(result.current.status).toBe('error'));
+  });
 });

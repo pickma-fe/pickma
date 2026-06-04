@@ -44,16 +44,15 @@ export function useRoleGuard(
   }
 
   if (isError) {
-    if (!enabled) {
-      return { status: 'ok', user: undefined, refetch };
-    }
     if (
       error instanceof ApiError &&
       (error.statusCode === 401 || error.code === 'UNAUTHORIZED')
     ) {
+      if (!enabled) return { status: 'ok', user: undefined, refetch };
       return { status: 'unauthorized', error, refetch };
     }
     if (error instanceof ApiError && error.statusCode === 403) {
+      if (!enabled) return { status: 'ok', user: undefined, refetch };
       return { status: 'forbidden', error, refetch };
     }
     return { status: 'error', error, refetch };
