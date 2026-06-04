@@ -6,13 +6,14 @@ import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
+import { getAuthErrorMessage } from '@/lib/errors/authErrorMessage';
 import { useAuthSession } from '@/hooks/auth/useAuthSession';
 import { useUpdatePassword } from '@/hooks/auth/useUpdatePassword';
 import { Button, Input } from '@/components/common';
 
 const resetPasswordSchema = z
   .object({
-    password: z.string().min(8, '비밀번호는 8자 이상으로 입력해 주세요.'),
+    password: z.string().min(10, '비밀번호는 10자 이상으로 입력해 주세요.'),
     passwordConfirm: z.string().min(1, '비밀번호 확인을 입력해 주세요.'),
   })
   .refine((data) => data.password === data.passwordConfirm, {
@@ -50,10 +51,8 @@ export default function ResetPasswordPage() {
     try {
       await updatePassword({ password: data.password });
       router.push('/');
-    } catch {
-      setError('root', {
-        message: '비밀번호를 변경하지 못했습니다. 다시 시도해 주세요.',
-      });
+    } catch (err) {
+      setError('root', { message: getAuthErrorMessage(err) });
     }
   }
 
@@ -93,7 +92,7 @@ export default function ResetPasswordPage() {
           <Input
             label="새 비밀번호"
             type="password"
-            placeholder="8자 이상"
+            placeholder="10자 이상"
             error={errors.password?.message}
             {...register('password')}
           />

@@ -104,6 +104,8 @@ export const config = {
 
 비밀번호 재설정 요청은 Supabase Auth reset flow를 사용한다. reset link 진입점은 `/auth/reset-password`이며, 해당 페이지는 새 비밀번호 저장 시 `authApi.updatePassword()`를 호출한다.
 
+**비밀번호 정책 (T60):** 최소 10자, 복잡도 요구 없음 (NIST SP 800-63B Rev.4 방향). Supabase Dashboard `Authentication → Password → Minimum password length: 10`과 클라이언트/서버 입력 Zod 스키마를 동일 기준으로 유지한다.
+
 보호 라우트 권장안:
 
 - 공개: `/`, `/search`, `/products/:path*`, `/seller`

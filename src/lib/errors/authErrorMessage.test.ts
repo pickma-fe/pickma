@@ -101,7 +101,30 @@ describe('getAuthErrorMessage', () => {
         getAuthErrorMessage(
           new Error('Password should be at least 6 characters')
         )
-      ).toBe('비밀번호는 8자 이상으로 입력해 주세요.');
+      ).toBe('비밀번호는 10자 이상으로 입력해 주세요.');
+    });
+
+    it('rate limit: status 429', () => {
+      const error = Object.assign(new Error('Too many requests'), {
+        status: 429,
+      });
+      expect(getAuthErrorMessage(error)).toBe(
+        '요청이 너무 많습니다. 잠시 후 다시 시도해 주세요.'
+      );
+    });
+
+    it('rate limit: message "too many requests"', () => {
+      expect(getAuthErrorMessage(new Error('Too many requests'))).toBe(
+        '요청이 너무 많습니다. 잠시 후 다시 시도해 주세요.'
+      );
+    });
+
+    it('동일 비밀번호: "New password should be different from the old password"', () => {
+      expect(
+        getAuthErrorMessage(
+          new Error('New password should be different from the old password')
+        )
+      ).toBe('현재 사용 중인 비밀번호와 다른 비밀번호를 입력해 주세요.');
     });
   });
 

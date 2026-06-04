@@ -14,7 +14,7 @@ export const verifyEmailOtpSchema = z.object({
 export const completeEmailSignupSchema = z.object({
   email: normalizedEmailSchema,
   verificationToken: z.string().trim().min(1),
-  password: z.string().min(8, '비밀번호는 8자 이상이어야 합니다.'),
+  password: z.string().min(10, '비밀번호는 10자 이상이어야 합니다.'),
   name: z.string().min(1).max(50),
   marketingAgreed: z.boolean(),
 });
