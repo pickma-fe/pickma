@@ -5,7 +5,7 @@ import type {
   OrderListItemResponse,
   OrderStatusParam,
 } from '@/contracts/order';
-import { type PaymentRow, mapPaymentRow } from '@/app/api/payments/_lib/mapper';
+import { type PaymentRow, mapPaymentRow } from '@/app/api/_lib/payment-mapper';
 
 interface OrderItemSnapshot {
   product_name: string;

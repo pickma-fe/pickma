@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import type { PaymentRow } from '@/app/api/payments/_lib/mapper';
+import type { PaymentRow } from '@/app/api/_lib/payment-mapper';
 
 import {
   buildOrderName,
