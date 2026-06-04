@@ -58,7 +58,7 @@
 - 구현 결과:
   - `/admin/sellers/pending` placeholder를 실제 판매자 승인 화면으로 교체했다.
   - pending seller application 목록을 `useAdminPendingSellerApplications`와 연결했다.
-  - 상호명/대표자명/이메일/전화번호 검색, 신청일, 업종 필터 UI를 추가했다.
+  - 상호명/대표자명/이메일/전화번호 검색, 신청일, 업종 필터 UI를 서버 검색/필터 query와 연결했다.
   - 신청 상세 모달에서 신청 정보와 제출 문서를 확인할 수 있게 했다.
   - 제출 문서 열람은 `useSellerApplicationDocumentReadUrl` signed URL 요청으로 연결했다.
   - 승인 액션은 `useApproveSellerApplication`, 거절 액션은 사유 입력 모달과 `useRejectSellerApplication`으로 연결했다.

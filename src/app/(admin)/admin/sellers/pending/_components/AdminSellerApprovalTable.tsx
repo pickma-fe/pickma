@@ -12,6 +12,7 @@ interface AdminSellerApprovalTableProps {
   isLoading: boolean;
   currentPage: number;
   totalPages: number;
+  isActionPending: boolean;
   pendingActionId?: string;
   onPageChange: (page: number) => void;
   onApprove: (application: AdminPendingSellerApplicationResponse) => void;
@@ -24,6 +25,7 @@ export function AdminSellerApprovalTable({
   isLoading,
   currentPage,
   totalPages,
+  isActionPending,
   pendingActionId,
   onPageChange,
   onApprove,
@@ -103,12 +105,13 @@ export function AdminSellerApprovalTable({
           align: 'center',
           render: (application) => {
             const isPending = pendingActionId === application.id;
+            const isActionDisabled = isActionPending || isPending;
 
             return (
               <div className="flex justify-center gap-2">
                 <Button
                   className="h-8 px-3 text-xs"
-                  disabled={isPending}
+                  disabled={isActionDisabled}
                   onClick={() => onApprove(application)}
                 >
                   승인
@@ -117,7 +120,7 @@ export function AdminSellerApprovalTable({
                   variant="outline"
                   color="gray"
                   className="h-8 px-3 text-xs"
-                  disabled={isPending}
+                  disabled={isActionDisabled}
                   onClick={() => onReject(application)}
                 >
                   거절

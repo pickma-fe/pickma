@@ -2,7 +2,10 @@
 
 import { useMemo, useState } from 'react';
 
-import type { AdminPendingSellerApplicationResponse } from '@/contracts/admin';
+import type {
+  AdminPendingSellerApplicationListQuery,
+  AdminPendingSellerApplicationResponse,
+} from '@/contracts/admin';
 import { useSellerApplicationDocumentReadUrl } from '@/hooks/admin/seller-application-documents/useSellerApplicationDocumentReadUrl';
 import { useAdminPendingSellerApplications } from '@/hooks/admin/sellers/useAdminPendingSellerApplications';
 import { useApproveSellerApplication } from '@/hooks/admin/sellers/useApproveSellerApplication';
@@ -17,27 +20,11 @@ import { AdminSellerApprovalTable } from './AdminSellerApprovalTable';
 
 const PAGE_SIZE = 10;
 
-function getApplicationSearchText(
-  application: AdminPendingSellerApplicationResponse
-): string {
-  return [
-    application.companyName,
-    application.representativeName,
-    application.applicantName,
-    application.applicantEmail,
-    application.applicantPhone,
-    application.businessNumber,
-  ]
-    .filter(Boolean)
-    .join(' ')
-    .toLowerCase();
-}
-
 export function AdminSellerApprovalPageContent() {
   const [page, setPage] = useState(1);
   const [searchKeyword, setSearchKeyword] = useState('');
   const [selectedDate, setSelectedDate] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('');
+  const [businessCategory, setBusinessCategory] = useState('');
   const [detailApplication, setDetailApplication] =
     useState<AdminPendingSellerApplicationResponse>();
   const [approveApplication, setApproveApplication] =
@@ -48,39 +35,35 @@ export function AdminSellerApprovalPageContent() {
   const [actionError, setActionError] = useState('');
   const [pendingActionId, setPendingActionId] = useState<string>();
 
-  const { data, isLoading, isError, error, refetch, isFetching } =
-    useAdminPendingSellerApplications(page, PAGE_SIZE);
+  const query = useMemo<AdminPendingSellerApplicationListQuery>(
+    () => ({
+      page,
+      pageSize: PAGE_SIZE,
+      ...(searchKeyword.trim().length > 0 && {
+        keyword: searchKeyword.trim(),
+      }),
+      ...(selectedDate.length > 0 && { createdDate: selectedDate }),
+      ...(businessCategory.trim().length > 0 && {
+        businessCategory: businessCategory.trim(),
+      }),
+    }),
+    [page, searchKeyword, selectedDate, businessCategory]
+  );
+
+  const { data, isLoading, isError, refetch, isFetching } =
+    useAdminPendingSellerApplications(query);
   const approveMutation = useApproveSellerApplication();
   const rejectMutation = useRejectSellerApplication();
   const documentReadUrlMutation = useSellerApplicationDocumentReadUrl();
 
-  const applications = useMemo(() => data?.items ?? [], [data?.items]);
-  const categories = useMemo(
-    () => [...new Set(applications.map((item) => item.businessCategory))],
-    [applications]
-  );
-  const filteredApplications = useMemo(() => {
-    const keyword = searchKeyword.trim().toLowerCase();
-
-    return applications.filter((application) => {
-      const matchesKeyword =
-        keyword.length === 0 ||
-        getApplicationSearchText(application).includes(keyword);
-      const matchesDate =
-        selectedDate.length === 0 ||
-        application.createdAt.slice(0, 10) === selectedDate;
-      const matchesCategory =
-        selectedCategory.length === 0 ||
-        application.businessCategory === selectedCategory;
-
-      return matchesKeyword && matchesDate && matchesCategory;
-    });
-  }, [applications, searchKeyword, selectedDate, selectedCategory]);
+  const applications = data?.items ?? [];
+  const isMutatingAction =
+    approveMutation.isPending || rejectMutation.isPending;
 
   function resetFilters() {
     setSearchKeyword('');
     setSelectedDate('');
-    setSelectedCategory('');
+    setBusinessCategory('');
     setPage(1);
   }
 
@@ -125,12 +108,21 @@ export function AdminSellerApprovalPageContent() {
 
   async function handleOpenDocument(documentId: string) {
     setActionError('');
+    const popup = window.open('about:blank', '_blank');
+
+    if (!popup) {
+      setActionError('팝업이 차단되었습니다. 브라우저 설정을 확인해주세요.');
+      return;
+    }
+
+    popup.opener = null;
 
     try {
       const { signedUrl } =
         await documentReadUrlMutation.mutateAsync(documentId);
-      window.open(signedUrl, '_blank', 'noopener,noreferrer');
+      popup.location.href = signedUrl;
     } catch {
+      popup.close();
       setActionError('문서 열람 URL을 가져오지 못했습니다.');
     }
   }
@@ -153,8 +145,7 @@ export function AdminSellerApprovalPageContent() {
       <AdminSellerApprovalFilters
         searchKeyword={searchKeyword}
         selectedDate={selectedDate}
-        selectedCategory={selectedCategory}
-        categories={categories}
+        businessCategory={businessCategory}
         onSearchKeywordChange={(value) => {
           setSearchKeyword(value);
           setPage(1);
@@ -163,29 +154,36 @@ export function AdminSellerApprovalPageContent() {
           setSelectedDate(value);
           setPage(1);
         }}
-        onSelectedCategoryChange={(value) => {
-          setSelectedCategory(value);
+        onBusinessCategoryChange={(value) => {
+          setBusinessCategory(value);
           setPage(1);
         }}
         onReset={resetFilters}
       />
 
       {message && (
-        <div className="border-primary-100 bg-primary-50 text-primary-700 rounded-md border px-4 py-3 text-sm">
+        <div
+          role="status"
+          className="border-primary-100 bg-primary-50 text-primary-700 rounded-md border px-4 py-3 text-sm"
+        >
           {message}
         </div>
       )}
       {actionError && (
-        <div className="rounded-md border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-600">
+        <div
+          role="alert"
+          className="rounded-md border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-600"
+        >
           {actionError}
         </div>
       )}
       {isError && (
-        <div className="flex items-center justify-between gap-4 rounded-md border border-red-100 bg-red-50 px-4 py-3">
+        <div
+          role="alert"
+          className="flex items-center justify-between gap-4 rounded-md border border-red-100 bg-red-50 px-4 py-3"
+        >
           <p className="text-sm text-red-600">
-            {error instanceof Error
-              ? error.message
-              : '판매자 신청 목록을 불러오지 못했습니다.'}
+            판매자 신청 목록을 불러오지 못했습니다.
           </p>
           <Button
             variant="outline"
@@ -199,10 +197,11 @@ export function AdminSellerApprovalPageContent() {
       )}
 
       <AdminSellerApprovalTable
-        applications={filteredApplications}
+        applications={applications}
         isLoading={isLoading || isFetching}
         currentPage={page}
         totalPages={data?.totalPages ?? 1}
+        isActionPending={isMutatingAction}
         pendingActionId={pendingActionId}
         onPageChange={setPage}
         onApprove={setApproveApplication}

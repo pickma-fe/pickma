@@ -41,6 +41,14 @@ export interface AdminPendingSellerApplicationResponse {
 export type AdminPendingSellerApplicationListResponse =
   PaginatedResult<AdminPendingSellerApplicationResponse>;
 
+export interface AdminPendingSellerApplicationListQuery {
+  page?: number;
+  pageSize?: number;
+  keyword?: string;
+  createdDate?: string;
+  businessCategory?: string;
+}
+
 export interface RejectSellerApplicationRequest {
   reason: string;
 }

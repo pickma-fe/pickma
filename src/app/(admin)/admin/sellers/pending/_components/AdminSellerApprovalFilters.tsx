@@ -1,28 +1,26 @@
 'use client';
 
-import { CalendarDays, RefreshCcw, Search } from 'lucide-react';
+import { CalendarDays, RefreshCcw, Search, Tags } from 'lucide-react';
 
 import { Input } from '@/components/common/Input/Input';
 
 interface AdminSellerApprovalFiltersProps {
   searchKeyword: string;
   selectedDate: string;
-  selectedCategory: string;
-  categories: string[];
+  businessCategory: string;
   onSearchKeywordChange: (value: string) => void;
   onSelectedDateChange: (value: string) => void;
-  onSelectedCategoryChange: (value: string) => void;
+  onBusinessCategoryChange: (value: string) => void;
   onReset: () => void;
 }
 
 export function AdminSellerApprovalFilters({
   searchKeyword,
   selectedDate,
-  selectedCategory,
-  categories,
+  businessCategory,
   onSearchKeywordChange,
   onSelectedDateChange,
-  onSelectedCategoryChange,
+  onBusinessCategoryChange,
   onReset,
 }: AdminSellerApprovalFiltersProps) {
   return (
@@ -44,19 +42,13 @@ export function AdminSellerApprovalFilters({
         aria-label="신청일 선택"
         endIcon={<CalendarDays className="h-4 w-4" />}
       />
-      <select
-        value={selectedCategory}
-        onChange={(event) => onSelectedCategoryChange(event.target.value)}
-        aria-label="업종 선택"
-        className="focus:border-primary-500 focus:ring-primary-300 h-10 rounded-md border border-gray-200 bg-white px-3 text-sm text-gray-700 outline-none focus:ring-2"
-      >
-        <option value="">전체 업종</option>
-        {categories.map((category) => (
-          <option key={category} value={category}>
-            {category}
-          </option>
-        ))}
-      </select>
+      <Input
+        value={businessCategory}
+        onChange={(event) => onBusinessCategoryChange(event.target.value)}
+        placeholder="업종 검색"
+        aria-label="업종 검색"
+        startIcon={<Tags className="h-4 w-4" />}
+      />
       <button
         type="button"
         onClick={onReset}

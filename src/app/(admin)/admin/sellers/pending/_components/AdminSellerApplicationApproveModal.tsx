@@ -38,6 +38,9 @@ export function AdminSellerApplicationApproveModal({
             이 신청을 승인하면 해당 사용자는 판매자 온보딩을 완료하고 판매자
             권한을 사용할 수 있습니다.
           </p>
+          <p className="text-sm font-medium text-gray-700">
+            제출 문서와 신청 정보를 확인한 뒤 승인해주세요.
+          </p>
           <div className="flex justify-end gap-2">
             <Button
               type="button"

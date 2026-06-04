@@ -91,7 +91,10 @@ describe('getPendingSellerApplications', () => {
       buildListClient() as unknown as ReturnType<typeof createServiceRoleClient>
     );
 
-    const result = await getPendingSellerApplications(1, 20);
+    const result = await getPendingSellerApplications({
+      page: 1,
+      pageSize: 20,
+    });
     expect(result.items).toHaveLength(1);
     expect(result.totalCount).toBe(1);
     expect(result.items[0].status).toBe('pending');

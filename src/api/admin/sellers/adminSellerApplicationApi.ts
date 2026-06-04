@@ -1,4 +1,5 @@
 import type {
+  AdminPendingSellerApplicationListQuery,
   AdminPendingSellerApplicationListResponse,
   RejectSellerApplicationRequest,
 } from '@/contracts/admin';
@@ -6,12 +7,11 @@ import { apiClient } from '@/api/apiClient';
 
 export const adminSellerApplicationApi = {
   getPendingSellerApplications(
-    page = 1,
-    pageSize = 20
+    params: AdminPendingSellerApplicationListQuery = {}
   ): Promise<AdminPendingSellerApplicationListResponse> {
     return apiClient.get<AdminPendingSellerApplicationListResponse>(
       '/api/admin/sellers/pending',
-      { page, pageSize }
+      params
     );
   },
 

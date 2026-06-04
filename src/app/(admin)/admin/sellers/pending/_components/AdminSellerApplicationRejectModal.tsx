@@ -57,9 +57,10 @@ export function AdminSellerApplicationRejectModal({
               {application.representativeName} · {application.applicantEmail}
             </p>
           </div>
-          <label className="block">
+          <label htmlFor="reject-reason" className="block">
             <span className="text-sm font-medium text-gray-700">거절 사유</span>
             <textarea
+              id="reject-reason"
               value={reason}
               onChange={(event) => {
                 setReason(event.target.value);
@@ -68,6 +69,7 @@ export function AdminSellerApplicationRejectModal({
               rows={5}
               className="focus:border-primary-500 focus:ring-primary-300 mt-2 w-full resize-none rounded-md border border-gray-200 px-3 py-2 text-sm outline-none focus:ring-2"
               placeholder="판매자에게 안내할 거절 사유를 입력해주세요."
+              aria-invalid={Boolean(error)}
               aria-describedby={error ? 'reject-reason-error' : undefined}
             />
           </label>

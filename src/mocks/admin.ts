@@ -1,4 +1,5 @@
 import type {
+  AdminPendingSellerApplicationListQuery,
   AdminPendingSellerApplicationListResponse,
   AdminPendingSellerApplicationResponse,
   AdminStoreListResponse,
@@ -32,6 +33,68 @@ export const mockAdminPendingSellerApplicationList: AdminPendingSellerApplicatio
     totalCount: 1,
     totalPages: 1,
   };
+
+function getKoreanDateString(value: string): string {
+  const date = new Date(value);
+
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Seoul',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(date);
+}
+
+function matchesPendingSellerApplicationQuery(
+  application: AdminPendingSellerApplicationResponse,
+  query: AdminPendingSellerApplicationListQuery
+): boolean {
+  const keyword = query.keyword?.trim().toLowerCase();
+  const matchesKeyword =
+    !keyword ||
+    [
+      application.companyName,
+      application.representativeName,
+      application.applicantName,
+      application.applicantEmail,
+      application.applicantPhone,
+      application.businessNumber,
+    ]
+      .filter(Boolean)
+      .join(' ')
+      .toLowerCase()
+      .includes(keyword);
+  const matchesCreatedDate =
+    !query.createdDate ||
+    getKoreanDateString(application.createdAt) === query.createdDate;
+  const matchesCategory =
+    !query.businessCategory ||
+    application.businessCategory
+      .toLowerCase()
+      .includes(query.businessCategory.trim().toLowerCase());
+
+  return matchesKeyword && matchesCreatedDate && matchesCategory;
+}
+
+export function filterMockAdminPendingSellerApplications(
+  query: AdminPendingSellerApplicationListQuery
+): AdminPendingSellerApplicationListResponse {
+  const page = query.page ?? 1;
+  const pageSize = query.pageSize ?? PAGE_SIZE;
+  const filteredItems = mockAdminPendingSellerApplicationList.items.filter(
+    (application) => matchesPendingSellerApplicationQuery(application, query)
+  );
+  const start = (page - 1) * pageSize;
+  const items = filteredItems.slice(start, start + pageSize);
+
+  return {
+    items,
+    page,
+    pageSize,
+    totalCount: filteredItems.length,
+    totalPages: Math.ceil(filteredItems.length / pageSize),
+  };
+}
 
 export const mockDocumentReadUrl: SellerApplicationDocumentReadUrlResponse = {
   signedUrl: 'https://example.com/mock-signed-document-url',

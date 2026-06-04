@@ -54,18 +54,28 @@ describe('GET /api/admin/sellers/pending', () => {
     expect(requireAdmin).not.toHaveBeenCalled();
   });
 
-  it('real 모드에서 requireAdmin 호출 후 page/pageSize로 service를 호출한다', async () => {
+  it('real 모드에서 requireAdmin 호출 후 query로 service를 호출한다', async () => {
     vi.mocked(isApiMockEnabled).mockReturnValue(false);
     vi.mocked(requireAdmin).mockResolvedValue(adminResult);
     vi.mocked(getPendingSellerApplications).mockResolvedValue(
       mockAdminPendingSellerApplicationList
     );
 
-    const res = await GET(makeGetRequest());
+    const res = await GET(
+      makeGetRequest(
+        'page=2&pageSize=10&keyword=%ED%99%8D%EA%B8%B8%EB%8F%99&createdDate=2026-06-04&businessCategory=%EB%B2%A0%EC%9D%B4%EC%BB%A4%EB%A6%AC'
+      )
+    );
 
     expect(res.status).toBe(200);
     expect(requireAdmin).toHaveBeenCalledOnce();
-    expect(getPendingSellerApplications).toHaveBeenCalledWith(1, 20);
+    expect(getPendingSellerApplications).toHaveBeenCalledWith({
+      page: 2,
+      pageSize: 10,
+      keyword: '홍길동',
+      createdDate: '2026-06-04',
+      businessCategory: '베이커리',
+    });
   });
 
   it('real 모드에서 잘못된 query는 400을 반환한다', async () => {
