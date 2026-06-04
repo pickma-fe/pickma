@@ -47,3 +47,11 @@
 - 완료 기준:
   - 비권한 사용자의 seller/admin 직접 URL 접근 UX가 안정적이다.
   - API 보안 검증과 page UX 검증의 책임이 문서화된다.
+
+- 구현 결과:
+  - `src/hooks/auth/useRoleGuard.ts` 신규 작성. `useMe()`를 내부 composition으로 호출해 `loading | ok | unauthorized | forbidden | error` 상태를 반환하며, `enabled=false`이면 role 판정과 auth 에러를 skip해 공개 라우트에서 redirect 루프 없이 동작한다.
+  - `src/app/(seller)/seller/layout.tsx`에 path-aware role guard 적용. `SELLER_MANAGEMENT_PREFIXES` 기준으로 관리 라우트만 guard 대상으로 하고, register/pending 온보딩 라우트는 제외.
+  - `src/app/(admin)/admin/layout.tsx`의 인라인 role 체크를 `useRoleGuard('admin')` 기반으로 정리. `guard.user!` non-null assertion을 제거하고 `RoleGuardResult`를 discriminated union으로 교체.
+  - `src/hooks/auth/useRoleGuard.test.ts` 신규 작성. 10개 케이스로 loading, 401/403/5xx, role 불일치, enabled=false 공개 라우트 auth 에러 무시를 검증.
+  - `docs/system_architecture.md`에 접근 제어 3계층(proxy → layout → Route Handler) 책임 분리 표 추가.
+  - `.codex/instructions/coding-style.md`, `.claude/rules/coding-style.md`에 hooks 내 단방향 composition 허용 기준 명문화.
