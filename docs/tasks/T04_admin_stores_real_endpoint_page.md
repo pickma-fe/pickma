@@ -1,10 +1,10 @@
 # T04. 관리자 가게 목록 real endpoint 및 화면 구현
 
 - 상태:
-  진행 전
+  완료
 
 - GitHub Issue:
-  확인 필요
+  230
 
 - 우선순위:
   P0
@@ -52,3 +52,12 @@
   - 관리자 가게 목록이 실제 데이터로 렌더링된다.
   - pagination/filter contract가 문서화된다.
   - API service 권한 검증 테스트가 있다.
+
+- 구현 결과:
+  - `GET /api/admin/stores` Route Handler를 real service/mapper/schema 기반으로 구현하고 501 반환을 제거했다.
+  - `page`, `pageSize`, `keyword`, `status`, `region` query를 지원하고 mock mode도 동일 query 기준으로 필터링한다.
+  - `src/api/admin/stores/adminStoreApi.ts`, `src/hooks/admin/stores/useAdminStores.ts`를 query params 기반으로 연결했다.
+  - `/admin/stores` 페이지를 실제 hook 기반 목록/필터/페이지네이션 UI로 연결했다.
+  - 관리자 공통 Header에서 admin 계정에만 `/admin` 진입 링크를 노출했다.
+  - 관리자 사이드바를 `대시보드`와 `관리` 섹션으로 정리하고 `판매자 관리`, `가게 관리`를 평면 메뉴로 배치했다.
+  - `src/app/api/admin/stores/route.test.ts`, `src/app/api/admin/stores/_lib/service.test.ts`로 권한 검증, query validation, mock/real 분기, service 필터 적용을 검증했다.

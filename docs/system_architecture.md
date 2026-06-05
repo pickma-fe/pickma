@@ -815,7 +815,7 @@ Branch protection은 `dev` 대상 PR에서 `CI / Lint, typecheck, and test` 통�
 | `POST /api/admin/sellers/[id]/approve`                       | P0       | admin                    | 없음        | 추가                   | —                       |
 | `POST /api/admin/sellers/[id]/reject`                        | P0       | admin                    | 없음        | 추가                   | —                       |
 | `POST /api/admin/seller-application-documents/[id]/read-url` | P0       | admin                    | 없음        | 추가                   | —                       |
-| `GET /api/admin/stores`                                      | P0       | admin                    | 없음        | 제외 (NOT_IMPLEMENTED) | T04                     |
+| `GET /api/admin/stores`                                      | P0       | admin                    | 추가        | 완료                   | —                       |
 | `POST /api/seller-applications`                              | P0       | activeUser + eligibility | 없음        | 추가                   | —                       |
 | `GET /api/seller/onboarding-status`                          | P0       | activeUser               | 없음        | 추가                   | —                       |
 | `GET /api/users/me`                                          | P0       | activeUser               | 없음        | 추가                   | —                       |
