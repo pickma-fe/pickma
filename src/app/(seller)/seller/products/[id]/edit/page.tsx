@@ -3,7 +3,6 @@
 import { ArrowLeft } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 
-import type { UpdateSellerProductRequest } from '@/contracts/product';
 import { useSellerProduct } from '@/hooks/seller/products/useSellerProduct';
 import { useUpdateSellerProduct } from '@/hooks/seller/products/useUpdateSellerProduct';
 
@@ -18,17 +17,18 @@ export default function SellerProductEditPage() {
   const { mutate: updateProduct, isPending } = useUpdateSellerProduct();
 
   const handleSubmit = (data: ProductEditFormData) => {
-    const body: UpdateSellerProductRequest = {
-      discountPrice: Number(data.discountPrice),
-      stock: Number(data.stock),
-      endAt: new Date(data.endAt).toISOString(),
-      pickupStartTime: data.pickupStartTime,
-      pickupEndTime: data.pickupEndTime,
-      status: data.status,
-    };
-
     updateProduct(
-      { id, body },
+      {
+        id,
+        body: {
+          discountPrice: Number(data.discountPrice),
+          stock: Number(data.stock),
+          endAt: new Date(data.endAt).toISOString(),
+          pickupStartTime: data.pickupStartTime,
+          pickupEndTime: data.pickupEndTime,
+          status: data.status,
+        },
+      },
       {
         onSuccess: () => {
           router.push('/seller/products');

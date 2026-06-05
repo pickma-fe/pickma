@@ -5,10 +5,11 @@ import { requireSellerStore } from '@/app/api/_lib/auth';
 import { isApiMockEnabled } from '@/app/api/_lib/mock';
 import { fail, routeError, success } from '@/app/api/_lib/response';
 import { validateBody } from '@/app/api/_lib/validation';
+import { mockSellerCreatedProduct } from '@/mocks/seller';
 
 import {
-  updateSellerProductStockSchema,
   sellerProductIdSchema,
+  updateSellerProductStockSchema,
 } from '../../_lib/schemas';
 import { updateSellerProductStock } from '../../_lib/service';
 
@@ -28,7 +29,7 @@ export async function PATCH(
   try {
     const body = await validateBody(updateSellerProductStockSchema, request);
 
-    if (isApiMockEnabled()) return success(undefined);
+    if (isApiMockEnabled()) return success(mockSellerCreatedProduct);
 
     const { store } = await requireSellerStore();
     const data = await updateSellerProductStock(
