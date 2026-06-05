@@ -20,3 +20,7 @@ export interface FileUploadUrlResponse {
   signedUrl: string;
   storagePath: string;
 }
+
+export interface DeleteFilesRequest {
+  storagePaths: string[];
+}
