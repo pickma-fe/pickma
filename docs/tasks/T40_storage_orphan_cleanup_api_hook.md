@@ -55,7 +55,7 @@
 
 - 구현 결과:
   - `src/app/api/admin/sellers/[applicationId]/` 폴더 rename 완료, schemas.ts `paramsApplicationIdSchema`로 정리.
-  - `src/app/api/files/route.ts` (DELETE), `_lib/service.ts` (deleteStorageFiles), `_lib/schemas.ts` (deleteFilesSchema) 신규 구현. userId prefix 소유권 검증 + service role client 삭제.
+  - `src/app/api/files/route.ts` (DELETE), `_lib/service.ts` (deleteStorageFiles), `_lib/schemas.ts` (deleteFilesSchema) 신규 구현. userId prefix 소유권 검증 + `seller_application_documents` 참조 중인 경로 삭제 차단(FORBIDDEN 403) + service role client 삭제.
   - `src/api/apiClient.ts` delete body 지원, `src/api/files/fileApi.ts` deleteFiles 추가.
   - `useCreateSellerApplication` Promise.allSettled 전환 + best-effort cleanup 구현.
   - `rejectSellerApplication` DB reject 성공 후 seller_application_documents 경로 조회 + storage best-effort cleanup 구현.
