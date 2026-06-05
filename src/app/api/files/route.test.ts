@@ -73,6 +73,30 @@ describe('DELETE /api/files', () => {
     expect(body.error.code).toBe('VALIDATION_ERROR');
   });
 
+  it('storagePaths에 빈 문자열이 포함되면 400 VALIDATION_ERROR를 반환한다', async () => {
+    vi.mocked(isApiMockEnabled).mockReturnValue(false);
+
+    const res = await DELETE(makeDeleteRequest({ storagePaths: [''] }));
+    const body = (await res.json()) as { error: { code: string } };
+
+    expect(res.status).toBe(400);
+    expect(body.error.code).toBe('VALIDATION_ERROR');
+  });
+
+  it('storagePaths가 50개를 초과하면 400 VALIDATION_ERROR를 반환한다', async () => {
+    vi.mocked(isApiMockEnabled).mockReturnValue(false);
+    const tooManyPaths = Array.from(
+      { length: 51 },
+      (_, i) => `${USER_ID}/file-${i}.pdf`
+    );
+
+    const res = await DELETE(makeDeleteRequest({ storagePaths: tooManyPaths }));
+    const body = (await res.json()) as { error: { code: string } };
+
+    expect(res.status).toBe(400);
+    expect(body.error.code).toBe('VALIDATION_ERROR');
+  });
+
   it('real 모드에서 requireActiveUser 호출 후 deleteStorageFiles를 호출한다', async () => {
     vi.mocked(isApiMockEnabled).mockReturnValue(false);
     vi.mocked(requireActiveUser).mockResolvedValue(activeUserResult);
