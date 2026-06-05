@@ -110,8 +110,10 @@ describe('GET /api/seller/products/[productId]', () => {
       new Request('http://localhost') as never,
       makeCtx(PRODUCT_ID)
     );
+    const body = (await res.json()) as { error: { code: string } };
 
     expect(res.status).toBe(404);
+    expect(body.error.code).toBe('PRODUCT_NOT_FOUND');
   });
 
   it('다른 store의 상품 조회 시도 시 404를 반환한다', async () => {
@@ -125,8 +127,10 @@ describe('GET /api/seller/products/[productId]', () => {
       new Request('http://localhost') as never,
       makeCtx(PRODUCT_ID)
     );
+    const body = (await res.json()) as { error: { code: string } };
 
     expect(res.status).toBe(404);
+    expect(body.error.code).toBe('PRODUCT_NOT_FOUND');
     expect(getSellerProductById).toHaveBeenCalledWith(STORE_ID, PRODUCT_ID);
   });
 });
