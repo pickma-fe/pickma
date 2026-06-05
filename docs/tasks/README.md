@@ -40,7 +40,7 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 | T12 | 공개 상품 목록 Server Component 초기 데이터 전환             | P1       | 완료    | 165          | T05                     | [T12_public_product_list_server_initial_data.md](T12_public_product_list_server_initial_data.md)                 |
 | T13 | 상품 상세 Server Component 초기 데이터 전환                  | P1       | 완료    | 167          | 없음                    | [T13_product_detail_server_initial_data.md](T13_product_detail_server_initial_data.md)                           |
 | T14 | seller/admin role-aware route guard 개선                     | P1       | 완료    | 212          | T07                     | [T14_role_aware_route_guard.md](T14_role_aware_route_guard.md)                                                   |
-| T15 | TanStack Query key 및 invalidation factory 도입              | P1       | 진행 전 | 확인 필요    | T02                     | [T15_tanstack_query_key_invalidation_factory.md](T15_tanstack_query_key_invalidation_factory.md)                 |
+| T15 | TanStack Query key 및 invalidation factory 도입              | P1       | 완료    | 190          | T02                     | [T15_tanstack_query_key_invalidation_factory.md](T15_tanstack_query_key_invalidation_factory.md)                 |
 | T16 | upload URL purpose별 권한 정책 강화                          | P1       | 완료    | 198          | T07, T61                | [T16_upload_url_purpose_permission_policy.md](T16_upload_url_purpose_permission_policy.md)                       |
 | T17 | dev-test route 제거 또는 dev-only guard                      | P1       | 완료    | 213          | 없음                    | [T17_dev_test_route_guard.md](T17_dev_test_route_guard.md)                                                       |
 | T18 | mock import 금지 기준 정리                                   | P1       | 완료    | 211          | 없음                    | [T18_mock_import_policy.md](T18_mock_import_policy.md)                                                           |
@@ -56,7 +56,7 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 | T28 | 판매자 상품 수정 진입점 결정 및 구현                         | P2       | 완료    | 229          | T15                     | [T28_seller_product_edit_entrypoint.md](T28_seller_product_edit_entrypoint.md)                                   |
 | T29 | 판매자 제출 문서 확인 UX 개선                                | P2       | 진행 전 | 확인 필요    | T06, T44, T61           | [T29_seller_document_review_ux.md](T29_seller_document_review_ux.md)                                             |
 | T30 | AI 추천 1차 설계                                             | P2       | 진행 전 | 확인 필요    | T25, T05                | [T30_ai_recommendation_first_design.md](T30_ai_recommendation_first_design.md)                                   |
-| T31 | 주문 취소/환불 API 구현                                      | P3       | 진행 전 | 확인 필요    | T11, T02, T62           | [T31_order_cancel_refund_api.md](T31_order_cancel_refund_api.md)                                                 |
+| T31 | 주문 취소/환불 API 구현                                      | P1       | 진행 전 | 확인 필요    | T11, T02, T62           | [T31_order_cancel_refund_api.md](T31_order_cancel_refund_api.md)                                                 |
 | T32 | 정산/수수료 시스템 설계                                      | P3       | 진행 전 | 확인 필요    | T31                     | [T32_settlement_fee_system_design.md](T32_settlement_fee_system_design.md)                                       |
 | T33 | 네이티브 앱 결제 방식 재검토                                 | P3       | 진행 전 | 확인 필요    | T01                     | [T33_native_app_payment_review.md](T33_native_app_payment_review.md)                                             |
 | T34 | 리뷰/평점 도메인 설계                                        | P3       | 진행 전 | 확인 필요    | 없음                    | [T34_review_rating_domain_design.md](T34_review_rating_domain_design.md)                                         |
@@ -94,8 +94,8 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 
 완료 task는 제외하고, `진행 중`과 `진행 전` task만 기준으로 정렬한다.
 
-1. P1 공통 기반과 정책 정리: T15, T58
-2. P1 차단 해소 후 핵심 API/화면 구현: T40, T45, T39, T54
-3. P2 기능 확장과 운영 기반: T43, T21, T22, T25, T26, T28, T29, T38, T59, T30, T23, T41
-4. 사용자 흐름별 UI/UX 및 접근성 개선: T46, T47, T48, T49
-5. 확장 단계 검토: T31, T32, T33, T34, T35, T36, T37, T57
+1. P1 기반/운영 차단 해소: T31, T54, T45, T39
+2. P1/P2 독립 기반 작업: T58, T29, T43, T26, T25
+3. 기능 확장: T21, T22, T38, T59, T30, T23, T41
+4. UI/UX 개선 묶음: T46, T47, T48, T49
+5. 확장/운영 고도화: T32, T33, T34, T35, T36, T37, T57
