@@ -33,7 +33,10 @@
 - 작업 내용:
   - 판매자 본인의 제출 문서 조회 API 필요 여부를 결정한다.
   - 하드코딩 목록을 실제 신청/문서 상태 기반으로 교체한다.
+  - DB schema 수정이 아니라 기존 `seller_applications`/`seller_application_documents` 데이터와 contract를 활용한다.
+  - `onboarding-status`를 문서 목록까지 확장할지, 별도 seller application 조회 API를 둘지 결정한다.
   - 민감 문서 다운로드/미리보기 권한과 masking 정책을 정한다.
+  - seller register/onboarding-status 주변 TODO(T29)를 함께 정리한다.
 
 - 관련 파일/영역:
   - `src/app/(seller)/seller/store/_components/StoreInfoContent.tsx`
@@ -47,3 +50,4 @@
 - 완료 기준:
   - 하드코딩 인증 목록이 제거된다.
   - 판매자가 실제 제출 문서 상태를 확인할 수 있다.
+  - seller register/onboarding-status 주변 TODO가 실제 신청/문서 데이터 조회 흐름과 충돌하지 않게 정리된다.
