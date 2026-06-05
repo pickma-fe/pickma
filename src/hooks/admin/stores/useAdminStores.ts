@@ -7,9 +7,13 @@ import type { Store } from '@/types/store';
 import { queryKeys } from '@/lib/queryKeys';
 import { adminStoreApi } from '@/api/admin/stores/adminStoreApi';
 
-export function useAdminStores() {
+export type AdminStoresQuery = NonNullable<
+  Parameters<typeof adminStoreApi.getStores>[0]
+>;
+
+export function useAdminStores(params: AdminStoresQuery = {}) {
   return useQuery<PaginatedResult<Store>>({
-    queryKey: queryKeys.admin.stores.list({}),
-    queryFn: () => adminStoreApi.getStores(),
+    queryKey: queryKeys.admin.stores.list(params),
+    queryFn: () => adminStoreApi.getStores(params),
   });
 }

@@ -2,6 +2,7 @@ import type {
   AdminPendingSellerApplicationListQuery,
   AdminPendingSellerApplicationListResponse,
   AdminPendingSellerApplicationResponse,
+  AdminStoreListQuery,
   AdminStoreListResponse,
   AdminStoreResponse,
 } from '@/contracts/admin';
@@ -148,6 +149,42 @@ export const mockAdminStoreList: AdminStoreListResponse = {
   totalCount: mockAdminStores.length,
   totalPages: Math.ceil(mockAdminStores.length / PAGE_SIZE),
 };
+
+export function filterMockAdminStores(
+  query: AdminStoreListQuery = {}
+): AdminStoreListResponse {
+  const page = query.page ?? 1;
+  const pageSize = query.pageSize ?? PAGE_SIZE;
+  const keyword = query.keyword?.trim().toLowerCase();
+  const region = query.region?.trim().toLowerCase();
+
+  const filteredItems = mockAdminStores.filter((store) => {
+    const matchesStatus = query.status ? store.status === query.status : true;
+    const matchesRegion = region
+      ? store.region.toLowerCase().includes(region)
+      : true;
+    const matchesKeyword = keyword
+      ? [
+          store.name,
+          store.businessNumber,
+          store.phone,
+          store.address,
+          store.region,
+        ].some((value) => value.toLowerCase().includes(keyword))
+      : true;
+
+    return matchesStatus && matchesRegion && matchesKeyword;
+  });
+  const offset = (page - 1) * pageSize;
+
+  return {
+    items: filteredItems.slice(offset, offset + pageSize),
+    page,
+    pageSize,
+    totalCount: filteredItems.length,
+    totalPages: Math.ceil(filteredItems.length / pageSize),
+  };
+}
 
 const pendingStores = mockAdminStores.filter(
   (store) => store.status === 'inactive'
