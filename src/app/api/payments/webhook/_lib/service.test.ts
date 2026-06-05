@@ -99,14 +99,23 @@ function makeSelectChain(
   };
 }
 
+interface MakeClientOptions {
+  existingEvent?: { id: string } | null;
+  order?: typeof mockOrder | null;
+  orderError?: { message: string } | null;
+  payment?: typeof mockPayment | typeof mockPaymentVirtualAccount | null;
+  insertEventId?: string | null;
+  insertError?: { code?: string; message: string } | null;
+}
+
 function makeClient({
-  existingEvent = null as { id: string } | null,
+  existingEvent = null,
   order = mockOrder,
-  orderError = null as { message: string } | null,
+  orderError = null,
   payment = mockPayment,
   insertEventId = 'event-uuid-1',
-  insertError = null as { code?: string; message: string } | null,
-} = {}) {
+  insertError = null,
+}: MakeClientOptions = {}) {
   const eventSelectChain = makeSelectChain(existingEvent);
   const orderSelectChain = makeSelectChain(order, orderError);
   const paymentSelectChain = makeSelectChain(payment);
