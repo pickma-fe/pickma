@@ -20,6 +20,14 @@ export interface AdminStoreResponse {
 
 export type AdminStoreListResponse = PaginatedResult<AdminStoreResponse>;
 
+export interface AdminStoreListQuery {
+  page?: number;
+  pageSize?: number;
+  keyword?: string;
+  status?: 'active' | 'inactive';
+  region?: string;
+}
+
 export interface AdminPendingSellerApplicationResponse {
   id: string;
   userId: string;

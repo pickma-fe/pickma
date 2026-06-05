@@ -1167,6 +1167,16 @@ Admin API는 `/api/admin/*`로 분리한다. 모든 Admin API는 `requireAdmin()
 
 가게 승인/거절 API는 신규 실행 범위가 아니다. 가게는 seller 승인 후 등록 시 `active` 상태로 생성한다.
 
+`GET /api/admin/stores` query:
+
+- `page`: positive integer, default `1`
+- `pageSize`: positive integer, max `100`, default `20`
+- `keyword`: optional string, 가게명/사업자번호/연락처/주소 검색
+- `status`: optional `active | inactive`
+- `region`: optional string, 지역 검색
+
+응답은 공통 `PaginatedResult<AdminStoreResponse>` envelope를 사용하며, 모든 요청은 `requireAdmin()`을 통과해야 한다.
+
 ### 10.3 Users
 
 | PRD ID    | 기능             | Method | API                               | Priority |
@@ -1290,12 +1300,11 @@ RPC에서 raise하는 예외는 아래 정책으로 API error code로 변환한�
 `API_MOCK_ENABLED=false`에서 `NOT_IMPLEMENTED` 501을 반환하는 endpoint 목록이다.
 각 endpoint의 실제 구현은 담당 task에서 진행하며, 담당 task 완료 기준에 `NOT_IMPLEMENTED` 반환 코드 제거가 포함된다.
 
-| endpoint                                       | method | real mode | mock mode | UI 연결 여부                                           | 운영 노출 위험   | 담당 task |
-| ---------------------------------------------- | ------ | --------- | --------- | ------------------------------------------------------ | ---------------- | --------- |
-| `PATCH /api/orders/{orderId}/cancel`           | PATCH  | 501       | 성공      | hook 정의됨, UI 미연결                                 | 낮음             | T31       |
-| `POST /api/payments/{paymentId}/cancel`        | POST   | 501       | 성공      | hook 정의됨, UI 미연결                                 | 낮음             | T31       |
-| `PATCH /api/seller/products/{productId}/stock` | PATCH  | 501       | 성공      | hook 정의됨, UI 미연결                                 | 낮음             | T28       |
-| `GET /api/admin/stores`                        | GET    | 501       | 성공      | 사이드바 링크 있음, 페이지 API 미호출 + "준비 중" 표시 | 없음 (처리 완료) | T04       |
+| endpoint                                       | method | real mode | mock mode | UI 연결 여부           | 운영 노출 위험 | 담당 task |
+| ---------------------------------------------- | ------ | --------- | --------- | ---------------------- | -------------- | --------- |
+| `PATCH /api/orders/{orderId}/cancel`           | PATCH  | 501       | 성공      | hook 정의됨, UI 미연결 | 낮음           | T31       |
+| `POST /api/payments/{paymentId}/cancel`        | POST   | 501       | 성공      | hook 정의됨, UI 미연결 | 낮음           | T31       |
+| `PATCH /api/seller/products/{productId}/stock` | PATCH  | 501       | 성공      | hook 정의됨, UI 미연결 | 낮음           | T28       |
 
 ### 501 연결 액션 운영 노출 정책
 

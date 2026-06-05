@@ -12,29 +12,23 @@ export const adminSidebarSections: SidebarSection[] = [
         href: '/admin',
         icon: LayoutDashboard,
       },
+    ],
+  },
+  {
+    id: 'management',
+    title: '관리',
+    items: [
       {
         id: 'seller-management',
         label: '판매자 관리',
+        href: '/admin/sellers/pending',
         icon: Users,
-        children: [
-          {
-            id: 'pending-sellers',
-            label: '판매자 승인',
-            href: '/admin/sellers/pending',
-          },
-        ],
       },
       {
         id: 'store-management',
         label: '가게 관리',
+        href: '/admin/stores',
         icon: Store,
-        children: [
-          {
-            id: 'stores',
-            label: '전체 가게',
-            href: '/admin/stores',
-          },
-        ],
       },
     ],
   },

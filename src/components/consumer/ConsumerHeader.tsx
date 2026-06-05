@@ -41,6 +41,15 @@ export function ConsumerHeader({ slot }: ConsumerHeaderProps) {
   ];
 
   const userMenuItems = [
+    ...(user?.role === 'admin'
+      ? [
+          {
+            label: '관리자 페이지',
+            type: 'link' as const,
+            href: '/admin',
+          },
+        ]
+      : []),
     {
       label: '판매자센터',
       type: 'link' as const,
