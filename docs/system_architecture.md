@@ -812,8 +812,8 @@ Branch protection은 `dev` 대상 PR에서 `CI / Lint, typecheck, and test` 통�
 | API                                                          | 우선순위 | 필요 scope               | 현재 테스트 | T07 조치               | 후속 task               |
 | ------------------------------------------------------------ | -------- | ------------------------ | ----------- | ---------------------- | ----------------------- |
 | `GET /api/admin/sellers/pending`                             | P0       | admin                    | 없음        | 추가                   | —                       |
-| `POST /api/admin/sellers/[id]/approve`                       | P0       | admin                    | 없음        | 추가                   | —                       |
-| `POST /api/admin/sellers/[id]/reject`                        | P0       | admin                    | 없음        | 추가                   | —                       |
+| `POST /api/admin/sellers/[applicationId]/approve`            | P0       | admin                    | 없음        | 추가                   | —                       |
+| `POST /api/admin/sellers/[applicationId]/reject`             | P0       | admin                    | 없음        | 추가                   | —                       |
 | `POST /api/admin/seller-application-documents/[id]/read-url` | P0       | admin                    | 없음        | 추가                   | —                       |
 | `GET /api/admin/stores`                                      | P0       | admin                    | 없음        | 제외 (NOT_IMPLEMENTED) | T04                     |
 | `POST /api/seller-applications`                              | P0       | activeUser + eligibility | 없음        | 추가                   | —                       |
