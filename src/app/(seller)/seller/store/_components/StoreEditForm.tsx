@@ -49,7 +49,8 @@ export function StoreEditForm({
     if (
       !formData.name.trim() ||
       !formData.phone.trim() ||
-      !formData.address.trim()
+      !formData.address.trim() ||
+      !formData.region.trim()
     ) {
       setError('필수 항목을 모두 입력해주세요.');
       return;

@@ -40,16 +40,20 @@
   - `operationStatus` 토글 (영업 시작/종료)
 
 - 관련 파일/영역:
-  - `src/app/(seller)/seller/store/edit/`
-  - `src/api/stores/` (`PATCH /api/stores/me`)
-  - `src/hooks/stores/`
+  - `src/app/(seller)/seller/store/_components/` (StoreInfoContent, StoreEditForm, StoreImageEditForm, CertificationDetailModal 등)
+  - `src/api/stores/storeApi.ts` (`PATCH /api/stores/me`)
+  - `src/hooks/stores/useUpdateStore.ts`
+  - `src/hooks/stores/useMyStore.ts`
 
 - 예상 난이도:
   보통
 
 - 완료 기준:
-  - `/seller/store/edit` 화면에서 가게 정보를 수정하고 저장할 수 있다.
-  - `businessNumber` 필드는 수정 불가로 표시된다.
+  - `/seller/store` 페이지 내 모달에서 가게 정보를 수정하고 저장할 수 있다.
+  - businessNumber` 필드는 수정 불가로 표시된다.
+  - 이미지 변경 모달에서 파일 선택 후 저장할 수 있다.
+  - 영업 시작/종료 토글이 동작한다.
+  - 수정 성공/실패 시 토스트 메시지가 표시된다.
 
 - 확인 필요 사항:
   - 인증서류 데이터 API 연결 미완료 (현재 mock 하드코딩) → 후속 task에서 처리
