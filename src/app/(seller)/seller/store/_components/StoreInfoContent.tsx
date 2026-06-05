@@ -303,6 +303,7 @@ export function StoreInfoContent() {
           storeName={storeInfo.name}
           onSubmit={handleImageEdit}
           onCancel={handleCloseModal}
+          isPending={isUpdating}
         />
       </Modal>
 

@@ -10,6 +10,7 @@ interface StoreImageEditFormProps {
   storeName: string;
   onSubmit: (imageUrl: string, file?: File) => void;
   onCancel: () => void;
+  isPending?: boolean;
 }
 
 export function StoreImageEditForm({
@@ -17,6 +18,7 @@ export function StoreImageEditForm({
   storeName,
   onSubmit,
   onCancel,
+  isPending = false,
 }: StoreImageEditFormProps) {
   const [previewUrl, setPreviewUrl] = useState<string | null>(
     currentImage ?? null
@@ -82,17 +84,6 @@ export function StoreImageEditForm({
       );
     }
 
-    if (previewUrl.startsWith('blob:')) {
-      return (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={previewUrl}
-          alt={storeName}
-          className="h-full w-full object-cover"
-        />
-      );
-    }
-
     return (
       <Image
         src={previewUrl}
@@ -100,6 +91,7 @@ export function StoreImageEditForm({
         fill
         sizes="(max-width: 768px) 100vw, 500px"
         className="object-cover"
+        unoptimized={previewUrl.startsWith('blob:')}
       />
     );
   };
@@ -125,7 +117,12 @@ export function StoreImageEditForm({
       />
 
       <div className="flex flex-col gap-2">
-        <Button variant="outline" color="gray" onClick={handleSelectClick}>
+        <Button
+          variant="outline"
+          color="gray"
+          onClick={handleSelectClick}
+          disabled={isPending}
+        >
           파일 선택
         </Button>
         <p className="text-center text-xs text-gray-400">
@@ -134,11 +131,16 @@ export function StoreImageEditForm({
       </div>
 
       <div className="flex justify-end gap-2">
-        <Button variant="outline" color="gray" onClick={handleCancel}>
+        <Button
+          variant="outline"
+          color="gray"
+          onClick={handleCancel}
+          disabled={isPending}
+        >
           취소
         </Button>
-        <Button onClick={handleSubmit} disabled={!previewUrl}>
-          저장
+        <Button onClick={handleSubmit} disabled={!previewUrl || isPending}>
+          {isPending ? '저장 중...' : '저장'}
         </Button>
       </div>
     </div>
