@@ -11,7 +11,11 @@ import {
   sellerProductIdSchema,
   updateSellerProductSchema,
 } from '../_lib/schemas';
-import { deleteSellerProduct, updateSellerProduct } from '../_lib/service';
+import {
+  deleteSellerProduct,
+  getSellerProductById,
+  updateSellerProduct,
+} from '../_lib/service';
 
 function validateProductId(productId: string) {
   const parsed = sellerProductIdSchema.safeParse(productId);
@@ -30,6 +34,30 @@ function validateProductId(productId: string) {
   }
 
   return { ok: true as const, productId: parsed.data };
+}
+
+export async function GET(
+  _request: NextRequest,
+  { params }: { params: Promise<{ productId: string }> }
+): Promise<Response> {
+  const { productId } = await params;
+  const parsedProductId = validateProductId(productId);
+  if (!parsedProductId.ok) return parsedProductId.response;
+
+  if (isApiMockEnabled()) {
+    return success(mockSellerCreatedProduct);
+  }
+
+  try {
+    const { store } = await requireSellerStore();
+    const data = await getSellerProductById(
+      store.id,
+      parsedProductId.productId
+    );
+    return success(data);
+  } catch (error) {
+    return routeError(error);
+  }
 }
 
 export async function PATCH(

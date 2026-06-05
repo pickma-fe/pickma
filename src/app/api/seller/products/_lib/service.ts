@@ -65,6 +65,24 @@ export async function getSellerProducts(
   );
 }
 
+export async function getSellerProductById(
+  storeId: string,
+  productId: string
+): Promise<ProductListItemResponse> {
+  const supabase = createServiceRoleClient();
+  const { data, error } = await supabase
+    .from('products')
+    .select(SELLER_PRODUCT_SELECT)
+    .eq('id', productId)
+    .eq('store_id', storeId)
+    .maybeSingle();
+
+  if (error) throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
+  if (!data) throw new AppError(ERROR_CODE.PRODUCT_NOT_FOUND, 404);
+
+  return mapSellerProductRow(data as unknown as SellerProductRow);
+}
+
 export async function createSellerProduct(
   storeId: string,
   body: CreateSellerProductRequest
@@ -139,6 +157,38 @@ export async function updateSellerProduct(
       }),
       ...(body.status !== undefined && { status: body.status }),
     })
+    .eq('id', productId)
+    .eq('store_id', storeId)
+    .select(SELLER_PRODUCT_SELECT)
+    .single();
+
+  if (error) throw mapDbError(error);
+  if (!data) throw new AppError(ERROR_CODE.PRODUCT_NOT_FOUND, 404);
+
+  return mapSellerProductRow(data as unknown as SellerProductRow);
+}
+
+export async function updateSellerProductStock(
+  storeId: string,
+  productId: string,
+  stock: number
+): Promise<ProductListItemResponse> {
+  const supabase = createServiceRoleClient();
+  const { data: product, error: productError } = await supabase
+    .from('products')
+    .select('id, reserved_stock')
+    .eq('id', productId)
+    .eq('store_id', storeId)
+    .maybeSingle();
+
+  if (productError) throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
+  if (!product) throw new AppError(ERROR_CODE.PRODUCT_NOT_FOUND, 404);
+
+  assertStockCanUpdate(stock, product.reserved_stock);
+
+  const { data, error } = await supabase
+    .from('products')
+    .update({ stock })
     .eq('id', productId)
     .eq('store_id', storeId)
     .select(SELLER_PRODUCT_SELECT)

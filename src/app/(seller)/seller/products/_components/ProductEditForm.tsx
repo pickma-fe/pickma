@@ -1,0 +1,262 @@
+'use client';
+
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+
+import type { Product } from '@/types/product';
+import { Button } from '@/components/common/Button/Button';
+import { Input } from '@/components/common/Input/Input';
+
+const productEditFormSchema = z.object({
+  discountPrice: z
+    .string()
+    .min(1, '판매가를 입력해주세요.')
+    .refine(
+      (v) => Number.isFinite(Number(v)) && Number(v) >= 1,
+      '올바른 판매가를 입력해주세요.'
+    ),
+  stock: z
+    .string()
+    .min(1, '재고를 입력해주세요.')
+    .refine(
+      (v) => Number.isFinite(Number(v)) && Number(v) >= 1,
+      '올바른 재고를 입력해주세요.'
+    ),
+  endAt: z.string().min(1, '마감일시를 입력해주세요.'),
+  pickupStartTime: z.string().min(1, '픽업 시작 시간을 입력해주세요.'),
+  pickupEndTime: z.string().min(1, '픽업 종료 시간을 입력해주세요.'),
+  status: z.enum(['active', 'closed']),
+});
+
+export type ProductEditFormData = z.infer<typeof productEditFormSchema>;
+
+interface ProductEditFormProps {
+  defaultValues?: Partial<ProductEditFormData>;
+  product: Product;
+  isPending: boolean;
+  onSubmit: (data: ProductEditFormData) => void;
+  onCancel: () => void;
+  submitLabel?: string;
+}
+
+const timeInputClass =
+  'rounded-md border border-gray-200 px-4 py-2 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-300 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-400';
+
+function toDatetimeLocalValue(date: Date): string {
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return (
+    `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}` +
+    `T${pad(date.getHours())}:${pad(date.getMinutes())}`
+  );
+}
+
+function toTimeValue(timeString: string): string {
+  return timeString.slice(0, 5);
+}
+
+export function ProductEditForm({
+  product,
+  isPending,
+  onSubmit,
+  onCancel,
+  submitLabel = '수정 완료',
+}: ProductEditFormProps) {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<ProductEditFormData>({
+    resolver: zodResolver(productEditFormSchema),
+    defaultValues: {
+      discountPrice: String(product.discountPrice),
+      stock: String(product.stock),
+      endAt: toDatetimeLocalValue(product.endAt),
+      pickupStartTime: toTimeValue(product.pickupStartTime),
+      pickupEndTime: toTimeValue(product.pickupEndTime),
+      status: product.status,
+    },
+  });
+
+  return (
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      className="flex flex-col gap-6"
+      aria-label="상품 수정 폼"
+    >
+      {/* 메뉴 정보 (읽기 전용) */}
+      <fieldset className="rounded-lg border border-gray-200 p-4">
+        <legend className="px-1 text-sm font-medium text-gray-700">
+          메뉴 정보
+        </legend>
+        <div className="flex items-center gap-4 pt-2">
+          {product.image && (
+            <div className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={product.image}
+                alt={product.name}
+                className="h-full w-full object-cover"
+              />
+            </div>
+          )}
+          <div>
+            <p className="font-medium text-gray-900">{product.name}</p>
+            <p className="text-sm text-gray-500">{product.categoryName}</p>
+            <p className="text-xs text-gray-400">
+              원가: {product.originalPrice.toLocaleString('ko-KR')}원
+            </p>
+          </div>
+        </div>
+        <p className="mt-2 text-xs text-gray-400">
+          * 메뉴는 변경할 수 없습니다. 새 상품을 등록하려면 판매 등록을
+          이용해주세요.
+        </p>
+      </fieldset>
+
+      {/* 판매 정보 */}
+      <fieldset className="flex flex-col gap-4">
+        <legend className="text-sm font-medium text-gray-700">판매 정보</legend>
+
+        <div className="grid grid-cols-2 gap-4 pt-2">
+          <Input
+            label="판매가 (원) *"
+            type="number"
+            placeholder="0"
+            {...register('discountPrice')}
+            error={errors.discountPrice?.message}
+            disabled={isPending}
+          />
+          <Input
+            label="재고 (개) *"
+            type="number"
+            placeholder="0"
+            {...register('stock')}
+            error={errors.stock?.message}
+            disabled={isPending}
+          />
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <label htmlFor="endAt" className="text-sm text-gray-700">
+            판매 마감일시 *
+          </label>
+          <input
+            id="endAt"
+            type="datetime-local"
+            {...register('endAt')}
+            className={timeInputClass}
+            disabled={isPending}
+            aria-invalid={!!errors.endAt}
+            aria-describedby={errors.endAt ? 'endAt-error' : undefined}
+          />
+          {errors.endAt && (
+            <p id="endAt-error" className="text-sm text-red-500" role="alert">
+              {errors.endAt.message}
+            </p>
+          )}
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div className="flex flex-col gap-1">
+            <label htmlFor="pickupStartTime" className="text-sm text-gray-700">
+              픽업 시작 시간 *
+            </label>
+            <input
+              id="pickupStartTime"
+              type="time"
+              {...register('pickupStartTime')}
+              className={timeInputClass}
+              disabled={isPending}
+              aria-invalid={!!errors.pickupStartTime}
+              aria-describedby={
+                errors.pickupStartTime ? 'pickupStartTime-error' : undefined
+              }
+            />
+            {errors.pickupStartTime && (
+              <p
+                id="pickupStartTime-error"
+                className="text-sm text-red-500"
+                role="alert"
+              >
+                {errors.pickupStartTime.message}
+              </p>
+            )}
+          </div>
+          <div className="flex flex-col gap-1">
+            <label htmlFor="pickupEndTime" className="text-sm text-gray-700">
+              픽업 종료 시간 *
+            </label>
+            <input
+              id="pickupEndTime"
+              type="time"
+              {...register('pickupEndTime')}
+              className={timeInputClass}
+              disabled={isPending}
+              aria-invalid={!!errors.pickupEndTime}
+              aria-describedby={
+                errors.pickupEndTime ? 'pickupEndTime-error' : undefined
+              }
+            />
+            {errors.pickupEndTime && (
+              <p
+                id="pickupEndTime-error"
+                className="text-sm text-red-500"
+                role="alert"
+              >
+                {errors.pickupEndTime.message}
+              </p>
+            )}
+          </div>
+        </div>
+      </fieldset>
+
+      {/* 판매 상태 */}
+      <fieldset className="flex flex-col gap-2">
+        <legend className="text-sm font-medium text-gray-700">판매 상태</legend>
+        <div className="flex gap-4 pt-2">
+          <label className="flex cursor-pointer items-center gap-2">
+            <input
+              type="radio"
+              value="active"
+              {...register('status')}
+              disabled={isPending}
+              className="accent-primary-500"
+            />
+            <span className="text-sm text-gray-700">판매중</span>
+          </label>
+          <label className="flex cursor-pointer items-center gap-2">
+            <input
+              type="radio"
+              value="closed"
+              {...register('status')}
+              disabled={isPending}
+              className="accent-primary-500"
+            />
+            <span className="text-sm text-gray-700">판매중지</span>
+          </label>
+        </div>
+        {errors.status && (
+          <p className="text-sm text-red-500" role="alert">
+            {errors.status.message}
+          </p>
+        )}
+      </fieldset>
+
+      <div className="flex justify-end gap-2">
+        <Button
+          type="button"
+          variant="outline"
+          color="gray"
+          onClick={onCancel}
+          disabled={isPending}
+        >
+          취소
+        </Button>
+        <Button type="submit" disabled={isPending}>
+          {isPending ? '저장 중...' : submitLabel}
+        </Button>
+      </div>
+    </form>
+  );
+}

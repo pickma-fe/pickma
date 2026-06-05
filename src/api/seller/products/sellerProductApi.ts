@@ -15,6 +15,12 @@ export const sellerProductApi = {
       .then((items) => items.map(mapSellerProduct));
   },
 
+  getProduct(id: string): Promise<Product> {
+    return apiClient
+      .get<ProductListItemResponse>(`/api/seller/products/${id}`)
+      .then(mapSellerProduct);
+  },
+
   createProduct(body: CreateSellerProductRequest): Promise<Product> {
     return apiClient
       .post<ProductListItemResponse>('/api/seller/products', body)
