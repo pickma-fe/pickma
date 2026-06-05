@@ -33,12 +33,15 @@ export type DepositCallbackBody = z.infer<typeof webhookDepositCallbackSchema>;
 export function parseWebhookBody(
   raw: unknown
 ): PaymentStatusChangedBody | DepositCallbackBody {
-  if (
-    raw !== null &&
-    typeof raw === 'object' &&
-    'eventType' in raw &&
-    (raw as Record<string, unknown>).eventType === 'PAYMENT_STATUS_CHANGED'
-  ) {
+  if (raw === null || typeof raw !== 'object') {
+    throw new AppError(ERROR_CODE.VALIDATION_ERROR, 400);
+  }
+  if ('eventType' in raw) {
+    if (
+      (raw as Record<string, unknown>).eventType !== 'PAYMENT_STATUS_CHANGED'
+    ) {
+      throw new AppError(ERROR_CODE.VALIDATION_ERROR, 400);
+    }
     const result = webhookPaymentStatusChangedSchema.safeParse(raw);
     if (result.success) return result.data;
   } else {
