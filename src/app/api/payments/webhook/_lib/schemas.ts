@@ -46,9 +46,26 @@ export function parseWebhookBody(
     }
     const result = webhookPaymentStatusChangedSchema.safeParse(raw);
     if (result.success) return result.data;
+    throw new AppError(
+      ERROR_CODE.VALIDATION_ERROR,
+      400,
+      undefined,
+      result.error.issues.map((e) => ({
+        path: e.path.join('.'),
+        message: e.message,
+      }))
+    );
   } else {
     const result = webhookDepositCallbackSchema.safeParse(raw);
     if (result.success) return result.data;
+    throw new AppError(
+      ERROR_CODE.VALIDATION_ERROR,
+      400,
+      undefined,
+      result.error.issues.map((e) => ({
+        path: e.path.join('.'),
+        message: e.message,
+      }))
+    );
   }
-  throw new AppError(ERROR_CODE.VALIDATION_ERROR, 400);
 }
