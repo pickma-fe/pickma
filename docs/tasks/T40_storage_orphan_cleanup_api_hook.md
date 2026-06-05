@@ -1,10 +1,10 @@
 # T40. Storage orphan cleanup API 및 hook 통합
 
 - 상태:
-  진행 전
+  완료
 
 - GitHub Issue:
-  확인 필요
+  235
 
 - 우선순위:
   P1
@@ -52,3 +52,12 @@
   - `useCreateSellerApplication` 실패 시 업로드 파일이 best-effort로 cleanup된다.
   - 신청 거부 시 서류 파일이 best-effort로 cleanup된다.
   - admin seller application approve/reject endpoint의 dynamic segment와 내부 변수명이 `applicationId` 기준으로 정리된다.
+
+- 구현 결과:
+  - `src/app/api/admin/sellers/[applicationId]/` 폴더 rename 완료, schemas.ts `paramsApplicationIdSchema`로 정리.
+  - `src/app/api/files/route.ts` (DELETE), `_lib/service.ts` (deleteStorageFiles), `_lib/schemas.ts` (deleteFilesSchema) 신규 구현. userId prefix 소유권 검증 + service role client 삭제.
+  - `src/api/apiClient.ts` delete body 지원, `src/api/files/fileApi.ts` deleteFiles 추가.
+  - `useCreateSellerApplication` Promise.allSettled 전환 + best-effort cleanup 구현.
+  - `rejectSellerApplication` DB reject 성공 후 seller_application_documents 경로 조회 + storage best-effort cleanup 구현.
+  - `docs/api_spec.md` 3.2절 DELETE /api/files 명세 추가.
+  - 전체 876개 테스트 통과.
