@@ -3,7 +3,7 @@
 -- ============================================================
 
 -- 1. payment_events 테이블 생성
-CREATE TABLE payment_events (
+CREATE TABLE IF NOT EXISTS payment_events (
   id                  uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
   order_id            uuid        NOT NULL REFERENCES orders(id),
   order_number        text        NOT NULL,
@@ -22,7 +22,7 @@ CREATE TABLE payment_events (
 );
 
 -- 2. webhook 중복 수신 방지 unique index
-CREATE UNIQUE INDEX payment_events_provider_event_uniq
+CREATE UNIQUE INDEX IF NOT EXISTS payment_events_provider_event_uniq
   ON payment_events (provider, provider_event_id)
   WHERE provider_event_id IS NOT NULL;
 
