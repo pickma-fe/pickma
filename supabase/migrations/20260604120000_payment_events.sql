@@ -127,10 +127,10 @@ BEGIN
 
   INSERT INTO payment_events (
     order_id, order_number, store_id, payment_id,
-    event_type, provider, provider_key, status, processed_at
+    event_type, provider, provider_key, payload, status, processed_at
   ) VALUES (
     v_order.id, p_order_number, v_order.store_id, v_payment_id,
-    'payment_confirmed', p_provider::text, p_provider_payment_key,
+    'payment_confirmed', p_provider::text, p_provider_payment_key, p_pg_response,
     'processed', now()
   );
 
