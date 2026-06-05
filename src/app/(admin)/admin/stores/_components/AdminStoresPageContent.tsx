@@ -22,29 +22,31 @@ export function AdminStoresPageContent() {
   const [submittedKeyword, setSubmittedKeyword] = useState('');
   const [submittedStatus, setSubmittedStatus] = useState<'' | StoreStatus>('');
   const [submittedRegion, setSubmittedRegion] = useState('');
+  const trimmedSubmittedKeyword = submittedKeyword.trim();
+  const trimmedSubmittedRegion = submittedRegion.trim();
 
   const query = useMemo<AdminStoresQuery>(
     () => ({
       page,
       pageSize: PAGE_SIZE,
-      ...(submittedKeyword.trim().length > 0 && {
-        keyword: submittedKeyword.trim(),
+      ...(trimmedSubmittedKeyword.length > 0 && {
+        keyword: trimmedSubmittedKeyword,
       }),
       ...(submittedStatus && { status: submittedStatus }),
-      ...(submittedRegion.trim().length > 0 && {
-        region: submittedRegion.trim(),
+      ...(trimmedSubmittedRegion.length > 0 && {
+        region: trimmedSubmittedRegion,
       }),
     }),
-    [page, submittedKeyword, submittedStatus, submittedRegion]
+    [page, submittedStatus, trimmedSubmittedKeyword, trimmedSubmittedRegion]
   );
 
   const { data, isLoading, isError, refetch, isFetching } =
     useAdminStores(query);
   const stores = data?.items ?? [];
   const hasSubmittedFilters =
-    submittedKeyword.trim().length > 0 ||
+    trimmedSubmittedKeyword.length > 0 ||
     Boolean(submittedStatus) ||
-    submittedRegion.trim().length > 0;
+    trimmedSubmittedRegion.length > 0;
   const countLabel = hasSubmittedFilters ? '조건에 맞는 가게' : '전체 가게';
 
   function submitFilters() {
