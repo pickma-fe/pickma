@@ -11,7 +11,7 @@ import { sellerApplicationApi } from '@/api/seller-applications/sellerApplicatio
 import { useCreateSellerApplication } from './useCreateSellerApplication';
 
 vi.mock('@/api/files/fileApi', () => ({
-  fileApi: { uploadFile: vi.fn() },
+  fileApi: { uploadFile: vi.fn(), deleteFiles: vi.fn() },
 }));
 
 vi.mock('@/api/seller-applications/sellerApplicationApi', () => ({
@@ -112,6 +112,7 @@ describe('useCreateSellerApplication', () => {
     vi.mocked(
       fileApi.uploadFile as (p: string, f: File, o: object) => Promise<string>
     ).mockRejectedValue(new Error('UPLOAD_FAILED'));
+    vi.mocked(fileApi.deleteFiles).mockResolvedValue(undefined);
 
     const { wrapper } = createWrapper();
     const { result } = renderHook(() => useCreateSellerApplication(), {
@@ -123,6 +124,86 @@ describe('useCreateSellerApplication', () => {
     });
 
     expect(sellerApplicationApi.createSellerApplication).not.toHaveBeenCalled();
+  });
+
+  it('업로드 일부 실패 시 성공한 파일 경로로 deleteFiles를 호출한다', async () => {
+    vi.mocked(
+      fileApi.uploadFile as (p: string, f: File, o: object) => Promise<string>
+    )
+      .mockResolvedValueOnce('path/business_license')
+      .mockRejectedValueOnce(new Error('UPLOAD_FAILED'))
+      .mockResolvedValueOnce('path/bank_account');
+    vi.mocked(fileApi.deleteFiles).mockResolvedValue(undefined);
+
+    const { wrapper } = createWrapper();
+    const { result } = renderHook(() => useCreateSellerApplication(), {
+      wrapper,
+    });
+
+    await act(async () => {
+      await result.current.mutateAsync(validInput).catch(() => undefined);
+    });
+
+    expect(fileApi.deleteFiles).toHaveBeenCalledWith(
+      expect.arrayContaining(['path/business_license', 'path/bank_account'])
+    );
+    expect(sellerApplicationApi.createSellerApplication).not.toHaveBeenCalled();
+  });
+
+  it('createSellerApplication 실패 시 업로드된 파일 경로로 deleteFiles를 호출한다', async () => {
+    vi.mocked(
+      fileApi.uploadFile as (p: string, f: File, o: object) => Promise<string>
+    )
+      .mockResolvedValueOnce('path/business_license')
+      .mockResolvedValueOnce('path/food_service_permit')
+      .mockResolvedValueOnce('path/bank_account');
+    vi.mocked(sellerApplicationApi.createSellerApplication).mockRejectedValue(
+      new Error('API_FAILED')
+    );
+    vi.mocked(fileApi.deleteFiles).mockResolvedValue(undefined);
+
+    const { wrapper } = createWrapper();
+    const { result } = renderHook(() => useCreateSellerApplication(), {
+      wrapper,
+    });
+
+    await act(async () => {
+      await result.current.mutateAsync(validInput).catch(() => undefined);
+    });
+
+    expect(fileApi.deleteFiles).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        'path/business_license',
+        'path/food_service_permit',
+        'path/bank_account',
+      ])
+    );
+  });
+
+  it('deleteFiles 실패 시 원래 에러를 그대로 전파한다', async () => {
+    vi.mocked(
+      fileApi.uploadFile as (p: string, f: File, o: object) => Promise<string>
+    ).mockResolvedValue('path/file');
+    vi.mocked(sellerApplicationApi.createSellerApplication).mockRejectedValue(
+      new Error('API_FAILED')
+    );
+    vi.mocked(fileApi.deleteFiles).mockRejectedValue(
+      new Error('CLEANUP_FAILED')
+    );
+
+    const { wrapper } = createWrapper();
+    const { result } = renderHook(() => useCreateSellerApplication(), {
+      wrapper,
+    });
+
+    let thrownError: Error | undefined;
+    await act(async () => {
+      await result.current
+        .mutateAsync(validInput)
+        .catch((e: Error) => (thrownError = e));
+    });
+
+    expect(thrownError?.message).toBe('API_FAILED');
   });
 
   it('상위에서 받은 서류 동의값을 덮어쓰지 않는다', async () => {
