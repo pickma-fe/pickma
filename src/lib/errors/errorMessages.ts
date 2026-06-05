@@ -48,7 +48,6 @@ export const ERROR_MESSAGES: Record<ErrorCode, string> = {
     '회원가입 요청을 처리 중입니다. 잠시 후 다시 시도해 주세요.',
   AUTH_EMAIL_STORE_UNAVAILABLE:
     '이메일 인증을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.',
-  INVALID_WEBHOOK_PAYLOAD: 'webhook 페이로드가 유효하지 않습니다.',
   NOT_IMPLEMENTED: '아직 구현되지 않은 API입니다.',
   INTERNAL_SERVER_ERROR: '서버 오류가 발생했습니다.',
 };
