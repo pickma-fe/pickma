@@ -17,13 +17,15 @@ export const webhookPaymentStatusChangedSchema = z.object({
     .passthrough(),
 });
 
-export const webhookDepositCallbackSchema = z.object({
-  createdAt: z.string(),
-  secret: z.string(),
-  status: z.string(),
-  orderId: z.string(),
-  transactionKey: z.string(),
-});
+export const webhookDepositCallbackSchema = z
+  .object({
+    createdAt: z.string(),
+    secret: z.string(),
+    status: z.string(),
+    orderId: z.string(),
+    transactionKey: z.string(),
+  })
+  .passthrough();
 
 export type PaymentStatusChangedBody = z.infer<
   typeof webhookPaymentStatusChangedSchema
