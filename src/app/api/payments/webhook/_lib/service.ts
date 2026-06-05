@@ -270,10 +270,11 @@ async function insertAndProcessEvent(
     throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
   }
 
-  await supabase
+  const { error: updateError } = await supabase
     .from('payment_events')
     .update({ status: 'processed', processed_at: new Date().toISOString() })
     .eq('id', inserted.id);
+  if (updateError) throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
 }
 
 interface FailedEventParams extends EventParams {
