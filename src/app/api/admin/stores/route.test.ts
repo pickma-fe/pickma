@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { AdminStoreListResponse } from '@/contracts/admin';
+import type { ApiErrorResponse } from '@/contracts/common';
 import { AppError } from '@/lib/errors/appError';
 import { ERROR_CODE } from '@/lib/errors/errorCodes';
 import { requireAdmin } from '@/app/api/_lib/auth';
@@ -106,16 +107,21 @@ describe('GET /api/admin/stores', () => {
     vi.mocked(requireAdmin).mockResolvedValue(adminResult);
 
     const res = await GET(makeGetRequest('page=-1'));
-    const body = (await res.json()) as {
-      statusCode: number;
-      error: { code: string };
-    };
+    const body = (await res.json()) as ApiErrorResponse;
 
     expect(res.status).toBe(400);
     expect(requireAdmin).toHaveBeenCalledOnce();
     expect(getAdminStores).not.toHaveBeenCalled();
     expect(body.statusCode).toBe(res.status);
     expect(body.error.code).toBe('VALIDATION_ERROR');
+    expect(body.error.details).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          path: 'page',
+          message: expect.any(String) as string,
+        }),
+      ])
+    );
   });
 
   it('권한 검사가 실패하면 error envelope를 반환한다', async () => {
