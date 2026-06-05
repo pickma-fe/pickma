@@ -10,7 +10,9 @@ function isValidCalendarDate(value: string): boolean {
   );
 }
 
-export const paramsIdSchema = z.object({ id: z.string().uuid() });
+export const paramsApplicationIdSchema = z.object({
+  applicationId: z.string().uuid(),
+});
 
 export const rejectSellerApplicationSchema = z
   .object({

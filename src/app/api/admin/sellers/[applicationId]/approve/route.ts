@@ -5,23 +5,19 @@ import { ERROR_CODE } from '@/lib/errors/errorCodes';
 import { requireAdmin } from '@/app/api/_lib/auth';
 import { isApiMockEnabled } from '@/app/api/_lib/mock';
 import { routeError, success } from '@/app/api/_lib/response';
-import { validateBody } from '@/app/api/_lib/validation';
 
-import {
-  paramsIdSchema,
-  rejectSellerApplicationSchema,
-} from '../../_lib/schemas';
-import { rejectSellerApplication } from '../../_lib/service';
+import { paramsApplicationIdSchema } from '../../_lib/schemas';
+import { approveSellerApplication } from '../../_lib/service';
 
 export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  _request: NextRequest,
+  { params }: { params: Promise<{ applicationId: string }> }
 ): Promise<Response> {
   if (isApiMockEnabled()) return success(null);
 
   try {
     await requireAdmin();
-    const result = paramsIdSchema.safeParse(await params);
+    const result = paramsApplicationIdSchema.safeParse(await params);
     if (!result.success)
       throw new AppError(
         ERROR_CODE.VALIDATION_ERROR,
@@ -32,9 +28,8 @@ export async function POST(
           message: issue.message,
         }))
       );
-    const { id } = result.data;
-    const body = await validateBody(rejectSellerApplicationSchema, request);
-    await rejectSellerApplication(id, body.reason);
+    const { applicationId } = result.data;
+    await approveSellerApplication(applicationId);
     return success(null);
   } catch (error) {
     return routeError(error);
