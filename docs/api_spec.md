@@ -391,17 +391,19 @@ Behavior:
 - `requireActiveUser()` 통과 사용자만 호출할 수 있다.
 - `storagePaths`는 1개 이상, 50개 이하이며 빈 문자열을 포함할 수 없다.
 - 각 `storagePath`는 `{userId}/` prefix로 소유권을 검증한다. 하나라도 소유권이 없으면 403을 반환하고 삭제를 실행하지 않는다.
-- 소유권 검증 통과 시 service role client로 `seller-application-documents` bucket에서 삭제한다.
+- 소유권 검증 통과 시 `seller_application_documents` 테이블에서 해당 경로가 참조 중인지 확인한다. 하나라도 참조 중이면 403을 반환하고 삭제를 실행하지 않는다.
+- 참조 확인 통과 시 service role client로 `seller-application-documents` bucket에서 삭제한다.
 - Storage 삭제 실패 시 500을 반환할 수 있다. 호출 측 hook이 이를 best-effort로 처리(실패 무시 + 로깅)한다.
 
 에러 정책:
 
-| 조건                             | HTTP | error code              |
-| -------------------------------- | ---- | ----------------------- |
-| 미인증 또는 inactive user        | 401  | `UNAUTHORIZED`          |
-| `storagePath`에 타 userId prefix | 403  | `FORBIDDEN`             |
-| body 검증 실패                   | 400  | `VALIDATION_ERROR`      |
-| Storage 삭제 실패                | 500  | `INTERNAL_SERVER_ERROR` |
+| 조건                                            | HTTP | error code              |
+| ----------------------------------------------- | ---- | ----------------------- |
+| 미인증 또는 inactive user                       | 401  | `UNAUTHORIZED`          |
+| `storagePath`에 타 userId prefix                | 403  | `FORBIDDEN`             |
+| `seller_application_documents`에 참조 중인 경로 | 403  | `FORBIDDEN`             |
+| body 검증 실패                                  | 400  | `VALIDATION_ERROR`      |
+| Storage 삭제 실패                               | 500  | `INTERNAL_SERVER_ERROR` |
 
 ---
 
