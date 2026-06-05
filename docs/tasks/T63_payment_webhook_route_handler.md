@@ -1,10 +1,10 @@
 # T63. POST /api/payments/webhook Route Handler 구현
 
 - 상태:
-  진행 전
+  완료
 
 - GitHub Issue:
-  확인 필요
+  231
 
 - 우선순위:
   P1
@@ -51,3 +51,10 @@
   - 중복 수신 시 `200 OK`를 반환한다 (멱등 처리).
   - `payment_webhook_received` 이벤트가 `payment_events`에 기록된다.
   - 처리 완료 시 `status='processed'`, `processed_at`이 갱신된다.
+
+- 구현 결과:
+  - `src/lib/errors/errorCodes.ts`, `errorMessages.ts`, `src/app/api/_lib/response.ts` — `INVALID_WEBHOOK_PAYLOAD` 에러 코드 추가
+  - `src/app/api/payments/webhook/_lib/schemas.ts` — Zod webhook body 스키마 (`PAYMENT_STATUS_CHANGED`, `DEPOSIT_CALLBACK`) + `parseWebhookBody` 함수
+  - `src/app/api/payments/webhook/_lib/service.ts` — `processWebhook` 서비스 함수 (멱등 처리, 이벤트별 검증, INSERT/UPDATE)
+  - `src/app/api/payments/webhook/route.ts` — Route Handler (Auth 미적용, Toss external call)
+  - `src/app/api/payments/webhook/_lib/service.test.ts`, `route.test.ts` — 21개 테스트 전부 통과
