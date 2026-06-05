@@ -733,7 +733,7 @@ Branch protection은 `dev` 대상 PR에서 `CI / Lint, typecheck, and test` 통�
 
 삭제 실행:
 
-- 클라이언트 cleanup: 본인 인증(`requireActiveUser()`) 후 `DELETE /api/files`. userId prefix로 소유권 검증.
+- 클라이언트 cleanup: 본인 인증(`requireActiveUser()`) 후 `DELETE /api/files`. userId prefix로 소유권 검증 후 `seller_application_documents`에 참조 중인 경로는 삭제하지 않는다 (FORBIDDEN 403).
 - 서버 cleanup: service role client (RLS bypass).
 
 ### 14.5 향후 재검토 사항

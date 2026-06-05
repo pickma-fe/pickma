@@ -17,8 +17,8 @@ const mockIn = vi.fn();
 
 function setupMocks({
   refData = [] as { storage_path: string }[],
-  refError = null,
-  storageError = null,
+  refError = null as object | null,
+  storageError = null as object | null,
 } = {}) {
   mockIn.mockResolvedValue({ data: refData, error: refError });
   mockRemove.mockResolvedValue({ error: storageError });
