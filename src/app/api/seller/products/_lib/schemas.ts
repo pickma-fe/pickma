@@ -3,6 +3,7 @@ import { z } from 'zod';
 import type {
   CreateSellerProductRequest,
   UpdateSellerProductRequest,
+  UpdateSellerProductStockRequest,
 } from '@/contracts/product';
 
 const timeStringSchema = z
@@ -34,5 +35,11 @@ export const updateSellerProductSchema = z
   .refine((body) => Object.values(body).some((value) => value !== undefined), {
     message: '수정할 필드를 1개 이상 입력해야 합니다.',
   }) satisfies z.ZodType<UpdateSellerProductRequest>;
+
+export const updateSellerProductStockSchema = z
+  .object({
+    stock: z.number().int().nonnegative(),
+  })
+  .strict() satisfies z.ZodType<UpdateSellerProductStockRequest>;
 
 export const sellerProductIdSchema = z.uuid();

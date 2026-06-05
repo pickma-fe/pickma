@@ -4,11 +4,17 @@ import { ERROR_CODE } from '@/lib/errors/errorCodes';
 import { requireSellerStore } from '@/app/api/_lib/auth';
 import { isApiMockEnabled } from '@/app/api/_lib/mock';
 import { fail, routeError, success } from '@/app/api/_lib/response';
+import { validateBody } from '@/app/api/_lib/validation';
+import { mockSellerCreatedProduct } from '@/mocks/seller';
 
-import { sellerProductIdSchema } from '../../_lib/schemas';
+import {
+  sellerProductIdSchema,
+  updateSellerProductStockSchema,
+} from '../../_lib/schemas';
+import { updateSellerProductStock } from '../../_lib/service';
 
 export async function PATCH(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ productId: string }> }
 ): Promise<Response> {
   const { productId } = await params;
@@ -20,11 +26,18 @@ export async function PATCH(
     ]);
   }
 
-  if (isApiMockEnabled()) return success(undefined);
-
   try {
-    await requireSellerStore();
-    return fail(ERROR_CODE.NOT_IMPLEMENTED);
+    const body = await validateBody(updateSellerProductStockSchema, request);
+
+    if (isApiMockEnabled()) return success(mockSellerCreatedProduct);
+
+    const { store } = await requireSellerStore();
+    const data = await updateSellerProductStock(
+      store.id,
+      parsed.data,
+      body.stock
+    );
+    return success(data);
   } catch (error) {
     return routeError(error);
   }

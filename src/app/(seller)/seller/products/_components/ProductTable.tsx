@@ -1,6 +1,8 @@
 'use client';
 
+import { Pencil } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useState } from 'react';
 
 import type { Product } from '@/types/product';
@@ -204,21 +206,30 @@ export function ProductTable({
                     {formatDate(product.updatedAt)}
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap">
-                    <Dropdown
-                      type="select"
-                      items={[
-                        { label: '판매중', value: 'active' },
-                        { label: '판매중지', value: 'closed' },
-                      ]}
-                      value={product.status}
-                      onChange={(value) =>
-                        updateProduct({
-                          id: product.id,
-                          body: { status: value as 'active' | 'closed' },
-                        })
-                      }
-                      placeholder="관리"
-                    />
+                    <div className="flex items-center gap-2">
+                      <Dropdown
+                        type="select"
+                        items={[
+                          { label: '판매중', value: 'active' },
+                          { label: '판매중지', value: 'closed' },
+                        ]}
+                        value={product.status}
+                        onChange={(value) =>
+                          updateProduct({
+                            id: product.id,
+                            body: { status: value as 'active' | 'closed' },
+                          })
+                        }
+                        placeholder="관리"
+                      />
+                      <Link
+                        href={`/seller/products/${product.id}/edit`}
+                        className="hover:border-primary-300 hover:bg-primary-50 hover:text-primary-600 flex h-8 w-8 items-center justify-center rounded-md border border-gray-200 bg-white text-gray-500 transition-colors"
+                        aria-label={`${product.name} 상품 수정`}
+                      >
+                        <Pencil className="h-4 w-4" aria-hidden="true" />
+                      </Link>
+                    </div>
                   </td>
                 </tr>
               );

@@ -56,7 +56,7 @@
 |                | 메뉴 등록 | `/seller/menu/new`           | 새 메뉴 등록                 | 판매자+가게 | ✅ 구현됨       |
 |                | 메뉴 수정 | `/seller/menu/[menuId]/edit` | 메뉴 정보 수정               | 판매자+가게 | ✅ 구현됨       |
 | 📦 상품 관리   | -         | `/seller/products`           | 상품 목록                    | 판매자+가게 | ✅ 구현됨       |
-|                | 상품 수정 | `/seller/products/[id]/edit` | 상품 정보 수정               | 판매자+가게 | 🚧 미구현 (T28) |
+|                | 상품 수정 | `/seller/products/[id]/edit` | 상품 정보 수정               | 판매자+가게 | ✅ 구현됨       |
 | 📋 주문 관리   | -         | `/seller/orders`             | 주문 목록                    | 판매자+가게 | ✅ 구현됨       |
 |                | 주문 상세 | `/seller/orders/[id]`        | 주문 상세, 픽업 처리         | 판매자+가게 | ✅ 구현됨       |
 | 🏠 가게 관리   | -         | `/seller/store`              | 가게 등록/정보               | 판매자      | ✅ 구현됨       |
@@ -188,7 +188,7 @@
 /seller/menu/new ............. 메뉴 등록
 /seller/menu/[menuId]/edit ... 메뉴 수정
 /seller/products ............. 상품 목록
-/seller/products/[id]/edit ... 상품 수정 [🚧 T28]
+/seller/products/[id]/edit ... 상품 수정
 /seller/orders ............... 주문 목록
 /seller/orders/[id] .......... 주문 상세
 /seller/store ................ 가게 정보

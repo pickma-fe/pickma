@@ -79,3 +79,7 @@ export interface UpdateSellerProductRequest {
   pickupEndTime?: string;
   status?: 'active' | 'closed';
 }
+
+export interface UpdateSellerProductStockRequest {
+  stock: number;
+}

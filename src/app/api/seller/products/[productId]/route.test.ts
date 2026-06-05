@@ -6,8 +6,12 @@ import { ERROR_CODE } from '@/lib/errors/errorCodes';
 import { requireSellerStore } from '@/app/api/_lib/auth';
 import { isApiMockEnabled } from '@/app/api/_lib/mock';
 
-import { DELETE, PATCH } from './route';
-import { deleteSellerProduct, updateSellerProduct } from '../_lib/service';
+import { DELETE, GET, PATCH } from './route';
+import {
+  deleteSellerProduct,
+  getSellerProductById,
+  updateSellerProduct,
+} from '../_lib/service';
 
 vi.mock('@/app/api/_lib/auth', () => ({
   requireSellerStore: vi.fn(),
@@ -19,6 +23,7 @@ vi.mock('@/app/api/_lib/mock', () => ({
 
 vi.mock('../_lib/service', () => ({
   deleteSellerProduct: vi.fn(),
+  getSellerProductById: vi.fn(),
   updateSellerProduct: vi.fn(),
 }));
 
@@ -44,6 +49,91 @@ function makePatchRequest(body: unknown): Request {
     body: JSON.stringify(body),
   });
 }
+
+describe('GET /api/seller/products/[productId]', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('productId가 UUID가 아니면 400을 반환한다', async () => {
+    vi.mocked(isApiMockEnabled).mockReturnValue(false);
+
+    const res = await GET(
+      new Request('http://localhost') as never,
+      makeCtx(INVALID_ID)
+    );
+    const body = (await res.json()) as {
+      error: { code: string; details: { path: string }[] };
+    };
+
+    expect(res.status).toBe(400);
+    expect(body.error.code).toBe('VALIDATION_ERROR');
+    expect(body.error.details[0].path).toBe('productId');
+  });
+
+  it('mock 모드에서는 mock product를 반환한다', async () => {
+    vi.mocked(isApiMockEnabled).mockReturnValue(true);
+
+    const res = await GET(
+      new Request('http://localhost') as never,
+      makeCtx(PRODUCT_ID)
+    );
+
+    expect(res.status).toBe(200);
+    expect(requireSellerStore).not.toHaveBeenCalled();
+  });
+
+  it('real 모드에서는 requireSellerStore store id로 service를 호출한다', async () => {
+    vi.mocked(isApiMockEnabled).mockReturnValue(false);
+    vi.mocked(requireSellerStore).mockResolvedValue(sellerResult);
+    vi.mocked(getSellerProductById).mockResolvedValue(product);
+
+    const res = await GET(
+      new Request('http://localhost') as never,
+      makeCtx(PRODUCT_ID)
+    );
+    const body = (await res.json()) as { data: ProductListItemResponse };
+
+    expect(res.status).toBe(200);
+    expect(getSellerProductById).toHaveBeenCalledWith(STORE_ID, PRODUCT_ID);
+    expect(body.data.id).toBe(PRODUCT_ID);
+  });
+
+  it('service가 PRODUCT_NOT_FOUND를 던지면 404를 반환한다', async () => {
+    vi.mocked(isApiMockEnabled).mockReturnValue(false);
+    vi.mocked(requireSellerStore).mockResolvedValue(sellerResult);
+    vi.mocked(getSellerProductById).mockRejectedValue(
+      new AppError(ERROR_CODE.PRODUCT_NOT_FOUND, 404)
+    );
+
+    const res = await GET(
+      new Request('http://localhost') as never,
+      makeCtx(PRODUCT_ID)
+    );
+    const body = (await res.json()) as { error: { code: string } };
+
+    expect(res.status).toBe(404);
+    expect(body.error.code).toBe('PRODUCT_NOT_FOUND');
+  });
+
+  it('다른 store의 상품 조회 시도 시 404를 반환한다', async () => {
+    vi.mocked(isApiMockEnabled).mockReturnValue(false);
+    vi.mocked(requireSellerStore).mockResolvedValue(sellerResult);
+    vi.mocked(getSellerProductById).mockRejectedValue(
+      new AppError(ERROR_CODE.PRODUCT_NOT_FOUND, 404)
+    );
+
+    const res = await GET(
+      new Request('http://localhost') as never,
+      makeCtx(PRODUCT_ID)
+    );
+    const body = (await res.json()) as { error: { code: string } };
+
+    expect(res.status).toBe(404);
+    expect(body.error.code).toBe('PRODUCT_NOT_FOUND');
+    expect(getSellerProductById).toHaveBeenCalledWith(STORE_ID, PRODUCT_ID);
+  });
+});
 
 describe('PATCH /api/seller/products/[productId]', () => {
   beforeEach(() => {
