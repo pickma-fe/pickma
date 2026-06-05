@@ -27,6 +27,7 @@ T46~T49, T64, T65가 공통으로 참조하는 기준 문서다. 각 task는 이
 - 필수 필드는 `required` 속성 또는 `aria-required="true"`를 지정하고, 시각적으로도 표시한다.
 - 인라인 오류 메시지는 해당 input과 `aria-describedby`로 연결한다.
 - Headless UI `Field`/`Label` 컴포넌트를 사용하면 label–input 연결이 자동으로 처리된다.
+- 이름, 이메일, 전화번호, 비밀번호 등 목적이 명확한 필드에는 `autocomplete` 속성을 지정한다. 스크린 리더가 필드 목적을 추가로 안내하고 WCAG 1.3.5(입력 목적 식별) 기준을 충족한다.
 
 ### Table / List
 
@@ -145,6 +146,13 @@ WCAG AA 기준을 따르되, 아래 예외를 인정한다.
 - `:focus` 대신 `:focus-visible`을 사용해 마우스 클릭 시 ring이 표시되지 않도록 한다.
 - ring 색상은 배경과 충분한 대비를 가져야 한다.
 
+### 동작 축소 (prefers-reduced-motion)
+
+- 애니메이션·트랜지션은 `motion-reduce:` variant로 동작 줄이기 설정을 존중한다.
+- 스켈레톤 shimmer, Toast 슬라이드, Modal 페이드, 페이지 전환 등 움직임이 있는 곳에 적용한다.
+- 예: `animate-spin motion-reduce:animate-none`, `transition-opacity motion-reduce:transition-none`
+- 애니메이션을 완전히 제거해도 기능이 동작해야 한다. 애니메이션이 기능의 유일한 피드백이 되지 않도록 한다.
+
 ### 텍스트 Overflow
 
 - 단일 라인 텍스트가 잘릴 가능성이 있는 곳에는 `truncate` 또는 `line-clamp-N`을 적용한다.
@@ -172,6 +180,19 @@ WCAG AA 기준을 따르되, 아래 예외를 인정한다.
 - 폼 제출 오류는 제출 차단 없이 인라인 오류 메시지로 표시하고, 수정 후 재시도가 쉬워야 한다.
 - 네트워크 오류는 자동 재시도 또는 명시적 [다시 시도] 버튼을 제공한다.
 - 세션 만료는 사용자 입력을 보존한 채 로그인 리디렉션하거나 명확히 안내한다.
+
+### 폼 입력 편의
+
+- 이름, 이메일, 전화번호, 비밀번호, 주소 필드에 `autocomplete` 속성을 지정해 브라우저와 모바일 키보드의 자동완성을 활성화한다.
+
+| 필드          | `autocomplete` 값  |
+| ------------- | ------------------ |
+| 이름          | `name`             |
+| 이메일        | `email`            |
+| 전화번호      | `tel`              |
+| 현재 비밀번호 | `current-password` |
+| 새 비밀번호   | `new-password`     |
+| 주소          | `street-address`   |
 
 ### 빈 상태 다음 행동
 
