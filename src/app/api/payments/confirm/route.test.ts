@@ -103,6 +103,16 @@ describe('POST /api/payments/confirm', () => {
     expect(body.error.code).toBe('PAYMENT_CONFIRM_FAILED');
   });
 
+  it('PAYMENT_ALREADY_CONFIRMED → 409', async () => {
+    vi.mocked(confirmPayment).mockRejectedValue(
+      new AppError(ERROR_CODE.PAYMENT_ALREADY_CONFIRMED, 409)
+    );
+    const res = await POST(makeRequest(validBody));
+    expect(res.status).toBe(409);
+    const body = (await res.json()) as { error: { code: string } };
+    expect(body.error.code).toBe('PAYMENT_ALREADY_CONFIRMED');
+  });
+
   it('paymentKey 누락 → VALIDATION_ERROR 400', async () => {
     const res = await POST(
       makeRequest({ orderNumber: 'PM2026TEST', amount: 5000 })
