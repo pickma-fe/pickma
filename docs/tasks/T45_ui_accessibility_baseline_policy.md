@@ -1,7 +1,7 @@
 # T45. UI/UX 및 접근성 baseline 기준 수립
 
 - 상태:
-  진행 전
+  완료
 
 - GitHub Issue:
   확인 필요
@@ -37,6 +37,17 @@
   - loading/error/empty/disabled 상태와 CTA 우선순위 기준을 정리한다.
   - T09의 501 API 및 미구현 UI 노출 목록과 연결해 숨김, disabled reason, 준비 상태 처리 기준을 정한다.
   - 수동 체크리스트, Storybook 상태 보강, Playwright 시나리오 중 흐름별 검증 방식을 정한다.
+  - `src/app/layout.tsx`에 `viewport-fit: cover`와 `lang="ko"`를 설정한다.
+  - `src/app/globals.css`에 `@utility pb-safe`를 추가한다.
+
+- 구현 결과:
+  - `docs/ui_accessibility_baseline.md` 작성 완료 (10절 구성: 컴포넌트 접근성·UI 상태·반응형·시각 품질·UX·T64 debt·키보드 탐색·501 정책 참조·검증 방식·컴포넌트 위치 규칙)
+  - `src/app/layout.tsx`: `viewport-fit: 'cover'` 추가, `lang="ko"` 버그 수정
+  - `src/app/globals.css`: `@utility pb-safe` 추가
+  - 커밋: `chore: viewport-fit cover, pb-safe 유틸리티, lang 한국어 설정` (4088bfb)
+  - 커밋: `docs: UI/UX 및 접근성 baseline 기준 문서 작성` (7d30445)
+  - 커밋: `docs: baseline에 prefers-reduced-motion, autocomplete 기준 추가` (398038f)
+  - 후속 task: T64(공통 컴포넌트 접근성), T65(도메인 컴포넌트 폴더 통일), T66(Capacitor/PWA), T67(i18n)
 
 - 관련 파일/영역:
   - `docs/tasks/T09_api_501_ui_exposure_inventory.md`

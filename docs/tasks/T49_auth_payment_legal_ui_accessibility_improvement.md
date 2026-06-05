@@ -10,7 +10,7 @@
   P2
 
 - 선행 조건:
-  - 선행 task: T45. UI/UX 및 접근성 baseline 기준 수립, T27. Auth 이메일/Supabase SMTP/rate limit 정책 정리, T42. 법적 고지 페이지 및 동의 흐름 구현
+  - 선행 task: T45. UI/UX 및 접근성 baseline 기준 수립, T64. 공통 컴포넌트 접근성 baseline 적용, T65. 도메인 컴포넌트 폴더 구조 통일, T27. Auth 이메일/Supabase SMTP/rate limit 정책 정리, T42. 법적 고지 페이지 및 동의 흐름 구현
 
 - 분류:
   UI
@@ -52,7 +52,8 @@
   중간
 
 - 완료 기준:
-  - Auth/Payment/Legal 주요 화면이 T45 checklist 기준으로 점검되고 개선된다.
+  - Auth/Payment/Legal 주요 화면이 `docs/ui_accessibility_baseline.md` 기준으로 점검되고 개선된다.
   - 인증 form과 결제 결과 화면의 error/loading/retry 흐름이 명확하다.
   - 법적 고지 페이지가 heading 구조, link, 모바일 가독성 기준을 만족한다.
+  - desktop/tablet(768–1024px)/mobile(375–430px) viewport에서 주요 화면을 수동 검증한다.
   - 필요한 후속 개선이 별도 task 또는 확인 필요 항목으로 분리된다.
