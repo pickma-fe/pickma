@@ -56,6 +56,29 @@ describe('GET /api/admin/stores', () => {
     );
   });
 
+  it('mock 모드 keyword 검색은 real service와 동일하게 region을 검색 대상에서 제외한다', async () => {
+    vi.mocked(isApiMockEnabled).mockReturnValue(true);
+    vi.mocked(requireAdmin).mockResolvedValue(adminResult);
+
+    const keywordRes = await GET(
+      makeGetRequest('keyword=%EC%84%9C%EC%9A%B8%20%EC%84%B1%EB%8F%99%EA%B5%AC')
+    );
+    const keywordBody = (await keywordRes.json()) as {
+      data: AdminStoreListResponse;
+    };
+
+    const regionRes = await GET(
+      makeGetRequest('region=%EC%84%9C%EC%9A%B8%20%EC%84%B1%EB%8F%99%EA%B5%AC')
+    );
+    const regionBody = (await regionRes.json()) as {
+      data: AdminStoreListResponse;
+    };
+
+    expect(keywordBody.data.totalCount).toBe(0);
+    expect(regionBody.data.totalCount).toBe(1);
+    expect(regionBody.data.items[0].region).toBe('서울 성동구');
+  });
+
   it('real 모드에서 requireAdmin 호출 후 query로 service를 호출한다', async () => {
     vi.mocked(isApiMockEnabled).mockReturnValue(false);
     vi.mocked(requireAdmin).mockResolvedValue(adminResult);

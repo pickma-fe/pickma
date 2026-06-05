@@ -150,13 +150,25 @@ export const mockAdminStoreList: AdminStoreListResponse = {
   totalPages: Math.ceil(mockAdminStores.length / PAGE_SIZE),
 };
 
+function escapeMockAdminStoreSearchValue(value: string): string {
+  return value
+    .replace(/[%,()]/g, ' ')
+    .replace(/[_*]/g, '\\$&')
+    .trim()
+    .toLowerCase();
+}
+
 export function filterMockAdminStores(
   query: AdminStoreListQuery = {}
 ): AdminStoreListResponse {
   const page = query.page ?? 1;
   const pageSize = query.pageSize ?? PAGE_SIZE;
-  const keyword = query.keyword?.trim().toLowerCase();
-  const region = query.region?.trim().toLowerCase();
+  const keyword = query.keyword
+    ? escapeMockAdminStoreSearchValue(query.keyword)
+    : '';
+  const region = query.region
+    ? escapeMockAdminStoreSearchValue(query.region)
+    : '';
 
   const filteredItems = mockAdminStores.filter((store) => {
     const matchesStatus = query.status ? store.status === query.status : true;
@@ -164,13 +176,9 @@ export function filterMockAdminStores(
       ? store.region.toLowerCase().includes(region)
       : true;
     const matchesKeyword = keyword
-      ? [
-          store.name,
-          store.businessNumber,
-          store.phone,
-          store.address,
-          store.region,
-        ].some((value) => value.toLowerCase().includes(keyword))
+      ? [store.name, store.businessNumber, store.phone, store.address].some(
+          (value) => value.toLowerCase().includes(keyword)
+        )
       : true;
 
     return matchesStatus && matchesRegion && matchesKeyword;
