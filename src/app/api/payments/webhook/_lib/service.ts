@@ -21,12 +21,14 @@ export async function processWebhook(
 
   // 멱등: 동일 transmissionId가 이미 기록된 경우 즉시 반환
   if (transmissionId !== null) {
-    const { data: existing } = await supabase
+    const { data: existing, error: existingError } = await supabase
       .from('payment_events')
       .select('id')
       .eq('provider', 'toss')
       .eq('provider_event_id', transmissionId)
       .maybeSingle();
+    if (existingError)
+      throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
     if (existing !== null) return;
   }
 
@@ -53,16 +55,16 @@ async function processPaymentStatusChanged(
     .eq('order_number', orderNumber)
     .maybeSingle();
 
-  if (orderError || order === null) {
-    throw new AppError(ERROR_CODE.ORDER_NOT_FOUND, 404);
-  }
+  if (orderError) throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
+  if (order === null) throw new AppError(ERROR_CODE.ORDER_NOT_FOUND, 404);
 
   // payments 조회
-  const { data: payment } = await supabase
+  const { data: payment, error: paymentError } = await supabase
     .from('payments')
     .select('id, provider_payment_key, method')
     .eq('order_id', order.id)
     .maybeSingle();
+  if (paymentError) throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
 
   const providerKey = body.data.paymentKey;
 
@@ -156,16 +158,16 @@ async function processDepositCallback(
     .eq('order_number', orderNumber)
     .maybeSingle();
 
-  if (orderError || order === null) {
-    throw new AppError(ERROR_CODE.ORDER_NOT_FOUND, 404);
-  }
+  if (orderError) throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
+  if (order === null) throw new AppError(ERROR_CODE.ORDER_NOT_FOUND, 404);
 
   // payments 조회
-  const { data: payment } = await supabase
+  const { data: payment, error: paymentError } = await supabase
     .from('payments')
     .select('id, provider_payment_key, method, pg_response')
     .eq('order_id', order.id)
     .maybeSingle();
+  if (paymentError) throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
 
   // payment 없음 검증
   if (payment === null) {
