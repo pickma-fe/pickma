@@ -8,7 +8,7 @@ import { sellerProductApi } from '@/api/seller/products/sellerProductApi';
 
 export function useSellerProduct(productId: string) {
   return useQuery<Product>({
-    queryKey: queryKeys.products.detail(productId),
+    queryKey: queryKeys.products.sellerDetail(productId),
     queryFn: () => sellerProductApi.getProduct(productId),
     enabled: !!productId,
   });

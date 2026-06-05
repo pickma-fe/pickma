@@ -27,6 +27,9 @@ export function useUpdateSellerProduct() {
       void queryClient.invalidateQueries({
         queryKey: queryKeys.products.detail(product.id),
       });
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.products.sellerDetail(product.id),
+      });
     },
   });
 }
