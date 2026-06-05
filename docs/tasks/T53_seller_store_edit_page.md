@@ -1,10 +1,10 @@
 # T53. 판매자 가게 정보 수정 화면 구현
 
 - 상태:
-  진행 전
+  완료
 
 - GitHub Issue:
-  확인 필요
+  219
 
 - 우선순위:
   P1
@@ -31,24 +31,30 @@
   판매자가 가게 정보(영업시간, 주소, 이미지 등)를 수정할 화면이 없다.
 
 - 작업 내용:
-  - `/seller/store/edit` 페이지 구현
-  - 가게 정보 수정 폼 (이름, 소개, 전화, 주소, 지역, 이미지, 영업시간)
-  - `PATCH /api/stores/me` 연결
-  - 이미지 업로드 연동
-  - 판매자+가게 권한 guard 적용
+  - `/seller/store` 페이지 내 모달 방식으로 구현 (별도 `/seller/store/edit` 경로 없음)
+  - 가게 기본 정보 수정 폼 모달 (이름, 전화, 주소, 지역, 소개, 영업시간)
+  - 대표 이미지 변경 모달
+  - 인증서류 조회 모달 (제출/갱신 UI 포함, API 연결은 후속 task)
+  - `PATCH /api/stores/me` 연결 (`useUpdateStore`)
+  - 이미지 업로드 `fileApi.uploadFile` 연동
+  - `operationStatus` 토글 (영업 시작/종료)
 
 - 관련 파일/영역:
-  - `src/app/(seller)/seller/store/edit/`
-  - `src/api/stores/` (`PATCH /api/stores/me`)
-  - `src/hooks/stores/`
+  - `src/app/(seller)/seller/store/_components/` (StoreInfoContent, StoreEditForm, StoreImageEditForm, CertificationDetailModal 등)
+  - `src/api/stores/storeApi.ts` (`PATCH /api/stores/me`)
+  - `src/hooks/stores/useUpdateStore.ts`
+  - `src/hooks/stores/useMyStore.ts`
 
 - 예상 난이도:
   보통
 
 - 완료 기준:
-  - `/seller/store/edit` 화면에서 가게 정보를 수정하고 저장할 수 있다.
+  - `/seller/store` 페이지 내 모달에서 가게 정보를 수정하고 저장할 수 있다.
   - `businessNumber` 필드는 수정 불가로 표시된다.
+  - 이미지 변경 모달에서 파일 선택 후 저장할 수 있다.
+  - 영업 시작/종료 토글이 동작한다.
+  - 수정 성공/실패 시 토스트 메시지가 표시된다.
 
 - 확인 필요 사항:
-  - 이미지 업로드 처리 방식 (Storage orphan 정책 T06 참고)
-  - 가게 정보 수정 후 리다이렉트 목적지
+  - 인증서류 데이터 API 연결 미완료 (현재 mock 하드코딩) → 후속 task에서 처리
+  - IA 문서의 `/seller/store/edit` URL은 실제 구현과 불일치 → ia.md 업데이트 필요

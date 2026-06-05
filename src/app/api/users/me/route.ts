@@ -7,7 +7,7 @@ import { requireActiveUser } from '@/app/api/_lib/auth';
 import { isApiMockEnabled } from '@/app/api/_lib/mock';
 import { routeError, success } from '@/app/api/_lib/response';
 import { validateBody } from '@/app/api/_lib/validation';
-import { mockAdminUser, mockUser } from '@/mocks/users';
+import { mockAdminUser, mockSellerUser, mockUser } from '@/mocks/users';
 
 import { updateMeSchema } from './_lib/schemas';
 import { deleteUser, updateUser } from './_lib/service';
@@ -15,6 +15,7 @@ import { deleteUser, updateUser } from './_lib/service';
 function getMockUser(req: NextRequest) {
   const cookie = req.cookies.get('mock_user')?.value;
   if (cookie === 'admin') return mockAdminUser;
+  if (cookie === 'seller') return mockSellerUser;
   return mockUser;
 }
 

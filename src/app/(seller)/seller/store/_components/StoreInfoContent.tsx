@@ -26,7 +26,9 @@ interface CertificationData {
   expiresAt?: string;
 }
 
-// TODO: API 연동 시 실제 데이터로 교체
+// TODO: [후속 task] 인증서류 API 연결
+// 현재 mock 하드코딩 상태 - 서류 제출/조회 API 미구현
+// PATCH /api/stores/me 연결은 완료됨
 const INITIAL_CERTIFICATIONS: Record<string, CertificationData> = {
   businessLicense: {
     status: true,
@@ -69,6 +71,12 @@ export function StoreInfoContent() {
     string | null
   >(null);
   const [certifications, setCertifications] = useState(INITIAL_CERTIFICATIONS);
+  const [toastMessage, setToastMessage] = useState('');
+
+  const showToast = (message: string) => {
+    setToastMessage(message);
+    setTimeout(() => setToastMessage(''), 3000);
+  };
 
   const certificationStatus = {
     businessLicense: certifications.businessLicense.status,
@@ -94,32 +102,68 @@ export function StoreInfoContent() {
 
   const handleToggleOperation = () => {
     if (!storeInfo) return;
-    updateStore({
-      operationStatus: storeInfo.operationStatus === 'open' ? 'closed' : 'open',
-    });
+    updateStore(
+      {
+        operationStatus:
+          storeInfo.operationStatus === 'open' ? 'closed' : 'open',
+      },
+      {
+        onSuccess: () => {
+          showToast(
+            storeInfo.operationStatus === 'open'
+              ? '영업이 종료되었습니다.'
+              : '영업을 시작했습니다.'
+          );
+        },
+        onError: () => {
+          showToast('운영 상태 변경에 실패했습니다.');
+        },
+      }
+    );
   };
 
   const handleStoreEdit = (data: StoreEditData) => {
-    updateStore({
-      name: data.name,
-      phone: data.phone,
-      address: data.address,
-      addressDetail: data.addressDetail || undefined,
-      region: data.region,
-      description: data.description || undefined,
-      openTime: `${data.openTime}:00`,
-      closeTime: `${data.closeTime}:00`,
-    });
-    handleCloseModal();
+    updateStore(
+      {
+        name: data.name,
+        phone: data.phone,
+        address: data.address,
+        addressDetail: data.addressDetail || undefined,
+        region: data.region,
+        description: data.description || undefined,
+        openTime: `${data.openTime}:00`,
+        closeTime: `${data.closeTime}:00`,
+      },
+      {
+        onSuccess: () => {
+          showToast('가게 정보가 저장되었습니다.');
+          handleCloseModal();
+        },
+        onError: () => {
+          showToast('가게 정보 저장에 실패했습니다.');
+        },
+      }
+    );
   };
 
   const handleImageEdit = (imageUrl: string, file?: File) => {
     if (file) {
-      updateStore({ imageFile: file });
+      updateStore(
+        { imageFile: file },
+        {
+          onSuccess: () => {
+            showToast('이미지가 변경되었습니다.');
+            handleCloseModal();
+          },
+          onError: () => {
+            showToast('이미지 변경에 실패했습니다.');
+          },
+        }
+      );
     } else {
-      updateStore({ image: imageUrl });
+      // file 없으면 변경사항 없음 - 기존 이미지 유지
+      handleCloseModal();
     }
-    handleCloseModal();
   };
 
   const handleCertificationSubmit = (certLabel: string, imageUrl: string) => {
@@ -244,6 +288,7 @@ export function StoreInfoContent() {
           storeInfo={storeInfo}
           onSubmit={handleStoreEdit}
           onCancel={handleCloseModal}
+          isPending={isUpdating}
         />
       </Modal>
 
@@ -258,6 +303,7 @@ export function StoreInfoContent() {
           storeName={storeInfo.name}
           onSubmit={handleImageEdit}
           onCancel={handleCloseModal}
+          isPending={isUpdating}
         />
       </Modal>
 
@@ -279,6 +325,12 @@ export function StoreInfoContent() {
           />
         )}
       </Modal>
+
+      {toastMessage && (
+        <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-lg bg-gray-900 px-4 py-2 text-sm text-white shadow-lg">
+          {toastMessage}
+        </div>
+      )}
     </div>
   );
 }
