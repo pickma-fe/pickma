@@ -150,24 +150,16 @@ export const mockAdminStoreList: AdminStoreListResponse = {
   totalPages: Math.ceil(mockAdminStores.length / PAGE_SIZE),
 };
 
-function escapeMockAdminStoreSearchValue(value: string): string {
-  return value
-    .replace(/[%,()]/g, ' ')
-    .replace(/[_*]/g, '\\$&')
-    .trim()
-    .toLowerCase();
-}
-
 export function filterMockAdminStores(
   query: AdminStoreListQuery = {}
 ): AdminStoreListResponse {
   const page = query.page ?? 1;
   const pageSize = query.pageSize ?? PAGE_SIZE;
   const keyword = query.keyword
-    ? escapeMockAdminStoreSearchValue(query.keyword)
+    ? sanitizeMockSearchValue(query.keyword).toLowerCase()
     : '';
   const region = query.region
-    ? escapeMockAdminStoreSearchValue(query.region)
+    ? sanitizeMockSearchValue(query.region).toLowerCase()
     : '';
 
   const filteredItems = mockAdminStores.filter((store) => {
