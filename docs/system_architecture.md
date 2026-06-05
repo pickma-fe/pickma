@@ -844,4 +844,4 @@ Branch protection은 `dev` 대상 PR에서 `CI / Lint, typecheck, and test` 통�
 | `PATCH /api/orders/[orderId]/cancel`                         | P1       | owner                    | 없음        | 제외 (NOT_IMPLEMENTED) | T31                     |
 | `POST /api/payments/[paymentId]/cancel`                      | P1       | owner                    | 없음        | 제외 (NOT_IMPLEMENTED) | T31                     |
 | `PATCH /api/seller/orders/[orderId]/no-show`                 | P1       | sellerStore              | 없음        | 구현됨, 테스트 미추가  | T52                     |
-| `PATCH /api/seller/products/[productId]/stock`               | P1       | sellerStore              | 없음        | 제외 (NOT_IMPLEMENTED) | T28                     |
+| `PATCH /api/seller/products/[productId]/stock`               | P1       | sellerStore              | 없음        | 구현됨                 | T28                     |
