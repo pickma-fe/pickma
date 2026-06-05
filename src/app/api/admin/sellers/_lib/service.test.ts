@@ -401,6 +401,59 @@ describe('approveSellerApplication', () => {
   });
 });
 
+const DOCUMENT_PATH = `${USER_ID}/upload-1/business_license/file.pdf`;
+
+function buildRejectClient({
+  findResult = { data: { id: APP_ID }, error: null },
+  docsResult = {
+    data: [{ storage_path: DOCUMENT_PATH }],
+    error: null,
+  },
+  updateResult = { data: [{ id: APP_ID }], error: null },
+  storageRemoveResult = { error: null },
+}: {
+  findResult?: { data: unknown; error: unknown };
+  docsResult?: { data: unknown; error: unknown };
+  updateResult?: { data: unknown; error: unknown };
+  storageRemoveResult?: { error: unknown };
+} = {}) {
+  const mockStorageRemove = vi.fn().mockResolvedValue(storageRemoveResult);
+
+  const client = {
+    from: vi.fn().mockImplementation((table: string) => {
+      if (table === 'seller_applications') {
+        return {
+          select: vi.fn().mockReturnValue({
+            eq: vi.fn().mockReturnValue({
+              single: vi.fn().mockResolvedValue(findResult),
+            }),
+          }),
+          update: vi.fn().mockReturnValue({
+            eq: vi.fn().mockReturnValue({
+              eq: vi.fn().mockReturnValue({
+                select: vi.fn().mockResolvedValue(updateResult),
+              }),
+            }),
+          }),
+        };
+      }
+      if (table === 'seller_application_documents') {
+        return {
+          select: vi.fn().mockReturnValue({
+            eq: vi.fn().mockResolvedValue(docsResult),
+          }),
+        };
+      }
+      return {};
+    }),
+    storage: {
+      from: vi.fn().mockReturnValue({ remove: mockStorageRemove }),
+    },
+  } as unknown as ReturnType<typeof createServiceRoleClient>;
+
+  return { client, mockStorageRemove };
+}
+
 describe('rejectSellerApplication', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -452,34 +505,10 @@ describe('rejectSellerApplication', () => {
   });
 
   it('이미 처리된 신청이면 VALIDATION_ERROR를 던진다', async () => {
-    vi.mocked(createServiceRoleClient).mockReturnValue({
-      from: vi.fn().mockImplementation((table: string) => {
-        if (table === 'seller_applications') {
-          const mockChain = {
-            select: vi.fn(),
-            update: vi.fn(),
-            eq: vi.fn(),
-            single: vi.fn(),
-          };
-          mockChain.select.mockReturnValue({
-            eq: vi.fn().mockReturnValue({
-              single: vi
-                .fn()
-                .mockResolvedValue({ data: { id: APP_ID }, error: null }),
-            }),
-          });
-          mockChain.update.mockReturnValue({
-            eq: vi.fn().mockReturnValue({
-              eq: vi.fn().mockReturnValue({
-                select: vi.fn().mockResolvedValue({ data: [], error: null }),
-              }),
-            }),
-          });
-          return mockChain;
-        }
-        return {};
-      }),
-    } as unknown as ReturnType<typeof createServiceRoleClient>);
+    const { client } = buildRejectClient({
+      updateResult: { data: [], error: null },
+    });
+    vi.mocked(createServiceRoleClient).mockReturnValue(client);
 
     await expect(
       rejectSellerApplication(APP_ID, '서류 미비')
@@ -487,5 +516,37 @@ describe('rejectSellerApplication', () => {
       (e: unknown) =>
         e instanceof AppError && e.code === ERROR_CODE.VALIDATION_ERROR
     );
+  });
+
+  it('reject 성공 후 documents 경로로 storage 삭제를 호출한다', async () => {
+    const { client, mockStorageRemove } = buildRejectClient();
+    vi.mocked(createServiceRoleClient).mockReturnValue(client);
+
+    await rejectSellerApplication(APP_ID, '서류 미비');
+
+    expect(mockStorageRemove).toHaveBeenCalledWith([DOCUMENT_PATH]);
+  });
+
+  it('documents 조회 실패 시 reject는 성공하고 storage 삭제는 건너뛴다', async () => {
+    const { client, mockStorageRemove } = buildRejectClient({
+      docsResult: { data: null, error: { message: 'db error' } },
+    });
+    vi.mocked(createServiceRoleClient).mockReturnValue(client);
+
+    await expect(
+      rejectSellerApplication(APP_ID, '서류 미비')
+    ).resolves.toBeUndefined();
+    expect(mockStorageRemove).not.toHaveBeenCalled();
+  });
+
+  it('storage 삭제 실패 시 에러를 throw하지 않는다', async () => {
+    const { client } = buildRejectClient({
+      storageRemoveResult: { error: { message: 'storage error' } },
+    });
+    vi.mocked(createServiceRoleClient).mockReturnValue(client);
+
+    await expect(
+      rejectSellerApplication(APP_ID, '서류 미비')
+    ).resolves.toBeUndefined();
   });
 });
