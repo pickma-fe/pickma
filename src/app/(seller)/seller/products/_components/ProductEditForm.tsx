@@ -13,14 +13,14 @@ const productEditFormSchema = z.object({
     .string()
     .min(1, '판매가를 입력해주세요.')
     .refine(
-      (v) => Number.isFinite(Number(v)) && Number(v) >= 1,
+      (v) => Number.isInteger(Number(v)) && Number(v) >= 0,
       '올바른 판매가를 입력해주세요.'
     ),
   stock: z
     .string()
     .min(1, '재고를 입력해주세요.')
     .refine(
-      (v) => Number.isFinite(Number(v)) && Number(v) >= 1,
+      (v) => Number.isInteger(Number(v)) && Number(v) >= 0,
       '올바른 재고를 입력해주세요.'
     ),
   endAt: z.string().min(1, '마감일시를 입력해주세요.'),
