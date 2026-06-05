@@ -31,35 +31,74 @@ const DOC_TYPE_MAP: Record<keyof DocumentFiles, SellerApplicationDocumentType> =
     bankAccount: 'bank_account',
   };
 
+async function cleanupPaths(paths: string[]): Promise<void> {
+  if (paths.length === 0) return;
+  try {
+    await fileApi.deleteFiles(paths);
+  } catch (err) {
+    console.error('[useCreateSellerApplication] cleanup failed', err);
+  }
+}
+
 export function useCreateSellerApplication() {
   const queryClient = useQueryClient();
 
   return useMutation<SellerApplication, Error, CreateSellerApplicationInput>({
     mutationFn: async ({ documents, ...rest }) => {
-      const uploadedDocs = await Promise.all(
-        (Object.entries(documents) as [keyof DocumentFiles, File][]).map(
-          async ([key, file]) => {
-            const documentType = DOC_TYPE_MAP[key];
-            const storagePath = await fileApi.uploadFile(
-              'seller_application_document',
-              file,
-              { documentType }
-            );
-            return {
-              type: documentType,
-              storagePath,
-              originalFileName: file.name,
-              contentType: file.type,
-              size: file.size,
-            };
-          }
-        )
+      const entries = Object.entries(documents) as [
+        keyof DocumentFiles,
+        File,
+      ][];
+
+      const results = await Promise.allSettled(
+        entries.map(async ([key, file]) => {
+          const documentType = DOC_TYPE_MAP[key];
+          const storagePath = await fileApi.uploadFile(
+            'seller_application_document',
+            file,
+            { documentType }
+          );
+          return {
+            type: documentType,
+            storagePath,
+            originalFileName: file.name,
+            contentType: file.type,
+            size: file.size,
+          };
+        })
       );
 
-      return sellerApplicationApi.createSellerApplication({
-        ...rest,
-        documents: uploadedDocs,
-      });
+      const uploadedPaths: string[] = [];
+      const uploadedDocs: {
+        type: SellerApplicationDocumentType;
+        storagePath: string;
+        originalFileName: string;
+        contentType: string;
+        size: number;
+      }[] = [];
+      const firstError = results.find((r) => r.status === 'rejected');
+
+      for (const result of results) {
+        if (result.status === 'fulfilled') {
+          uploadedPaths.push(result.value.storagePath);
+          uploadedDocs.push(result.value);
+        }
+      }
+
+      if (firstError) {
+        await cleanupPaths(uploadedPaths);
+        throw firstError.reason as Error;
+      }
+
+      try {
+        return await sellerApplicationApi.createSellerApplication({
+          ...rest,
+          documents: uploadedDocs,
+        });
+      } catch (err) {
+        await cleanupPaths(uploadedPaths);
+        throw err;
+      }
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({

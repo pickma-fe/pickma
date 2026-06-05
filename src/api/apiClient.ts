@@ -82,7 +82,10 @@ export const apiClient = {
     return request<T>(path, { method: 'PATCH', body: JSON.stringify(body) });
   },
 
-  delete<T>(path: string): Promise<T> {
-    return request<T>(path, { method: 'DELETE' });
+  delete<T>(path: string, body?: unknown): Promise<T> {
+    return request<T>(path, {
+      method: 'DELETE',
+      ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
+    });
   },
 };

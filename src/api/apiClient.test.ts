@@ -55,6 +55,41 @@ describe('apiClient', () => {
     expect(parsed.searchParams.get('region')).toBe('서울');
   });
 
+  it('delete는 body 없이 호출할 수 있다', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ statusCode: 200, data: null }), {
+        status: 200,
+      })
+    );
+    vi.stubGlobal('fetch', fetchMock);
+
+    await apiClient.delete('/api/resources/1');
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/api/resources/1',
+      expect.objectContaining({ method: 'DELETE' })
+    );
+    const calledInit = fetchMock.mock.calls[0][1] as RequestInit;
+    expect(calledInit.body).toBeUndefined();
+  });
+
+  it('delete는 body를 JSON으로 직렬화해서 전송한다', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ statusCode: 200, data: null }), {
+        status: 200,
+      })
+    );
+    vi.stubGlobal('fetch', fetchMock);
+
+    await apiClient.delete('/api/files', { storagePaths: ['path/a.pdf'] });
+
+    const calledInit = fetchMock.mock.calls[0][1] as RequestInit;
+    expect(calledInit.method).toBe('DELETE');
+    expect(calledInit.body).toBe(
+      JSON.stringify({ storagePaths: ['path/a.pdf'] })
+    );
+  });
+
   it('실패 envelope를 ApiError로 변환한다', async () => {
     vi.stubGlobal(
       'fetch',

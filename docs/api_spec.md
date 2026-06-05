@@ -311,6 +311,7 @@ Response: `UserResponse`
 | 기능                   | Method | API                     | Auth | Priority |
 | ---------------------- | ------ | ----------------------- | ---- | -------- |
 | signed upload URL 발급 | POST   | `/api/files/upload-url` | user | P0       |
+| orphan 파일 cleanup    | DELETE | `/api/files`            | user | P1       |
 
 ### 3.1 `POST /api/files/upload-url`
 
@@ -372,6 +373,37 @@ Purpose별 권한 정책:
 `store_image`에 store 존재 체크를 하지 않는 이유: seller 승인 시 store가 자동 생성되지 않으며, store 최초 생성 시 이미지를 업로드해야 하므로 이 시점에 store가 아직 존재하지 않는다. `seller_product_image`는 상품 등록이 store 생성 이후에만 가능하므로 store 존재가 보장된다.
 
 클라이언트 API helper는 `createUploadUrl → signed URL 업로드 → storagePath 반환` 흐름을 감싼다. TanStack Query mutation은 도메인 hook에서 전체 submit 단위로 관리한다.
+
+### 3.2 `DELETE /api/files`
+
+Request:
+
+```ts
+export interface DeleteFilesRequest {
+  storagePaths: string[];
+}
+```
+
+Response: `null`
+
+Behavior:
+
+- `requireActiveUser()` 통과 사용자만 호출할 수 있다.
+- `storagePaths`는 1개 이상, 50개 이하이며 빈 문자열을 포함할 수 없다.
+- 각 `storagePath`는 `{userId}/` prefix로 소유권을 검증한다. 하나라도 소유권이 없으면 403을 반환하고 삭제를 실행하지 않는다.
+- 소유권 검증 통과 시 `seller_application_documents` 테이블에서 해당 경로가 참조 중인지 확인한다. 하나라도 참조 중이면 403을 반환하고 삭제를 실행하지 않는다.
+- 참조 확인 통과 시 service role client로 `seller-application-documents` bucket에서 삭제한다.
+- Storage 삭제 실패 시 500을 반환할 수 있다. 호출 측 hook이 이를 best-effort로 처리(실패 무시 + 로깅)한다.
+
+에러 정책:
+
+| 조건                                            | HTTP | error code              |
+| ----------------------------------------------- | ---- | ----------------------- |
+| 미인증 또는 inactive user                       | 401  | `UNAUTHORIZED`          |
+| `storagePath`에 타 userId prefix                | 403  | `FORBIDDEN`             |
+| `seller_application_documents`에 참조 중인 경로 | 403  | `FORBIDDEN`             |
+| body 검증 실패                                  | 400  | `VALIDATION_ERROR`      |
+| Storage 삭제 실패                               | 500  | `INTERNAL_SERVER_ERROR` |
 
 ---
 
@@ -1128,11 +1160,11 @@ Admin API는 `/api/admin/*`로 분리한다. 모든 Admin API는 `requireAdmin()
 | 기능                       | Method | API                                                    | Priority |
 | -------------------------- | ------ | ------------------------------------------------------ | -------- |
 | 승인 대기 판매자 신청 목록 | GET    | `/api/admin/sellers/pending`                           | P0       |
-| 판매자 신청 승인           | POST   | `/api/admin/sellers/:id/approve`                       | P0       |
-| 판매자 신청 거절           | POST   | `/api/admin/sellers/:id/reject`                        | P0       |
+| 판매자 신청 승인           | POST   | `/api/admin/sellers/:applicationId/approve`            | P0       |
+| 판매자 신청 거절           | POST   | `/api/admin/sellers/:applicationId/reject`             | P0       |
 | 첨부 파일 signed URL 발급  | POST   | `/api/admin/seller-application-documents/:id/read-url` | P0       |
 
-- `/api/admin/sellers/:id/*`의 `:id`는 seller application id이다.
+- `/api/admin/sellers/:applicationId/*`의 `:applicationId`는 seller application id이다.
 - `/api/admin/seller-application-documents/:id/read-url`의 `:id`는 seller application document id이다.
 
 `GET /api/admin/sellers/pending`은 pending 신청만 반환한다. Query는 `page`, `pageSize`, `keyword`, `createdDate`, `businessCategory`를 지원하며, `totalCount`와 `totalPages`는 적용된 검색/필터 조건 기준으로 반환한다. 승인 완료/거절 이력을 포함한 전체 심사 이력 조회는 후속 `/api/admin/seller-applications` 같은 별도 API로 검토한다.

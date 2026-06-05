@@ -1,5 +1,6 @@
 import type {
   CreateFileUploadUrlRequest,
+  DeleteFilesRequest,
   FileUploadPurpose,
   FileUploadUrlResponse,
   SellerApplicationDocumentType,
@@ -81,8 +82,14 @@ export function uploadFiles(
   return Promise.all(files.map((file) => uploadFile(purpose, file, options)));
 }
 
+export function deleteFiles(storagePaths: string[]): Promise<void> {
+  const body: DeleteFilesRequest = { storagePaths };
+  return apiClient.delete<void>('/api/files', body);
+}
+
 export const fileApi = {
   createUploadUrl,
   uploadFile,
   uploadFiles,
+  deleteFiles,
 };

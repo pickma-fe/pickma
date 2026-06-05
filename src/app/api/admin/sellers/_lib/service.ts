@@ -225,6 +225,16 @@ export async function rejectSellerApplication(
     throw new AppError(ERROR_CODE.SELLER_APPLICATION_NOT_FOUND, 404);
   }
 
+  let documentPaths: string[] = [];
+  const { data: docs, error: docsError } = await supabase
+    .from('seller_application_documents')
+    .select('storage_path')
+    .eq('application_id', id);
+
+  if (!docsError) {
+    documentPaths = (docs ?? []).map((d) => d.storage_path);
+  }
+
   const { data: updated, error: updateError } = await supabase
     .from('seller_applications')
     .update({
@@ -242,5 +252,11 @@ export async function rejectSellerApplication(
 
   if (!updated || updated.length === 0) {
     throw new AppError(ERROR_CODE.VALIDATION_ERROR, 400);
+  }
+
+  if (documentPaths.length > 0) {
+    await supabase.storage
+      .from('seller-application-documents')
+      .remove(documentPaths);
   }
 }
