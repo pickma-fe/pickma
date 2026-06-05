@@ -231,12 +231,7 @@ export async function rejectSellerApplication(
     .select('storage_path')
     .eq('application_id', id);
 
-  if (docsError) {
-    console.error(
-      '[rejectSellerApplication] failed to fetch documents',
-      docsError
-    );
-  } else {
+  if (!docsError) {
     documentPaths = (docs ?? []).map((d) => d.storage_path);
   }
 
@@ -260,15 +255,8 @@ export async function rejectSellerApplication(
   }
 
   if (documentPaths.length > 0) {
-    const { error: storageError } = await supabase.storage
+    await supabase.storage
       .from('seller-application-documents')
       .remove(documentPaths);
-
-    if (storageError) {
-      console.error(
-        '[rejectSellerApplication] storage cleanup failed',
-        storageError
-      );
-    }
   }
 }
