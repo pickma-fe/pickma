@@ -311,6 +311,7 @@ Response: `UserResponse`
 | 기능                   | Method | API                     | Auth | Priority |
 | ---------------------- | ------ | ----------------------- | ---- | -------- |
 | signed upload URL 발급 | POST   | `/api/files/upload-url` | user | P0       |
+| orphan 파일 cleanup    | DELETE | `/api/files`            | user | P1       |
 
 ### 3.1 `POST /api/files/upload-url`
 
@@ -372,6 +373,34 @@ Purpose별 권한 정책:
 `store_image`에 store 존재 체크를 하지 않는 이유: seller 승인 시 store가 자동 생성되지 않으며, store 최초 생성 시 이미지를 업로드해야 하므로 이 시점에 store가 아직 존재하지 않는다. `seller_product_image`는 상품 등록이 store 생성 이후에만 가능하므로 store 존재가 보장된다.
 
 클라이언트 API helper는 `createUploadUrl → signed URL 업로드 → storagePath 반환` 흐름을 감싼다. TanStack Query mutation은 도메인 hook에서 전체 submit 단위로 관리한다.
+
+### 3.2 `DELETE /api/files`
+
+Request:
+
+```ts
+export interface DeleteFilesRequest {
+  storagePaths: string[];
+}
+```
+
+Response: `null`
+
+Behavior:
+
+- `requireActiveUser()` 통과 사용자만 호출할 수 있다.
+- `storagePaths`는 1개 이상, 50개 이하이며 빈 문자열을 포함할 수 없다.
+- 각 `storagePath`는 `{userId}/` prefix로 소유권을 검증한다. 하나라도 소유권이 없으면 403을 반환하고 삭제를 실행하지 않는다.
+- 소유권 검증 통과 시 service role client로 `seller-application-documents` bucket에서 삭제한다.
+- 클라이언트 best-effort cleanup 전용이다. 삭제 실패는 에러를 전파하지 않고 로깅만 한다.
+
+에러 정책:
+
+| 조건                             | HTTP | error code         |
+| -------------------------------- | ---- | ------------------ |
+| 미인증 또는 inactive user        | 401  | `UNAUTHORIZED`     |
+| `storagePath`에 타 userId prefix | 403  | `FORBIDDEN`        |
+| body 검증 실패                   | 400  | `VALIDATION_ERROR` |
 
 ---
 
