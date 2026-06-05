@@ -13,9 +13,7 @@ export async function GET(request: NextRequest): Promise<Response> {
   try {
     const isMock = isApiMockEnabled();
 
-    if (!isMock) {
-      await requireAdmin();
-    }
+    await requireAdmin();
 
     const query = validateQuery(
       pendingSellerApplicationsQuerySchema,

@@ -36,7 +36,8 @@
   - 신청 상세, 제출 문서 signed read URL 확인, 승인/거절 액션을 연결한다.
   - 거절 사유 입력 UI와 validation을 구현한다.
   - 성공 후 목록 invalidate와 성공/error 상태를 처리한다.
-  - admin page-local 컴포넌트는 `src/app/(admin)/admin/_components`를 우선 사용하고, cross-domain 재사용성이 확인된 presentational component만 공통 컴포넌트로 승격한다.
+  - T03 전용 컴포넌트는 `src/app/(admin)/admin/sellers/pending/_components`에 페이지 로컬로 둔다.
+  - 여러 admin 화면에서 재사용성이 검증된 presentational component만 별도 공통 컴포넌트로 승격한다.
 
 - 관련 파일/영역:
   - `src/app/(admin)/admin/sellers/pending/page.tsx`
@@ -44,7 +45,6 @@
   - `src/hooks/admin/sellers/*`
   - `src/hooks/admin/seller-application-documents/*`
   - `src/api/admin/sellers/*`
-  - `src/app/(admin)/admin/_components/*`
 
 - 예상 난이도:
   중간

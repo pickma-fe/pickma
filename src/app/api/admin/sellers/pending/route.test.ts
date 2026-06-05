@@ -39,6 +39,7 @@ describe('GET /api/admin/sellers/pending', () => {
 
   it('mock 모드에서 mockAdminPendingSellerApplicationList를 반환한다', async () => {
     vi.mocked(isApiMockEnabled).mockReturnValue(true);
+    vi.mocked(requireAdmin).mockResolvedValue(adminResult);
 
     const res = await GET(makeGetRequest());
     const body = (await res.json()) as {
@@ -51,7 +52,26 @@ describe('GET /api/admin/sellers/pending', () => {
     expect(body.data.items).toHaveLength(
       mockAdminPendingSellerApplicationList.items.length
     );
-    expect(requireAdmin).not.toHaveBeenCalled();
+    expect(requireAdmin).toHaveBeenCalledOnce();
+  });
+
+  it('mock 모드에서도 권한 검사가 실패하면 error envelope를 반환한다', async () => {
+    vi.mocked(isApiMockEnabled).mockReturnValue(true);
+    vi.mocked(requireAdmin).mockRejectedValue(
+      new AppError(ERROR_CODE.FORBIDDEN, 403)
+    );
+
+    const res = await GET(makeGetRequest());
+    const body = (await res.json()) as {
+      statusCode: number;
+      error: { code: string };
+    };
+
+    expect(res.status).toBe(403);
+    expect(requireAdmin).toHaveBeenCalledOnce();
+    expect(getPendingSellerApplications).not.toHaveBeenCalled();
+    expect(body.statusCode).toBe(res.status);
+    expect(body.error.code).toBe('FORBIDDEN');
   });
 
   it('real 모드에서 requireAdmin 호출 후 query로 service를 호출한다', async () => {
