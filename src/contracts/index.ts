@@ -8,6 +8,7 @@ export type {
 export type {
   ApiErrorResponse,
   ApiSuccess,
+  JsonValue,
   PaginatedResult,
   ValidationIssue,
 } from './common';

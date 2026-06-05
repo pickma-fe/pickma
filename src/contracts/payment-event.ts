@@ -1,3 +1,5 @@
+import type { JsonValue } from './common';
+
 export type PaymentEventType =
   | 'payment_confirmed'
   | 'payment_compensation_failed'
@@ -26,7 +28,7 @@ export interface PaymentEventRow {
   providerKey: string | null;
   providerEventType: string | null;
   providerEventId: string | null;
-  payload: unknown;
+  payload: JsonValue | null;
   status: PaymentEventStatus;
   errorMessage: string | null;
   processedAt: string | null;
