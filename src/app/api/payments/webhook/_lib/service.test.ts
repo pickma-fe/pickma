@@ -81,10 +81,10 @@ function makeInsertChain(
   };
 }
 
-function makeUpdateChain() {
+function makeUpdateChain(error: { message: string } | null = null) {
   return {
     update: vi.fn().mockReturnThis(),
-    eq: vi.fn().mockResolvedValue({ data: null, error: null }),
+    eq: vi.fn().mockResolvedValue({ data: null, error }),
   };
 }
 
@@ -104,8 +104,10 @@ interface MakeClientOptions {
   order?: typeof mockOrder | null;
   orderError?: { message: string } | null;
   payment?: typeof mockPayment | typeof mockPaymentVirtualAccount | null;
+  paymentError?: { message: string } | null;
   insertEventId?: string | null;
   insertError?: { code?: string; message: string } | null;
+  updateError?: { message: string } | null;
 }
 
 function makeClient({
@@ -113,14 +115,16 @@ function makeClient({
   order = mockOrder,
   orderError = null,
   payment = mockPayment,
+  paymentError = null,
   insertEventId = 'event-uuid-1',
   insertError = null,
+  updateError = null,
 }: MakeClientOptions = {}) {
   const eventSelectChain = makeSelectChain(existingEvent);
   const orderSelectChain = makeSelectChain(order, orderError);
-  const paymentSelectChain = makeSelectChain(payment);
+  const paymentSelectChain = makeSelectChain(payment, paymentError);
   const insertChain = makeInsertChain(insertEventId, insertError);
-  const updateChain = makeUpdateChain();
+  const updateChain = makeUpdateChain(updateError);
 
   let eventSelectCalled = false;
 
@@ -386,6 +390,35 @@ describe('processWebhook', () => {
           error_message: 'secret mismatch',
         })
       );
+    });
+  });
+
+  describe('DB 오류 처리', () => {
+    it('payments 조회 DB 오류 → INTERNAL_SERVER_ERROR 500', async () => {
+      const client = makeClient({
+        paymentError: { message: 'connection error' },
+      });
+      vi.mocked(createServiceRoleClient).mockReturnValue(
+        client as unknown as ReturnType<typeof createServiceRoleClient>
+      );
+      await expect(
+        processWebhook(TRANSMISSION_ID, validStatusChangedBody)
+      ).rejects.toMatchObject({ code: ERROR_CODE.INTERNAL_SERVER_ERROR });
+      expect(client.insertChain.insert).not.toHaveBeenCalled();
+    });
+
+    it('processed UPDATE DB 오류 → INTERNAL_SERVER_ERROR 500', async () => {
+      const client = makeClient({
+        updateError: { message: 'connection error' },
+      });
+      vi.mocked(createServiceRoleClient).mockReturnValue(
+        client as unknown as ReturnType<typeof createServiceRoleClient>
+      );
+      await expect(
+        processWebhook(TRANSMISSION_ID, validStatusChangedBody)
+      ).rejects.toMatchObject({ code: ERROR_CODE.INTERNAL_SERVER_ERROR });
+      expect(client.insertChain.insert).toHaveBeenCalled();
+      expect(client.updateChain.update).toHaveBeenCalled();
     });
   });
 });
