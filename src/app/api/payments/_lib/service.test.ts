@@ -28,6 +28,13 @@ const mockTossResult: TossConfirmResult = {
   providerOrderId: 'PM2026TEST',
   method: 'card',
   methodDetail: null,
+  pgResponse: {
+    paymentKey: 'toss_ppk_PM2026TEST',
+    orderId: 'PM2026TEST',
+    method: 'card',
+    status: 'DONE',
+    secret: null,
+  },
 };
 
 function makeClient({
@@ -58,17 +65,21 @@ function makeClient({
       error: seqError,
     }),
   };
+  const paymentEventsInsertMock = {
+    insert: vi.fn().mockResolvedValue({ data: null, error: null }),
+  };
   return {
-    from: vi
-      .fn()
-      .mockImplementation((table: string) =>
-        table === 'store_order_sequences' ? seqQueryMock : orderQueryMock
-      ),
+    from: vi.fn().mockImplementation((table: string) => {
+      if (table === 'store_order_sequences') return seqQueryMock;
+      if (table === 'payment_events') return paymentEventsInsertMock;
+      return orderQueryMock;
+    }),
     rpc: vi
       .fn()
       .mockImplementation((fnName: string) =>
         Promise.resolve({ data: null, error: rpcErrors[fnName] ?? null })
       ),
+    paymentEventsInsertMock,
   };
 }
 
@@ -209,6 +220,13 @@ describe('confirmPayment', () => {
         p_order_number: 'PM2026TEST',
         p_provider: 'toss',
         p_amount: 5000,
+        p_pg_response: {
+          paymentKey: 'mock_pk_test',
+          orderId: 'PM2026TEST',
+          method: 'card',
+          status: 'DONE',
+          secret: null,
+        },
       })
     );
   });
@@ -249,9 +267,28 @@ describe('confirmPayment', () => {
     ).rejects.toMatchObject({ code: ERROR_CODE.ORDER_EXPIRED });
   });
 
-  it('status가 payment_pending 아님 → INVALID_ORDER_STATUS', async () => {
+  it('status가 reserved → PAYMENT_ALREADY_CONFIRMED 409', async () => {
     const client = makeClient({
       orderData: { ...mockOrderRow, status: 'reserved' },
+    });
+    vi.mocked(createServiceRoleClient).mockReturnValue(
+      client as unknown as ReturnType<typeof createServiceRoleClient>
+    );
+    await expect(
+      confirmPayment(mockUserId, {
+        paymentKey: 'mock_pk_test',
+        orderNumber: 'PM2026TEST',
+        amount: 5000,
+      })
+    ).rejects.toMatchObject({
+      code: ERROR_CODE.PAYMENT_ALREADY_CONFIRMED,
+      statusCode: 409,
+    });
+  });
+
+  it('status가 payment_pending 아닌 비정상 상태 → INVALID_ORDER_STATUS', async () => {
+    const client = makeClient({
+      orderData: { ...mockOrderRow, status: 'cancelled' },
     });
     vi.mocked(createServiceRoleClient).mockReturnValue(
       client as unknown as ReturnType<typeof createServiceRoleClient>
@@ -555,6 +592,12 @@ describe('confirmPayment', () => {
         'revert_payment_processing',
         expect.anything()
       );
+      expect(client.paymentEventsInsertMock.insert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event_type: 'payment_compensation_failed',
+          payload: expect.objectContaining({ failureStage: 'toss_cancel' }),
+        })
+      );
     });
 
     it('PAYMENT_MOCK=false + cancel 성공 + revert 실패 → PAYMENT_CONFIRM_FAILED', async () => {
@@ -583,6 +626,14 @@ describe('confirmPayment', () => {
       expect(client.rpc).toHaveBeenCalledWith('revert_payment_processing', {
         p_order_id: 'order-uuid-1',
       });
+      expect(client.paymentEventsInsertMock.insert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event_type: 'payment_compensation_failed',
+          payload: expect.objectContaining({
+            failureStage: 'revert_processing',
+          }),
+        })
+      );
     });
 
     it('PAYMENT_MOCK=true + confirm_payment 실패 → cancel 미호출, revert_payment_processing 호출', async () => {

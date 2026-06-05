@@ -8,6 +8,7 @@ export type {
 export type {
   ApiErrorResponse,
   ApiSuccess,
+  JsonValue,
   PaginatedResult,
   ValidationIssue,
 } from './common';
@@ -52,6 +53,12 @@ export type {
   SellerOnboardingStatusResponse,
 } from './seller-application';
 export type { CreateStoreRequest, StoreResponse } from './store';
+export type {
+  PaymentCompensationFailedPayload,
+  PaymentEventRow,
+  PaymentEventStatus,
+  PaymentEventType,
+} from './payment-event';
 export type {
   ProductDetailResponse,
   ProductListItemResponse,

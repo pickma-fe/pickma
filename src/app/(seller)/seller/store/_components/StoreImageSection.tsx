@@ -22,23 +22,13 @@ export function StoreImageSection({
       );
     }
 
-    if (storeInfo.image.startsWith('blob:')) {
-      return (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={storeInfo.image}
-          alt={storeInfo.name}
-          className="h-full w-full object-cover"
-        />
-      );
-    }
-
     return (
       <Image
         src={storeInfo.image}
         alt={storeInfo.name}
         fill
         className="object-cover"
+        unoptimized={storeInfo.image.startsWith('blob:')}
       />
     );
   };

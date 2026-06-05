@@ -3,6 +3,7 @@ import type {
   PreparePaymentRequest,
   PreparePaymentResponse,
 } from '@/contracts/payment';
+import type { PaymentCompensationFailedPayload } from '@/contracts/payment-event';
 import { AppError } from '@/lib/errors/appError';
 import { ERROR_CODE } from '@/lib/errors/errorCodes';
 import { createServiceRoleClient } from '@/lib/supabase/service';
@@ -112,6 +113,9 @@ export async function confirmPayment(
   if (order.status === 'expired') {
     throw new AppError(ERROR_CODE.ORDER_EXPIRED, 409);
   }
+  if (order.status === 'reserved') {
+    throw new AppError(ERROR_CODE.PAYMENT_ALREADY_CONFIRMED, 409);
+  }
   if (order.status !== 'payment_pending') {
     throw new AppError(ERROR_CODE.INVALID_ORDER_STATUS, 409);
   }
@@ -153,6 +157,13 @@ export async function confirmPayment(
         providerOrderId: body.orderNumber,
         method: 'card',
         methodDetail: null,
+        pgResponse: {
+          paymentKey: body.paymentKey,
+          orderId: body.orderNumber,
+          method: 'card',
+          status: 'DONE',
+          secret: null,
+        },
       };
     } else {
       confirmed = await callTossConfirm({
@@ -175,6 +186,7 @@ export async function confirmPayment(
     p_method: confirmed.method,
     p_method_detail: confirmed.methodDetail ?? '',
     p_amount: order.payment_amount,
+    p_pg_response: confirmed.pgResponse,
   });
 
   if (rpcError) {
@@ -189,12 +201,51 @@ export async function confirmPayment(
         });
       } catch {
         // cancel 실패: 결제 승인 + processing 잔류 — 30분 알람 대상
+        await Promise.resolve(
+          supabase.from('payment_events').insert({
+            order_id: order.id,
+            order_number: body.orderNumber,
+            store_id: order.store_id,
+            event_type: 'payment_compensation_failed',
+            status: 'processed',
+            processed_at: new Date().toISOString(),
+            payload: {
+              failureStage: 'toss_cancel',
+              paymentStateAssumption: 'approved_may_remain',
+              manualAction: 'check_toss_and_cancel_or_refund',
+              orderStatus: 'processing',
+              tossPaymentKey: confirmed.providerPaymentKey,
+            } satisfies PaymentCompensationFailedPayload,
+          })
+        ).catch(() => {});
         throw mapConfirmRpcError(rpcError.message);
       }
     }
     // cancel 성공(또는 MOCK): revert 시도
-    await supabase.rpc('revert_payment_processing', { p_order_id: order.id });
-    // revert 실패도 허용: 결제는 취소됐지만 processing 잔류 — 30분 알람 대상
+    const { error: revertError } = await supabase.rpc(
+      'revert_payment_processing',
+      { p_order_id: order.id }
+    );
+    if (revertError) {
+      // revert 실패: 결제는 취소됐지만 processing 잔류 — 30분 알람 대상
+      await Promise.resolve(
+        supabase.from('payment_events').insert({
+          order_id: order.id,
+          order_number: body.orderNumber,
+          store_id: order.store_id,
+          event_type: 'payment_compensation_failed',
+          status: 'processed',
+          processed_at: new Date().toISOString(),
+          payload: {
+            failureStage: 'revert_processing',
+            paymentStateAssumption: 'cancelled_may_be_done',
+            manualAction: 'restore_order_status',
+            orderStatus: 'processing',
+            tossPaymentKey: confirmed.providerPaymentKey,
+          } satisfies PaymentCompensationFailedPayload,
+        })
+      ).catch(() => {});
+    }
     throw mapConfirmRpcError(rpcError.message);
   }
 }

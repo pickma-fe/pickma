@@ -60,7 +60,7 @@
 | 📋 주문 관리   | -         | `/seller/orders`             | 주문 목록                    | 판매자+가게 | ✅ 구현됨       |
 |                | 주문 상세 | `/seller/orders/[id]`        | 주문 상세, 픽업 처리         | 판매자+가게 | ✅ 구현됨       |
 | 🏠 가게 관리   | -         | `/seller/store`              | 가게 등록/정보               | 판매자      | ✅ 구현됨       |
-|                | 정보 수정 | `/seller/store/edit`         | 가게 정보 수정               | 판매자+가게 | 🚧 미구현 (T53) |
+|                | 정보 수정 | `/seller/store` (모달)       | 가게 정보 수정 (모달 방식)   | 판매자+가게 | ✅ 구현됨       |
 
 ## 2.3 관리자 영역 (`/admin`)
 
@@ -184,7 +184,7 @@
 /seller ...................... 판매자 홈/온보딩 CTA [🚧 T38]
 /seller/register ............. 판매자 신청
 /seller/pending .............. 심사 대기
-/seller/dashboard ............ 대시보드 [✅ T51]
+/seller/dashboard ............ 대시보드
 /seller/menu ................. 메뉴 목록, 판매 등록
 /seller/menu/new ............. 메뉴 등록
 /seller/menu/[menuId]/edit ... 메뉴 수정
@@ -193,7 +193,6 @@
 /seller/orders ............... 주문 목록
 /seller/orders/[id] .......... 주문 상세
 /seller/store ................ 가게 정보
-/seller/store/edit ........... 가게 정보 수정 [🚧 T53]
 (로그인) .................... 전역 모달 — 별도 URL 없음
 
 관리자 영역

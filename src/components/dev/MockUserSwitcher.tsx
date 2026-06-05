@@ -19,6 +19,11 @@ export function MockUserSwitcher() {
     invalidateMe();
   }
 
+  function setSeller() {
+    document.cookie = 'mock_user=seller; path=/';
+    invalidateMe();
+  }
+
   function setCustomer() {
     document.cookie = 'mock_user=customer; path=/';
     invalidateMe();
@@ -54,6 +59,16 @@ export function MockUserSwitcher() {
         }`}
       >
         Admin
+      </button>
+      <button
+        onClick={setSeller}
+        className={`rounded px-3 py-1 text-xs font-medium text-white ${
+          currentRole === 'seller'
+            ? 'bg-green-700 ring-2 ring-green-400'
+            : 'bg-green-500 hover:bg-green-600'
+        }`}
+      >
+        Seller
       </button>
       <button
         onClick={setCustomer}

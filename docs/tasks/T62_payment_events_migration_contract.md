@@ -1,10 +1,10 @@
 # T62. payment_events 테이블 migration 및 이벤트 contract 구현
 
 - 상태:
-  진행 전
+  완료
 
 - GitHub Issue:
-  확인 필요
+  226
 
 - 우선순위:
   P1
@@ -47,3 +47,17 @@
   - 이벤트 타입이 공통 contract에 정의된다.
   - 결제 확정 시 `payment_confirmed` 이벤트가 `store_id`와 함께 atomic하게 삽입된다.
   - T22(Realtime 구독), T31(취소 이벤트), T43(Cron 감지)가 이 테이블을 사용할 수 있다.
+
+- 구현 결과:
+  - `supabase/migrations/20260604120000_payment_events.sql`: `payment_events` 테이블 생성, `payment_events_provider_event_uniq` unique index, RLS 활성화, `confirm_payment` RPC 7→8 args (`p_pg_response jsonb` 추가) + `payment_confirmed` 이벤트 atomic INSERT
+  - `src/lib/supabase/database.ts`: typegen 반영
+  - `src/contracts/payment-event.ts`: `PaymentEventType`, `PaymentEventStatus`, `PaymentCompensationFailedPayload`, `PaymentEventRow` 정의
+  - `src/app/api/payments/_lib/toss.ts`: `TossConfirmResult`에 `pgResponse` 필드 추가
+  - `src/app/api/payments/_lib/service.ts`: `reserved` → `PAYMENT_ALREADY_CONFIRMED` 409, `p_pg_response` RPC 전달, Toss cancel/revert 실패 시 `payment_compensation_failed` best-effort INSERT
+  - `src/lib/errors/errorCodes.ts`, `errorMessages.ts`, `src/app/api/_lib/response.ts`: `PAYMENT_ALREADY_CONFIRMED` 409 추가
+  - `docs/api_spec.md`: `PAYMENT_ALREADY_CONFIRMED` error code 표 갱신
+
+- 검증 결과:
+  - `npx vitest run` (toss.test.ts, service.test.ts, route.test.ts): 54 tests passed
+  - `npx tsc --noEmit`: 통과
+  - `npm run lint`: 통과

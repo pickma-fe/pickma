@@ -79,6 +79,7 @@ describe('callTossConfirm', () => {
           paymentKey: 'toss_ppk_result',
           orderId: 'PM2026TEST',
           method: '카드',
+          status: 'DONE',
         }),
         { status: 200 }
       )
@@ -94,6 +95,13 @@ describe('callTossConfirm', () => {
     expect(result.providerOrderId).toBe('PM2026TEST');
     expect(result.method).toBe('card');
     expect(result.methodDetail).toBeNull();
+    expect(result.pgResponse).toEqual({
+      paymentKey: 'toss_ppk_result',
+      orderId: 'PM2026TEST',
+      method: '카드',
+      status: 'DONE',
+      secret: null,
+    });
   });
 
   it('method 한국어 → PaymentMethod 매핑: 가상계좌', async () => {

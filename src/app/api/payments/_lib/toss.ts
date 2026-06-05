@@ -7,6 +7,13 @@ export interface TossConfirmResult {
   providerOrderId: string;
   method: PaymentMethod;
   methodDetail: string | null;
+  pgResponse: {
+    paymentKey: string;
+    orderId: string;
+    method: string;
+    status: string;
+    secret: string | null;
+  };
 }
 
 const TOSS_CONFIRM_ERROR_MAP: Record<string, () => AppError> = {
@@ -152,6 +159,8 @@ export async function callTossConfirm(params: {
     paymentKey: string;
     orderId: string;
     method: string;
+    status: string;
+    secret?: string;
     card?: { number?: string; installmentPlanMonths?: number };
     easyPay?: { provider?: string };
   };
@@ -174,5 +183,12 @@ export async function callTossConfirm(params: {
     providerOrderId: data.orderId,
     method,
     methodDetail,
+    pgResponse: {
+      paymentKey: data.paymentKey,
+      orderId: data.orderId,
+      method: data.method,
+      status: data.status,
+      secret: data.secret ?? null,
+    },
   };
 }
