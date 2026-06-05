@@ -28,7 +28,7 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 | --- | ------------------------------------------------------------ | -------- | ------- | ------------ | ----------------------- | ---------------------------------------------------------------------------------------------------------------- |
 | T01 | 결제 confirm 보상 정책 확정                                  | P0       | 완료    | 155          | 없음                    | [T01_payment_confirm_compensation_policy.md](T01_payment_confirm_compensation_policy.md)                         |
 | T02 | 판매자 주문 관리 real API 연결                               | P0       | 완료    | 164          | 없음                    | [T02_seller_orders_real_api.md](T02_seller_orders_real_api.md)                                                   |
-| T03 | 관리자 판매자 승인 화면 구현                                 | P0       | 진행 전 | 확인 필요    | T07                     | [T03_admin_seller_approval_page.md](T03_admin_seller_approval_page.md)                                           |
+| T03 | 관리자 판매자 승인 화면 구현                                 | P0       | 완료    | 216          | T07                     | [T03_admin_seller_approval_page.md](T03_admin_seller_approval_page.md)                                           |
 | T04 | 관리자 가게 목록 real endpoint 및 화면 구현                  | P0       | 진행 전 | 확인 필요    | T07                     | [T04_admin_stores_real_endpoint_page.md](T04_admin_stores_real_endpoint_page.md)                                 |
 | T05 | 상품 목록 할인율 필터/정렬 DB pagination 복구                | P0       | 완료    | 183          | T08                     | [T05_product_discount_sort_db_pagination.md](T05_product_discount_sort_db_pagination.md)                         |
 | T06 | Storage orphan 및 개인정보 cleanup 정책 확정                 | P0       | 완료    | 161          | 없음                    | [T06_storage_orphan_privacy_cleanup_policy.md](T06_storage_orphan_privacy_cleanup_policy.md)                     |
@@ -94,9 +94,9 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 
 완료 task는 제외하고, `진행 중`과 `진행 전` task만 기준으로 정렬한다.
 
-1. 즉시 착수 가능한 P0: T03, T04
-2. P1 공통 기반과 정책 정리: T20, T15, T58, T62, T63
-3. P1 차단 해소 후 핵심 API/화면 구현: T40, T45, T39, T51, T54, T53
+1. 즉시 착수 가능한 P0: T04
+2. P1 공통 기반과 정책 정리: T15, T58, T62, T63
+3. P1 차단 해소 후 핵심 API/화면 구현: T40, T45, T39, T54, T53
 4. P2 기능 확장과 운영 기반: T43, T21, T22, T25, T26, T28, T29, T38, T59, T30, T23, T41
 5. 사용자 흐름별 UI/UX 및 접근성 개선: T46, T47, T48, T49
 6. 확장 단계 검토: T31, T32, T33, T34, T35, T36, T37, T57

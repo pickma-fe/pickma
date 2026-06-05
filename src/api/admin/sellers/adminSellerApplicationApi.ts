@@ -1,18 +1,24 @@
+import type { PaginatedResult } from '@/types/common';
+import type { AdminPendingSellerApplication } from '@/types/seller-application';
 import type {
+  AdminPendingSellerApplicationListQuery,
   AdminPendingSellerApplicationListResponse,
   RejectSellerApplicationRequest,
 } from '@/contracts/admin';
 import { apiClient } from '@/api/apiClient';
 
+import { mapAdminPendingSellerApplicationList } from './adminSellerApplicationMapper';
+
 export const adminSellerApplicationApi = {
   getPendingSellerApplications(
-    page = 1,
-    pageSize = 20
-  ): Promise<AdminPendingSellerApplicationListResponse> {
-    return apiClient.get<AdminPendingSellerApplicationListResponse>(
-      '/api/admin/sellers/pending',
-      { page, pageSize }
-    );
+    params: AdminPendingSellerApplicationListQuery = {}
+  ): Promise<PaginatedResult<AdminPendingSellerApplication>> {
+    return apiClient
+      .get<AdminPendingSellerApplicationListResponse>(
+        '/api/admin/sellers/pending',
+        params
+      )
+      .then(mapAdminPendingSellerApplicationList);
   },
 
   approveSellerApplication(id: string): Promise<void> {

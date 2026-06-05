@@ -37,6 +37,20 @@ export interface SellerApplication {
   updatedAt: Date;
 }
 
+export interface AdminPendingSellerApplication extends Omit<
+  SellerApplication,
+  | 'status'
+  | 'documentConsentAgreed'
+  | 'documentConsentAgreedAt'
+  | 'rejectReason'
+  | 'reviewedAt'
+> {
+  applicantEmail: string;
+  applicantName: string;
+  applicantPhone?: string;
+  status: 'pending';
+}
+
 export type SellerApplicationStatusForOnboarding =
   | 'none'
   | SellerApplicationStatus;

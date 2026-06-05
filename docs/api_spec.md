@@ -1135,7 +1135,7 @@ Admin API는 `/api/admin/*`로 분리한다. 모든 Admin API는 `requireAdmin()
 - `/api/admin/sellers/:id/*`의 `:id`는 seller application id이다.
 - `/api/admin/seller-application-documents/:id/read-url`의 `:id`는 seller application document id이다.
 
-`GET /api/admin/sellers/pending`은 pending 신청만 반환한다. 전체 심사 이력/검색은 후속 `/api/admin/seller-applications` 같은 별도 API로 검토한다.
+`GET /api/admin/sellers/pending`은 pending 신청만 반환한다. Query는 `page`, `pageSize`, `keyword`, `createdDate`, `businessCategory`를 지원하며, `totalCount`와 `totalPages`는 적용된 검색/필터 조건 기준으로 반환한다. 승인 완료/거절 이력을 포함한 전체 심사 이력 조회는 후속 `/api/admin/seller-applications` 같은 별도 API로 검토한다.
 
 승인 처리:
 

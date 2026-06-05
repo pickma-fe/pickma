@@ -39,6 +39,7 @@ describe('GET /api/admin/sellers/pending', () => {
 
   it('mock 모드에서 mockAdminPendingSellerApplicationList를 반환한다', async () => {
     vi.mocked(isApiMockEnabled).mockReturnValue(true);
+    vi.mocked(requireAdmin).mockResolvedValue(adminResult);
 
     const res = await GET(makeGetRequest());
     const body = (await res.json()) as {
@@ -51,24 +52,53 @@ describe('GET /api/admin/sellers/pending', () => {
     expect(body.data.items).toHaveLength(
       mockAdminPendingSellerApplicationList.items.length
     );
-    expect(requireAdmin).not.toHaveBeenCalled();
+    expect(requireAdmin).toHaveBeenCalledOnce();
   });
 
-  it('real 모드에서 requireAdmin 호출 후 page/pageSize로 service를 호출한다', async () => {
+  it('mock 모드에서도 권한 검사가 실패하면 error envelope를 반환한다', async () => {
+    vi.mocked(isApiMockEnabled).mockReturnValue(true);
+    vi.mocked(requireAdmin).mockRejectedValue(
+      new AppError(ERROR_CODE.FORBIDDEN, 403)
+    );
+
+    const res = await GET(makeGetRequest());
+    const body = (await res.json()) as {
+      statusCode: number;
+      error: { code: string };
+    };
+
+    expect(res.status).toBe(403);
+    expect(requireAdmin).toHaveBeenCalledOnce();
+    expect(getPendingSellerApplications).not.toHaveBeenCalled();
+    expect(body.statusCode).toBe(res.status);
+    expect(body.error.code).toBe('FORBIDDEN');
+  });
+
+  it('real 모드에서 requireAdmin 호출 후 query로 service를 호출한다', async () => {
     vi.mocked(isApiMockEnabled).mockReturnValue(false);
     vi.mocked(requireAdmin).mockResolvedValue(adminResult);
     vi.mocked(getPendingSellerApplications).mockResolvedValue(
       mockAdminPendingSellerApplicationList
     );
 
-    const res = await GET(makeGetRequest());
+    const res = await GET(
+      makeGetRequest(
+        'page=2&pageSize=10&keyword=%ED%99%8D%EA%B8%B8%EB%8F%99&createdDate=2026-06-04&businessCategory=%EB%B2%A0%EC%9D%B4%EC%BB%A4%EB%A6%AC'
+      )
+    );
 
     expect(res.status).toBe(200);
     expect(requireAdmin).toHaveBeenCalledOnce();
-    expect(getPendingSellerApplications).toHaveBeenCalledWith(1, 20);
+    expect(getPendingSellerApplications).toHaveBeenCalledWith({
+      page: 2,
+      pageSize: 10,
+      keyword: '홍길동',
+      createdDate: '2026-06-04',
+      businessCategory: '베이커리',
+    });
   });
 
-  it('real 모드에서 잘못된 query는 400을 반환한다', async () => {
+  it('real 모드에서 잘못된 query여도 requireAdmin을 먼저 호출한다', async () => {
     vi.mocked(isApiMockEnabled).mockReturnValue(false);
     vi.mocked(requireAdmin).mockResolvedValue(adminResult);
 
@@ -79,8 +109,46 @@ describe('GET /api/admin/sellers/pending', () => {
     };
 
     expect(res.status).toBe(400);
+    expect(requireAdmin).toHaveBeenCalledOnce();
+    expect(getPendingSellerApplications).not.toHaveBeenCalled();
     expect(body.statusCode).toBe(res.status);
     expect(body.error.code).toBe('VALIDATION_ERROR');
+  });
+
+  it('존재하지 않는 createdDate는 400을 반환한다', async () => {
+    vi.mocked(isApiMockEnabled).mockReturnValue(false);
+    vi.mocked(requireAdmin).mockResolvedValue(adminResult);
+
+    const res = await GET(makeGetRequest('createdDate=2026-02-31'));
+    const body = (await res.json()) as {
+      statusCode: number;
+      error: { code: string };
+    };
+
+    expect(res.status).toBe(400);
+    expect(requireAdmin).toHaveBeenCalledOnce();
+    expect(getPendingSellerApplications).not.toHaveBeenCalled();
+    expect(body.statusCode).toBe(res.status);
+    expect(body.error.code).toBe('VALIDATION_ERROR');
+  });
+
+  it('real 모드에서 권한 검사가 실패하면 query validation보다 403을 먼저 반환한다', async () => {
+    vi.mocked(isApiMockEnabled).mockReturnValue(false);
+    vi.mocked(requireAdmin).mockRejectedValue(
+      new AppError(ERROR_CODE.FORBIDDEN, 403)
+    );
+
+    const res = await GET(makeGetRequest('page=-1'));
+    const body = (await res.json()) as {
+      statusCode: number;
+      error: { code: string };
+    };
+
+    expect(res.status).toBe(403);
+    expect(requireAdmin).toHaveBeenCalledOnce();
+    expect(getPendingSellerApplications).not.toHaveBeenCalled();
+    expect(body.statusCode).toBe(res.status);
+    expect(body.error.code).toBe('FORBIDDEN');
   });
 
   it('requireAdmin이 실패하면 error envelope를 반환한다', async () => {
