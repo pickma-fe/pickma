@@ -8,8 +8,14 @@ import { createServiceRoleClient } from '@/lib/supabase/service';
 
 import { toAdminStoreListResponse, toAdminStoreResponse } from './mapper';
 
-function sanitizePostgrestSearchValue(value: string): string {
-  return value.replace(/[%,()]/g, ' ').trim();
+const ADMIN_STORE_SELECT_COLUMNS =
+  'id,user_id,name,description,business_number,phone,address,address_detail,region,image,status,operation_status,created_at,updated_at';
+
+function escapePostgrestLikeValue(value: string): string {
+  return value
+    .replace(/[%,()]/g, ' ')
+    .replace(/[_*]/g, '\\$&')
+    .trim();
 }
 
 export async function getAdminStores(
@@ -21,15 +27,15 @@ export async function getAdminStores(
   const pageSize = query.pageSize ?? 20;
   const offset = (page - 1) * pageSize;
   const searchValue = query.keyword
-    ? sanitizePostgrestSearchValue(query.keyword)
+    ? escapePostgrestLikeValue(query.keyword)
     : '';
   const regionValue = query.region
-    ? sanitizePostgrestSearchValue(query.region)
+    ? escapePostgrestLikeValue(query.region)
     : '';
 
   let storesQuery = supabase
     .from('stores')
-    .select('*', { count: 'exact' })
+    .select(ADMIN_STORE_SELECT_COLUMNS, { count: 'exact' })
     .order('created_at', { ascending: false });
 
   if (query.status) {

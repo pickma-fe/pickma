@@ -30,6 +30,7 @@ const MOCK_STORE = {
 };
 
 interface StoreQuerySpies {
+  select: ReturnType<typeof vi.fn>;
   eq: ReturnType<typeof vi.fn>;
   ilike: ReturnType<typeof vi.fn>;
   or: ReturnType<typeof vi.fn>;
@@ -49,6 +50,7 @@ function buildStoresClient({
   storeQuery: StoreQuerySpies;
 } {
   const storeQuery: StoreQuerySpies = {
+    select: vi.fn(),
     eq: vi.fn(),
     ilike: vi.fn(),
     or: vi.fn(),
@@ -65,7 +67,7 @@ function buildStoresClient({
 
   const client = {
     from: vi.fn().mockReturnValue({
-      select: vi.fn().mockReturnValue({
+      select: storeQuery.select.mockReturnValue({
         order: vi.fn().mockReturnValue(storeQuery),
       }),
     }),
@@ -80,11 +82,15 @@ describe('getAdminStores', () => {
   });
 
   it('관리자 가게 목록을 반환한다', async () => {
-    const { client } = buildStoresClient();
+    const { client, storeQuery } = buildStoresClient();
     vi.mocked(createServiceRoleClient).mockReturnValue(client);
 
     const result = await getAdminStores({ page: 1, pageSize: 20 });
 
+    expect(storeQuery.select).toHaveBeenCalledWith(
+      'id,user_id,name,description,business_number,phone,address,address_detail,region,image,status,operation_status,created_at,updated_at',
+      { count: 'exact' }
+    );
     expect(result.items).toHaveLength(1);
     expect(result.items[0].name).toBe('픽마 베이커리');
     expect(result.items[0].status).toBe('active');
@@ -111,7 +117,7 @@ describe('getAdminStores', () => {
     expect(storeQuery.range).toHaveBeenCalledWith(10, 19);
   });
 
-  it('검색어 sanitize 후 빈 값이면 keyword 필터를 적용하지 않는다', async () => {
+  it('검색어 escape 후 빈 값이면 keyword 필터를 적용하지 않는다', async () => {
     const { client, storeQuery } = buildStoresClient();
     vi.mocked(createServiceRoleClient).mockReturnValue(client);
 
@@ -122,6 +128,23 @@ describe('getAdminStores', () => {
     });
 
     expect(storeQuery.or).not.toHaveBeenCalled();
+  });
+
+  it('LIKE wildcard 문자를 escape해서 검색 조건에 사용한다', async () => {
+    const { client, storeQuery } = buildStoresClient();
+    vi.mocked(createServiceRoleClient).mockReturnValue(client);
+
+    await getAdminStores({
+      page: 1,
+      pageSize: 20,
+      keyword: '픽_마*',
+      region: '서_울',
+    });
+
+    expect(storeQuery.ilike).toHaveBeenCalledWith('region', '%서\\_울%');
+    expect(storeQuery.or).toHaveBeenCalledWith(
+      'name.ilike.%픽\\_마\\*%,business_number.ilike.%픽\\_마\\*%,phone.ilike.%픽\\_마\\*%,address.ilike.%픽\\_마\\*%'
+    );
   });
 
   it('Supabase 오류가 있으면 INTERNAL_SERVER_ERROR를 던진다', async () => {

@@ -41,6 +41,11 @@ export function AdminStoresPageContent() {
   const { data, isLoading, isError, refetch, isFetching } =
     useAdminStores(query);
   const stores = data?.items ?? [];
+  const hasSubmittedFilters =
+    submittedKeyword.trim().length > 0 ||
+    Boolean(submittedStatus) ||
+    submittedRegion.trim().length > 0;
+  const countLabel = hasSubmittedFilters ? '조건에 맞는 가게' : '전체 가게';
 
   function submitFilters() {
     setSubmittedKeyword(keyword);
@@ -70,7 +75,7 @@ export function AdminStoresPageContent() {
 
       <section className="rounded-lg border border-gray-200 bg-white px-5 py-4">
         <p className="text-sm font-semibold text-gray-900">
-          전체 가게 {data?.totalCount ?? 0}건
+          {countLabel} {data?.totalCount ?? 0}건
         </p>
       </section>
 

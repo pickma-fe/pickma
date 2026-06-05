@@ -5,8 +5,25 @@ import type {
 import type { Database } from '@/lib/supabase/database';
 
 type StoreRow = Database['public']['Tables']['stores']['Row'];
+type AdminStoreRow = Pick<
+  StoreRow,
+  | 'id'
+  | 'user_id'
+  | 'name'
+  | 'description'
+  | 'business_number'
+  | 'phone'
+  | 'address'
+  | 'address_detail'
+  | 'region'
+  | 'image'
+  | 'status'
+  | 'operation_status'
+  | 'created_at'
+  | 'updated_at'
+>;
 
-export function toAdminStoreResponse(row: StoreRow): AdminStoreResponse {
+export function toAdminStoreResponse(row: AdminStoreRow): AdminStoreResponse {
   return {
     id: row.id,
     userId: row.user_id,
