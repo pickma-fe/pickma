@@ -137,13 +137,13 @@ export function StoreInfoContent() {
       {
         onSuccess: () => {
           showToast('가게 정보가 저장되었습니다.');
+          handleCloseModal();
         },
         onError: () => {
           showToast('가게 정보 저장에 실패했습니다.');
         },
       }
     );
-    handleCloseModal();
   };
 
   const handleImageEdit = (imageUrl: string, file?: File) => {
@@ -153,15 +153,17 @@ export function StoreInfoContent() {
         {
           onSuccess: () => {
             showToast('이미지가 변경되었습니다.');
+            handleCloseModal();
           },
           onError: () => {
             showToast('이미지 변경에 실패했습니다.');
           },
         }
       );
+    } else {
+      // file 없으면 변경사항 없음 - 기존 이미지 유지
+      handleCloseModal();
     }
-    // file 없으면 변경사항 없음 - 기존 이미지 유지
-    handleCloseModal();
   };
 
   const handleCertificationSubmit = (certLabel: string, imageUrl: string) => {
@@ -286,6 +288,7 @@ export function StoreInfoContent() {
           storeInfo={storeInfo}
           onSubmit={handleStoreEdit}
           onCancel={handleCloseModal}
+          isPending={isUpdating}
         />
       </Modal>
 

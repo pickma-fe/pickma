@@ -10,6 +10,7 @@ interface StoreEditFormProps {
   storeInfo: MyStore;
   onSubmit: (data: StoreEditData) => void;
   onCancel: () => void;
+  isPending?: boolean;
 }
 
 export interface StoreEditData {
@@ -27,6 +28,7 @@ export function StoreEditForm({
   storeInfo,
   onSubmit,
   onCancel,
+  isPending = false,
 }: StoreEditFormProps) {
   const [formData, setFormData] = useState<StoreEditData>({
     name: storeInfo.name,
@@ -138,10 +140,17 @@ export function StoreEditForm({
       </div>
 
       <div className="flex justify-end gap-2">
-        <Button variant="outline" color="gray" onClick={onCancel}>
+        <Button
+          variant="outline"
+          color="gray"
+          onClick={onCancel}
+          disabled={isPending}
+        >
           취소
         </Button>
-        <Button onClick={handleSubmit}>저장</Button>
+        <Button onClick={handleSubmit} disabled={isPending}>
+          {isPending ? '저장 중...' : '저장'}
+        </Button>
       </div>
     </div>
   );
