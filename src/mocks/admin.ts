@@ -2,6 +2,7 @@ import type {
   AdminPendingSellerApplicationListQuery,
   AdminPendingSellerApplicationListResponse,
   AdminPendingSellerApplicationResponse,
+  AdminDashboardStatsResponse,
   AdminStoreListQuery,
   AdminStoreListResponse,
   AdminStoreResponse,
@@ -196,4 +197,88 @@ export const mockPendingAdminStoreList: AdminStoreListResponse = {
   pageSize: PAGE_SIZE,
   totalCount: pendingStores.length,
   totalPages: Math.ceil(pendingStores.length / PAGE_SIZE),
+};
+
+export const mockAdminDashboardStats: AdminDashboardStatsResponse = {
+  totalStores: mockAdminStores.length,
+  totalProducts: 1524,
+  totalOrders: 8342,
+  totalUsers: 12680,
+  dailyMetrics: [
+    {
+      date: '2026-05-30T00:00:00.000Z',
+      orderCount: 650,
+      salesAmount: 32_000_000,
+    },
+    {
+      date: '2026-05-31T00:00:00.000Z',
+      orderCount: 820,
+      salesAmount: 41_000_000,
+    },
+    {
+      date: '2026-06-01T00:00:00.000Z',
+      orderCount: 870,
+      salesAmount: 43_000_000,
+    },
+    {
+      date: '2026-06-02T00:00:00.000Z',
+      orderCount: 760,
+      salesAmount: 37_000_000,
+    },
+    {
+      date: '2026-06-03T00:00:00.000Z',
+      orderCount: 910,
+      salesAmount: 45_000_000,
+    },
+    {
+      date: '2026-06-04T00:00:00.000Z',
+      orderCount: 800,
+      salesAmount: 39_000_000,
+    },
+    {
+      date: '2026-06-05T00:00:00.000Z',
+      orderCount: 700,
+      salesAmount: 34_000_000,
+    },
+  ],
+  recentPendingApplications: [
+    {
+      id: mockAdminPendingSellerApplication.id,
+      companyName: mockAdminPendingSellerApplication.companyName,
+      businessCategory: mockAdminPendingSellerApplication.businessCategory,
+      createdAt: mockAdminPendingSellerApplication.createdAt,
+    },
+  ],
+  recentOrders: [
+    {
+      id: 'order_mock_1',
+      productName: '연어 샐러드',
+      storeName: '샐러디 강남점',
+      paymentAmount: 12900,
+      status: 'ready',
+      createdAt: '2026-06-05T03:30:00.000Z',
+    },
+    {
+      id: 'order_mock_2',
+      productName: '아메리카노',
+      storeName: '커피에 반하다 역삼점',
+      paymentAmount: 4500,
+      status: 'completed',
+      createdAt: '2026-06-05T02:40:00.000Z',
+    },
+  ],
+  recentUsers: [
+    {
+      id: 'user_mock_1',
+      name: '김민지',
+      email: 'minji@example.com',
+      createdAt: '2026-06-05T00:00:00.000Z',
+    },
+    {
+      id: 'user_mock_2',
+      name: '박서준',
+      email: 'park@example.com',
+      createdAt: '2026-06-04T00:00:00.000Z',
+    },
+  ],
 };

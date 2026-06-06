@@ -1232,6 +1232,17 @@ A-ORDER-01은 `status=processing` filter를 지원해야 한다. `processing` �
 | A-DASH-01 | 플랫폼 통계 | GET    | `/api/admin/dashboard/stats` | P1       |
 | A-DASH-02 | 일별 현황   | GET    | `/api/admin/dashboard/daily` | P2       |
 
+`GET /api/admin/dashboard/stats`는 `requireAdmin()`을 통과한 관리자에게만 플랫폼 summary count를 반환한다. 응답은 공통 envelope의 `data`에 아래 필드를 포함한다.
+
+- `totalStores`: 전체 가게 수
+- `totalProducts`: 전체 상품 수 (`menu_items` 기준)
+- `totalOrders`: 전체 주문 수
+- `totalUsers`: 전체 사용자 수
+- `dailyMetrics`: 최근 7일 주문 수와 매출액
+- `recentPendingApplications`: 최근 승인 대기 판매자 신청
+- `recentOrders`: 최근 주문 내역
+- `recentUsers`: 최근 가입 사용자
+
 ---
 
 ## 11. Wishlist

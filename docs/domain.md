@@ -413,20 +413,43 @@ export interface WishlistItem {
 
 ```ts
 export interface AdminDashboardStats {
-  totalUsers: number;
   totalStores: number;
-  pendingStores: number;
   totalProducts: number;
   totalOrders: number;
-  totalSalesAmount: number;
+  totalUsers: number;
+  dailyMetrics: DailyAdminMetric[];
+  recentPendingApplications: AdminDashboardPendingApplicationSummary[];
+  recentOrders: AdminDashboardRecentOrder[];
+  recentUsers: AdminDashboardRecentUser[];
 }
 
 export interface DailyAdminMetric {
   date: Date;
   orderCount: number;
   salesAmount: number;
-  newUserCount: number;
-  newStoreCount: number;
+}
+
+export interface AdminDashboardPendingApplicationSummary {
+  id: string;
+  companyName: string;
+  businessCategory: string;
+  createdAt: Date;
+}
+
+export interface AdminDashboardRecentOrder {
+  id: string;
+  productName: string;
+  storeName: string;
+  paymentAmount: number;
+  status: string;
+  createdAt: Date;
+}
+
+export interface AdminDashboardRecentUser {
+  id: string;
+  name: string;
+  email: string;
+  createdAt: Date;
 }
 ```
 

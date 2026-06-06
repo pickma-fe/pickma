@@ -28,6 +28,46 @@ export interface AdminStoreListQuery {
   region?: string;
 }
 
+export interface AdminDashboardStatsResponse {
+  totalStores: number;
+  totalProducts: number;
+  totalOrders: number;
+  totalUsers: number;
+  dailyMetrics: AdminDashboardDailyMetricResponse[];
+  recentPendingApplications: AdminDashboardPendingApplicationSummaryResponse[];
+  recentOrders: AdminDashboardRecentOrderResponse[];
+  recentUsers: AdminDashboardRecentUserResponse[];
+}
+
+export interface AdminDashboardDailyMetricResponse {
+  date: string;
+  orderCount: number;
+  salesAmount: number;
+}
+
+export interface AdminDashboardPendingApplicationSummaryResponse {
+  id: string;
+  companyName: string;
+  businessCategory: string;
+  createdAt: string;
+}
+
+export interface AdminDashboardRecentOrderResponse {
+  id: string;
+  productName: string;
+  storeName: string;
+  paymentAmount: number;
+  status: string;
+  createdAt: string;
+}
+
+export interface AdminDashboardRecentUserResponse {
+  id: string;
+  name: string;
+  email: string;
+  createdAt: string;
+}
+
 export interface AdminPendingSellerApplicationResponse {
   id: string;
   userId: string;

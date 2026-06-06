@@ -1,3 +1,4 @@
+export type { AdminDashboardStats } from './admin';
 export type { AuthProvider, AuthResult, AuthSession, AuthUser } from './auth';
 export type {
   ConsumerOrderListQuery,

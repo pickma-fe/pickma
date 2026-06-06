@@ -15,6 +15,9 @@ export function useRejectSellerApplication() {
       void queryClient.invalidateQueries({
         queryKey: queryKeys.admin.sellers.pending(),
       });
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.admin.dashboard.stats(),
+      });
     },
   });
 }

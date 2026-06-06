@@ -1,4 +1,5 @@
 export type {
+  AdminDashboardStatsResponse,
   AdminPendingSellerApplicationListResponse,
   AdminPendingSellerApplicationResponse,
   AdminStoreListResponse,
