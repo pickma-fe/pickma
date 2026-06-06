@@ -60,6 +60,7 @@ export function AdminDashboardRejectModal({
             <textarea
               id="dashboard-reject-reason"
               value={reason}
+              disabled={isSubmitting}
               onChange={(event) => {
                 setReason(event.target.value);
                 setError('');

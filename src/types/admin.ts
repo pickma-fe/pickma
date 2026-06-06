@@ -27,9 +27,20 @@ export interface AdminDashboardRecentOrder {
   productName: string;
   storeName: string;
   paymentAmount: number;
-  status: string;
+  status: AdminDashboardRecentOrderStatus;
   createdAt: Date;
 }
+
+export type AdminDashboardRecentOrderStatus =
+  | 'payment_pending'
+  | 'processing'
+  | 'reserved'
+  | 'accepted'
+  | 'ready'
+  | 'completed'
+  | 'cancelled'
+  | 'no_show'
+  | 'expired';
 
 export interface AdminDashboardRecentUser {
   id: string;

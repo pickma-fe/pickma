@@ -29,6 +29,16 @@ function getTooltipX(x: number, chartRight: number): number {
 export function AdminDashboardDailyChart({
   metrics,
 }: AdminDashboardDailyChartProps) {
+  if (metrics.length === 0) {
+    return (
+      <AdminCard title="일별 주문/매출 현황">
+        <div className="flex min-h-64 items-center justify-center text-sm text-gray-500">
+          집계 데이터가 없습니다.
+        </div>
+      </AdminCard>
+    );
+  }
+
   const maxOrderCount = Math.max(
     ...metrics.map((metric) => metric.orderCount),
     1
@@ -126,9 +136,16 @@ export function AdminDashboardDailyChart({
             if (!metric) return null;
             const tooltipX = getTooltipX(point.x, chartRight);
             const tooltipY = Math.max(4, point.y - TOOLTIP_HEIGHT - 14);
+            const metricLabel = `${formatDateLabel(metric.date)} 주문 ${CURRENCY_FORMATTER.format(metric.orderCount)}건, 매출 ${CURRENCY_FORMATTER.format(metric.salesAmount)}원`;
 
             return (
-              <g key={`${point.x}-${point.y}`} className="group cursor-pointer">
+              <g
+                key={`${point.x}-${point.y}`}
+                tabIndex={0}
+                role="img"
+                aria-label={metricLabel}
+                className="group cursor-pointer outline-none"
+              >
                 <rect
                   x={point.x - Math.max(step / 2, 24)}
                   y={chartTop}
@@ -143,7 +160,7 @@ export function AdminDashboardDailyChart({
                   y2={chartBottom}
                   stroke="#d1d5db"
                   strokeDasharray="4 4"
-                  className="opacity-0 transition-opacity group-hover:opacity-100"
+                  className="opacity-0 transition-opacity group-hover:opacity-100 group-focus:opacity-100"
                 />
                 <circle
                   cx={point.x}
@@ -153,7 +170,7 @@ export function AdminDashboardDailyChart({
                   stroke="#009C4A"
                   strokeWidth="3"
                 />
-                <g className="pointer-events-none opacity-0 transition-opacity group-hover:opacity-100">
+                <g className="pointer-events-none opacity-0 transition-opacity group-hover:opacity-100 group-focus:opacity-100">
                   <rect
                     x={tooltipX}
                     y={tooltipY}

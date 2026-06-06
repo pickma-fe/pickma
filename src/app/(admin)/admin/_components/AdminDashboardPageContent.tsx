@@ -175,6 +175,7 @@ export function AdminDashboardPageContent() {
       </section>
 
       <AdminDashboardRejectModal
+        key={rejectApplication?.id ?? 'closed'}
         application={rejectApplication}
         isSubmitting={rejectMutation.isPending}
         onClose={() => setRejectApplication(undefined)}

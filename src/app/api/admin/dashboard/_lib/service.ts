@@ -18,7 +18,7 @@ type PendingApplicationRow = {
 type RecentOrderRow = {
   id: string;
   payment_amount: number;
-  status: string;
+  status: AdminDashboardStatsResponse['recentOrders'][number]['status'];
   created_at: string;
   stores: { name: string } | null;
   order_items: { product_name: string }[] | null;
@@ -33,6 +33,13 @@ type RecentUserRow = {
 const DAILY_METRIC_DAYS = 7;
 const RECENT_ITEM_LIMIT = 5;
 const KOREA_TIME_ZONE = 'Asia/Seoul';
+const DAILY_METRIC_ORDER_STATUSES = [
+  'reserved',
+  'accepted',
+  'ready',
+  'completed',
+  'no_show',
+] satisfies AdminDashboardStatsResponse['recentOrders'][number]['status'][];
 
 async function countRows(
   supabase: ServiceRoleClient,
@@ -90,6 +97,7 @@ async function getDailyMetrics(
   const { data, error } = await supabase
     .from('orders')
     .select('created_at, payment_amount')
+    .in('status', DAILY_METRIC_ORDER_STATUSES)
     .gte('created_at', start)
     .lt('created_at', end);
 

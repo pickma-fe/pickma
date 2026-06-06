@@ -13,10 +13,28 @@ vi.mock('@/lib/supabase/service', () => ({
 function buildDashboardClient(
   counts: Record<string, number>,
   errorTable?: string
-): ReturnType<typeof createServiceRoleClient> {
+): {
+  client: ReturnType<typeof createServiceRoleClient>;
+  dailyMetricQuery: {
+    in: ReturnType<typeof vi.fn>;
+    gte: ReturnType<typeof vi.fn>;
+    lt: ReturnType<typeof vi.fn>;
+  };
+} {
   const now = new Date().toISOString();
+  const dailyMetricQuery = {
+    in: vi.fn(),
+    gte: vi.fn(),
+    lt: vi.fn(),
+  };
+  dailyMetricQuery.in.mockReturnValue(dailyMetricQuery);
+  dailyMetricQuery.gte.mockReturnValue(dailyMetricQuery);
+  dailyMetricQuery.lt.mockResolvedValue({
+    data: [{ created_at: now, payment_amount: 12000 }],
+    error: null,
+  });
 
-  return {
+  const client = {
     from: vi.fn().mockImplementation((table: string) => {
       const countResult = {
         data: null,
@@ -31,14 +49,7 @@ function buildDashboardClient(
           }
 
           if (table === 'orders' && columns === 'created_at, payment_amount') {
-            return {
-              gte: vi.fn().mockReturnValue({
-                lt: vi.fn().mockResolvedValue({
-                  data: [{ created_at: now, payment_amount: 12000 }],
-                  error: null,
-                }),
-              }),
-            };
+            return dailyMetricQuery;
           }
 
           if (table === 'orders') {
@@ -107,6 +118,8 @@ function buildDashboardClient(
       };
     }),
   } as unknown as ReturnType<typeof createServiceRoleClient>;
+
+  return { client, dailyMetricQuery };
 }
 
 describe('getAdminDashboardStats', () => {
@@ -115,7 +128,7 @@ describe('getAdminDashboardStats', () => {
   });
 
   it('관리자 대시보드 통계와 최근 현황을 반환한다', async () => {
-    const client = buildDashboardClient({
+    const { client, dailyMetricQuery } = buildDashboardClient({
       stores: 12,
       menu_items: 34,
       orders: 56,
@@ -129,6 +142,13 @@ describe('getAdminDashboardStats', () => {
     expect(client.from).toHaveBeenCalledWith('menu_items');
     expect(client.from).toHaveBeenCalledWith('orders');
     expect(client.from).toHaveBeenCalledWith('users');
+    expect(dailyMetricQuery.in).toHaveBeenCalledWith('status', [
+      'reserved',
+      'accepted',
+      'ready',
+      'completed',
+      'no_show',
+    ]);
     expect(result).toMatchObject({
       totalStores: 12,
       totalProducts: 34,
@@ -158,7 +178,7 @@ describe('getAdminDashboardStats', () => {
   });
 
   it('count 조회 오류가 있으면 INTERNAL_SERVER_ERROR를 던진다', async () => {
-    const client = buildDashboardClient({}, 'orders');
+    const { client } = buildDashboardClient({}, 'orders');
     vi.mocked(createServiceRoleClient).mockReturnValue(client);
 
     await expect(getAdminDashboardStats()).rejects.toSatisfy(

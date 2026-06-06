@@ -1,4 +1,5 @@
 import type { PaginatedResult } from './common';
+import type { OrderStatusParam } from './order';
 import type { SellerApplicationDocumentResponse } from './seller-application';
 
 export interface AdminStoreResponse {
@@ -57,7 +58,7 @@ export interface AdminDashboardRecentOrderResponse {
   productName: string;
   storeName: string;
   paymentAmount: number;
-  status: string;
+  status: OrderStatusParam;
   createdAt: string;
 }
 
