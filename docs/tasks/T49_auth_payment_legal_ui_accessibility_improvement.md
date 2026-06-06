@@ -31,7 +31,7 @@
   인증과 결제 화면에서 form label, error message, redirect/loading 상태, 실패 복구 CTA가 불명확하면 사용자가 계정 생성이나 결제를 완료하지 못할 수 있다. 법적 고지 페이지는 긴 문서 구조와 링크 탐색 접근성도 함께 고려해야 한다.
 
 - 작업 내용:
-  - auth, payment, legal 화면을 T45 체크리스트로 점검한다.
+  - auth, payment, legal 화면을 `docs/ui_accessibility_baseline.md` 기준으로 점검한다(컴포넌트 접근성, UI 상태, 반응형, 시각 품질, UX 완성도, 기존 UI 보완 포함).
   - 로그인/회원가입/비밀번호 재설정 form의 label, validation, error, focus 처리를 점검한다.
   - 결제 성공/실패/checkout 화면의 loading, 실패 복구 CTA, query parameter 오류 상태를 점검한다.
   - 개인정보처리방침/이용약관 페이지의 heading 구조, link, 모바일 가독성을 점검한다.

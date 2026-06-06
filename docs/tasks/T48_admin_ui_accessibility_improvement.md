@@ -31,7 +31,7 @@
   관리자 화면에서 심사 action, 상태 badge, table/list, confirm/reject 흐름의 접근성 기준이 흐리면 잘못된 운영 판단이나 작업 실수가 발생할 수 있다.
 
 - 작업 내용:
-  - 관리자 홈, 판매자 승인, 가게 목록 화면을 T45 체크리스트로 점검한다.
+  - 관리자 홈, 판매자 승인, 가게 목록 화면을 `docs/ui_accessibility_baseline.md` 기준으로 점검한다(컴포넌트 접근성, UI 상태, 반응형, 시각 품질, UX 완성도, 기존 UI 보완 포함).
   - pending/approved/rejected 등 심사 상태 표시와 action CTA의 의미를 명확히 한다.
   - approve/reject dialog, reason 입력, confirm action의 keyboard/focus 처리를 점검한다.
   - table/list의 빈 상태, loading/error 상태, 모바일 표시를 점검한다.

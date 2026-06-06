@@ -31,7 +31,7 @@
   판매자 화면의 form, table/list, 상태 badge, CTA, error/empty 상태가 일관되지 않으면 입점과 운영 업무가 어렵고, 심사/주문 처리 같은 핵심 작업에서 실수가 발생하기 쉽다.
 
 - 작업 내용:
-  - 판매자 홈, 상품/메뉴/가게/주문/등록 화면을 T45 체크리스트로 점검한다.
+  - 판매자 홈, 상품/메뉴/가게/주문/등록 화면을 `docs/ui_accessibility_baseline.md` 기준으로 점검한다(컴포넌트 접근성, UI 상태, 반응형, 시각 품질, UX 완성도, 기존 UI 보완 포함).
   - form label, validation message, file upload, disabled state, focus 이동을 점검한다.
   - table/list의 정렬, 필터, 빈 상태, 행 action, 모바일 표시를 점검한다.
   - T29 판매자 제출 문서 확인 UX와 T38 판매자 랜딩/온보딩 CTA 흐름과 충돌하지 않게 개선 범위를 조정한다.
