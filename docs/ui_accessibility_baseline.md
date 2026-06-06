@@ -210,13 +210,13 @@ WCAG AA 기준을 따르되, 아래 예외를 인정한다.
 
 아래 항목은 현황 조사에서 확인된 `src/components/common/**` 접근성 미비 사항이다. 실제 수정은 **T64** 범위에서 처리한다. T46~T49 점검 시 중복 수정하지 않는다.
 
-| 컴포넌트   | 현황                                      | T64 개선 목표                               |
-| ---------- | ----------------------------------------- | ------------------------------------------- |
-| Button     | `aria-label` prop 없음 (아이콘 전용 버튼) | `aria-label` prop 추가                      |
-| Pagination | `focus-visible:ring-2` 미적용             | focus ring 스타일 추가                      |
-| Footer     | 링크 focus 스타일 없음                    | `focus-visible:ring-2` 적용                 |
-| Badge      | aria 속성 없음                            | `role="status"` 또는 `aria-label` 기준 적용 |
-| Modal      | `aria-modal` 명시 없음                    | Headless UI Dialog `aria-modal` 동작 확인   |
+| 컴포넌트   | 현황                                                                                                                | T64 개선 목표                                                                       |
+| ---------- | ------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| Button     | `aria-label` 전달 가능(`ButtonHTMLAttributes` 확장). 아이콘 전용 Button 사용처의 accessible name 누락 여부는 미확인 | 아이콘 전용 Button 사용처의 accessible name 누락 여부 점검 및 story/usage 기준 정의 |
+| Pagination | `focus-visible:ring-2` 미적용                                                                                       | focus ring 스타일 추가                                                              |
+| Footer     | 링크 focus 스타일 없음                                                                                              | `focus-visible:ring-2` 적용                                                         |
+| Badge      | aria 속성 없음                                                                                                      | `role="status"` 또는 `aria-label` 기준 적용                                         |
+| Modal      | `aria-modal` 명시 없음                                                                                              | Headless UI Dialog `aria-modal` 동작 확인                                           |
 
 ---
 

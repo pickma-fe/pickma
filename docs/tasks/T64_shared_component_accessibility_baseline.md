@@ -25,13 +25,13 @@
   QA
 
 - 배경:
-  T45에서 공통 UI/UX 및 접근성 baseline 기준(`docs/ui_accessibility_baseline.md`)이 수립됐다. T46~T49에서 도메인별 화면에 baseline을 적용하기 전에, `src/components/common/**`의 공통 컴포넌트가 baseline을 먼저 충족해야 한다. 현황 파악 결과, 아이콘 전용 Button의 aria-label prop 부재, Pagination과 Footer의 focus ring 미적용, Badge의 aria 속성 부재, Modal의 aria-modal 명시 누락이 확인됐다.
+  T45에서 공통 UI/UX 및 접근성 baseline 기준(`docs/ui_accessibility_baseline.md`)이 수립됐다. T46~T49에서 도메인별 화면에 baseline을 적용하기 전에, `src/components/common/**`의 공통 컴포넌트가 baseline을 먼저 충족해야 한다. 현황 파악 결과, 공통 Button은 `ButtonHTMLAttributes`를 확장하므로 `aria-label` 전달 자체는 가능하나 아이콘 전용 Button 사용처의 accessible name 누락 여부는 미확인 상태다. Pagination과 Footer의 focus ring 미적용, Badge의 aria 속성 부재, Modal의 aria-modal 명시 누락도 확인됐다.
 
 - 문제:
   공통 컴포넌트에 접근성 기준이 빠져 있으면 T46~T49에서 도메인 화면을 점검해도 공통 컴포넌트에서 동일한 문제가 반복된다. T65(도메인 컴포넌트 폴더 통일)보다 먼저 처리해야 이동 후에도 접근성 기준이 유지된다.
 
 - 작업 내용:
-  - Button: 아이콘 전용 버튼용 `aria-label` prop을 추가한다. 텍스트 포함 버튼은 `aria-label`이 없어도 된다.
+  - Button: 아이콘 전용 Button 사용처를 찾아 accessible name(`aria-label` 또는 `aria-labelledby`) 누락 여부를 점검하고, 누락된 곳을 수정한다. story/usage 기준을 정의한다.
   - Pagination: 각 페이지 버튼과 이전/다음 버튼에 `focus-visible:ring-2` 스타일을 적용한다.
   - Footer: 모든 링크에 `focus-visible:ring-2` 스타일을 적용한다.
   - Badge: 상태 배지에 `role="status"` 또는 의미 전달용 `aria-label`을 추가한다. 순수 장식적 Badge는 적용 제외.
@@ -52,7 +52,7 @@
 
 - 완료 기준:
   - `src/components/common/**`의 Button, Pagination, Footer, Badge, Modal이 `docs/ui_accessibility_baseline.md` 1·3·4절 기준을 만족한다.
-  - 아이콘 전용 Button에 `aria-label` prop이 추가된다.
+  - 아이콘 전용 Button 사용처의 accessible name 누락 여부가 점검되고 수정된다. story/usage 기준이 정의된다.
   - Pagination과 Footer 링크에 `focus-visible:ring-2` 스타일이 적용된다.
   - 상태 Badge에 `role="status"` 또는 `aria-label`이 적용된다.
   - 각 공통 컴포넌트에 Storybook 상태 story가 보강된다.
