@@ -44,9 +44,6 @@
   - `docs/ui_accessibility_baseline.md` 작성 완료 (10절 구성: 컴포넌트 접근성·UI 상태·반응형·시각 품질·UX·T64 debt·키보드 탐색·501 정책 참조·검증 방식·컴포넌트 위치 규칙)
   - `src/app/layout.tsx`: `viewport-fit: 'cover'` 추가, `lang="ko"` 버그 수정
   - `src/app/globals.css`: `@utility pb-safe` 추가
-  - 커밋: `chore: viewport-fit cover, pb-safe 유틸리티, lang 한국어 설정` (4088bfb)
-  - 커밋: `docs: UI/UX 및 접근성 baseline 기준 문서 작성` (7d30445)
-  - 커밋: `docs: baseline에 prefers-reduced-motion, autocomplete 기준 추가` (398038f)
   - 후속 task: T64(공통 컴포넌트 접근성), T65(도메인 컴포넌트 폴더 통일), T66(Capacitor/PWA), T67(i18n)
 
 - 관련 파일/영역:
