@@ -56,4 +56,4 @@
   - admin seller route 4개 `route.test.ts` 신규 작성 (pending, approve, reject, read-url)
   - seller-applications, files/upload-url, seller/onboarding-status `route.test.ts` 신규 작성
   - 전체 API 테스트 482개 통과, lint 에러 없음
-  - NOT_IMPLEMENTED route (admin/stores, orders/cancel, seller/stock) 테스트는 후속 task(T04, T31, T28)로 명시적 이관; seller/no-show는 이후 구현됨 (테스트 추가: T52)
+  - NOT_IMPLEMENTED route 중 admin/stores는 T04에서, seller/stock은 T28에서 구현 완료; orders/cancel 테스트는 후속 task(T31)로 명시적 이관; seller/no-show는 이후 구현됨 (테스트 추가: T52)

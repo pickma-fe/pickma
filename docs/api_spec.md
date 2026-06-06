@@ -1332,11 +1332,10 @@ RPC에서 raise하는 예외는 아래 정책으로 API error code로 변환한�
 `API_MOCK_ENABLED=false`에서 `NOT_IMPLEMENTED` 501을 반환하는 endpoint 목록이다.
 각 endpoint의 실제 구현은 담당 task에서 진행하며, 담당 task 완료 기준에 `NOT_IMPLEMENTED` 반환 코드 제거가 포함된다.
 
-| endpoint                                       | method | real mode | mock mode | UI 연결 여부           | 운영 노출 위험 | 담당 task |
-| ---------------------------------------------- | ------ | --------- | --------- | ---------------------- | -------------- | --------- |
-| `PATCH /api/orders/{orderId}/cancel`           | PATCH  | 501       | 성공      | hook 정의됨, UI 미연결 | 낮음           | T31       |
-| `POST /api/payments/{paymentId}/cancel`        | POST   | 501       | 성공      | hook 정의됨, UI 미연결 | 낮음           | T31       |
-| `PATCH /api/seller/products/{productId}/stock` | PATCH  | 501       | 성공      | hook 정의됨, UI 미연결 | 낮음           | T28       |
+| endpoint                                | method | real mode | mock mode | UI 연결 여부           | 운영 노출 위험 | 담당 task |
+| --------------------------------------- | ------ | --------- | --------- | ---------------------- | -------------- | --------- |
+| `PATCH /api/orders/{orderId}/cancel`    | PATCH  | 501       | 성공      | hook 정의됨, UI 미연결 | 낮음           | T31       |
+| `POST /api/payments/{paymentId}/cancel` | POST   | 501       | 성공      | hook 정의됨, UI 미연결 | 낮음           | T31       |
 
 ### 501 연결 액션 운영 노출 정책
 

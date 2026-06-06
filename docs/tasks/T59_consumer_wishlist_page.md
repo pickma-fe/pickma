@@ -46,8 +46,9 @@
 - 완료 기준:
   - `/mypage/wishlist`에서 찜한 가게 목록을 확인할 수 있다.
   - 가게 찜 추가/삭제가 동작한다.
-  - PRD C-MY-04 중 가게 찜 범위를 충족한다 (상품 찜은 ERD/API spec 미정의 — 후속 task).
+  - PRD C-MY-04 중 가게 찜 범위를 충족한다.
+  - 상품 찜 ERD/API/화면 확장이 필요하면 T59 작업 중 후속 task를 생성한다.
 
 - 확인 필요 사항:
   - wishlist API 현재 구현 상태 (`api_spec` 11장 기준)
-  - 상품 찜은 현재 ERD/API spec 미정의 — 필요 시 후속 task로 분리
+  - 상품 찜은 현재 ERD/API spec 미정의 — 필요 시 T59 작업 중 후속 task로 분리
