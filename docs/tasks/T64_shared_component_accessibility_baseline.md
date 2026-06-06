@@ -40,12 +40,11 @@
   - desktop/tablet(768–1024px)/mobile(375–430px) viewport에서 focus ring 시각 확인과 aria 속성 적용을 수동 검증한다.
 
 - 관련 파일/영역:
-  - `src/components/common/Button.tsx`
-  - `src/components/common/Pagination.tsx`
-  - `src/components/common/Footer.tsx`
-  - `src/components/common/Badge.tsx`
-  - `src/components/common/Modal.tsx` (또는 해당 Dialog 컴포넌트)
-  - 각 컴포넌트 Storybook story 파일
+  - `src/components/common/Button/Button.tsx`, `Button.stories.tsx`
+  - `src/components/common/Pagination/Pagination.tsx`, `Pagination.stories.tsx`
+  - `src/components/common/Footer/Footer.tsx`, `Footer.stories.tsx`
+  - `src/components/common/Badge/Badge.tsx`, `Badge.stories.tsx`
+  - `src/components/common/Modal/Modal.tsx`, `Modal.stories.tsx`
 
 - 예상 난이도:
   낮음~중간
