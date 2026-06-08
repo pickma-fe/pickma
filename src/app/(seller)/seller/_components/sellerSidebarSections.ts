@@ -1,11 +1,4 @@
-import {
-  Store,
-  Package,
-  ClipboardList,
-  Megaphone,
-  UtensilsCrossed,
-  LayoutDashboard,
-} from 'lucide-react';
+import { Store, Package, ClipboardList, LayoutDashboard } from 'lucide-react';
 
 import type { SidebarSection } from '@/components/common/Sidebar/Sidebar.types';
 
@@ -29,11 +22,6 @@ export const sellerSidebarSections: SidebarSection[] = [
         label: '가게 관리',
         icon: Store,
         children: [
-          {
-            id: 'store-register',
-            label: '인증 및 가게 등록',
-            href: '/seller/register',
-          },
           {
             id: 'store-info',
             label: '가게 정보 관리',
@@ -67,23 +55,6 @@ export const sellerSidebarSections: SidebarSection[] = [
         label: '주문 관리',
         icon: ClipboardList,
         href: '/seller/orders',
-      },
-    ],
-  },
-  {
-    id: 'etc',
-    items: [
-      {
-        id: 'review',
-        label: '리뷰 관리',
-        href: '/seller/reviews',
-        icon: Megaphone,
-      },
-      {
-        id: 'notice',
-        label: '공지사항',
-        href: '/seller/notice',
-        icon: UtensilsCrossed,
       },
     ],
   },
