@@ -906,6 +906,12 @@ BEGIN
     RAISE EXCEPTION 'ORDER_NOT_FOUND';
   END IF;
 
+  IF v_order.status = 'cancelled' THEN
+    RETURN QUERY SELECT true;
+  END IF;
+  IF v_order.status = 'cancelling' THEN
+    RETURN QUERY SELECT true;
+  END IF;
   IF v_order.status NOT IN ('reserved', 'accepted') THEN
     RAISE EXCEPTION 'INVALID_ORDER_STATUS';
   END IF;
