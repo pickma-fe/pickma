@@ -327,7 +327,8 @@ export async function cancelPaymentById(
           cancel_claimed_at: null,
           updated_at: new Date().toISOString(),
         })
-        .eq('id', order.id);
+        .eq('id', order.id)
+        .eq('status', 'cancelling');
       throw new AppError(ERROR_CODE.PAYMENT_CANCEL_FAILED, 502);
     }
   }
