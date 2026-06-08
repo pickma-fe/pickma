@@ -1288,6 +1288,18 @@ Admin API는 `/api/admin/*`로 분리한다. 모든 Admin API는 `requireAdmin()
 | A-USER-01 | 사용자 목록 조회 | GET    | `/api/admin/users`                | P1       |
 | A-USER-02 | 사용자 상태 변경 | PATCH  | `/api/admin/users/:userId/status` | P1       |
 
+`GET /api/admin/users` query:
+
+- `page`: positive integer, default `1`
+- `pageSize`: positive integer, max `100`, default `20`
+- `keyword`: optional string, 이름/이메일/연락처 검색
+- `role`: optional `customer | seller | admin`
+- `status`: optional `active | suspended | deleted`
+
+응답은 공통 `PaginatedResult<AdminUserResponse>` envelope를 사용하며, 모든 요청은 `requireAdmin()`을 통과해야 한다.
+
+사용자 상태 변경 API는 T57 범위에서 운영 UI에 노출하지 않는다. 실제 정지/활성화 정책과 audit logging 기준 확정 후 별도 구현한다.
+
 ### 10.4 Products / Orders
 
 | PRD ID     | 기능           | Method | API                   | Priority |
@@ -1295,7 +1307,28 @@ Admin API는 `/api/admin/*`로 분리한다. 모든 Admin API는 `requireAdmin()
 | A-PROD-01  | 전체 상품 조회 | GET    | `/api/admin/products` | P1       |
 | A-ORDER-01 | 전체 주문 조회 | GET    | `/api/admin/orders`   | P1       |
 
-A-ORDER-01은 `status=processing` filter를 지원해야 한다. `processing` 잔류 주문 운영 확인(30분 알람 기준)에 사용된다. 우선순위 P1 유지, T04 이후 구현 예정.
+A-ORDER-01은 `status=processing` filter를 지원한다. `processing` 잔류 주문 운영 확인(30분 알람 기준)에 사용된다.
+
+`GET /api/admin/products` query:
+
+- `page`: positive integer, default `1`
+- `pageSize`: positive integer, max `100`, default `20`
+- `keyword`: optional string, 상품명/가게명 검색
+- `status`: optional `active | closed`
+- `storeId`: optional uuid
+
+응답은 공통 `PaginatedResult<AdminProductResponse>` envelope를 사용하며, 모든 요청은 `requireAdmin()`을 통과해야 한다.
+
+`GET /api/admin/orders` query:
+
+- `page`: positive integer, default `1`
+- `pageSize`: positive integer, max `100`, default `20`
+- `keyword`: optional string, 주문번호/매장별 주문번호/픽업번호/가게명 검색
+- `status`: optional `payment_pending | processing | reserved | accepted | ready | completed | cancelled | no_show | expired`
+- `sort`: optional `createdAt | pickupAt`, default `createdAt`
+- `order`: optional `asc | desc`, default `desc`
+
+응답은 공통 `PaginatedResult<AdminOrderResponse>` envelope를 사용하며, 모든 요청은 `requireAdmin()`을 통과해야 한다.
 
 ### 10.5 Dashboard
 

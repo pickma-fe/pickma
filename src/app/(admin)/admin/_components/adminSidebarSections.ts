@@ -1,4 +1,10 @@
-import { LayoutDashboard, Store, Users } from 'lucide-react';
+import {
+  ClipboardList,
+  LayoutDashboard,
+  Package,
+  Store,
+  Users,
+} from 'lucide-react';
 
 import type { SidebarSection } from '@/components/common/Sidebar/Sidebar.types';
 
@@ -29,6 +35,24 @@ export const adminSidebarSections: SidebarSection[] = [
         label: '가게 관리',
         href: '/admin/stores',
         icon: Store,
+      },
+      {
+        id: 'user-management',
+        label: '사용자 관리',
+        href: '/admin/users',
+        icon: Users,
+      },
+      {
+        id: 'product-management',
+        label: '상품 관리',
+        href: '/admin/products',
+        icon: Package,
+      },
+      {
+        id: 'order-management',
+        label: '주문 관리',
+        href: '/admin/orders',
+        icon: ClipboardList,
       },
     ],
   },
