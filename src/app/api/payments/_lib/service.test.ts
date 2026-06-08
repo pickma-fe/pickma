@@ -8,6 +8,7 @@ import type { TossConfirmResult } from './toss';
 
 vi.mock('@/lib/supabase/service');
 vi.mock('./toss');
+vi.mock('@/app/api/_lib/toss-cancel');
 
 const mockUserId = 'user-1';
 
@@ -535,7 +536,8 @@ describe('confirmPayment', () => {
   describe('confirm_payment RPC 실패 시 Option B 보상', () => {
     it('PAYMENT_MOCK=false + cancel 성공 → revert_payment_processing 호출 후 PAYMENT_CONFIRM_FAILED', async () => {
       vi.stubEnv('PAYMENT_MOCK', 'false');
-      const { callTossConfirm, callTossCancel } = await import('./toss');
+      const { callTossConfirm } = await import('./toss');
+      const { callTossCancel } = await import('@/app/api/_lib/toss-cancel');
       vi.mocked(callTossConfirm).mockResolvedValue(mockTossResult);
       vi.mocked(callTossCancel).mockResolvedValue(undefined);
       const client = makeClient({
@@ -567,7 +569,8 @@ describe('confirmPayment', () => {
 
     it('PAYMENT_MOCK=false + cancel 실패 → revert_payment_processing 미호출 후 PAYMENT_CONFIRM_FAILED', async () => {
       vi.stubEnv('PAYMENT_MOCK', 'false');
-      const { callTossConfirm, callTossCancel } = await import('./toss');
+      const { callTossConfirm } = await import('./toss');
+      const { callTossCancel } = await import('@/app/api/_lib/toss-cancel');
       vi.mocked(callTossConfirm).mockResolvedValue(mockTossResult);
       const { AppError } = await import('@/lib/errors/appError');
       vi.mocked(callTossCancel).mockRejectedValueOnce(
@@ -602,7 +605,8 @@ describe('confirmPayment', () => {
 
     it('PAYMENT_MOCK=false + cancel 성공 + revert 실패 → PAYMENT_CONFIRM_FAILED', async () => {
       vi.stubEnv('PAYMENT_MOCK', 'false');
-      const { callTossConfirm, callTossCancel } = await import('./toss');
+      const { callTossConfirm } = await import('./toss');
+      const { callTossCancel } = await import('@/app/api/_lib/toss-cancel');
       vi.mocked(callTossConfirm).mockResolvedValue(mockTossResult);
       vi.mocked(callTossCancel).mockResolvedValue(undefined);
       const client = makeClient({
@@ -637,7 +641,7 @@ describe('confirmPayment', () => {
     });
 
     it('PAYMENT_MOCK=true + confirm_payment 실패 → cancel 미호출, revert_payment_processing 호출', async () => {
-      const { callTossCancel } = await import('./toss');
+      const { callTossCancel } = await import('@/app/api/_lib/toss-cancel');
       const client = makeClient({
         rpcErrors: { confirm_payment: { message: 'unknown error' } },
       });

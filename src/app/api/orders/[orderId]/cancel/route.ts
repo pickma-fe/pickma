@@ -1,28 +1,42 @@
 import { ERROR_CODE } from '@/lib/errors/errorCodes';
 import { requireActiveUser } from '@/app/api/_lib/auth';
-import { isApiMockEnabled } from '@/app/api/_lib/mock';
 import { fail, routeError, success } from '@/app/api/_lib/response';
 
-import { orderIdSchema } from '../../_lib/schemas';
+import { cancelOrderSchema, orderIdSchema } from '../../_lib/schemas';
+import { cancelOrder } from '../../_lib/service';
 
 export async function PATCH(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ orderId: string }> }
 ): Promise<Response> {
   const { orderId } = await params;
 
-  const parsed = orderIdSchema.safeParse(orderId);
-  if (!parsed.success) {
+  const idParsed = orderIdSchema.safeParse(orderId);
+  if (!idParsed.success) {
     return fail(ERROR_CODE.VALIDATION_ERROR, 400, [
-      { path: 'orderId', message: parsed.error.issues[0].message },
+      { path: 'orderId', message: idParsed.error.issues[0].message },
     ]);
   }
 
-  if (isApiMockEnabled()) return success(undefined);
-
   try {
-    await requireActiveUser();
-    return fail(ERROR_CODE.NOT_IMPLEMENTED);
+    const { authUser: user } = await requireActiveUser();
+
+    let body: unknown;
+    try {
+      body = await request.json();
+    } catch {
+      return fail(ERROR_CODE.VALIDATION_ERROR, 400);
+    }
+
+    const bodyParsed = cancelOrderSchema.safeParse(body);
+    if (!bodyParsed.success) {
+      return fail(ERROR_CODE.VALIDATION_ERROR, 400, [
+        { path: 'reason', message: bodyParsed.error.issues[0].message },
+      ]);
+    }
+
+    await cancelOrder(user.id, idParsed.data, bodyParsed.data.reason);
+    return success(undefined);
   } catch (error) {
     return routeError(error);
   }

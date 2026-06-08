@@ -19,6 +19,10 @@ export interface CreateOrderRequest {
   pickupAt: string;
 }
 
+export interface CancelOrderRequest {
+  reason: string;
+}
+
 export interface CreateOrderResponse {
   id: string;
   orderNumber: string;

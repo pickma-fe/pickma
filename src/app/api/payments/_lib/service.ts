@@ -7,10 +7,10 @@ import type { PaymentCompensationFailedPayload } from '@/contracts/payment-event
 import { AppError } from '@/lib/errors/appError';
 import { ERROR_CODE } from '@/lib/errors/errorCodes';
 import { createServiceRoleClient } from '@/lib/supabase/service';
+import { callTossCancel } from '@/app/api/_lib/toss-cancel';
 
 import {
   buildTossCheckoutUrl,
-  callTossCancel,
   callTossConfirm,
   type TossConfirmResult,
 } from './toss';
