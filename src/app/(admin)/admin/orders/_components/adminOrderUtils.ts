@@ -7,6 +7,7 @@ export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
   accepted: '접수 완료',
   ready: '픽업 준비',
   completed: '픽업 완료',
+  cancelling: '취소 처리 중',
   cancelled: '취소',
   noShow: '노쇼',
   expired: '만료',

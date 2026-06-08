@@ -42,3 +42,8 @@ export const SinglePage: Story = {
   args: { totalPages: 1 },
   render: (args) => <PaginationWithState totalPages={args.totalPages} />,
 };
+
+export const EmptyState: Story = {
+  args: { totalPages: 0 },
+  render: (args) => <PaginationWithState totalPages={args.totalPages} />,
+};
