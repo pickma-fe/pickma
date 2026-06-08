@@ -515,6 +515,7 @@ describe('getOrder', () => {
 
 const mockOrderForCancel = {
   id: 'order-uuid-1',
+  status: 'reserved',
   order_number: 'PM2026TEST',
   payment_amount: 5000,
   store_id: 'store-uuid-1',
@@ -602,6 +603,22 @@ describe('cancelOrder', () => {
     await expect(
       cancelOrder('user-1', 'order-uuid-1', '취소')
     ).rejects.toMatchObject({ code: ERROR_CODE.ORDER_NOT_FOUND });
+  });
+
+  it('reserved 아닌 상태(accepted) → INVALID_ORDER_STATUS 409', async () => {
+    const client = makeCancelClient({
+      orderData: { ...mockOrderForCancel, status: 'accepted' },
+    });
+    vi.mocked(createServiceRoleClient).mockReturnValue(
+      client as unknown as ReturnType<typeof createServiceRoleClient>
+    );
+
+    await expect(
+      cancelOrder('user-1', 'order-uuid-1', '취소')
+    ).rejects.toMatchObject({
+      code: ERROR_CODE.INVALID_ORDER_STATUS,
+      statusCode: 409,
+    });
   });
 
   it('begin_order_cancel RPC 실패(INVALID_ORDER_STATUS) → 409', async () => {

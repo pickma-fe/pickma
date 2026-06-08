@@ -67,13 +67,17 @@ export async function cancelOrder(
 
   const { data: order, error } = await supabase
     .from('orders')
-    .select('id, order_number, payment_amount, store_id, payments(payment_key)')
+    .select(
+      'id, status, order_number, payment_amount, store_id, payments(payment_key)'
+    )
     .eq('id', orderId)
     .eq('user_id', userId)
     .maybeSingle();
 
   if (error) throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
   if (!order) throw new AppError(ERROR_CODE.ORDER_NOT_FOUND, 404);
+  if (order.status !== 'reserved')
+    throw new AppError(ERROR_CODE.INVALID_ORDER_STATUS, 409);
 
   const paymentRow = Array.isArray(order.payments)
     ? order.payments[0]
