@@ -705,7 +705,11 @@ function makeAdminClient(
     insertError = null,
   } = overrides;
 
-  const innerEqFn = vi.fn().mockResolvedValue({ error: updateError });
+  const selectAfterEqFn = vi.fn().mockResolvedValue({
+    data: updateError ? null : [{ id: 'order-uuid-1' }],
+    error: updateError,
+  });
+  const innerEqFn = vi.fn().mockReturnValue({ select: selectAfterEqFn });
   const outerEqFn = vi.fn().mockReturnValue({ eq: innerEqFn });
   const ordersUpdateChain = {
     update: vi.fn().mockReturnValue({ eq: outerEqFn }),
@@ -785,6 +789,29 @@ describe('cancelPaymentById', () => {
   it('order.status가 허용 목록 외 → INVALID_ORDER_STATUS 409', async () => {
     const client = makeAdminClient({
       orderData: { ...mockOrderRowForCancel, status: 'completed' },
+    });
+    vi.mocked(createServiceRoleClient).mockReturnValue(
+      client as unknown as ReturnType<typeof createServiceRoleClient>
+    );
+
+    await expect(
+      cancelPaymentById('payment-uuid-1', '관리자 취소')
+    ).rejects.toMatchObject({
+      code: ERROR_CODE.INVALID_ORDER_STATUS,
+      statusCode: 409,
+    });
+  });
+
+  it('클레임 업데이트 0 rows(동시 요청) → INVALID_ORDER_STATUS 409', async () => {
+    const client = makeAdminClient({ updateError: null });
+    // select 결과가 빈 배열 → 다른 요청이 이미 상태 변경
+    const selectAfterEqFn = vi
+      .fn()
+      .mockResolvedValue({ data: [], error: null });
+    (client.from('orders').update as ReturnType<typeof vi.fn>).mockReturnValue({
+      eq: vi.fn().mockReturnValue({
+        eq: vi.fn().mockReturnValue({ select: selectAfterEqFn }),
+      }),
     });
     vi.mocked(createServiceRoleClient).mockReturnValue(
       client as unknown as ReturnType<typeof createServiceRoleClient>

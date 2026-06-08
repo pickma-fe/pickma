@@ -287,7 +287,7 @@ export async function cancelPaymentById(
   }
 
   if (order.status !== 'cancelling') {
-    const { error: claimError } = await supabase
+    const { data: claimed, error: claimError } = await supabase
       .from('orders')
       .update({
         status: 'cancelling',
@@ -296,8 +296,11 @@ export async function cancelPaymentById(
         updated_at: new Date().toISOString(),
       })
       .eq('id', order.id)
-      .eq('status', order.status);
+      .eq('status', order.status)
+      .select('id');
     if (claimError) throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
+    if (!claimed || claimed.length === 0)
+      throw new AppError(ERROR_CODE.INVALID_ORDER_STATUS, 409);
   }
 
   if (process.env.PAYMENT_MOCK !== 'true') {
