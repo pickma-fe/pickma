@@ -20,5 +20,5 @@ export const confirmPaymentSchema = z.object({
 export const paymentIdSchema = z.uuid();
 
 export const cancelPaymentSchema = z.object({
-  reason: z.string().min(1).max(500),
+  reason: z.string().trim().min(1).max(500),
 }) satisfies z.ZodType<CancelPaymentRequest>;

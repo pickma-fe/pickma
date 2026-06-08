@@ -36,5 +36,5 @@ export const orderListQuerySchema = z
 export const orderIdSchema = z.uuid();
 
 export const cancelOrderSchema = z.object({
-  reason: z.string().min(1).max(500),
+  reason: z.string().trim().min(1).max(500),
 }) satisfies z.ZodType<CancelOrderRequest>;
