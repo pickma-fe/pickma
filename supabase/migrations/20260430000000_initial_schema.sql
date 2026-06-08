@@ -982,8 +982,9 @@ BEGIN
      WHERE id = v_payment.id;
   END IF;
 
+  -- restores stock (paid order cancel)
   UPDATE products p
-     SET reserved_stock = GREATEST(0, p.reserved_stock - oi.quantity)
+     SET stock = p.stock + oi.quantity
     FROM order_items oi
    WHERE oi.order_id = p_order_id
      AND p.id = oi.product_id;
