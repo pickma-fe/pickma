@@ -1051,6 +1051,76 @@ DB source:
 - Response: `200 { statusCode: 200, data: StoreResponse }`
 - 정책: `businessNumber` 수정 불가
 
+### 7.6 `GET /api/seller-applications/me`
+
+판매자 본인의 최신 신청 정보와 제출 문서 목록을 조회한다.
+
+| 기능                | Method | API                           | Auth   | Priority |
+| ------------------- | ------ | ----------------------------- | ------ | -------- |
+| 본인 신청 정보 조회 | GET    | `/api/seller-applications/me` | seller | P2       |
+
+Auth 조건:
+
+- `requireActiveUser()`를 통과한 로그인 사용자만 호출할 수 있다.
+
+Response: `SellerApplicationResponse` (기존 7.1 참조)
+
+Behavior:
+
+- `seller_applications` 테이블을 `user_id = authUser.id` 조건으로 조회한다. service role client + `eq('user_id', userId)` 소유권 조건을 사용하며, 해당 테이블은 RLS enable 상태이나 authenticated 직접 접근을 막는 정책으로 운영된다.
+- 최신 신청(`created_at DESC LIMIT 1`)을 반환하며, `seller_application_documents`를 함께 조회해 `documents` 배열에 포함한다.
+- 신청 이력이 없으면 `SELLER_APPLICATION_NOT_FOUND (404)`를 반환한다.
+- `SellerApplicationDocumentResponse.storagePath`는 응답에 포함되나, 클라이언트는 이 값으로 Storage에 직접 접근하지 않는다. 문서 미리보기는 반드시 아래 7.7 signed URL API를 경유한다.
+
+에러 정책:
+
+| 조건                      | HTTP | error code                     |
+| ------------------------- | ---- | ------------------------------ |
+| 미인증 또는 inactive user | 401  | `UNAUTHORIZED`                 |
+| 신청 이력 없음            | 404  | `SELLER_APPLICATION_NOT_FOUND` |
+| DB 조회 실패              | 500  | `INTERNAL_SERVER_ERROR`        |
+
+---
+
+### 7.7 `GET /api/seller-applications/me/documents/[documentId]`
+
+판매자 본인의 제출 문서에 대한 단기 signed URL을 발급한다.
+
+| 기능                 | Method | API                                                 | Auth   | Priority |
+| -------------------- | ------ | --------------------------------------------------- | ------ | -------- |
+| 문서 signed URL 발급 | GET    | `/api/seller-applications/me/documents/:documentId` | seller | P2       |
+
+Auth 조건:
+
+- `requireActiveUser()`를 통과한 로그인 사용자만 호출할 수 있다.
+- 요청한 `documentId`가 본인 신청(`seller_applications.user_id = authUser.id`)에 속하는지 서버에서 검증한다.
+
+Response:
+
+```ts
+export interface SellerApplicationDocumentReadUrlResponse {
+  signedUrl: string;
+}
+```
+
+Behavior:
+
+- `seller_application_documents` 테이블에서 `documentId`로 문서를 조회한다.
+- 해당 문서의 `application_id`로 `seller_applications`를 조회해 `user_id`가 요청자와 일치하는지 소유권을 검증한다.
+- 소유권 검증 통과 후 Supabase Storage `seller-application-documents` bucket에서 `storage_path` 기준으로 signed URL을 발급한다. 만료 시간은 **5분**이다.
+- 클라이언트는 signed URL만 받으며, `storagePath`로 Storage에 직접 접근하지 않는다.
+- signed URL은 `image/jpeg`, `image/png`, `application/pdf` 문서 모두에 적용된다. 클라이언트는 `contentType` 기준으로 이미지(`image/*`)는 미리보기, PDF 등은 새 탭 열기로 분기한다.
+- `staleTime`은 클라이언트 hook에서 4분으로 설정해 만료 전 갱신을 유도한다.
+
+에러 정책:
+
+| 조건                            | HTTP | error code                       |
+| ------------------------------- | ---- | -------------------------------- |
+| 미인증 또는 inactive user       | 401  | `UNAUTHORIZED`                   |
+| documentId에 해당하는 문서 없음 | 404  | `APPLICATION_DOCUMENT_NOT_FOUND` |
+| 문서가 본인 신청 소속이 아님    | 403  | `FORBIDDEN`                      |
+| Storage signed URL 생성 실패    | 500  | `INTERNAL_SERVER_ERROR`          |
+
 ---
 
 ## 8. Seller Products
@@ -1115,7 +1185,9 @@ Seller order API는 `requireSellerStore()`를 통과해야 하며, 해당 주문
 ### 9.1 상태 전이 정책
 
 ```
+
 reserved → (PATCH /accept) → accepted → (PATCH /ready) → ready → (PATCH /complete) → completed
+
 ```
 
 - accept 허용 상태: `reserved`

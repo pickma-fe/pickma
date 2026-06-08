@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 
+import type { SellerApplicationDocument } from '@/types/seller-application';
+import { useMySellerApplication } from '@/hooks/seller/applications/useMySellerApplication';
 import { useMyStore } from '@/hooks/stores/useMyStore';
 import { useUpdateStore } from '@/hooks/stores/useUpdateStore';
 import { Badge } from '@/components/common/Badge/Badge';
@@ -10,6 +12,7 @@ import { Modal } from '@/components/common/Modal/Modal';
 import { Section } from '@/components/common/Section/Section';
 
 import { BasicInfoSection } from './BasicInfoSection';
+import { DOC_TYPE_LABEL } from './certificationConstants';
 import { CertificationDetailModal } from './CertificationDetailModal';
 import { CertificationSection } from './CertificationSection';
 import { OperationInfoSection } from './OperationInfoSection';
@@ -20,70 +23,23 @@ import { StoreImageSection } from './StoreImageSection';
 
 type ModalType = 'editStore' | 'editImage' | 'viewCertification' | null;
 
-interface CertificationData {
-  status: boolean;
-  imageUrl?: string;
-  expiresAt?: string;
-}
-
-// TODO: [후속 task] 인증서류 API 연결
-// 현재 mock 하드코딩 상태 - 서류 제출/조회 API 미구현
-// PATCH /api/stores/me 연결은 완료됨
-const INITIAL_CERTIFICATIONS: Record<string, CertificationData> = {
-  businessLicense: {
-    status: true,
-    imageUrl: '/images/mock/documents/business-license.jpeg',
-  },
-  foodServicePermit: {
-    status: true,
-    imageUrl: '/images/mock/documents/food-service-permit.jpeg',
-  },
-  bankAccount: {
-    status: true,
-    imageUrl: '/images/mock/documents/bank-account.jpeg',
-  },
-  salesLicense: {
-    status: false,
-    imageUrl: undefined,
-  },
-  hygieneLicense: {
-    status: false,
-    imageUrl: undefined,
-    expiresAt: undefined,
-  },
-};
-
-const CERT_KEY_MAP: Record<string, string> = {
-  '사업자 등록증': 'businessLicense',
-  영업신고증: 'foodServicePermit',
-  '통장 사본': 'bankAccount',
-  '통신판매업 신고증': 'salesLicense',
-  '위생교육 수료증': 'hygieneLicense',
-};
-
-const REGISTER_CERTS = ['사업자 등록증', '영업신고증', '통장 사본'];
-
 export function StoreInfoContent() {
   const { data: storeInfo, isLoading, isError } = useMyStore();
   const { mutate: updateStore, isPending: isUpdating } = useUpdateStore();
+  const {
+    data: application,
+    isLoading: isApplicationLoading,
+    isError: isApplicationError,
+  } = useMySellerApplication();
+
   const [activeModal, setActiveModal] = useState<ModalType>(null);
-  const [selectedCertification, setSelectedCertification] = useState<
-    string | null
-  >(null);
-  const [certifications, setCertifications] = useState(INITIAL_CERTIFICATIONS);
+  const [selectedDocument, setSelectedDocument] =
+    useState<SellerApplicationDocument | null>(null);
   const [toastMessage, setToastMessage] = useState('');
 
   const showToast = (message: string) => {
     setToastMessage(message);
     setTimeout(() => setToastMessage(''), 3000);
-  };
-
-  const certificationStatus = {
-    businessLicense: certifications.businessLicense.status,
-    foodServicePermit: certifications.foodServicePermit.status,
-    bankAccount: certifications.bankAccount.status,
-    salesLicense: certifications.salesLicense.status,
-    hygieneLicense: certifications.hygieneLicense.status,
   };
 
   const handleOpenModal = (modal: ModalType) => {
@@ -92,11 +48,13 @@ export function StoreInfoContent() {
 
   const handleCloseModal = () => {
     setActiveModal(null);
-    setSelectedCertification(null);
+    setSelectedDocument(null);
   };
 
-  const handleViewCertification = (label: string) => {
-    setSelectedCertification(label);
+  const handleViewDocument = (documentId: string) => {
+    const doc = application?.documents.find((d) => d.id === documentId);
+    if (!doc) return;
+    setSelectedDocument(doc);
     setActiveModal('viewCertification');
   };
 
@@ -161,37 +119,8 @@ export function StoreInfoContent() {
         }
       );
     } else {
-      // file 없으면 변경사항 없음 - 기존 이미지 유지
       handleCloseModal();
     }
-  };
-
-  const handleCertificationSubmit = (certLabel: string, imageUrl: string) => {
-    const key = CERT_KEY_MAP[certLabel];
-    if (key) {
-      const newData: CertificationData = {
-        status: true,
-        imageUrl,
-      };
-
-      if (certLabel === '위생교육 수료증') {
-        const nextYear = new Date();
-        nextYear.setFullYear(nextYear.getFullYear() + 1);
-        newData.expiresAt = nextYear.toISOString().split('T')[0];
-      }
-
-      setCertifications((prev) => ({
-        ...prev,
-        [key]: newData,
-      }));
-    }
-    handleCloseModal();
-  };
-
-  const getSelectedCertData = () => {
-    if (!selectedCertification) return null;
-    const key = CERT_KEY_MAP[selectedCertification];
-    return certifications[key];
   };
 
   if (isLoading) {
@@ -211,8 +140,6 @@ export function StoreInfoContent() {
       <div className="p-8 text-center text-gray-500">가게 정보가 없습니다.</div>
     );
   }
-
-  const selectedCertData = getSelectedCertData();
 
   return (
     <div className="flex flex-col gap-6">
@@ -272,10 +199,20 @@ export function StoreInfoContent() {
           storeInfo={storeInfo}
           onEditImage={() => handleOpenModal('editImage')}
         />
-        <CertificationSection
-          onViewCertification={handleViewCertification}
-          certificationStatus={certificationStatus}
-        />
+        {isApplicationError ? (
+          <Section variant="card" className="bg-white">
+            <p className="text-sm text-red-500">
+              제출 서류 정보를 불러오지 못했습니다.
+            </p>
+          </Section>
+        ) : (
+          <CertificationSection
+            documents={application?.documents ?? []}
+            applicationStatus={application?.status ?? 'pending'}
+            onViewDocument={handleViewDocument}
+            isLoading={isApplicationLoading}
+          />
+        )}
       </div>
 
       <Modal
@@ -310,18 +247,17 @@ export function StoreInfoContent() {
       <Modal
         isOpen={activeModal === 'viewCertification'}
         onClose={handleCloseModal}
-        title={selectedCertification ? `${selectedCertification}` : '인증 정보'}
+        title={
+          selectedDocument
+            ? (DOC_TYPE_LABEL[selectedDocument.type] ?? '제출 서류')
+            : '제출 서류'
+        }
         size="md"
       >
-        {selectedCertification && selectedCertData && (
+        {selectedDocument && (
           <CertificationDetailModal
-            label={selectedCertification}
-            isCompleted={selectedCertData.status}
-            imageUrl={selectedCertData.imageUrl}
-            expiresAt={selectedCertData.expiresAt}
+            document={selectedDocument}
             onClose={handleCloseModal}
-            onSubmit={handleCertificationSubmit}
-            canSubmitHere={!REGISTER_CERTS.includes(selectedCertification)}
           />
         )}
       </Modal>

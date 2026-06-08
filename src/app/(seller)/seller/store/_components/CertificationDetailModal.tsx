@@ -1,131 +1,85 @@
 'use client';
 
 import Image from 'next/image';
-import { useState, useRef, useEffect } from 'react';
 
+import type { SellerApplicationDocument } from '@/types/seller-application';
+import { useDocumentSignedUrl } from '@/hooks/seller/applications/useDocumentSignedUrl';
 import { Badge } from '@/components/common/Badge/Badge';
 import { Button } from '@/components/common/Button/Button';
 
+import { DOC_TYPE_LABEL } from './certificationConstants';
+
 interface CertificationDetailModalProps {
-  label: string;
-  isCompleted: boolean;
-  imageUrl?: string;
+  document: SellerApplicationDocument;
   onClose: () => void;
-  onSubmit: (label: string, imageUrl: string) => void;
-  canSubmitHere: boolean;
-  expiresAt?: string;
+}
+
+function isImageContentType(contentType: string): boolean {
+  return contentType.startsWith('image/');
 }
 
 export function CertificationDetailModal({
-  label,
-  isCompleted,
-  imageUrl,
+  document,
   onClose,
-  onSubmit,
-  canSubmitHere,
-  expiresAt,
 }: CertificationDetailModalProps) {
-  const [previewUrl, setPreviewUrl] = useState<string | null>(imageUrl ?? null);
-  const [isUploading, setIsUploading] = useState(false);
-  const isSubmittedRef = useRef(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const label = DOC_TYPE_LABEL[document.type] ?? document.type;
+  const isImage = isImageContentType(document.contentType);
 
-  useEffect(() => {
-    const currentUrl = previewUrl;
-    return () => {
-      if (currentUrl?.startsWith('blob:') && !isSubmittedRef.current) {
-        URL.revokeObjectURL(currentUrl);
-      }
-    };
-  }, [previewUrl]);
+  const {
+    data: signedUrl,
+    isLoading,
+    isError,
+  } = useDocumentSignedUrl({
+    documentId: document.id,
+  });
 
-  const isExpired = expiresAt ? new Date(expiresAt) < new Date() : false;
-  const needsRenewal = label === '위생교육 수료증' && isCompleted && isExpired;
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (previewUrl?.startsWith('blob:')) {
-        URL.revokeObjectURL(previewUrl);
-      }
-      const url = URL.createObjectURL(file);
-      setPreviewUrl(url);
-      setIsUploading(true);
-    }
-    e.currentTarget.value = '';
-  };
-
-  const handleSelectClick = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleSubmit = () => {
-    if (previewUrl) {
-      isSubmittedRef.current = true;
-      onSubmit(label, previewUrl);
-    }
-  };
-
-  const handleClose = () => {
-    if (previewUrl?.startsWith('blob:') && !isSubmittedRef.current) {
-      URL.revokeObjectURL(previewUrl);
-    }
-    onClose();
-  };
-
-  const getDescription = () => {
-    if (!isCompleted) {
-      return `${label}을(를) 제출해주세요.`;
-    }
-    if (isExpired) {
-      return `${label}이(가) 만료되었습니다. 갱신이 필요합니다.`;
-    }
-    return `${label}이(가) 정상적으로 인증되었습니다.`;
-  };
-
-  const getBadgeColor = () => {
-    if (!isCompleted) return 'warning';
-    if (isExpired) return 'danger';
-    return 'success';
-  };
-
-  const getBadgeText = () => {
-    if (!isCompleted) return '신청 필요';
-    if (isExpired) return '갱신 필요';
-    return '인증 완료';
-  };
-
-  const renderImage = () => {
-    if (!previewUrl) {
+  const renderDocument = () => {
+    if (isLoading) {
       return (
-        <div className="flex aspect-[4/3] w-full items-center justify-center rounded-lg bg-gray-100 text-gray-400">
-          이미지가 없습니다
+        <div className="flex aspect-[4/3] w-full items-center justify-center rounded-lg bg-gray-100">
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600" />
         </div>
       );
     }
 
-    if (previewUrl.startsWith('blob:')) {
+    if (isError || !signedUrl) {
+      return (
+        <div className="flex aspect-[4/3] w-full items-center justify-center rounded-lg bg-gray-100 text-sm text-red-500">
+          문서를 불러올 수 없습니다
+        </div>
+      );
+    }
+
+    if (isImage) {
       return (
         <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg bg-gray-100">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={previewUrl}
+          <Image
+            src={signedUrl}
             alt={label}
-            className="h-full w-full object-contain"
+            fill
+            sizes="(max-width: 768px) 100vw, 500px"
+            className="object-contain"
+            unoptimized
           />
         </div>
       );
     }
 
+    // PDF 등 이미지가 아닌 문서
     return (
-      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg bg-gray-100">
-        <Image
-          src={previewUrl}
-          alt={label}
-          fill
-          sizes="(max-width: 768px) 100vw, 500px"
-          className="object-contain"
-        />
+      <div className="flex aspect-[4/3] w-full flex-col items-center justify-center gap-3 rounded-lg bg-gray-100">
+        <span className="text-4xl">📄</span>
+        <p className="text-sm text-gray-500">
+          이 문서는 미리보기를 지원하지 않습니다.
+        </p>
+        <a
+          href={signedUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="rounded-md bg-gray-900 px-4 py-2 text-sm text-white hover:bg-gray-700"
+        >
+          새 탭에서 열기
+        </a>
       </div>
     );
   };
@@ -134,49 +88,30 @@ export function CertificationDetailModal({
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <span className="text-sm font-medium text-gray-900">{label}</span>
-        <Badge variant="soft" color={getBadgeColor()}>
-          {getBadgeText()}
+        <Badge variant="soft" color="success">
+          제출 완료
         </Badge>
       </div>
 
-      <p className="text-sm text-gray-500">{getDescription()}</p>
+      {renderDocument()}
 
-      {renderImage()}
+      <dl className="flex flex-col gap-2">
+        <div className="flex">
+          <dt className="w-28 shrink-0 text-sm text-gray-500">파일명</dt>
+          <dd className="truncate text-sm text-gray-900">
+            {document.originalFileName}
+          </dd>
+        </div>
+        <div className="flex">
+          <dt className="w-28 shrink-0 text-sm text-gray-500">제출일</dt>
+          <dd className="text-sm text-gray-900">
+            {document.createdAt.toLocaleDateString('ko-KR')}
+          </dd>
+        </div>
+      </dl>
 
-      {isCompleted && expiresAt && (
-        <dl className="flex flex-col gap-2">
-          <div className="flex">
-            <dt className="w-24 text-sm text-gray-500">만료일</dt>
-            <dd
-              className={`text-sm ${isExpired ? 'font-medium text-red-500' : 'text-gray-900'}`}
-            >
-              {expiresAt}
-            </dd>
-          </div>
-        </dl>
-      )}
-
-      {canSubmitHere && (
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/jpeg,image/png"
-          onChange={handleFileChange}
-          className="hidden"
-        />
-      )}
-
-      <div className="flex justify-end gap-2">
-        {canSubmitHere && !isCompleted && !isUploading && (
-          <Button onClick={handleSelectClick}>서류 제출</Button>
-        )}
-        {canSubmitHere && needsRenewal && !isUploading && (
-          <Button variant="outline" color="gray" onClick={handleSelectClick}>
-            갱신하기
-          </Button>
-        )}
-        {isUploading && <Button onClick={handleSubmit}>제출 완료</Button>}
-        <Button variant="outline" color="gray" onClick={handleClose}>
+      <div className="flex justify-end">
+        <Button variant="outline" color="gray" onClick={onClose}>
           닫기
         </Button>
       </div>

@@ -54,7 +54,7 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 | T26 | 운영 화면 summary/list API 분리                              | P2       | 진행 전 | 확인 필요    | T04                          | [T26_admin_seller_summary_list_api_split.md](T26_admin_seller_summary_list_api_split.md)                         |
 | T27 | Auth 이메일/Supabase SMTP/rate limit 정책 정리               | P0       | 완료    | 186          | 없음                         | [T27_auth_email_smtp_rate_limit_policy.md](T27_auth_email_smtp_rate_limit_policy.md)                             |
 | T28 | 판매자 상품 수정 진입점 결정 및 구현                         | P2       | 완료    | 229          | T15                          | [T28_seller_product_edit_entrypoint.md](T28_seller_product_edit_entrypoint.md)                                   |
-| T29 | 판매자 제출 문서 확인 UX 개선                                | P2       | 진행 전 | 확인 필요    | T06, T44, T61                | [T29_seller_document_review_ux.md](T29_seller_document_review_ux.md)                                             |
+| T29 | 판매자 제출 문서 확인 UX 개선                                | P2       | 완료    | 236          | T06, T44, T61                | [T29_seller_document_review_ux.md](T29_seller_document_review_ux.md)                                             |
 | T30 | AI 추천 1차 설계                                             | P2       | 진행 전 | 확인 필요    | T25, T05                     | [T30_ai_recommendation_first_design.md](T30_ai_recommendation_first_design.md)                                   |
 | T31 | 주문 취소/환불 API 구현                                      | P1       | 진행 전 | 확인 필요    | T11, T02, T62                | [T31_order_cancel_refund_api.md](T31_order_cancel_refund_api.md)                                                 |
 | T32 | 정산/수수료 시스템 설계                                      | P3       | 진행 전 | 확인 필요    | T31                          | [T32_settlement_fee_system_design.md](T32_settlement_fee_system_design.md)                                       |
@@ -99,7 +99,7 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 완료 task는 제외하고, `진행 중`과 `진행 전` task만 기준으로 정렬한다.
 
 1. P1 기반/운영 차단 해소: T31, T39
-2. P1/P2 독립 기반 작업: T29, T43, T26, T25
+2. P1/P2 독립 기반 작업: T43, T26, T25
 3. 기능 확장: T21, T22, T38, T59, T30, T23, T41
 4. 공통 컴포넌트 접근성 및 폴더 통일 (T46~T49 선행 필수): T64, T65
 5. UI/UX 개선 묶음: T46, T47, T48, T49

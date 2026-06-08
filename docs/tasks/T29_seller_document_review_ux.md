@@ -1,10 +1,10 @@
 # T29. 판매자 제출 문서 확인 UX 개선
 
 - 상태:
-  진행 전
+  완료
 
 - GitHub Issue:
-  확인 필요
+  236
 
 - 우선순위:
   P2
@@ -33,10 +33,7 @@
 - 작업 내용:
   - 판매자 본인의 제출 문서 조회 API 필요 여부를 결정한다.
   - 하드코딩 목록을 실제 신청/문서 상태 기반으로 교체한다.
-  - DB schema 수정이 아니라 기존 `seller_applications`/`seller_application_documents` 데이터와 contract를 활용한다.
-  - `onboarding-status`를 문서 목록까지 확장할지, 별도 seller application 조회 API를 둘지 결정한다.
   - 민감 문서 다운로드/미리보기 권한과 masking 정책을 정한다.
-  - seller register/onboarding-status 주변 TODO(T29)를 함께 정리한다.
 
 - 관련 파일/영역:
   - `src/app/(seller)/seller/store/_components/StoreInfoContent.tsx`
@@ -50,4 +47,13 @@
 - 완료 기준:
   - 하드코딩 인증 목록이 제거된다.
   - 판매자가 실제 제출 문서 상태를 확인할 수 있다.
-  - seller register/onboarding-status 주변 TODO가 실제 신청/문서 데이터 조회 흐름과 충돌하지 않게 정리된다.
+
+- 구현 결과
+
+- 하드코딩 제거: `StoreInfoContent.tsx`의 `INITIAL_CERTIFICATIONS`, `CERT_KEY_MAP` 완전 제거. `CertificationSection.tsx`는 props로 받은 실제 문서 데이터를 렌더링하도록 교체.
+
+- 실제 데이터 렌더링 경로: `GET /api/seller-applications/me` → `useMySellerApplication` hook → `CertificationSection` 컴포넌트. 문서 미리보기는 `GET /api/seller-applications/me/documents/[documentId]` → `useDocumentSignedUrl` hook → signed URL로 렌더링.
+
+- 권한/마스킹 결정: 민감 문서는 서버에서 소유권 검증(신청의 `user_id` 대조) 후 Supabase Storage signed URL(5분 만료)을 발급. 클라이언트는 signed URL만 받아 미리보기에 사용하며, `storagePath`로 Storage에 직접 접근하지 않음. `SellerApplicationDocumentResponse.storagePath`는 응답에 포함되나 클라이언트가 이를 직접 사용하지 않는 것이 원칙. 본인 신청 조회 및 signed URL 생성 모두 service role client + `eq('user_id', userId)` 소유권 조건을 사용하며, `seller_applications` 테이블은 RLS enable 상태이나 authenticated 직접 접근을 막는 정책으로 운영됨.
+
+- 테스트/검증 방법: `API_MOCK_ENABLED=true` 환경에서 `/seller/store` 접속 후 인증 정보 섹션의 3개 서류 목록 및 "보기" 모달 동작 확인. `pnpm test sellerApplicationApi`로 단위 테스트 확인.
