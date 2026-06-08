@@ -14,11 +14,16 @@ interface CertificationDetailModalProps {
   onClose: () => void;
 }
 
+function isImageContentType(contentType: string): boolean {
+  return contentType.startsWith('image/');
+}
+
 export function CertificationDetailModal({
   document,
   onClose,
 }: CertificationDetailModalProps) {
   const label = DOC_TYPE_LABEL[document.type] ?? document.type;
+  const isImage = isImageContentType(document.contentType);
 
   const {
     data: signedUrl,
@@ -28,7 +33,7 @@ export function CertificationDetailModal({
     documentId: document.id,
   });
 
-  const renderImage = () => {
+  const renderDocument = () => {
     if (isLoading) {
       return (
         <div className="flex aspect-[4/3] w-full items-center justify-center rounded-lg bg-gray-100">
@@ -40,21 +45,41 @@ export function CertificationDetailModal({
     if (isError || !signedUrl) {
       return (
         <div className="flex aspect-[4/3] w-full items-center justify-center rounded-lg bg-gray-100 text-sm text-red-500">
-          이미지를 불러올 수 없습니다
+          문서를 불러올 수 없습니다
         </div>
       );
     }
 
+    if (isImage) {
+      return (
+        <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg bg-gray-100">
+          <Image
+            src={signedUrl}
+            alt={label}
+            fill
+            sizes="(max-width: 768px) 100vw, 500px"
+            className="object-contain"
+            unoptimized
+          />
+        </div>
+      );
+    }
+
+    // PDF 등 이미지가 아닌 문서
     return (
-      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg bg-gray-100">
-        <Image
-          src={signedUrl}
-          alt={label}
-          fill
-          sizes="(max-width: 768px) 100vw, 500px"
-          className="object-contain"
-          unoptimized
-        />
+      <div className="flex aspect-[4/3] w-full flex-col items-center justify-center gap-3 rounded-lg bg-gray-100">
+        <span className="text-4xl">📄</span>
+        <p className="text-sm text-gray-500">
+          이 문서는 미리보기를 지원하지 않습니다.
+        </p>
+        <a
+          href={signedUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="rounded-md bg-gray-900 px-4 py-2 text-sm text-white hover:bg-gray-700"
+        >
+          새 탭에서 열기
+        </a>
       </div>
     );
   };
@@ -68,7 +93,7 @@ export function CertificationDetailModal({
         </Badge>
       </div>
 
-      {renderImage()}
+      {renderDocument()}
 
       <dl className="flex flex-col gap-2">
         <div className="flex">

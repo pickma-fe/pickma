@@ -1,12 +1,11 @@
 import { AppError } from '@/lib/errors/appError';
 import { ERROR_CODE } from '@/lib/errors/errorCodes';
-import { createServerClient } from '@/lib/supabase/server';
 import { createServiceRoleClient } from '@/lib/supabase/service';
 
 import { toSellerApplicationResponse } from '../../_lib/mapper';
 
 export async function getMySellerApplication(userId: string) {
-  const supabase = await createServerClient();
+  const supabase = createServiceRoleClient();
 
   const { data: appData, error: appError } = await supabase
     .from('seller_applications')
