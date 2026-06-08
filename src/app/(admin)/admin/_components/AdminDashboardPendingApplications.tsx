@@ -50,7 +50,7 @@ export function AdminDashboardPendingApplications({
                   href="/admin/sellers/pending"
                   className="border-primary-200 text-primary-700 hover:bg-primary-50 rounded-sm border px-3 py-1.5 text-sm font-semibold"
                 >
-                  심사하기
+                  검토
                 </Link>
               </div>
             </li>
