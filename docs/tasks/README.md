@@ -79,7 +79,7 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 | T51 | 판매자 대시보드 메인 화면 구현                               | P1       | 완료    | 202          | T10, T15                     | [T51_seller_dashboard_page.md](T51_seller_dashboard_page.md)                                                     |
 | T52 | 판매자 주문 상세 화면 구현                                   | P1       | 완료    | 185          | T02                          | [T52_seller_order_detail_page.md](T52_seller_order_detail_page.md)                                               |
 | T53 | 판매자 가게 정보 수정 화면 구현                              | P1       | 완료    | 219          | T15, T16                     | [T53_seller_store_edit_page.md](T53_seller_store_edit_page.md)                                                   |
-| T54 | 소비자 주문 내역 정합성 및 마이페이지 기본 화면 정리         | P1       | 진행 중 | 208          | T15                          | [T54_consumer_orders_page.md](T54_consumer_orders_page.md)                                                       |
+| T54 | 소비자 주문 내역 정합성 및 마이페이지 기본 화면 정리         | P1       | 완료    | 208          | T15                          | [T54_consumer_orders_page.md](T54_consumer_orders_page.md)                                                       |
 | T55 | 소비자 프로필 수정 화면 구현                                 | P2       | 완료    | 177          | 없음                         | [T55_consumer_profile_edit_page.md](T55_consumer_profile_edit_page.md)                                           |
 | T56 | 상품 검색 결과 화면 구현                                     | P2       | 완료    | 194          | T05, T12                     | [T56_search_result_page.md](T56_search_result_page.md)                                                           |
 | T57 | 관리자 사용자·상품·주문 관리 화면 구현                       | P3       | 진행 전 | 확인 필요    | T04                          | [T57_admin_users_products_orders_pages.md](T57_admin_users_products_orders_pages.md)                             |
@@ -98,7 +98,7 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 
 완료 task는 제외하고, `진행 중`과 `진행 전` task만 기준으로 정렬한다.
 
-1. P1 기반/운영 차단 해소: T31, T54, T39
+1. P1 기반/운영 차단 해소: T31, T39
 2. P1/P2 독립 기반 작업: T29, T43, T26, T25
 3. 기능 확장: T21, T22, T38, T59, T30, T23, T41
 4. 공통 컴포넌트 접근성 및 폴더 통일 (T46~T49 선행 필수): T64, T65
