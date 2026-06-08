@@ -39,7 +39,11 @@ function LoadingSpinner() {
 
 function OnboardingErrorFallback({ onRetry }: { onRetry: () => void }) {
   return (
-    <div className="flex min-h-[calc(100vh-64px)] flex-col items-center justify-center gap-3 px-4">
+    <div
+      className="flex min-h-[calc(100vh-64px)] flex-col items-center justify-center gap-3 px-4"
+      role="alert"
+      aria-live="assertive"
+    >
       <p className="text-sm text-gray-500">
         상태를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.
       </p>
