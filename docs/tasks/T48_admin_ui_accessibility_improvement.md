@@ -10,7 +10,7 @@
   P2
 
 - 선행 조건:
-  - 선행 task: T45. UI/UX 및 접근성 baseline 기준 수립, T03. 관리자 판매자 승인 화면 구현, T04. 관리자 가게 목록 real endpoint 및 화면 구현, T26. 운영 화면 summary/list API 분리
+  - 선행 task: T45. UI/UX 및 접근성 baseline 기준 수립, T64. 공통 컴포넌트 접근성 baseline 적용, T65. 도메인 컴포넌트 폴더 구조 통일, T03. 관리자 판매자 승인 화면 구현, T04. 관리자 가게 목록 real endpoint 및 화면 구현, T26. 운영 화면 summary/list API 분리
 
 - 분류:
   UI
@@ -31,7 +31,7 @@
   관리자 화면에서 심사 action, 상태 badge, table/list, confirm/reject 흐름의 접근성 기준이 흐리면 잘못된 운영 판단이나 작업 실수가 발생할 수 있다.
 
 - 작업 내용:
-  - 관리자 홈, 판매자 승인, 가게 목록 화면을 T45 체크리스트로 점검한다.
+  - 관리자 홈, 판매자 승인, 가게 목록 화면을 `docs/ui_accessibility_baseline.md` 기준으로 점검한다(컴포넌트 접근성, UI 상태, 반응형, 시각 품질, UX 완성도, 기존 UI 보완 포함).
   - pending/approved/rejected 등 심사 상태 표시와 action CTA의 의미를 명확히 한다.
   - approve/reject dialog, reason 입력, confirm action의 keyboard/focus 처리를 점검한다.
   - table/list의 빈 상태, loading/error 상태, 모바일 표시를 점검한다.
@@ -48,7 +48,8 @@
   중간
 
 - 완료 기준:
-  - Admin 주요 화면이 T45 checklist 기준으로 점검되고 개선된다.
+  - Admin 주요 화면이 `docs/ui_accessibility_baseline.md` 기준으로 점검되고 개선된다.
   - 심사 action과 운영 상태 표시가 명확하고 keyboard/focus 기준을 만족한다.
   - 관리자 table/list의 loading/error/empty 상태가 일관된다.
+  - desktop/tablet(768–1024px)/mobile(375–430px) viewport에서 주요 화면을 수동 검증한다.
   - 필요한 후속 개선이 별도 task 또는 확인 필요 항목으로 분리된다.

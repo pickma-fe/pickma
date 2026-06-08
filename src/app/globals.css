@@ -60,6 +60,10 @@
   --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.08);
 }
 
+@utility pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
 body {
   font-family: Arial, Helvetica, sans-serif;
 }

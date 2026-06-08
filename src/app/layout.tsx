@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import { Suspense } from 'react';
 
@@ -24,6 +24,10 @@ export const metadata: Metadata = {
   description: '마감 임박 할인 상품을 예약하고 픽업하는 플랫폼',
 };
 
+export const viewport: Viewport = {
+  viewportFit: 'cover',
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -31,7 +35,7 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
+      lang="ko"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
