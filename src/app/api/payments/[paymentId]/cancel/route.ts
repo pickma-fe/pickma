@@ -11,15 +11,15 @@ export async function POST(
 ): Promise<Response> {
   const { paymentId } = await params;
 
-  const idParsed = paymentIdSchema.safeParse(paymentId);
-  if (!idParsed.success) {
-    return fail(ERROR_CODE.VALIDATION_ERROR, 400, [
-      { path: 'paymentId', message: idParsed.error.issues[0].message },
-    ]);
-  }
-
   try {
     await requireAdmin();
+
+    const idParsed = paymentIdSchema.safeParse(paymentId);
+    if (!idParsed.success) {
+      return fail(ERROR_CODE.VALIDATION_ERROR, 400, [
+        { path: 'paymentId', message: idParsed.error.issues[0].message },
+      ]);
+    }
 
     let body: unknown;
     try {

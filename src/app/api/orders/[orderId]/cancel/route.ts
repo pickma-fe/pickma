@@ -11,15 +11,15 @@ export async function PATCH(
 ): Promise<Response> {
   const { orderId } = await params;
 
-  const idParsed = orderIdSchema.safeParse(orderId);
-  if (!idParsed.success) {
-    return fail(ERROR_CODE.VALIDATION_ERROR, 400, [
-      { path: 'orderId', message: idParsed.error.issues[0].message },
-    ]);
-  }
-
   try {
     const { authUser: user } = await requireActiveUser();
+
+    const idParsed = orderIdSchema.safeParse(orderId);
+    if (!idParsed.success) {
+      return fail(ERROR_CODE.VALIDATION_ERROR, 400, [
+        { path: 'orderId', message: idParsed.error.issues[0].message },
+      ]);
+    }
 
     let body: unknown;
     try {
