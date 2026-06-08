@@ -46,6 +46,7 @@ const VALID_STATUSES: SellerOrderDisplayStatus[] = [
   'accepted',
   'ready',
   'completed',
+  'cancelling',
   'cancelled',
   'noShow',
 ];
