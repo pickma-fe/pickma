@@ -1,9 +1,9 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ERROR_CODE } from '@/lib/errors/errorCodes';
 import { createServiceRoleClient } from '@/lib/supabase/service';
 
-import { confirmPayment, preparePayment } from './service';
+import { cancelPaymentById, confirmPayment, preparePayment } from './service';
 import type { TossConfirmResult } from './toss';
 
 vi.mock('@/lib/supabase/service');
@@ -662,5 +662,213 @@ describe('confirmPayment', () => {
         p_order_id: 'order-uuid-1',
       });
     });
+  });
+});
+
+const mockPaymentRow = {
+  id: 'payment-uuid-1',
+  payment_key: 'toss_ppk_test',
+  status: 'paid',
+  order_id: 'order-uuid-1',
+};
+
+const mockOrderRowForCancel = {
+  id: 'order-uuid-1',
+  order_number: 'PM2026TEST',
+  store_id: 'store-uuid-1',
+  status: 'reserved',
+  payment_amount: 5000,
+  cancel_claimed_status: null as string | null,
+};
+
+type MockPaymentRow = typeof mockPaymentRow;
+type MockOrderRowForCancel = typeof mockOrderRowForCancel;
+
+function makeAdminClient(
+  overrides: {
+    paymentData?: MockPaymentRow | null;
+    paymentError?: { message: string } | null;
+    orderData?: MockOrderRowForCancel | null;
+    orderError?: { message: string } | null;
+    updateError?: { message: string } | null;
+    rpcError?: { message: string } | null;
+    insertError?: { message: string } | null;
+  } = {}
+) {
+  const {
+    paymentData = mockPaymentRow,
+    paymentError = null,
+    orderData = mockOrderRowForCancel,
+    orderError = null,
+    updateError = null,
+    rpcError = null,
+    insertError = null,
+  } = overrides;
+
+  const innerEqFn = vi.fn().mockResolvedValue({ error: updateError });
+  const outerEqFn = vi.fn().mockReturnValue({ eq: innerEqFn });
+  const ordersUpdateChain = {
+    update: vi.fn().mockReturnValue({ eq: outerEqFn }),
+    eq: outerEqFn,
+  };
+
+  const insertMock = {
+    insert: vi.fn().mockResolvedValue({ error: insertError }),
+  };
+
+  const paymentsFrom = {
+    select: vi.fn().mockReturnThis(),
+    eq: vi.fn().mockReturnThis(),
+    maybeSingle: vi
+      .fn()
+      .mockResolvedValue({ data: paymentData, error: paymentError }),
+  };
+
+  const ordersFrom = {
+    select: vi.fn().mockReturnThis(),
+    eq: vi.fn().mockReturnThis(),
+    single: vi.fn().mockResolvedValue({ data: orderData, error: orderError }),
+    update: vi.fn().mockImplementation(() => ordersUpdateChain),
+  };
+
+  const client = {
+    from: vi.fn().mockImplementation((table: string) => {
+      if (table === 'payments') return paymentsFrom;
+      if (table === 'orders') return ordersFrom;
+      if (table === 'payment_events') return insertMock;
+      return {};
+    }),
+    rpc: vi.fn().mockResolvedValue({ error: rpcError }),
+    insertMock,
+    ordersFrom,
+  };
+  return client;
+}
+
+describe('cancelPaymentById', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.stubEnv('PAYMENT_MOCK', 'true');
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it('payment 없음 → NOT_FOUND 404', async () => {
+    const client = makeAdminClient({ paymentData: null });
+    vi.mocked(createServiceRoleClient).mockReturnValue(
+      client as unknown as ReturnType<typeof createServiceRoleClient>
+    );
+
+    await expect(
+      cancelPaymentById('payment-uuid-1', '관리자 취소')
+    ).rejects.toMatchObject({ code: ERROR_CODE.NOT_FOUND, statusCode: 404 });
+  });
+
+  it('payment.status !== paid → INVALID_ORDER_STATUS 409', async () => {
+    const client = makeAdminClient({
+      paymentData: { ...mockPaymentRow, status: 'pending' },
+    });
+    vi.mocked(createServiceRoleClient).mockReturnValue(
+      client as unknown as ReturnType<typeof createServiceRoleClient>
+    );
+
+    await expect(
+      cancelPaymentById('payment-uuid-1', '관리자 취소')
+    ).rejects.toMatchObject({
+      code: ERROR_CODE.INVALID_ORDER_STATUS,
+      statusCode: 409,
+    });
+  });
+
+  it('order.status가 허용 목록 외 → INVALID_ORDER_STATUS 409', async () => {
+    const client = makeAdminClient({
+      orderData: { ...mockOrderRowForCancel, status: 'completed' },
+    });
+    vi.mocked(createServiceRoleClient).mockReturnValue(
+      client as unknown as ReturnType<typeof createServiceRoleClient>
+    );
+
+    await expect(
+      cancelPaymentById('payment-uuid-1', '관리자 취소')
+    ).rejects.toMatchObject({
+      code: ERROR_CODE.INVALID_ORDER_STATUS,
+      statusCode: 409,
+    });
+  });
+
+  it('PAYMENT_MOCK=true → cancel_order RPC 호출', async () => {
+    const client = makeAdminClient();
+    vi.mocked(createServiceRoleClient).mockReturnValue(
+      client as unknown as ReturnType<typeof createServiceRoleClient>
+    );
+
+    await cancelPaymentById('payment-uuid-1', '관리자 취소');
+
+    expect(client.rpc).toHaveBeenCalledWith('cancel_order', {
+      p_order_id: 'order-uuid-1',
+      p_reason: '관리자 취소',
+    });
+  });
+
+  it('PAYMENT_MOCK=false + Toss 성공 → cancel_order RPC 호출', async () => {
+    vi.stubEnv('PAYMENT_MOCK', 'false');
+    const { callTossCancel } = await import('@/app/api/_lib/toss-cancel');
+    vi.mocked(callTossCancel).mockResolvedValue(undefined);
+    const client = makeAdminClient();
+    vi.mocked(createServiceRoleClient).mockReturnValue(
+      client as unknown as ReturnType<typeof createServiceRoleClient>
+    );
+
+    await cancelPaymentById('payment-uuid-1', '관리자 취소');
+
+    expect(callTossCancel).toHaveBeenCalledWith(
+      expect.objectContaining({
+        paymentKey: 'toss_ppk_test',
+        cancelAmount: 5000,
+      })
+    );
+    expect(client.rpc).toHaveBeenCalledWith('cancel_order', expect.anything());
+  });
+
+  it('PAYMENT_MOCK=false + Toss 실패 → 주문 상태 복원 후 PAYMENT_CANCEL_FAILED 502', async () => {
+    vi.stubEnv('PAYMENT_MOCK', 'false');
+    const { callTossCancel } = await import('@/app/api/_lib/toss-cancel');
+    vi.mocked(callTossCancel).mockRejectedValueOnce(new Error('Toss fail'));
+    const client = makeAdminClient();
+    vi.mocked(createServiceRoleClient).mockReturnValue(
+      client as unknown as ReturnType<typeof createServiceRoleClient>
+    );
+
+    await expect(
+      cancelPaymentById('payment-uuid-1', '관리자 취소')
+    ).rejects.toMatchObject({
+      code: ERROR_CODE.PAYMENT_CANCEL_FAILED,
+      statusCode: 502,
+    });
+    expect(client.ordersFrom.update).toHaveBeenCalledTimes(2); // claim + revert
+  });
+
+  it('cancel_order RPC 실패 → compensation 이벤트 insert + PAYMENT_CANCEL_FAILED 502', async () => {
+    const client = makeAdminClient({ rpcError: { message: 'db error' } });
+    vi.mocked(createServiceRoleClient).mockReturnValue(
+      client as unknown as ReturnType<typeof createServiceRoleClient>
+    );
+
+    await expect(
+      cancelPaymentById('payment-uuid-1', '관리자 취소')
+    ).rejects.toMatchObject({
+      code: ERROR_CODE.PAYMENT_CANCEL_FAILED,
+      statusCode: 502,
+    });
+
+    await new Promise((r) => setTimeout(r, 10)); // fire-and-forget flush
+    expect(client.insertMock.insert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        event_type: 'payment_compensation_failed',
+        payload: expect.objectContaining({ failureStage: 'cancel_finalize' }),
+      })
+    );
   });
 });
