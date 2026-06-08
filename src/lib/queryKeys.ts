@@ -53,6 +53,9 @@ export const queryKeys = {
   },
 
   admin: {
+    dashboard: {
+      stats: () => ['admin', 'dashboard', 'stats'] as const,
+    },
     sellers: {
       all: () => ['admin', 'sellers'] as const,
       pending: () => ['admin', 'sellers', 'pending'] as const,
