@@ -12,8 +12,8 @@ const ADMIN_USER_SELECT_COLUMNS =
 
 function escapePostgrestLikeValue(value: string): string {
   return value
-    .replace(/[%,()]/g, ' ')
-    .replace(/[_*]/g, '\\$&')
+    .replace(/[,*()]/g, ' ')
+    .replace(/[%_]/g, '\\$&')
     .trim();
 }
 

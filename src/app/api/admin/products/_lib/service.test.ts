@@ -205,4 +205,20 @@ describe('getAdminProducts', () => {
       'menu_item_id.eq.menu-id-1,store_id.eq.store-id-1'
     );
   });
+
+  it('LIKE wildcard는 escape하고 PostgREST OR 문법 문자는 검색어에서 제거한다', async () => {
+    const { client, menuItemQuery, storeQuery } = buildProductsClient({
+      menuItemIds: ['menu-id-1'],
+    });
+    vi.mocked(createServiceRoleClient).mockReturnValue(client);
+
+    await getAdminProducts({
+      page: 1,
+      pageSize: 20,
+      keyword: '50%_세트*',
+    });
+
+    expect(menuItemQuery.ilike).toHaveBeenCalledWith('name', '%50\\%\\_세트%');
+    expect(storeQuery.ilike).toHaveBeenCalledWith('name', '%50\\%\\_세트%');
+  });
 });

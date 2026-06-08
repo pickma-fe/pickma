@@ -10,11 +10,35 @@ import { mapOrderListRow } from '@/app/api/_lib/order-mapper';
 const ADMIN_ORDER_LIST_SELECT =
   'id, order_number, store_id, total_amount, discount_amount, payment_amount, status, pickup_at, pickup_service_date, store_order_number, pickup_number, expires_at, created_at, updated_at, stores(name)';
 
+type ServiceRoleClient = ReturnType<typeof createServiceRoleClient>;
+
 function escapePostgrestLikeValue(value: string): string {
   return value
-    .replace(/[%,()]/g, ' ')
-    .replace(/[_*]/g, '\\$&')
+    .replace(/[,*()]/g, ' ')
+    .replace(/[%_]/g, '\\$&')
     .trim();
+}
+
+async function getKeywordMatchedStoreIds(
+  supabase: ServiceRoleClient,
+  keyword: string
+): Promise<string[]> {
+  const searchValue = escapePostgrestLikeValue(keyword);
+
+  if (searchValue.length === 0) {
+    return [];
+  }
+
+  const { data, error } = await supabase
+    .from('stores')
+    .select('id')
+    .ilike('name', `%${searchValue}%`);
+
+  if (error) {
+    throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
+  }
+
+  return (data ?? []).map((store) => store.id);
 }
 
 export async function getAdminOrders(
@@ -37,11 +61,16 @@ export async function getAdminOrders(
   }
 
   if (searchValue.length > 0) {
+    const storeIds = await getKeywordMatchedStoreIds(
+      supabase,
+      query.keyword ?? ''
+    );
     ordersQuery = ordersQuery.or(
       [
         `order_number.ilike.%${searchValue}%`,
         `store_order_number.ilike.%${searchValue}%`,
         `pickup_number.ilike.%${searchValue}%`,
+        ...storeIds.map((id) => `store_id.eq.${id}`),
       ].join(',')
     );
   }

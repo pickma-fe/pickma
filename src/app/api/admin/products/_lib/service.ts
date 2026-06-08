@@ -1,3 +1,5 @@
+import { z } from 'zod';
+
 import type {
   AdminProductListQuery,
   AdminProductListResponse,
@@ -7,36 +9,40 @@ import { AppError } from '@/lib/errors/appError';
 import { ERROR_CODE } from '@/lib/errors/errorCodes';
 import { createServiceRoleClient } from '@/lib/supabase/service';
 
-type AdminProductRow = {
-  id: string;
-  store_id: string;
-  menu_item_id: string;
-  category_id: string | null;
-  discount_price: number;
-  original_price: number;
-  discount_rate: number;
-  available_stock: number;
-  stock: number;
-  reserved_stock: number;
-  end_at: string;
-  pickup_start_time: string;
-  pickup_end_time: string;
-  status: 'active' | 'closed';
-  updated_at: string;
-  menu_items: {
-    id: string;
-    name: string;
-    image: string | null;
-  };
-  categories: {
-    id: string;
-    name: string;
-  } | null;
-  stores: {
-    id: string;
-    name: string;
-  };
-};
+const adminProductRowSchema = z.object({
+  id: z.string(),
+  store_id: z.string(),
+  menu_item_id: z.string(),
+  category_id: z.string().nullable(),
+  discount_price: z.number(),
+  original_price: z.number(),
+  discount_rate: z.number(),
+  available_stock: z.number(),
+  stock: z.number(),
+  reserved_stock: z.number(),
+  end_at: z.string(),
+  pickup_start_time: z.string(),
+  pickup_end_time: z.string(),
+  status: z.enum(['active', 'closed']),
+  updated_at: z.string(),
+  menu_items: z.object({
+    id: z.string(),
+    name: z.string(),
+    image: z.string().nullable(),
+  }),
+  categories: z
+    .object({
+      id: z.string(),
+      name: z.string(),
+    })
+    .nullable(),
+  stores: z.object({
+    id: z.string(),
+    name: z.string(),
+  }),
+});
+
+type AdminProductRow = z.infer<typeof adminProductRowSchema>;
 
 const ADMIN_PRODUCT_SELECT = [
   'id',
@@ -100,10 +106,20 @@ function mapAdminProductRow(row: AdminProductRow): AdminProductResponse {
   };
 }
 
+function parseAdminProductRows(value: unknown): AdminProductRow[] {
+  const result = z.array(adminProductRowSchema).safeParse(value);
+
+  if (!result.success) {
+    throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
+  }
+
+  return result.data;
+}
+
 function escapePostgrestLikeValue(value: string): string {
   return value
-    .replace(/[%,()]/g, ' ')
-    .replace(/[_*]/g, '\\$&')
+    .replace(/[,*()]/g, ' ')
+    .replace(/[%_]/g, '\\$&')
     .trim();
 }
 
@@ -185,10 +201,10 @@ export async function getAdminProducts(
 
   const totalCount = count ?? 0;
 
+  const rows = parseAdminProductRows(data ?? []);
+
   return {
-    items: ((data ?? []) as unknown as AdminProductRow[]).map(
-      mapAdminProductRow
-    ),
+    items: rows.map(mapAdminProductRow),
     page,
     pageSize,
     totalCount,

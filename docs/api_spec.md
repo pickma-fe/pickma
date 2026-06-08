@@ -1235,7 +1235,7 @@ Admin API는 `/api/admin/*`로 분리한다. 모든 Admin API는 `requireAdmin()
 | A-PROD-01  | 전체 상품 조회 | GET    | `/api/admin/products` | P1       |
 | A-ORDER-01 | 전체 주문 조회 | GET    | `/api/admin/orders`   | P1       |
 
-A-ORDER-01은 `status=processing` filter를 지원해야 한다. `processing` 잔류 주문 운영 확인(30분 알람 기준)에 사용된다. 우선순위 P1 유지, T04 이후 구현 예정.
+A-ORDER-01은 `status=processing` filter를 지원한다. `processing` 잔류 주문 운영 확인(30분 알람 기준)에 사용된다.
 
 `GET /api/admin/products` query:
 
@@ -1251,7 +1251,7 @@ A-ORDER-01은 `status=processing` filter를 지원해야 한다. `processing` �
 
 - `page`: positive integer, default `1`
 - `pageSize`: positive integer, max `100`, default `20`
-- `keyword`: optional string, 주문번호/매장별 주문번호/픽업번호 검색
+- `keyword`: optional string, 주문번호/매장별 주문번호/픽업번호/가게명 검색
 - `status`: optional `payment_pending | processing | reserved | accepted | ready | completed | cancelled | no_show | expired`
 - `sort`: optional `createdAt | pickupAt`, default `createdAt`
 - `order`: optional `asc | desc`, default `desc`

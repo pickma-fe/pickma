@@ -57,7 +57,7 @@ function getKoreanDateString(value: string): string {
 }
 
 function sanitizeMockSearchValue(value: string): string {
-  return value.replace(/[%,()]/g, ' ').trim();
+  return value.replace(/[,()*]/g, ' ').trim();
 }
 
 function matchesPendingSellerApplicationQuery(
