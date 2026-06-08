@@ -24,6 +24,7 @@ const ORDER_STATUS_LABELS: Record<AdminDashboardRecentOrder['status'], string> =
     accepted: '준비 중',
     ready: '준비 완료',
     completed: '픽업 완료',
+    cancelling: '취소 처리 중',
     cancelled: '취소',
     noShow: '노쇼',
     expired: '만료',
