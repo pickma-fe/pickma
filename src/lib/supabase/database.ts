@@ -791,6 +791,12 @@ export type Database = {
         Args: { application_id: string };
         Returns: undefined;
       };
+      begin_order_cancel: {
+        Args: { p_order_id: string; p_user_id: string };
+        Returns: {
+          success: boolean;
+        }[];
+      };
       begin_payment_processing: {
         Args: { p_order_id: string };
         Returns: {
@@ -858,6 +864,12 @@ export type Database = {
         }[];
       };
       generate_order_number: { Args: never; Returns: string };
+      revert_order_cancel_claim: {
+        Args: { p_order_id: string };
+        Returns: {
+          success: boolean;
+        }[];
+      };
       revert_payment_processing: {
         Args: { p_order_id: string };
         Returns: {
