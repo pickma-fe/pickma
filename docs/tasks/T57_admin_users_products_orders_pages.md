@@ -1,10 +1,10 @@
 # T57. 관리자 사용자·상품·주문 관리 화면 구현
 
 - 상태:
-  진행 전
+  완료
 
 - GitHub Issue:
-  확인 필요
+  245
 
 - 우선순위:
   P3
@@ -33,7 +33,7 @@
 - 작업 내용:
   - `/admin/users` 사용자 관리 페이지 구현
     - 사용자 목록 테이블
-    - 계정 상태(활성/정지) 관리
+    - 계정 상태(활성/정지) 확인 및 필터
   - `/admin/products` 상품 관리 페이지 구현
     - 전체 상품 목록 테이블
     - 상품 상태 확인
@@ -56,7 +56,19 @@
   - 관리자 권한이 없는 사용자는 접근 불가 처리된다.
 
 - 확인 필요 사항:
-  - `/admin/users`, `/admin/products`, `/admin/orders`는 성격이 다르므로 착수 시 3개 task로 분리할지 결정
-  - pagination 방식 (무한 스크롤 vs 페이지네이션)
-  - 사용자 계정 정지/활성화 API 엔드포인트 현재 구현 상태
-  - 상품/주문 관리자 전용 API 현재 구현 상태
+  - `/admin/users`, `/admin/products`, `/admin/orders`는 T57 범위에서 함께 구현한다.
+  - pagination 방식은 기존 관리자 가게 목록과 동일한 페이지네이션으로 통일한다.
+  - 사용자 계정 정지/활성화 API는 정책/audit 기준 확정 전까지 운영 UI에 노출하지 않는다.
+  - 상품/주문 관리자 전용 API는 목록 조회 endpoint를 우선 구현한다.
+
+- 구현 결과:
+  - `/admin/users` 사용자 관리 페이지를 구현했다.
+    - 사용자 목록, 검색, 역할 필터, 계정 상태 필터, 페이지네이션을 제공한다.
+  - `/admin/products` 상품 관리 페이지를 구현했다.
+    - 전체 상품 목록, 상품명/가게명 검색, 상품 상태 필터, 페이지네이션을 제공한다.
+  - `/admin/orders` 주문 관리 페이지를 구현했다.
+    - 전체 주문 목록, 주문번호/픽업번호 검색, 주문 상태 필터, 주문일/픽업일 정렬, 페이지네이션을 제공한다.
+  - `GET /api/admin/users`, `GET /api/admin/products`, `GET /api/admin/orders` 관리자 전용 Route Handler와 client API/hook을 추가했다.
+  - 모든 신규 관리자 API는 mock/real mode 모두 `requireAdmin()`을 통과하도록 고정했다.
+  - 사용자 상태 변경은 endpoint 정책 확인 전까지 버튼으로 노출하지 않고 상태 확인만 제공한다.
+  - `docs/ia.md`, `docs/api_spec.md`, `docs/tasks/README.md`를 구현 상태에 맞게 갱신했다.
