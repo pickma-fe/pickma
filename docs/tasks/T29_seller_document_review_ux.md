@@ -52,8 +52,8 @@
 
 - 하드코딩 제거: `StoreInfoContent.tsx`의 `INITIAL_CERTIFICATIONS`, `CERT_KEY_MAP` 완전 제거. `CertificationSection.tsx`는 props로 받은 실제 문서 데이터를 렌더링하도록 교체.
 
-- 실제 데이터 렌더링 경로: `GET /api/seller-applications/me` → `useMySellerApplication` hook → `CertificationSection` 컴포넌트. 문서 미리보기는 `GET /api/seller-applications/me/documents/[documentId]` → `useDocumentSignedUrl` hook → signed URL로 이미지 렌더링.
+- 실제 데이터 렌더링 경로: `GET /api/seller-applications/me` → `useMySellerApplication` hook → `CertificationSection` 컴포넌트. 문서 미리보기는 `GET /api/seller-applications/me/documents/[documentId]` → `useDocumentSignedUrl` hook → signed URL로 렌더링.
 
-- 권한/마스킹 결정: 민감 문서는 서버에서 소유권 검증(신청의 `user_id` 대조) 후 Supabase Storage signed URL(5분 만료)을 발급. 클라이언트는 signed URL만 받으며 storage path를 직접 노출하지 않음. 본인 신청 조회(`getMySellerApplication`)는 RLS 기반 server client 사용, signed URL 생성은 service role 사용.
+- 권한/마스킹 결정: 민감 문서는 서버에서 소유권 검증(신청의 `user_id` 대조) 후 Supabase Storage signed URL(5분 만료)을 발급. 클라이언트는 signed URL만 받아 미리보기에 사용하며, `storagePath`로 Storage에 직접 접근하지 않음. `SellerApplicationDocumentResponse.storagePath`는 응답에 포함되나 클라이언트가 이를 직접 사용하지 않는 것이 원칙. 본인 신청 조회 및 signed URL 생성 모두 service role client + `eq('user_id', userId)` 소유권 조건을 사용하며, `seller_applications` 테이블은 RLS enable 상태이나 authenticated 직접 접근을 막는 정책으로 운영됨.
 
 - 테스트/검증 방법: `API_MOCK_ENABLED=true` 환경에서 `/seller/store` 접속 후 인증 정보 섹션의 3개 서류 목록 및 "보기" 모달 동작 확인. `pnpm test sellerApplicationApi`로 단위 테스트 확인.
