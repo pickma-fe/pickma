@@ -9,7 +9,6 @@ import {
   XCircle,
 } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 
 import { useSellerOnboardingStatus } from '@/hooks/seller/onboarding/useSellerOnboardingStatus';
 import { useMe } from '@/hooks/users/useMe';
@@ -306,8 +305,6 @@ function ApprovedNoStoreCTA() {
 }
 
 function ApprovedWithStoreCTA() {
-  const router = useRouter();
-
   return (
     <div className="flex min-h-[calc(100vh-64px)] flex-col items-center justify-center px-4 py-12">
       <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-sm">
@@ -327,15 +324,12 @@ function ApprovedWithStoreCTA() {
         </div>
 
         <div className="space-y-3">
-          <Button
-            className="w-full"
-            variant="filled"
-            color="primary"
-            onClick={() => router.push('/seller/dashboard')}
-          >
-            대시보드로 이동
-            <ChevronRight className="ml-1 h-4 w-4" />
-          </Button>
+          <Link href="/seller/dashboard" className="block">
+            <Button className="w-full" variant="filled" color="primary">
+              대시보드로 이동
+              <ChevronRight className="ml-1 h-4 w-4" />
+            </Button>
+          </Link>
           <Link href="/" className="block">
             <Button className="w-full" variant="ghost" color="gray">
               소비자 홈으로 돌아가기
