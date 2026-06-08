@@ -71,7 +71,7 @@ describe('callTossCancel', () => {
     ).resolves.toBeUndefined();
   });
 
-  it('4xx 응답 → PAYMENT_CANCEL_FAILED 500', async () => {
+  it('4xx 응답 → PAYMENT_CANCEL_FAILED 502', async () => {
     vi.mocked(fetch).mockResolvedValueOnce(new Response(null, { status: 400 }));
 
     await expect(
@@ -83,11 +83,11 @@ describe('callTossCancel', () => {
       })
     ).rejects.toMatchObject({
       code: ERROR_CODE.PAYMENT_CANCEL_FAILED,
-      statusCode: 500,
+      statusCode: 502,
     });
   });
 
-  it('5xx 응답 → PAYMENT_CANCEL_FAILED 500', async () => {
+  it('5xx 응답 → PAYMENT_CANCEL_FAILED 502', async () => {
     vi.mocked(fetch).mockResolvedValueOnce(new Response(null, { status: 500 }));
 
     await expect(
@@ -99,11 +99,11 @@ describe('callTossCancel', () => {
       })
     ).rejects.toMatchObject({
       code: ERROR_CODE.PAYMENT_CANCEL_FAILED,
-      statusCode: 500,
+      statusCode: 502,
     });
   });
 
-  it('timeout → PAYMENT_CANCEL_FAILED 500', async () => {
+  it('timeout → PAYMENT_CANCEL_FAILED 502', async () => {
     vi.mocked(fetch).mockRejectedValueOnce(
       Object.assign(new DOMException('timeout', 'TimeoutError'))
     );
@@ -117,7 +117,7 @@ describe('callTossCancel', () => {
       })
     ).rejects.toMatchObject({
       code: ERROR_CODE.PAYMENT_CANCEL_FAILED,
-      statusCode: 500,
+      statusCode: 502,
     });
   });
 

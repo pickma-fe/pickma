@@ -32,17 +32,11 @@ export async function callTossCancel(params: {
       }
     );
   } catch (e) {
-    if (e instanceof DOMException && e.name === 'TimeoutError') {
-      throw new AppError(
-        ERROR_CODE.PAYMENT_CANCEL_FAILED,
-        500,
-        'Toss cancel timeout'
-      );
-    }
-    throw e;
+    if (e instanceof AppError) throw e;
+    throw new AppError(ERROR_CODE.PAYMENT_CANCEL_FAILED, 502);
   }
 
   if (!response.ok) {
-    throw new AppError(ERROR_CODE.PAYMENT_CANCEL_FAILED, 500);
+    throw new AppError(ERROR_CODE.PAYMENT_CANCEL_FAILED, 502);
   }
 }
