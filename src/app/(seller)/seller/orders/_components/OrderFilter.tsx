@@ -18,6 +18,7 @@ const STATUS_OPTIONS = [
   { label: '주문 승인', value: 'accepted' },
   { label: '픽업 대기', value: 'ready' },
   { label: '픽업 완료', value: 'completed' },
+  { label: '취소 처리 중', value: 'cancelling' },
   { label: '취소/환불', value: 'cancelled' },
   { label: '미수령', value: 'noShow' },
 ];

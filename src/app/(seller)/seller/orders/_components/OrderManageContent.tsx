@@ -36,6 +36,7 @@ const DOMAIN_TO_CONTRACT_STATUS: Record<
   accepted: 'accepted',
   ready: 'ready',
   completed: 'completed',
+  cancelling: 'cancelling',
   cancelled: 'cancelled',
   noShow: 'no_show',
 };

@@ -7,5 +7,11 @@ export type SellerOrderActionStatus = Extract<
 
 export type SellerOrderDisplayStatus = Extract<
   OrderStatus,
-  'reserved' | 'accepted' | 'ready' | 'completed' | 'cancelled' | 'noShow'
+  | 'reserved'
+  | 'accepted'
+  | 'ready'
+  | 'completed'
+  | 'cancelling'
+  | 'cancelled'
+  | 'noShow'
 >;
