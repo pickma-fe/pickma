@@ -213,7 +213,7 @@ export async function confirmPayment(
               paymentStateAssumption: 'approved_may_remain',
               manualAction: 'check_toss_and_cancel_or_refund',
               orderStatus: 'processing',
-              tossPaymentKey: confirmed.paymentKey,
+              paymentKey: confirmed.paymentKey,
             } satisfies PaymentCompensationFailedPayload,
           })
         ).catch(() => {});
@@ -240,7 +240,7 @@ export async function confirmPayment(
             paymentStateAssumption: 'cancelled_may_be_done',
             manualAction: 'restore_order_status',
             orderStatus: 'processing',
-            tossPaymentKey: confirmed.paymentKey,
+            paymentKey: confirmed.paymentKey,
           } satisfies PaymentCompensationFailedPayload,
         })
       ).catch(() => {});
