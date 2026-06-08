@@ -1101,6 +1101,25 @@ Response:
 export interface SellerApplicationDocumentReadUrlResponse {
   signedUrl: string;
 }
+```
+
+Behavior:
+
+- `seller_application_documents` 테이블에서 `documentId`로 문서를 조회한다.
+- 해당 문서의 `application_id`로 `seller_applications`를 조회해 `user_id`가 요청자와 일치하는지 소유권을 검증한다.
+- 소유권 검증 통과 후 Supabase Storage `seller-application-documents` bucket에서 `storage_path` 기준으로 signed URL을 발급한다. 만료 시간은 **5분**이다.
+- 클라이언트는 signed URL만 받으며, `storagePath`로 Storage에 직접 접근하지 않는다.
+- signed URL은 `image/jpeg`, `image/png`, `application/pdf` 문서 모두에 적용된다. 클라이언트는 `contentType` 기준으로 이미지(`image/*`)는 미리보기, PDF 등은 새 탭 열기로 분기한다.
+- `staleTime`은 클라이언트 hook에서 4분으로 설정해 만료 전 갱신을 유도한다.
+
+에러 정책:
+
+| 조건                            | HTTP | error code                       |
+| ------------------------------- | ---- | -------------------------------- |
+| 미인증 또는 inactive user       | 401  | `UNAUTHORIZED`                   |
+| documentId에 해당하는 문서 없음 | 404  | `APPLICATION_DOCUMENT_NOT_FOUND` |
+| 문서가 본인 신청 소속이 아님    | 403  | `FORBIDDEN`                      |
+| Storage signed URL 생성 실패    | 500  | `INTERNAL_SERVER_ERROR`          |
 
 ---
 
@@ -1169,7 +1188,7 @@ Seller order API는 `requireSellerStore()`를 통과해야 하며, 해당 주문
 
 reserved → (PATCH /accept) → accepted → (PATCH /ready) → ready → (PATCH /complete) → completed
 
-````
+```
 
 - accept 허용 상태: `reserved`
 - ready 허용 상태: `accepted`
@@ -1198,7 +1217,7 @@ export interface SellerOrderListParams {
   sort: 'createdAt' | 'pickupAt';
   order: 'asc' | 'desc';
 }
-````
+```
 
 - 오류: `ORDER_NOT_FOUND` 404 (orderId 불일치 또는 타 store 주문), `INVALID_ORDER_STATUS` 409
 
