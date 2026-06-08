@@ -1,9 +1,9 @@
-import type { AdminDashboardDailyMetric } from '@/types/admin';
+import type { DailyAdminMetric } from '@/types/admin';
 
 import { AdminCard } from './AdminCard';
 
 interface AdminDashboardDailyChartProps {
-  metrics: AdminDashboardDailyMetric[];
+  metrics: DailyAdminMetric[];
 }
 
 const CURRENCY_FORMATTER = new Intl.NumberFormat('ko-KR');

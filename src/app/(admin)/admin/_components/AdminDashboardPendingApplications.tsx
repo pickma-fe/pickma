@@ -6,6 +6,7 @@ interface AdminDashboardPendingApplicationsProps {
   applications: AdminDashboardPendingApplicationSummary[];
   isActionPending: boolean;
   pendingActionId?: string;
+  pendingActionType?: 'approve' | 'reject';
   onApprove: (application: AdminDashboardPendingApplicationSummary) => void;
   onReject: (application: AdminDashboardPendingApplicationSummary) => void;
 }
@@ -20,6 +21,7 @@ export function AdminDashboardPendingApplications({
   applications,
   isActionPending,
   pendingActionId,
+  pendingActionType,
   onApprove,
   onReject,
 }: AdminDashboardPendingApplicationsProps) {
@@ -48,7 +50,10 @@ export function AdminDashboardPendingApplications({
                   onClick={() => onApprove(application)}
                   className="bg-primary-500 hover:bg-primary-600 rounded-sm px-3 py-1.5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500"
                 >
-                  {pendingActionId === application.id ? '처리 중' : '승인'}
+                  {pendingActionId === application.id &&
+                  pendingActionType === 'approve'
+                    ? '처리 중'
+                    : '승인'}
                 </button>
                 <button
                   type="button"
@@ -56,7 +61,10 @@ export function AdminDashboardPendingApplications({
                   onClick={() => onReject(application)}
                   className="rounded-sm border border-gray-200 px-3 py-1.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-400"
                 >
-                  거절
+                  {pendingActionId === application.id &&
+                  pendingActionType === 'reject'
+                    ? '처리 중'
+                    : '거절'}
                 </button>
               </div>
             </li>

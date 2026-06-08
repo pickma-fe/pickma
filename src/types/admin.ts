@@ -5,13 +5,13 @@ export interface AdminDashboardStats {
   totalProducts: number;
   totalOrders: number;
   totalUsers: number;
-  dailyMetrics: AdminDashboardDailyMetric[];
+  dailyMetrics: DailyAdminMetric[];
   recentPendingApplications: AdminDashboardPendingApplicationSummary[];
   recentOrders: AdminDashboardRecentOrder[];
   recentUsers: AdminDashboardRecentUser[];
 }
 
-export interface AdminDashboardDailyMetric {
+export interface DailyAdminMetric {
   date: Date;
   orderCount: number;
   salesAmount: number;
