@@ -25,8 +25,27 @@ const BENEFITS = [
 
 function LoadingSpinner() {
   return (
-    <div className="flex min-h-[calc(100vh-64px)] items-center justify-center">
+    <div
+      className="flex min-h-[calc(100vh-64px)] items-center justify-center"
+      role="status"
+      aria-live="polite"
+      aria-label="로딩 중"
+    >
       <div className="border-primary-500 h-8 w-8 animate-spin rounded-full border-4 border-t-transparent" />
+      <span className="sr-only">로딩 중</span>
+    </div>
+  );
+}
+
+function OnboardingErrorFallback({ onRetry }: { onRetry: () => void }) {
+  return (
+    <div className="flex min-h-[calc(100vh-64px)] flex-col items-center justify-center gap-3 px-4">
+      <p className="text-sm text-gray-500">
+        상태를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.
+      </p>
+      <Button variant="ghost" color="gray" onClick={onRetry}>
+        다시 시도
+      </Button>
     </div>
   );
 }
@@ -44,7 +63,6 @@ function BenefitList() {
   );
 }
 
-/** 비로그인 */
 function GuestCTA() {
   const { openAuthModal } = useAuthModal();
 
@@ -94,7 +112,6 @@ function GuestCTA() {
   );
 }
 
-/** 로그인 + 신청 전 */
 function NotAppliedCTA() {
   return (
     <div className="flex min-h-[calc(100vh-64px)] flex-col items-center justify-center px-4 py-12">
@@ -138,7 +155,6 @@ function NotAppliedCTA() {
   );
 }
 
-/** 심사 대기 중 */
 function PendingCTA() {
   return (
     <div className="flex min-h-[calc(100vh-64px)] flex-col items-center justify-center px-4 py-12">
@@ -187,7 +203,6 @@ function PendingCTA() {
   );
 }
 
-/** 반려 */
 function RejectedCTA({ rejectReason }: { rejectReason?: string }) {
   return (
     <div className="flex min-h-[calc(100vh-64px)] flex-col items-center justify-center px-4 py-12">
@@ -239,7 +254,6 @@ function RejectedCTA({ rejectReason }: { rejectReason?: string }) {
   );
 }
 
-/** 승인 완료 + 가게 없음 */
 function ApprovedNoStoreCTA() {
   return (
     <div className="flex min-h-[calc(100vh-64px)] flex-col items-center justify-center px-4 py-12">
@@ -287,7 +301,6 @@ function ApprovedNoStoreCTA() {
   );
 }
 
-/** 승인 완료 + 가게 있음 */
 function ApprovedWithStoreCTA() {
   const router = useRouter();
 
@@ -332,8 +345,12 @@ function ApprovedWithStoreCTA() {
 
 export default function SellerPage() {
   const { data: user, isLoading: isUserLoading } = useMe();
-  const { data: onboardingStatus, isLoading: isOnboardingLoading } =
-    useSellerOnboardingStatus({ enabled: Boolean(user) });
+  const {
+    data: onboardingStatus,
+    isLoading: isOnboardingLoading,
+    isError: isOnboardingError,
+    refetch: refetchOnboardingStatus,
+  } = useSellerOnboardingStatus({ enabled: Boolean(user) });
 
   const isLoading = isUserLoading || (Boolean(user) && isOnboardingLoading);
 
@@ -346,11 +363,14 @@ export default function SellerPage() {
     return <GuestCTA />;
   }
 
-  const { applicationStatus, hasStore, latestRejectReason } =
-    onboardingStatus ?? {
-      applicationStatus: 'none' as const,
-      hasStore: false,
-    };
+  // 온보딩 상태 조회 실패
+  if (isOnboardingError || !onboardingStatus) {
+    return (
+      <OnboardingErrorFallback onRetry={() => void refetchOnboardingStatus()} />
+    );
+  }
+
+  const { applicationStatus, hasStore, latestRejectReason } = onboardingStatus;
 
   // 승인 + 가게 있음
   if (applicationStatus === 'approved' && hasStore) {
@@ -372,6 +392,5 @@ export default function SellerPage() {
     return <RejectedCTA rejectReason={latestRejectReason} />;
   }
 
-  // 신청 전 (none) 또는 로그인만 된 상태
   return <NotAppliedCTA />;
 }
