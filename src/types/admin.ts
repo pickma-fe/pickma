@@ -1,3 +1,5 @@
+import type { OrderStatus } from './order';
+
 export interface AdminDashboardStats {
   totalStores: number;
   totalProducts: number;
@@ -27,20 +29,9 @@ export interface AdminDashboardRecentOrder {
   productName: string;
   storeName: string;
   paymentAmount: number;
-  status: AdminDashboardRecentOrderStatus;
+  status: OrderStatus;
   createdAt: Date;
 }
-
-export type AdminDashboardRecentOrderStatus =
-  | 'payment_pending'
-  | 'processing'
-  | 'reserved'
-  | 'accepted'
-  | 'ready'
-  | 'completed'
-  | 'cancelled'
-  | 'no_show'
-  | 'expired';
 
 export interface AdminDashboardRecentUser {
   id: string;

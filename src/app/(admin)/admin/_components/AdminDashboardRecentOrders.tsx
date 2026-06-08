@@ -16,17 +16,18 @@ const DATE_TIME_FORMATTER = new Intl.DateTimeFormat('ko-KR', {
   hour12: false,
 });
 
-const ORDER_STATUS_LABELS: Record<string, string> = {
-  payment_pending: '결제 대기',
-  processing: '처리 중',
-  reserved: '접수 대기',
-  accepted: '준비 중',
-  ready: '준비 완료',
-  completed: '픽업 완료',
-  cancelled: '취소',
-  no_show: '노쇼',
-  expired: '만료',
-};
+const ORDER_STATUS_LABELS: Record<AdminDashboardRecentOrder['status'], string> =
+  {
+    paymentPending: '결제 대기',
+    processing: '처리 중',
+    reserved: '접수 대기',
+    accepted: '준비 중',
+    ready: '준비 완료',
+    completed: '픽업 완료',
+    cancelled: '취소',
+    noShow: '노쇼',
+    expired: '만료',
+  };
 
 export function AdminDashboardRecentOrders({
   orders,
@@ -51,7 +52,7 @@ export function AdminDashboardRecentOrders({
                   {CURRENCY_FORMATTER.format(order.paymentAmount)}원
                 </p>
                 <p className="mt-1 text-xs text-gray-500">
-                  {ORDER_STATUS_LABELS[order.status] ?? order.status} ·{' '}
+                  {ORDER_STATUS_LABELS[order.status]} ·{' '}
                   {DATE_TIME_FORMATTER.format(order.createdAt)}
                 </p>
               </div>

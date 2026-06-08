@@ -441,7 +441,7 @@ export interface AdminDashboardRecentOrder {
   productName: string;
   storeName: string;
   paymentAmount: number;
-  status: string;
+  status: OrderStatus;
   createdAt: Date;
 }
 
