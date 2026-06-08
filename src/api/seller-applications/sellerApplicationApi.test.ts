@@ -99,16 +99,28 @@ describe('sellerApplicationApi', () => {
     expect(result).toBe(mockMapped);
   });
 
-  it('getDocumentSignedUrl은 get 후 signedUrl을 반환한다', async () => {
-    const mockSignedUrl: SellerApplicationDocumentReadUrlResponse = {
+  it('getDocumentSignedUrl은 signedUrl 문자열을 반환한다', async () => {
+    const mockDto: SellerApplicationDocumentReadUrlResponse = {
       signedUrl: 'https://example.com/signed-url',
     };
-    vi.mocked(apiClient.get).mockResolvedValue(mockSignedUrl);
+    vi.mocked(apiClient.get).mockResolvedValue(mockDto);
 
     const result = await sellerApplicationApi.getDocumentSignedUrl('doc-1');
     expect(apiClient.get).toHaveBeenCalledWith(
       '/api/seller-applications/me/documents/doc-1'
     );
-    expect(result).toBe(mockSignedUrl);
+    expect(result).toBe('https://example.com/signed-url');
+  });
+
+  it('getDocumentSignedUrl은 documentId를 encodeURIComponent로 인코딩한다', async () => {
+    const mockDto: SellerApplicationDocumentReadUrlResponse = {
+      signedUrl: 'https://example.com/signed-url',
+    };
+    vi.mocked(apiClient.get).mockResolvedValue(mockDto);
+
+    await sellerApplicationApi.getDocumentSignedUrl('doc/special id');
+    expect(apiClient.get).toHaveBeenCalledWith(
+      '/api/seller-applications/me/documents/doc%2Fspecial%20id'
+    );
   });
 });

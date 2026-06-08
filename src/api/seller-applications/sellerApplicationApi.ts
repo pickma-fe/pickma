@@ -23,11 +23,11 @@ export const sellerApplicationApi = {
       .then(mapSellerApplication);
   },
 
-  getDocumentSignedUrl(
-    documentId: string
-  ): Promise<SellerApplicationDocumentReadUrlResponse> {
-    return apiClient.get<SellerApplicationDocumentReadUrlResponse>(
-      `/api/seller-applications/me/documents/${encodeURIComponent(documentId)}`
-    );
+  getDocumentSignedUrl(documentId: string): Promise<string> {
+    return apiClient
+      .get<SellerApplicationDocumentReadUrlResponse>(
+        `/api/seller-applications/me/documents/${encodeURIComponent(documentId)}`
+      )
+      .then(({ signedUrl }) => signedUrl);
   },
 };

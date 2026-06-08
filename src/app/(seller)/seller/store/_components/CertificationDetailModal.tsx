@@ -20,7 +20,11 @@ export function CertificationDetailModal({
 }: CertificationDetailModalProps) {
   const label = DOC_TYPE_LABEL[document.type] ?? document.type;
 
-  const { data, isLoading, isError } = useDocumentSignedUrl({
+  const {
+    data: signedUrl,
+    isLoading,
+    isError,
+  } = useDocumentSignedUrl({
     documentId: document.id,
   });
 
@@ -33,7 +37,7 @@ export function CertificationDetailModal({
       );
     }
 
-    if (isError || !data?.signedUrl) {
+    if (isError || !signedUrl) {
       return (
         <div className="flex aspect-[4/3] w-full items-center justify-center rounded-lg bg-gray-100 text-sm text-red-500">
           이미지를 불러올 수 없습니다
@@ -44,7 +48,7 @@ export function CertificationDetailModal({
     return (
       <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg bg-gray-100">
         <Image
-          src={data.signedUrl}
+          src={signedUrl}
           alt={label}
           fill
           sizes="(max-width: 768px) 100vw, 500px"
