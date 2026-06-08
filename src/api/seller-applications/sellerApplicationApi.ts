@@ -27,7 +27,7 @@ export const sellerApplicationApi = {
     documentId: string
   ): Promise<SellerApplicationDocumentReadUrlResponse> {
     return apiClient.get<SellerApplicationDocumentReadUrlResponse>(
-      `/api/seller-applications/me/documents/${documentId}`
+      `/api/seller-applications/me/documents/${encodeURIComponent(documentId)}`
     );
   },
 };

@@ -7,16 +7,12 @@ import { useDocumentSignedUrl } from '@/hooks/seller/applications/useDocumentSig
 import { Badge } from '@/components/common/Badge/Badge';
 import { Button } from '@/components/common/Button/Button';
 
+import { DOC_TYPE_LABEL } from './certificationConstants';
+
 interface CertificationDetailModalProps {
   document: SellerApplicationDocument;
   onClose: () => void;
 }
-
-const DOC_TYPE_LABEL: Record<string, string> = {
-  business_license: '사업자 등록증',
-  food_service_permit: '영업신고증',
-  bank_account: '통장 사본',
-};
 
 export function CertificationDetailModal({
   document,
@@ -80,7 +76,7 @@ export function CertificationDetailModal({
         <div className="flex">
           <dt className="w-28 shrink-0 text-sm text-gray-500">제출일</dt>
           <dd className="text-sm text-gray-900">
-            {new Date(document.createdAt).toLocaleDateString('ko-KR')}
+            {document.createdAt.toLocaleDateString('ko-KR')}
           </dd>
         </div>
       </dl>

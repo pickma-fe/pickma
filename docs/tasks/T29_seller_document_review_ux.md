@@ -33,10 +33,7 @@
 - 작업 내용:
   - 판매자 본인의 제출 문서 조회 API 필요 여부를 결정한다.
   - 하드코딩 목록을 실제 신청/문서 상태 기반으로 교체한다.
-  - DB schema 수정이 아니라 기존 `seller_applications`/`seller_application_documents` 데이터와 contract를 활용한다.
-  - `onboarding-status`를 문서 목록까지 확장할지, 별도 seller application 조회 API를 둘지 결정한다.
   - 민감 문서 다운로드/미리보기 권한과 masking 정책을 정한다.
-  - seller register/onboarding-status 주변 TODO(T29)를 함께 정리한다.
 
 - 관련 파일/영역:
   - `src/app/(seller)/seller/store/_components/StoreInfoContent.tsx`
@@ -50,4 +47,13 @@
 - 완료 기준:
   - 하드코딩 인증 목록이 제거된다.
   - 판매자가 실제 제출 문서 상태를 확인할 수 있다.
-  - seller register/onboarding-status 주변 TODO가 실제 신청/문서 데이터 조회 흐름과 충돌하지 않게 정리된다.
+
+- 구현 결과
+
+- 하드코딩 제거: `StoreInfoContent.tsx`의 `INITIAL_CERTIFICATIONS`, `CERT_KEY_MAP` 완전 제거. `CertificationSection.tsx`는 props로 받은 실제 문서 데이터를 렌더링하도록 교체.
+
+- 실제 데이터 렌더링 경로: `GET /api/seller-applications/me` → `useMySellerApplication` hook → `CertificationSection` 컴포넌트. 문서 미리보기는 `GET /api/seller-applications/me/documents/[documentId]` → `useDocumentSignedUrl` hook → signed URL로 이미지 렌더링.
+
+- 권한/마스킹 결정: 민감 문서는 서버에서 소유권 검증(신청의 `user_id` 대조) 후 Supabase Storage signed URL(5분 만료)을 발급. 클라이언트는 signed URL만 받으며 storage path를 직접 노출하지 않음. 본인 신청 조회(`getMySellerApplication`)는 RLS 기반 server client 사용, signed URL 생성은 service role 사용.
+
+- 테스트/검증 방법: `API_MOCK_ENABLED=true` 환경에서 `/seller/store` 접속 후 인증 정보 섹션의 3개 서류 목록 및 "보기" 모달 동작 확인. `pnpm test sellerApplicationApi`로 단위 테스트 확인.

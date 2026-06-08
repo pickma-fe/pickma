@@ -1,11 +1,12 @@
 import { AppError } from '@/lib/errors/appError';
 import { ERROR_CODE } from '@/lib/errors/errorCodes';
+import { createServerClient } from '@/lib/supabase/server';
 import { createServiceRoleClient } from '@/lib/supabase/service';
 
 import { toSellerApplicationResponse } from '../../_lib/mapper';
 
 export async function getMySellerApplication(userId: string) {
-  const supabase = createServiceRoleClient();
+  const supabase = await createServerClient();
 
   const { data: appData, error: appError } = await supabase
     .from('seller_applications')
@@ -41,7 +42,6 @@ export async function getDocumentSignedUrl(
 ): Promise<string> {
   const supabase = createServiceRoleClient();
 
-  // 문서 조회
   const { data: doc, error: docError } = await supabase
     .from('seller_application_documents')
     .select('storage_path, application_id')
@@ -56,7 +56,6 @@ export async function getDocumentSignedUrl(
     throw new AppError(ERROR_CODE.APPLICATION_DOCUMENT_NOT_FOUND, 404);
   }
 
-  // 소유권 검증
   const { data: app, error: appError } = await supabase
     .from('seller_applications')
     .select('user_id')
@@ -71,7 +70,6 @@ export async function getDocumentSignedUrl(
     throw new AppError(ERROR_CODE.FORBIDDEN, 403);
   }
 
-  // signed URL 생성 (5분)
   const { data: signedData, error: signedError } = await supabase.storage
     .from('seller-application-documents')
     .createSignedUrl(doc.storage_path, 60 * 5);

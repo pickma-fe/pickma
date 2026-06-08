@@ -12,6 +12,7 @@ import { Modal } from '@/components/common/Modal/Modal';
 import { Section } from '@/components/common/Section/Section';
 
 import { BasicInfoSection } from './BasicInfoSection';
+import { DOC_TYPE_LABEL } from './certificationConstants';
 import { CertificationDetailModal } from './CertificationDetailModal';
 import { CertificationSection } from './CertificationSection';
 import { OperationInfoSection } from './OperationInfoSection';
@@ -22,17 +23,14 @@ import { StoreImageSection } from './StoreImageSection';
 
 type ModalType = 'editStore' | 'editImage' | 'viewCertification' | null;
 
-const DOC_TYPE_LABEL: Record<string, string> = {
-  business_license: '사업자 등록증',
-  food_service_permit: '영업신고증',
-  bank_account: '통장 사본',
-};
-
 export function StoreInfoContent() {
   const { data: storeInfo, isLoading, isError } = useMyStore();
   const { mutate: updateStore, isPending: isUpdating } = useUpdateStore();
-  const { data: application, isLoading: isApplicationLoading } =
-    useMySellerApplication();
+  const {
+    data: application,
+    isLoading: isApplicationLoading,
+    isError: isApplicationError,
+  } = useMySellerApplication();
 
   const [activeModal, setActiveModal] = useState<ModalType>(null);
   const [selectedDocument, setSelectedDocument] =
@@ -201,12 +199,20 @@ export function StoreInfoContent() {
           storeInfo={storeInfo}
           onEditImage={() => handleOpenModal('editImage')}
         />
-        <CertificationSection
-          documents={application?.documents ?? []}
-          applicationStatus={application?.status ?? 'pending'}
-          onViewDocument={handleViewDocument}
-          isLoading={isApplicationLoading}
-        />
+        {isApplicationError ? (
+          <Section variant="card" className="bg-white">
+            <p className="text-sm text-red-500">
+              제출 서류 정보를 불러오지 못했습니다.
+            </p>
+          </Section>
+        ) : (
+          <CertificationSection
+            documents={application?.documents ?? []}
+            applicationStatus={application?.status ?? 'pending'}
+            onViewDocument={handleViewDocument}
+            isLoading={isApplicationLoading}
+          />
+        )}
       </div>
 
       <Modal
