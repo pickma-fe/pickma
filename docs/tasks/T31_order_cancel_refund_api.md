@@ -1,10 +1,10 @@
 # T31. 주문 취소/환불 API 구현
 
 - 상태:
-  진행 전
+  완료
 
 - GitHub Issue:
-  확인 필요
+  246
 
 - 우선순위:
   P1
@@ -60,3 +60,14 @@
   - `payment_cancelled` 이벤트가 결제/주문 취소 확정과 함께 기록된다.
   - `store_order_number`, `pickup_number`, sequence는 취소 후에도 회수하지 않는다.
   - `PATCH /api/orders/{orderId}/cancel`, `POST /api/payments/{paymentId}/cancel` endpoint가 구현되고 `NOT_IMPLEMENTED` 반환 코드가 제거된다.
+
+- 구현 결과:
+  - `payment_provider` enum 제거 및 Toss-only 결제 스키마로 정리 (migration + typegen)
+  - `cancelling` 상태 추가: `order_status` enum, DB, 계약, UI(consumer/seller) 전체 반영
+  - `begin_order_cancel` / `cancel_order` (finalize) / `revert_order_cancel_claim` RPC 구현
+  - `PAYMENT_CANCEL_FAILED` (502) 에러 코드 추가
+  - `callTossCancel` 공유 helper (`src/app/api/_lib/toss-cancel.ts`) 추가
+  - `PATCH /api/orders/:orderId/cancel`: consumer 취소 (DB claim → Toss → DB finalize)
+  - `POST /api/payments/:paymentId/cancel`: admin 전용 취소 (동일 흐름, user check 우회)
+  - `payment_compensation_failed` payload에 `cancel_finalize` stage 추가
+  - consumer mypage, seller 주문 목록/상세에 `cancelling` 상태 표시 및 액션 차단
