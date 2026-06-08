@@ -6,19 +6,14 @@ import {
   StoreIcon,
   UsersIcon,
 } from 'lucide-react';
-import { useState } from 'react';
 
-import type { AdminDashboardPendingApplicationSummary } from '@/types/admin';
 import { useAdminDashboardStats } from '@/hooks/admin/dashboard/useAdminDashboardStats';
-import { useApproveSellerApplication } from '@/hooks/admin/sellers/useApproveSellerApplication';
-import { useRejectSellerApplication } from '@/hooks/admin/sellers/useRejectSellerApplication';
 import { Button } from '@/components/common/Button/Button';
 
 import { AdminDashboardDailyChart } from './AdminDashboardDailyChart';
 import { AdminDashboardPendingApplications } from './AdminDashboardPendingApplications';
 import { AdminDashboardRecentOrders } from './AdminDashboardRecentOrders';
 import { AdminDashboardRecentUsers } from './AdminDashboardRecentUsers';
-import { AdminDashboardRejectModal } from './AdminDashboardRejectModal';
 import { AdminDashboardStatCard } from './AdminDashboardStatCard';
 
 const EMPTY_STATS = {
@@ -33,64 +28,10 @@ const EMPTY_STATS = {
 };
 
 export function AdminDashboardPageContent() {
-  const [message, setMessage] = useState('');
-  const [actionError, setActionError] = useState('');
-  const [pendingActionId, setPendingActionId] = useState<string>();
-  const [pendingActionType, setPendingActionType] = useState<
-    'approve' | 'reject'
-  >();
-  const [rejectApplication, setRejectApplication] =
-    useState<AdminDashboardPendingApplicationSummary>();
   const { data, isLoading, isError, refetch, isFetching } =
     useAdminDashboardStats();
-  const approveMutation = useApproveSellerApplication();
-  const rejectMutation = useRejectSellerApplication();
   const stats = data ?? EMPTY_STATS;
   const shouldRenderDashboardBody = isLoading || Boolean(data);
-  const isMutatingAction =
-    approveMutation.isPending || rejectMutation.isPending;
-
-  async function handleApprove(
-    application: AdminDashboardPendingApplicationSummary
-  ) {
-    setMessage('');
-    setActionError('');
-    setPendingActionId(application.id);
-    setPendingActionType('approve');
-
-    try {
-      await approveMutation.mutateAsync(application.id);
-      setMessage(`${application.companyName} 신청을 승인했습니다.`);
-    } catch {
-      setActionError('승인 처리에 실패했습니다. 잠시 후 다시 시도해주세요.');
-    } finally {
-      setPendingActionId(undefined);
-      setPendingActionType(undefined);
-    }
-  }
-
-  async function handleReject(reason: string) {
-    if (!rejectApplication) return;
-
-    setMessage('');
-    setActionError('');
-    setPendingActionId(rejectApplication.id);
-    setPendingActionType('reject');
-
-    try {
-      await rejectMutation.mutateAsync({
-        id: rejectApplication.id,
-        reason,
-      });
-      setMessage(`${rejectApplication.companyName} 신청을 거절했습니다.`);
-      setRejectApplication(undefined);
-    } catch {
-      setActionError('거절 처리에 실패했습니다. 잠시 후 다시 시도해주세요.');
-    } finally {
-      setPendingActionId(undefined);
-      setPendingActionType(undefined);
-    }
-  }
 
   return (
     <div className="space-y-6">
@@ -100,23 +41,6 @@ export function AdminDashboardPageContent() {
           픽마 플랫폼의 주요 현황을 한눈에 확인하세요.
         </p>
       </header>
-
-      {message && (
-        <div
-          role="status"
-          className="border-primary-100 bg-primary-50 text-primary-700 rounded-md border px-4 py-3 text-sm"
-        >
-          {message}
-        </div>
-      )}
-      {actionError && (
-        <div
-          role="alert"
-          className="rounded-md border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-600"
-        >
-          {actionError}
-        </div>
-      )}
 
       {isError && (
         <div
@@ -172,11 +96,6 @@ export function AdminDashboardPageContent() {
             <AdminDashboardDailyChart metrics={stats.dailyMetrics} />
             <AdminDashboardPendingApplications
               applications={stats.recentPendingApplications}
-              isActionPending={isMutatingAction}
-              pendingActionId={pendingActionId}
-              pendingActionType={pendingActionType}
-              onApprove={(application) => void handleApprove(application)}
-              onReject={setRejectApplication}
             />
           </section>
 
@@ -186,14 +105,6 @@ export function AdminDashboardPageContent() {
           </section>
         </>
       )}
-
-      <AdminDashboardRejectModal
-        key={rejectApplication?.id ?? 'closed'}
-        application={rejectApplication}
-        isSubmitting={rejectMutation.isPending}
-        onClose={() => setRejectApplication(undefined)}
-        onSubmit={(reason) => void handleReject(reason)}
-      />
     </div>
   );
 }

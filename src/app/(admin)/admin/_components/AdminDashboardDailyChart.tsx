@@ -13,6 +13,8 @@ const DATE_FORMATTER = new Intl.DateTimeFormat('ko-KR', {
 });
 const TOOLTIP_WIDTH = 150;
 const TOOLTIP_HEIGHT = 66;
+const ORDER_LINE_HEIGHT_RATIO = 0.88;
+const SALES_BAR_HEIGHT_RATIO = 0.72;
 
 function formatDateLabel(date: Date): string {
   return DATE_FORMATTER.format(date).replace(/\.$/, '').replace('. ', '.');
@@ -60,7 +62,10 @@ export function AdminDashboardDailyChart({
   const points = metrics.map((metric, index) => {
     const x = chartLeft + step * index;
     const y =
-      chartBottom - (metric.orderCount / maxOrderCount) * chartHeight * 0.88;
+      chartBottom -
+      (metric.orderCount / maxOrderCount) *
+        chartHeight *
+        ORDER_LINE_HEIGHT_RATIO;
     return { x, y };
   });
   const linePoints = points.map((point) => `${point.x},${point.y}`).join(' ');
@@ -101,7 +106,9 @@ export function AdminDashboardDailyChart({
           {metrics.map((metric, index) => {
             const x = chartLeft + step * index;
             const barHeight =
-              (metric.salesAmount / maxSalesAmount) * chartHeight * 0.72;
+              (metric.salesAmount / maxSalesAmount) *
+              chartHeight *
+              SALES_BAR_HEIGHT_RATIO;
             return (
               <g key={metric.date.toISOString()}>
                 <rect

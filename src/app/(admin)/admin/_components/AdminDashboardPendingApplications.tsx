@@ -1,14 +1,11 @@
+import Link from 'next/link';
+
 import type { AdminDashboardPendingApplicationSummary } from '@/types/admin';
 
 import { AdminCard } from './AdminCard';
 
 interface AdminDashboardPendingApplicationsProps {
   applications: AdminDashboardPendingApplicationSummary[];
-  isActionPending: boolean;
-  pendingActionId?: string;
-  pendingActionType?: 'approve' | 'reject';
-  onApprove: (application: AdminDashboardPendingApplicationSummary) => void;
-  onReject: (application: AdminDashboardPendingApplicationSummary) => void;
 }
 
 const DATE_FORMATTER = new Intl.DateTimeFormat('ko-KR', {
@@ -19,14 +16,19 @@ const DATE_FORMATTER = new Intl.DateTimeFormat('ko-KR', {
 
 export function AdminDashboardPendingApplications({
   applications,
-  isActionPending,
-  pendingActionId,
-  pendingActionType,
-  onApprove,
-  onReject,
 }: AdminDashboardPendingApplicationsProps) {
   return (
-    <AdminCard title="최근 승인 대기 가게">
+    <AdminCard
+      title="최근 승인 대기 가게"
+      action={
+        <Link
+          href="/admin/sellers/pending"
+          className="text-sm font-medium text-gray-500 hover:text-gray-900"
+        >
+          전체 보기
+        </Link>
+      }
+    >
       <ul className="divide-y divide-gray-100">
         {applications.length > 0 ? (
           applications.map((application) => (
@@ -44,28 +46,12 @@ export function AdminDashboardPendingApplications({
                 </p>
               </div>
               <div className="flex shrink-0 items-center gap-2">
-                <button
-                  type="button"
-                  disabled={isActionPending}
-                  onClick={() => onApprove(application)}
-                  className="bg-primary-500 hover:bg-primary-600 rounded-sm px-3 py-1.5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500"
+                <Link
+                  href="/admin/sellers/pending"
+                  className="border-primary-200 text-primary-700 hover:bg-primary-50 rounded-sm border px-3 py-1.5 text-sm font-semibold"
                 >
-                  {pendingActionId === application.id &&
-                  pendingActionType === 'approve'
-                    ? '처리 중'
-                    : '승인'}
-                </button>
-                <button
-                  type="button"
-                  disabled={isActionPending}
-                  onClick={() => onReject(application)}
-                  className="rounded-sm border border-gray-200 px-3 py-1.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-400"
-                >
-                  {pendingActionId === application.id &&
-                  pendingActionType === 'reject'
-                    ? '처리 중'
-                    : '거절'}
-                </button>
+                  심사하기
+                </Link>
               </div>
             </li>
           ))

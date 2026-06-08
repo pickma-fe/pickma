@@ -58,6 +58,7 @@
   - `GET /api/admin/dashboard/stats` 관리자 전용 통계 API를 구현했다.
   - 총 가게수, 총 상품수, 총 주문수, 총 사용자수 summary 카드를 렌더링한다.
   - 최근 7일 주문/매출 현황과 최근 승인 대기, 최근 주문, 신규 사용자 섹션을 렌더링한다.
+  - 최근 승인 대기 섹션은 요약 정보만 제공하고, 실제 승인/거절은 `/admin/sellers/pending` 심사 화면으로 이동해 처리하도록 연결했다.
   - 공지사항은 현재 공지 도메인/API가 없어 T58 범위에서 제외하고 후속 공지 도메인 task에서 연동한다.
   - mock/real mode 모두 Route Handler에서 `requireAdmin()`을 통과하도록 고정했다.
   - service/route 테스트로 count 집계와 관리자 권한 검증을 확인했다.
