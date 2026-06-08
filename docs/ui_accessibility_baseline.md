@@ -292,7 +292,7 @@ T46~T49·T64·T65는 아래 기준에 따라 검증 방법을 선택한다.
 
 모든 도메인 컴포넌트는 `src/components/{domain}/` 아래에 위치한다.
 
-```
+```text
 src/components/
   common/      # 도메인 무관 공통 컴포넌트 (Button, Input, Modal 등)
   consumer/    # Consumer 전용 컴포넌트
