@@ -94,7 +94,10 @@ export async function cancelOrder(
   }
 
   if (process.env.PAYMENT_MOCK !== 'true') {
-    if (!paymentKey) throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
+    if (!paymentKey) {
+      await supabase.rpc('revert_order_cancel_claim', { p_order_id: orderId });
+      throw new AppError(ERROR_CODE.PAYMENT_CANCEL_FAILED, 502);
+    }
     try {
       await callTossCancel({
         orderNumber: order.order_number,
@@ -103,7 +106,29 @@ export async function cancelOrder(
         cancelAmount: order.payment_amount,
       });
     } catch {
-      await supabase.rpc('revert_order_cancel_claim', { p_order_id: orderId });
+      const { error: revertError } = await supabase.rpc(
+        'revert_order_cancel_claim',
+        { p_order_id: orderId }
+      );
+      if (revertError) {
+        await Promise.resolve(
+          supabase.from('payment_events').insert({
+            order_id: orderId,
+            order_number: order.order_number,
+            store_id: order.store_id,
+            event_type: 'payment_compensation_failed',
+            status: 'processed',
+            processed_at: new Date().toISOString(),
+            payload: {
+              failureStage: 'revert_processing',
+              paymentStateAssumption: 'approved_may_remain',
+              manualAction: 'restore_order_status',
+              orderStatus: 'cancelling',
+              paymentKey,
+            } satisfies PaymentCompensationFailedPayload,
+          })
+        ).catch(() => {});
+      }
       throw new AppError(ERROR_CODE.PAYMENT_CANCEL_FAILED, 502);
     }
   }
