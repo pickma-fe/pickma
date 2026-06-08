@@ -965,6 +965,15 @@ BEGIN
     RAISE EXCEPTION 'INVALID_ORDER_STATUS';
   END IF;
 
+  SELECT * INTO v_payment
+  FROM payments
+  WHERE order_id = p_order_id
+  FOR UPDATE;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'PAYMENT_NOT_FOUND';
+  END IF;
+
   UPDATE orders
      SET status                = 'cancelled',
          cancelled_at          = now(),
@@ -974,19 +983,12 @@ BEGIN
          updated_at            = now()
    WHERE id = p_order_id;
 
-  SELECT * INTO v_payment
-  FROM payments
-  WHERE order_id = p_order_id
-  FOR UPDATE;
-
-  IF FOUND THEN
-    UPDATE payments
-       SET status        = 'cancelled',
-           refunded_at   = now(),
-           refund_reason = p_reason,
-           updated_at    = now()
-     WHERE id = v_payment.id;
-  END IF;
+  UPDATE payments
+     SET status        = 'cancelled',
+         refunded_at   = now(),
+         refund_reason = p_reason,
+         updated_at    = now()
+   WHERE id = v_payment.id;
 
   -- restores stock (paid order cancel)
   UPDATE products p
