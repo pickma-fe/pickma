@@ -50,6 +50,17 @@ export const queryKeys = {
       list: (params: object) => ['seller', 'menu-items', params] as const,
     },
     onboardingStatus: () => ['seller', 'onboarding-status'] as const,
+    application: {
+      my: () => ['seller', 'application', 'my'] as const,
+      documentSignedUrl: (documentId: string) =>
+        [
+          'seller',
+          'application',
+          'document',
+          documentId,
+          'signed-url',
+        ] as const,
+    },
   },
 
   admin: {
