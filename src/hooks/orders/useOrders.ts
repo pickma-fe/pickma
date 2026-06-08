@@ -20,6 +20,7 @@ const ORDER_STATUS_TO_PARAM: Record<
   ready: 'ready',
   completed: 'completed',
   cancelled: 'cancelled',
+  cancelling: 'cancelling',
   noShow: 'no_show',
   expired: 'expired',
 };

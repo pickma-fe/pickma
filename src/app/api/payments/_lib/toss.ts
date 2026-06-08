@@ -3,7 +3,7 @@ import { AppError } from '@/lib/errors/appError';
 import { ERROR_CODE } from '@/lib/errors/errorCodes';
 
 export interface TossConfirmResult {
-  providerPaymentKey: string;
+  paymentKey: string;
   providerOrderId: string;
   method: PaymentMethod;
   methodDetail: string | null;
@@ -179,7 +179,7 @@ export async function callTossConfirm(params: {
   }
 
   return {
-    providerPaymentKey: data.paymentKey,
+    paymentKey: data.paymentKey,
     providerOrderId: data.orderId,
     method,
     methodDetail,

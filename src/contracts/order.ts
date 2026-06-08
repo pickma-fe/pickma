@@ -9,6 +9,7 @@ export type OrderStatusParam =
   | 'ready'
   | 'completed'
   | 'cancelled'
+  | 'cancelling'
   | 'no_show'
   | 'expired';
 

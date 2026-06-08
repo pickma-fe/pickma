@@ -24,7 +24,6 @@ export async function processWebhook(
     const { data: existing, error: existingError } = await supabase
       .from('payment_events')
       .select('id')
-      .eq('provider', 'toss')
       .eq('provider_event_id', transmissionId)
       .maybeSingle();
     if (existingError)
@@ -61,12 +60,12 @@ async function processPaymentStatusChanged(
   // payments 조회
   const { data: payment, error: paymentError } = await supabase
     .from('payments')
-    .select('id, provider_payment_key, method')
+    .select('id, payment_key, method')
     .eq('order_id', order.id)
     .maybeSingle();
   if (paymentError) throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
 
-  const providerKey = body.data.paymentKey;
+  const paymentKey = body.data.paymentKey;
 
   // 금액 검증
   if (body.data.totalAmount !== order.payment_amount) {
@@ -76,7 +75,7 @@ async function processPaymentStatusChanged(
       storeId: order.store_id,
       paymentId: payment?.id ?? null,
       transmissionId,
-      providerKey,
+      paymentKey,
       providerEventType: 'PAYMENT_STATUS_CHANGED',
       payload: body,
       errorMessage: 'totalAmount mismatch',
@@ -92,7 +91,7 @@ async function processPaymentStatusChanged(
       storeId: order.store_id,
       paymentId: null,
       transmissionId,
-      providerKey,
+      paymentKey,
       providerEventType: 'PAYMENT_STATUS_CHANGED',
       payload: body,
       errorMessage: 'payment not found',
@@ -101,14 +100,14 @@ async function processPaymentStatusChanged(
   }
 
   // paymentKey 검증
-  if (body.data.paymentKey !== payment.provider_payment_key) {
+  if (body.data.paymentKey !== payment.payment_key) {
     await insertFailedEvent(supabase, {
       orderId: order.id,
       orderNumber: order.order_number,
       storeId: order.store_id,
       paymentId: payment.id,
       transmissionId,
-      providerKey: payment.provider_payment_key,
+      paymentKey: payment.payment_key,
       providerEventType: 'PAYMENT_STATUS_CHANGED',
       payload: body,
       errorMessage: 'paymentKey mismatch',
@@ -124,7 +123,7 @@ async function processPaymentStatusChanged(
       storeId: order.store_id,
       paymentId: payment.id,
       transmissionId,
-      providerKey: payment.provider_payment_key,
+      paymentKey: payment.payment_key,
       providerEventType: 'PAYMENT_STATUS_CHANGED',
       payload: body,
       errorMessage: 'method mismatch',
@@ -138,7 +137,7 @@ async function processPaymentStatusChanged(
     storeId: order.store_id,
     paymentId: payment.id,
     transmissionId,
-    providerKey: payment.provider_payment_key,
+    paymentKey: payment.payment_key,
     providerEventType: 'PAYMENT_STATUS_CHANGED',
     payload: body,
   });
@@ -164,7 +163,7 @@ async function processDepositCallback(
   // payments 조회
   const { data: payment, error: paymentError } = await supabase
     .from('payments')
-    .select('id, provider_payment_key, method, pg_response')
+    .select('id, payment_key, method, pg_response')
     .eq('order_id', order.id)
     .maybeSingle();
   if (paymentError) throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
@@ -177,7 +176,7 @@ async function processDepositCallback(
       storeId: order.store_id,
       paymentId: null,
       transmissionId,
-      providerKey: null,
+      paymentKey: null,
       providerEventType: 'DEPOSIT_CALLBACK',
       payload: body,
       errorMessage: 'payment not found',
@@ -193,7 +192,7 @@ async function processDepositCallback(
       storeId: order.store_id,
       paymentId: payment.id,
       transmissionId,
-      providerKey: payment.provider_payment_key,
+      paymentKey: payment.payment_key,
       providerEventType: 'DEPOSIT_CALLBACK',
       payload: body,
       errorMessage: 'method is not virtual_account',
@@ -211,7 +210,7 @@ async function processDepositCallback(
       storeId: order.store_id,
       paymentId: payment.id,
       transmissionId,
-      providerKey: payment.provider_payment_key,
+      paymentKey: payment.payment_key,
       providerEventType: 'DEPOSIT_CALLBACK',
       payload: body,
       errorMessage: 'secret mismatch',
@@ -225,7 +224,7 @@ async function processDepositCallback(
     storeId: order.store_id,
     paymentId: payment.id,
     transmissionId,
-    providerKey: payment.provider_payment_key,
+    paymentKey: payment.payment_key,
     providerEventType: 'DEPOSIT_CALLBACK',
     payload: body,
   });
@@ -237,7 +236,7 @@ interface EventParams {
   storeId: string | null;
   paymentId: string | null;
   transmissionId: string | null;
-  providerKey: string | null;
+  paymentKey: string | null;
   providerEventType: string;
   payload: unknown;
 }
@@ -255,9 +254,8 @@ async function insertAndProcessEvent(
       order_number: params.orderNumber,
       store_id: params.storeId,
       payment_id: params.paymentId,
-      provider: 'toss',
+      payment_key: params.paymentKey,
       provider_event_id: params.transmissionId,
-      provider_key: params.providerKey,
       provider_event_type: params.providerEventType,
       payload: params.payload as Json,
     })
@@ -265,7 +263,7 @@ async function insertAndProcessEvent(
     .single();
 
   if (insertError) {
-    // (provider, provider_event_id) unique violation — 동시 중복 webhook
+    // provider_event_id unique violation — 동시 중복 webhook
     if (insertError.code === '23505') return;
     throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
   }
@@ -293,9 +291,8 @@ async function insertFailedEvent(
       order_number: params.orderNumber,
       store_id: params.storeId,
       payment_id: params.paymentId,
-      provider: 'toss',
+      payment_key: params.paymentKey,
       provider_event_id: params.transmissionId,
-      provider_key: params.providerKey,
       provider_event_type: params.providerEventType,
       payload: params.payload as Json,
       error_message: params.errorMessage,

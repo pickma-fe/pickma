@@ -24,8 +24,7 @@ export interface PaymentEventRow {
   storeId: string | null;
   paymentId: string | null;
   eventType: PaymentEventType;
-  provider: string | null;
-  providerKey: string | null;
+  paymentKey: string | null;
   providerEventType: string | null;
   providerEventId: string | null;
   payload: JsonValue | null;

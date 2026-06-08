@@ -4,8 +4,7 @@ import type { PaymentResponse } from '@/contracts/payment';
 export interface PaymentRow {
   id: string;
   order_id: string;
-  provider: string;
-  provider_payment_key: string | null;
+  payment_key: string | null;
   provider_order_id: string | null;
   method: PaymentMethod;
   method_detail: string | null;

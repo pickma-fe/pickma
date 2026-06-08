@@ -170,6 +170,10 @@ export type Database = {
       };
       orders: {
         Row: {
+          cancel_claimed_at: string | null;
+          cancel_claimed_status:
+            | Database['public']['Enums']['order_status']
+            | null;
           cancel_reason: string | null;
           cancelled_at: string | null;
           created_at: string;
@@ -191,6 +195,10 @@ export type Database = {
           user_id: string;
         };
         Insert: {
+          cancel_claimed_at?: string | null;
+          cancel_claimed_status?:
+            | Database['public']['Enums']['order_status']
+            | null;
           cancel_reason?: string | null;
           cancelled_at?: string | null;
           created_at?: string;
@@ -212,6 +220,10 @@ export type Database = {
           user_id: string;
         };
         Update: {
+          cancel_claimed_at?: string | null;
+          cancel_claimed_status?:
+            | Database['public']['Enums']['order_status']
+            | null;
           cancel_reason?: string | null;
           cancelled_at?: string | null;
           created_at?: string;
@@ -259,11 +271,10 @@ export type Database = {
           order_number: string;
           payload: Json | null;
           payment_id: string | null;
+          payment_key: string | null;
           processed_at: string | null;
-          provider: string | null;
           provider_event_id: string | null;
           provider_event_type: string | null;
-          provider_key: string | null;
           status: string;
           store_id: string | null;
         };
@@ -276,11 +287,10 @@ export type Database = {
           order_number: string;
           payload?: Json | null;
           payment_id?: string | null;
+          payment_key?: string | null;
           processed_at?: string | null;
-          provider?: string | null;
           provider_event_id?: string | null;
           provider_event_type?: string | null;
-          provider_key?: string | null;
           status?: string;
           store_id?: string | null;
         };
@@ -293,11 +303,10 @@ export type Database = {
           order_number?: string;
           payload?: Json | null;
           payment_id?: string | null;
+          payment_key?: string | null;
           processed_at?: string | null;
-          provider?: string | null;
           provider_event_id?: string | null;
           provider_event_type?: string | null;
-          provider_key?: string | null;
           status?: string;
           store_id?: string | null;
         };
@@ -334,10 +343,9 @@ export type Database = {
           method_detail: string | null;
           order_id: string;
           paid_at: string | null;
+          payment_key: string | null;
           pg_response: Json | null;
-          provider: Database['public']['Enums']['payment_provider'];
           provider_order_id: string | null;
-          provider_payment_key: string | null;
           refund_reason: string | null;
           refunded_at: string | null;
           status: Database['public']['Enums']['payment_status'];
@@ -351,10 +359,9 @@ export type Database = {
           method_detail?: string | null;
           order_id: string;
           paid_at?: string | null;
+          payment_key?: string | null;
           pg_response?: Json | null;
-          provider: Database['public']['Enums']['payment_provider'];
           provider_order_id?: string | null;
-          provider_payment_key?: string | null;
           refund_reason?: string | null;
           refunded_at?: string | null;
           status: Database['public']['Enums']['payment_status'];
@@ -368,10 +375,9 @@ export type Database = {
           method_detail?: string | null;
           order_id?: string;
           paid_at?: string | null;
+          payment_key?: string | null;
           pg_response?: Json | null;
-          provider?: Database['public']['Enums']['payment_provider'];
           provider_order_id?: string | null;
-          provider_payment_key?: string | null;
           refund_reason?: string | null;
           refunded_at?: string | null;
           status?: Database['public']['Enums']['payment_status'];
@@ -810,10 +816,9 @@ export type Database = {
           p_method: Database['public']['Enums']['payment_method'];
           p_method_detail: string;
           p_order_number: string;
+          p_payment_key: string;
           p_pg_response: Json;
-          p_provider: Database['public']['Enums']['payment_provider'];
           p_provider_order_id: string;
-          p_provider_payment_key: string;
         };
         Returns: {
           success: boolean;
@@ -871,10 +876,10 @@ export type Database = {
         | 'ready'
         | 'completed'
         | 'cancelled'
+        | 'cancelling'
         | 'no_show'
         | 'expired';
       payment_method: 'card' | 'virtual_account' | 'mobile' | 'easy_pay';
-      payment_provider: 'toss' | 'kakao_pay' | 'naver_pay';
       payment_status: 'pending' | 'paid' | 'failed' | 'cancelled' | 'refunded';
       product_status: 'active' | 'closed';
       seller_application_document_type:
@@ -1029,11 +1034,11 @@ export const Constants = {
         'ready',
         'completed',
         'cancelled',
+        'cancelling',
         'no_show',
         'expired',
       ],
       payment_method: ['card', 'virtual_account', 'mobile', 'easy_pay'],
-      payment_provider: ['toss', 'kakao_pay', 'naver_pay'],
       payment_status: ['pending', 'paid', 'failed', 'cancelled', 'refunded'],
       product_status: ['active', 'closed'],
       seller_application_document_type: [

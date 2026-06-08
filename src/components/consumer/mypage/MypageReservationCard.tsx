@@ -30,6 +30,7 @@ const statusDisplayMap: Record<OrderStatus, ReservationDisplayGroup> = {
   ready: 'pendingPickup',
   completed: 'completed',
   cancelled: 'cancelled',
+  cancelling: 'cancelled',
   noShow: 'cancelled',
   expired: 'cancelled',
 };

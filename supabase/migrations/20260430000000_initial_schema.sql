@@ -23,10 +23,10 @@ CREATE TYPE order_status AS ENUM (
   'ready',
   'completed',
   'cancelled',
+  'cancelling',
   'no_show',
   'expired'
 );
-CREATE TYPE payment_provider AS ENUM ('toss', 'kakao_pay', 'naver_pay');
 CREATE TYPE payment_method AS ENUM ('card', 'virtual_account', 'mobile', 'easy_pay');
 CREATE TYPE payment_status AS ENUM ('pending', 'paid', 'failed', 'cancelled', 'refunded');
 CREATE TYPE social_provider AS ENUM ('google', 'kakao');
@@ -138,6 +138,8 @@ CREATE TABLE orders (
   picked_up_at          timestamptz,
   cancelled_at          timestamptz,
   cancel_reason         varchar(500),
+  cancel_claimed_status order_status,
+  cancel_claimed_at     timestamptz,
   created_at            timestamptz   NOT NULL DEFAULT now(),
   updated_at            timestamptz   NOT NULL DEFAULT now()
 );
@@ -155,23 +157,22 @@ CREATE TABLE order_items (
 );
 
 CREATE TABLE payments (
-  id                   uuid             PRIMARY KEY DEFAULT gen_random_uuid(),
-  order_id             uuid             UNIQUE NOT NULL REFERENCES orders(id) ON DELETE RESTRICT,
-  provider             payment_provider NOT NULL,
-  provider_payment_key varchar(200),
-  provider_order_id    varchar(200),
-  method               payment_method   NOT NULL,
-  method_detail        text,
-  amount               int              NOT NULL,
-  status               payment_status   NOT NULL,
-  paid_at              timestamptz,
-  refunded_at          timestamptz,
-  refund_reason        varchar(500),
-  pg_response          jsonb,
-  created_at           timestamptz      NOT NULL DEFAULT now(),
-  updated_at           timestamptz      NOT NULL DEFAULT now(),
-  CONSTRAINT check_provider_identifiers CHECK (
-    provider_payment_key IS NOT NULL OR provider_order_id IS NOT NULL
+  id                uuid           PRIMARY KEY DEFAULT gen_random_uuid(),
+  order_id          uuid           UNIQUE NOT NULL REFERENCES orders(id) ON DELETE RESTRICT,
+  payment_key       varchar(200),
+  provider_order_id varchar(200),
+  method            payment_method NOT NULL,
+  method_detail     text,
+  amount            int            NOT NULL,
+  status            payment_status NOT NULL,
+  paid_at           timestamptz,
+  refunded_at       timestamptz,
+  refund_reason     varchar(500),
+  pg_response       jsonb,
+  created_at        timestamptz    NOT NULL DEFAULT now(),
+  updated_at        timestamptz    NOT NULL DEFAULT now(),
+  CONSTRAINT check_payment_key CHECK (
+    payment_key IS NOT NULL OR provider_order_id IS NOT NULL
   )
 );
 
@@ -242,13 +243,13 @@ CREATE INDEX idx_orders_user_store_created
 CREATE INDEX idx_orders_store_pickup_sequence
   ON orders(store_id, pickup_service_date, store_order_sequence);
 
--- Partial unique indexes: provider payment keys are only unique when assigned
-CREATE UNIQUE INDEX idx_payments_unique_provider_payment_key
-  ON payments(provider, provider_payment_key)
-  WHERE provider_payment_key IS NOT NULL;
+-- Partial unique indexes: payment keys are only unique when assigned
+CREATE UNIQUE INDEX idx_payments_unique_payment_key
+  ON payments(payment_key)
+  WHERE payment_key IS NOT NULL;
 
 CREATE UNIQUE INDEX idx_payments_unique_provider_order_id
-  ON payments(provider, provider_order_id)
+  ON payments(provider_order_id)
   WHERE provider_order_id IS NOT NULL;
 
 -- Partial unique index: at most one pending/approved application per user
@@ -660,20 +661,19 @@ GRANT  EXECUTE ON FUNCTION check_pickup_capacity(varchar) TO service_role;
 -- ============================================================
 -- RPC 3: confirm_payment
 -- Role: atomic payment confirmation + stock finalization + sequence/number issuance
--- Input: p_order_number, p_provider, p_provider_payment_key, p_provider_order_id,
+-- Input: p_order_number, p_payment_key, p_provider_order_id,
 --        p_method, p_method_detail, p_amount
 -- Output: success
--- Note: p_method must be mapped from provider response by Route Handler service before calling
+-- Note: p_method must be mapped from Toss response by Route Handler service before calling
 -- ============================================================
 
 CREATE OR REPLACE FUNCTION confirm_payment(
-  p_order_number         varchar,
-  p_provider             payment_provider,
-  p_provider_payment_key varchar,
-  p_provider_order_id    varchar,
-  p_method               payment_method,
-  p_method_detail        text,
-  p_amount               int
+  p_order_number      varchar,
+  p_payment_key       varchar,
+  p_provider_order_id varchar,
+  p_method            payment_method,
+  p_method_detail     text,
+  p_amount            int
 )
 RETURNS TABLE(success boolean)
 LANGUAGE plpgsql
@@ -733,10 +733,10 @@ BEGIN
      AND p.id = oi.product_id;
 
   INSERT INTO payments (
-    order_id, provider, provider_payment_key, provider_order_id,
+    order_id, payment_key, provider_order_id,
     method, method_detail, amount, status, paid_at
   ) VALUES (
-    v_order.id, p_provider, p_provider_payment_key, p_provider_order_id,
+    v_order.id, p_payment_key, p_provider_order_id,
     p_method, p_method_detail, p_amount, 'paid', now()
   );
 
@@ -751,8 +751,8 @@ BEGIN
 END;
 $$;
 
-REVOKE EXECUTE ON FUNCTION confirm_payment(varchar, payment_provider, varchar, varchar, payment_method, text, int) FROM PUBLIC;
-GRANT  EXECUTE ON FUNCTION confirm_payment(varchar, payment_provider, varchar, varchar, payment_method, text, int) TO service_role;
+REVOKE EXECUTE ON FUNCTION confirm_payment(varchar, varchar, varchar, payment_method, text, int) FROM PUBLIC;
+GRANT  EXECUTE ON FUNCTION confirm_payment(varchar, varchar, varchar, payment_method, text, int) TO service_role;
 
 -- ============================================================
 -- RPC 4: expire_order

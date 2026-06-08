@@ -91,7 +91,7 @@ describe('callTossConfirm', () => {
       amount: 5000,
     });
 
-    expect(result.providerPaymentKey).toBe('toss_ppk_result');
+    expect(result.paymentKey).toBe('toss_ppk_result');
     expect(result.providerOrderId).toBe('PM2026TEST');
     expect(result.method).toBe('card');
     expect(result.methodDetail).toBeNull();

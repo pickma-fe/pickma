@@ -15,6 +15,7 @@ const ORDER_STATUS_MAP: Record<OrderListItemResponse['status'], OrderStatus> = {
   ready: 'ready',
   completed: 'completed',
   cancelled: 'cancelled',
+  cancelling: 'cancelling',
   no_show: 'noShow',
   expired: 'expired',
 };

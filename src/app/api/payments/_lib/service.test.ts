@@ -24,7 +24,7 @@ const mockOrderRow = {
 type MockOrderRow = typeof mockOrderRow;
 
 const mockTossResult: TossConfirmResult = {
-  providerPaymentKey: 'toss_ppk_PM2026TEST',
+  paymentKey: 'toss_ppk_PM2026TEST',
   providerOrderId: 'PM2026TEST',
   method: 'card',
   methodDetail: null,
@@ -218,7 +218,7 @@ describe('confirmPayment', () => {
       'confirm_payment',
       expect.objectContaining({
         p_order_number: 'PM2026TEST',
-        p_provider: 'toss',
+        p_payment_key: 'mock_pk_test',
         p_amount: 5000,
         p_pg_response: {
           paymentKey: 'mock_pk_test',
@@ -556,7 +556,7 @@ describe('confirmPayment', () => {
       expect(callTossCancel).toHaveBeenCalledWith(
         expect.objectContaining({
           orderNumber: 'PM2026TEST',
-          paymentKey: mockTossResult.providerPaymentKey,
+          paymentKey: mockTossResult.paymentKey,
           cancelAmount: 5000,
         })
       );

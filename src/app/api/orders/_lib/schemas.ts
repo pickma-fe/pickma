@@ -22,6 +22,7 @@ export const orderListQuerySchema = z
         'ready',
         'completed',
         'cancelled',
+        'cancelling',
         'no_show',
         'expired',
       ])

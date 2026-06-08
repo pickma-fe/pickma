@@ -153,7 +153,7 @@ export async function confirmPayment(
   try {
     if (process.env.PAYMENT_MOCK === 'true') {
       confirmed = {
-        providerPaymentKey: body.paymentKey,
+        paymentKey: body.paymentKey,
         providerOrderId: body.orderNumber,
         method: 'card',
         methodDetail: null,
@@ -180,8 +180,7 @@ export async function confirmPayment(
 
   const { error: rpcError } = await supabase.rpc('confirm_payment', {
     p_order_number: body.orderNumber,
-    p_provider: 'toss',
-    p_provider_payment_key: confirmed.providerPaymentKey,
+    p_payment_key: confirmed.paymentKey,
     p_provider_order_id: confirmed.providerOrderId,
     p_method: confirmed.method,
     p_method_detail: confirmed.methodDetail ?? '',
@@ -195,7 +194,7 @@ export async function confirmPayment(
       try {
         await callTossCancel({
           orderNumber: body.orderNumber,
-          paymentKey: confirmed.providerPaymentKey,
+          paymentKey: confirmed.paymentKey,
           cancelReason: 'PickMa order confirmation failed',
           cancelAmount: order.payment_amount,
         });
@@ -214,7 +213,7 @@ export async function confirmPayment(
               paymentStateAssumption: 'approved_may_remain',
               manualAction: 'check_toss_and_cancel_or_refund',
               orderStatus: 'processing',
-              tossPaymentKey: confirmed.providerPaymentKey,
+              tossPaymentKey: confirmed.paymentKey,
             } satisfies PaymentCompensationFailedPayload,
           })
         ).catch(() => {});
@@ -241,7 +240,7 @@ export async function confirmPayment(
             paymentStateAssumption: 'cancelled_may_be_done',
             manualAction: 'restore_order_status',
             orderStatus: 'processing',
-            tossPaymentKey: confirmed.providerPaymentKey,
+            tossPaymentKey: confirmed.paymentKey,
           } satisfies PaymentCompensationFailedPayload,
         })
       ).catch(() => {});
