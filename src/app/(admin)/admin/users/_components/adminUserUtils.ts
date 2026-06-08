@@ -14,6 +14,7 @@ export const USER_STATUS_LABELS: Record<UserStatus, string> = {
 
 export function formatAdminUserDate(value: Date): string {
   return new Intl.DateTimeFormat('ko-KR', {
+    timeZone: 'Asia/Seoul',
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',

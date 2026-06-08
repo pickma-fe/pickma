@@ -41,6 +41,7 @@ export const ORDER_STATUS_QUERY_LABELS: Record<
 
 export function formatAdminOrderDate(value: Date): string {
   return new Intl.DateTimeFormat('ko-KR', {
+    timeZone: 'Asia/Seoul',
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',

@@ -19,6 +19,7 @@ export function formatAdminProductDate(value: Date | undefined): string {
   if (!value) return '-';
 
   return new Intl.DateTimeFormat('ko-KR', {
+    timeZone: 'Asia/Seoul',
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
