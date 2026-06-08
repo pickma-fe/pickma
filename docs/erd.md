@@ -209,27 +209,29 @@
 
 ## 2.9 orders (주문)
 
-| 컬럼명                 | 타입         | 제약조건                            | 설명                                                                         |
-| ---------------------- | ------------ | ----------------------------------- | ---------------------------------------------------------------------------- |
-| `id`                   | uuid         | PK                                  | 주문 ID                                                                      |
-| `order_number`         | varchar(20)  | UNIQUE, NOT NULL                    | PickMa 내부 전역 주문번호 (provider별 외부 주문 ID는 payments 테이블에 저장) |
-| `user_id`              | uuid         | FK → users.id, NOT NULL             | 사용자                                                                       |
-| `store_id`             | uuid         | FK → stores.id, NOT NULL            | 가게                                                                         |
-| `total_amount`         | int          | NOT NULL                            | 총 금액                                                                      |
-| `discount_amount`      | int          | NOT NULL                            | 할인 금액                                                                    |
-| `payment_amount`       | int          | NOT NULL                            | 결제 금액                                                                    |
-| `status`               | enum         | NOT NULL, DEFAULT 'payment_pending' | 상태                                                                         |
-| `pickup_at`            | timestamp    | NOT NULL                            | 사용자가 선택한 픽업 시간                                                    |
-| `pickup_service_date`  | date         | NOT NULL                            | 픽업 운영 기준일                                                             |
-| `store_order_sequence` | int          |                                     | 매장+픽업일 기준 결제완료 순번                                               |
-| `store_order_number`   | varchar(16)  |                                     | 판매자 운영용 주문번호                                                       |
-| `pickup_number`        | varchar(4)   |                                     | 매장 현장 픽업번호                                                           |
-| `expires_at`           | timestamp    |                                     | 결제 만료                                                                    |
-| `picked_up_at`         | timestamp    |                                     | 픽업 완료                                                                    |
-| `cancelled_at`         | timestamp    |                                     | 취소 시간                                                                    |
-| `cancel_reason`        | varchar(500) |                                     | 사유                                                                         |
-| `created_at`           | timestamp    | NOT NULL, DEFAULT now()             | 생성일시                                                                     |
-| `updated_at`           | timestamp    | NOT NULL, DEFAULT now()             | 수정일시                                                                     |
+| 컬럼명                  | 타입         | 제약조건                            | 설명                                                                         |
+| ----------------------- | ------------ | ----------------------------------- | ---------------------------------------------------------------------------- |
+| `id`                    | uuid         | PK                                  | 주문 ID                                                                      |
+| `order_number`          | varchar(20)  | UNIQUE, NOT NULL                    | PickMa 내부 전역 주문번호 (provider별 외부 주문 ID는 payments 테이블에 저장) |
+| `user_id`               | uuid         | FK → users.id, NOT NULL             | 사용자                                                                       |
+| `store_id`              | uuid         | FK → stores.id, NOT NULL            | 가게                                                                         |
+| `total_amount`          | int          | NOT NULL                            | 총 금액                                                                      |
+| `discount_amount`       | int          | NOT NULL                            | 할인 금액                                                                    |
+| `payment_amount`        | int          | NOT NULL                            | 결제 금액                                                                    |
+| `status`                | enum         | NOT NULL, DEFAULT 'payment_pending' | 상태                                                                         |
+| `pickup_at`             | timestamp    | NOT NULL                            | 사용자가 선택한 픽업 시간                                                    |
+| `pickup_service_date`   | date         | NOT NULL                            | 픽업 운영 기준일                                                             |
+| `store_order_sequence`  | int          |                                     | 매장+픽업일 기준 결제완료 순번                                               |
+| `store_order_number`    | varchar(16)  |                                     | 판매자 운영용 주문번호                                                       |
+| `pickup_number`         | varchar(4)   |                                     | 매장 현장 픽업번호                                                           |
+| `expires_at`            | timestamp    |                                     | 결제 만료                                                                    |
+| `picked_up_at`          | timestamp    |                                     | 픽업 완료                                                                    |
+| `cancel_claimed_status` | order_status |                                     | 취소 claim 직전 상태 (revert용)                                              |
+| `cancel_claimed_at`     | timestamp    |                                     | 취소 claim 시간                                                              |
+| `cancelled_at`          | timestamp    |                                     | 취소 완료 시간                                                               |
+| `cancel_reason`         | varchar(500) |                                     | 취소 사유                                                                    |
+| `created_at`            | timestamp    | NOT NULL, DEFAULT now()             | 생성일시                                                                     |
+| `updated_at`            | timestamp    | NOT NULL, DEFAULT now()             | 수정일시                                                                     |
 
 ### 주문 정책
 
@@ -239,7 +241,8 @@
 - seller가 접수 처리 시 `accepted` (준비 중)
 - seller가 준비 완료 처리 시 `ready` (픽업 가능) — MVP에서는 seller 수동 전환 (cron 없음)
 - seller가 픽업 완료 처리 시 `completed`
-- 취소 시 `cancelled`
+- 취소 요청 접수 시 `cancelling` (Toss 취소 진행 중)
+- 취소 완료 시 `cancelled` — `cancel_order` RPC가 결제 취소, 재고(`reserved_stock`) 복구, `payment_cancelled` 이벤트를 atomic하게 처리
 - 노쇼 처리 시 `no_show`
 - 결제 만료 시 `expired`
 - expires_at 이후 결제 불가

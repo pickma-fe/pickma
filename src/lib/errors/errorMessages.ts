@@ -20,6 +20,7 @@ export const ERROR_MESSAGES: Record<ErrorCode, string> = {
   ORDER_EXPIRED: '결제 가능 시간이 만료되었습니다.',
   PAYMENT_AMOUNT_MISMATCH: '결제 금액이 일치하지 않습니다.',
   PAYMENT_CONFIRM_FAILED: '결제 승인에 실패했습니다.',
+  PAYMENT_CANCEL_FAILED: '결제 취소에 실패했습니다.',
   PAYMENT_ALREADY_CONFIRMED: '이미 완료된 결제입니다.',
   INVALID_WEBHOOK_PAYLOAD: '유효하지 않은 웹훅 페이로드입니다.',
   DUPLICATE_PRODUCT_IN_ORDER: '주문 항목에 중복된 상품이 있습니다.',

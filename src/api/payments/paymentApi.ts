@@ -1,4 +1,5 @@
 import type {
+  CancelPaymentRequest,
   ConfirmPaymentRequest,
   PreparePaymentRequest,
   PreparePaymentResponse,
@@ -17,9 +18,9 @@ export const paymentApi = {
     return apiClient.post<void>('/api/payments/confirm', body);
   },
 
-  cancelPayment(paymentId: string): Promise<void> {
+  cancelPayment(paymentId: string, body: CancelPaymentRequest): Promise<void> {
     return apiClient
-      .post<void>(`/api/payments/${paymentId}/cancel`)
+      .post<void>(`/api/payments/${paymentId}/cancel`, body)
       .then(() => undefined);
   },
 };

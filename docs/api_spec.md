@@ -104,13 +104,13 @@ export interface PaginatedResult<T> {
 
 API contract의 status 값은 JSON-safe string이며, DB 저장 값과 Domain Type 값이 1:1 대응한다고 가정하지 않는다.
 
-| 대상    | API/DB 기준 값                                                                                                   | Domain 기준 값/파생값                                                                                                  |
-| ------- | ---------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| User    | `active`, `suspended`, `deleted`                                                                                 | 동일                                                                                                                   |
-| Store   | `status: active \| inactive`, `operation_status: open \| closed`                                                 | 신규 가게는 `active/open`으로 생성. `canSell = role === 'seller' && status === 'active' && operationStatus === 'open'` |
-| Product | `active`, `closed`                                                                                               | `status: active \| closed`, `isSoldOut`, `isExpired`, `displayStatus` 파생                                             |
-| Order   | `payment_pending`, `processing`, `reserved`, `accepted`, `ready`, `completed`, `cancelled`, `no_show`, `expired` | `paymentPending`, `processing`, `reserved`, `accepted`, `ready`, `completed`, `cancelled`, `noShow`, `expired`         |
-| Payment | `pending`, `paid`, `failed`, `cancelled`, `refunded`                                                             | 동일                                                                                                                   |
+| 대상    | API/DB 기준 값                                                                                                                 | Domain 기준 값/파생값                                                                                                        |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
+| User    | `active`, `suspended`, `deleted`                                                                                               | 동일                                                                                                                         |
+| Store   | `status: active \| inactive`, `operation_status: open \| closed`                                                               | 신규 가게는 `active/open`으로 생성. `canSell = role === 'seller' && status === 'active' && operationStatus === 'open'`       |
+| Product | `active`, `closed`                                                                                                             | `status: active \| closed`, `isSoldOut`, `isExpired`, `displayStatus` 파생                                                   |
+| Order   | `payment_pending`, `processing`, `reserved`, `accepted`, `ready`, `completed`, `cancelling`, `cancelled`, `no_show`, `expired` | `paymentPending`, `processing`, `reserved`, `accepted`, `ready`, `completed`, `cancelling`, `cancelled`, `noShow`, `expired` |
+| Payment | `pending`, `paid`, `failed`, `cancelled`, `refunded`                                                                           | 동일                                                                                                                         |
 
 Product `displayStatus` 계산 기준:
 
@@ -1388,7 +1388,6 @@ RPC에서 raise하는 예외는 아래 정책으로 API error code로 변환한�
 | `PICKUP_NUMBER_EXHAUSTED`     | `PICKUP_NUMBER_EXHAUSTED` 409    | `confirm_payment`                                                                                                                     |
 | `INVALID_ORDER_STATUS`        | `INVALID_ORDER_STATUS` 409       | `confirm_payment`, `expire_order`, `accept_seller_order`, `mark_seller_order_ready`, `complete_seller_order`                          |
 | `ORDER_NOT_EXPIRED`           | `VALIDATION_ERROR` 400           | `expire_order`                                                                                                                        |
-| `NOT_IMPLEMENTED`             | `NOT_IMPLEMENTED` 501            | `cancel_order`                                                                                                                        |
 | `APPLICATION_NOT_PENDING`     | `VALIDATION_ERROR` 400           | `approve_seller_application`                                                                                                          |
 
 `create_order`의 validation 예외는 Zod 스키마 검증이 선행되므로 정상 흐름에서는 도달하지 않아야 한다.
@@ -1435,6 +1434,7 @@ RPC에서 raise하는 예외는 아래 정책으로 API error code로 변환한�
 | `DUPLICATE_PRODUCT_IN_ORDER`            | 400  | 주문 항목에 중복된 상품이 있습니다.                            |
 | `PAYMENT_AMOUNT_MISMATCH`               | 400  | 결제 금액이 일치하지 않습니다.                                 |
 | `PAYMENT_CONFIRM_FAILED`                | 502  | 결제 승인에 실패했습니다.                                      |
+| `PAYMENT_CANCEL_FAILED`                 | 502  | 결제 취소에 실패했습니다.                                      |
 | `PAYMENT_ALREADY_CONFIRMED`             | 409  | 이미 완료된 결제입니다.                                        |
 | `ORDER_NUMBER_EXHAUSTED`                | 503  | 주문번호가 모두 소진되었습니다.                                |
 | `PICKUP_NUMBER_EXHAUSTED`               | 409  | 픽업 번호가 모두 소진되었습니다.                               |
@@ -1448,10 +1448,7 @@ RPC에서 raise하는 예외는 아래 정책으로 API error code로 변환한�
 `API_MOCK_ENABLED=false`에서 `NOT_IMPLEMENTED` 501을 반환하는 endpoint 목록이다.
 각 endpoint의 실제 구현은 담당 task에서 진행하며, 담당 task 완료 기준에 `NOT_IMPLEMENTED` 반환 코드 제거가 포함된다.
 
-| endpoint                                | method | real mode | mock mode | UI 연결 여부           | 운영 노출 위험 | 담당 task |
-| --------------------------------------- | ------ | --------- | --------- | ---------------------- | -------------- | --------- |
-| `PATCH /api/orders/{orderId}/cancel`    | PATCH  | 501       | 성공      | hook 정의됨, UI 미연결 | 낮음           | T31       |
-| `POST /api/payments/{paymentId}/cancel` | POST   | 501       | 성공      | hook 정의됨, UI 미연결 | 낮음           | T31       |
+현재 미구현 endpoint 없음 (T31 완료로 취소 API 구현 완료).
 
 ### 501 연결 액션 운영 노출 정책
 

@@ -20,6 +20,7 @@ type ReservationDisplayGroup =
   | 'processing'
   | 'pendingPickup'
   | 'completed'
+  | 'cancelling'
   | 'cancelled';
 
 const statusDisplayMap: Record<OrderStatus, ReservationDisplayGroup> = {
@@ -30,6 +31,7 @@ const statusDisplayMap: Record<OrderStatus, ReservationDisplayGroup> = {
   ready: 'pendingPickup',
   completed: 'completed',
   cancelled: 'cancelled',
+  cancelling: 'cancelling',
   noShow: 'cancelled',
   expired: 'cancelled',
 };
@@ -65,6 +67,12 @@ const statusStyles: Record<
     label: '픽업 완료',
     className: 'bg-primary-50 text-primary-500',
     actionLabel: '다시 예약',
+    actionVariant: 'outline',
+  },
+  cancelling: {
+    label: '취소 처리 중',
+    className: 'bg-orange-50 text-orange-500',
+    actionLabel: '내역 보기',
     actionVariant: 'outline',
   },
   cancelled: {

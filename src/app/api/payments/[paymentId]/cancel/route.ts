@@ -1,25 +1,42 @@
 import { ERROR_CODE } from '@/lib/errors/errorCodes';
-import { requireActiveUser } from '@/app/api/_lib/auth';
-import { isApiMockEnabled } from '@/app/api/_lib/mock';
+import { requireAdmin } from '@/app/api/_lib/auth';
 import { fail, routeError, success } from '@/app/api/_lib/response';
 
+import { cancelPaymentSchema, paymentIdSchema } from '../../_lib/schemas';
+import { cancelPaymentById } from '../../_lib/service';
+
 export async function POST(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ paymentId: string }> }
 ): Promise<Response> {
   const { paymentId } = await params;
 
-  if (!paymentId) {
-    return fail(ERROR_CODE.VALIDATION_ERROR, 400, [
-      { path: 'paymentId', message: 'paymentId is required' },
-    ]);
-  }
-
-  if (isApiMockEnabled()) return success(undefined);
-
   try {
-    await requireActiveUser();
-    return fail(ERROR_CODE.NOT_IMPLEMENTED);
+    await requireAdmin();
+
+    const idParsed = paymentIdSchema.safeParse(paymentId);
+    if (!idParsed.success) {
+      return fail(ERROR_CODE.VALIDATION_ERROR, 400, [
+        { path: 'paymentId', message: idParsed.error.issues[0].message },
+      ]);
+    }
+
+    let body: unknown;
+    try {
+      body = await request.json();
+    } catch {
+      return fail(ERROR_CODE.VALIDATION_ERROR, 400);
+    }
+
+    const bodyParsed = cancelPaymentSchema.safeParse(body);
+    if (!bodyParsed.success) {
+      return fail(ERROR_CODE.VALIDATION_ERROR, 400, [
+        { path: 'reason', message: bodyParsed.error.issues[0].message },
+      ]);
+    }
+
+    await cancelPaymentById(idParsed.data, bodyParsed.data.reason);
+    return success(undefined);
   } catch (error) {
     return routeError(error);
   }

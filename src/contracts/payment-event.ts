@@ -10,11 +10,17 @@ export type PaymentEventType =
 export type PaymentEventStatus = 'pending' | 'processed' | 'failed';
 
 export interface PaymentCompensationFailedPayload {
-  failureStage: 'toss_cancel' | 'revert_processing';
-  paymentStateAssumption: 'approved_may_remain' | 'cancelled_may_be_done';
-  manualAction: 'check_toss_and_cancel_or_refund' | 'restore_order_status';
+  failureStage: 'toss_cancel' | 'revert_processing' | 'cancel_finalize';
+  paymentStateAssumption:
+    | 'approved_may_remain'
+    | 'cancelled_may_be_done'
+    | 'toss_cancelled_db_pending';
+  manualAction:
+    | 'check_toss_and_cancel_or_refund'
+    | 'restore_order_status'
+    | 'finalize_order_cancel_manually';
   orderStatus: string;
-  tossPaymentKey: string | null;
+  paymentKey: string | null;
 }
 
 export interface PaymentEventRow {
@@ -24,8 +30,7 @@ export interface PaymentEventRow {
   storeId: string | null;
   paymentId: string | null;
   eventType: PaymentEventType;
-  provider: string | null;
-  providerKey: string | null;
+  paymentKey: string | null;
   providerEventType: string | null;
   providerEventId: string | null;
   payload: JsonValue | null;

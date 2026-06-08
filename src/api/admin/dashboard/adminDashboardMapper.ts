@@ -12,6 +12,7 @@ const ORDER_STATUS_MAP: Record<
   accepted: 'accepted',
   ready: 'ready',
   completed: 'completed',
+  cancelling: 'cancelling',
   cancelled: 'cancelled',
   no_show: 'noShow',
   expired: 'expired',

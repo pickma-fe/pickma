@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import type {
+  CancelOrderRequest,
   ConsumerOrderListParams,
   CreateOrderRequest,
 } from '@/contracts/order';
@@ -22,6 +23,7 @@ export const orderListQuerySchema = z
         'ready',
         'completed',
         'cancelled',
+        'cancelling',
         'no_show',
         'expired',
       ])
@@ -32,3 +34,7 @@ export const orderListQuerySchema = z
   .strict() satisfies z.ZodType<ConsumerOrderListParams>;
 
 export const orderIdSchema = z.uuid();
+
+export const cancelOrderSchema = z.object({
+  reason: z.string().trim().min(1).max(500),
+}) satisfies z.ZodType<CancelOrderRequest>;

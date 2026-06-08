@@ -23,7 +23,7 @@ const mockOrder = {
 
 const mockPayment = {
   id: PAYMENT_ID,
-  provider_payment_key: PAYMENT_KEY,
+  payment_key: PAYMENT_KEY,
   method: 'card',
   pg_response: {
     paymentKey: PAYMENT_KEY,
@@ -36,7 +36,7 @@ const mockPayment = {
 
 const mockPaymentVirtualAccount = {
   id: PAYMENT_ID,
-  provider_payment_key: PAYMENT_KEY,
+  payment_key: PAYMENT_KEY,
   method: 'virtual_account',
   pg_response: {
     paymentKey: PAYMENT_KEY,
@@ -193,10 +193,9 @@ describe('processWebhook', () => {
           status: 'pending',
           order_id: ORDER_ID,
           order_number: ORDER_NUMBER,
-          provider: 'toss',
+          payment_key: PAYMENT_KEY,
           provider_event_id: TRANSMISSION_ID,
           provider_event_type: 'PAYMENT_STATUS_CHANGED',
-          provider_key: PAYMENT_KEY,
         })
       );
       expect(client.updateChain.update).toHaveBeenCalledWith(
@@ -322,7 +321,6 @@ describe('processWebhook', () => {
           event_type: 'payment_webhook_received',
           status: 'pending',
           provider_event_type: 'DEPOSIT_CALLBACK',
-          provider: 'toss',
         })
       );
       expect(client.updateChain.update).toHaveBeenCalledWith(

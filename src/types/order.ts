@@ -8,6 +8,7 @@ export type OrderStatus =
   | 'ready'
   | 'completed'
   | 'cancelled'
+  | 'cancelling'
   | 'noShow'
   | 'expired';
 
