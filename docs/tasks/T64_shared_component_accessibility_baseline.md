@@ -62,6 +62,6 @@
   - Button: `focus-visible:ring-{color}` 명시 추가 (Tailwind v4 currentColor 기본값 문제 해결). IconOnly/LoadingInProgress story 추가.
   - Pagination: 이전/다음/페이지 버튼 `focus-visible:ring-2 focus-visible:ring-offset-2` 적용. EmptyState story 추가.
   - Footer: FooterGroup 링크, SupportSection tel/mailto 링크에 `focus-visible:ring-2 focus-visible:ring-offset-2` 적용. SocialLinks 활성 링크 준비 (현재 href 모두 null). sr-only 텍스트에 `(새 탭에서 열림)` 추가.
-  - Badge: `role`, `aria-label` optional prop 추가. StatusBadge(`role="status"`)/DecorationBadge(`role="img"` + `aria-label`) story 추가.
+  - Badge: `role`, `aria-label` optional prop 추가. StatusBadge(`role="status"`)/ContextualBadge(`role="img"` + `aria-label`) story 추가.
   - Modal: 닫기 버튼 `focus-visible:ring-2 focus-visible:ring-offset-2` 적용. Headless UI Dialog의 `aria-modal="true"` 자동 처리 확인.
   - SolidWarning Badge의 WCAG AA 미충족(yellow-500/white 2.14:1)은 색상 설계 변경이 필요해 T46~T49 범위로 이관.
