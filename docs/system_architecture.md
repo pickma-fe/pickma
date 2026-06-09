@@ -882,8 +882,9 @@ Vercel Cron은 등록된 path를 스케줄에 따라 GET 요청으로 호출한�
 Route Handler(`/api/cron/storage-cleanup`)는 이 헤더를 검증한다:
 
 ```ts
+const cronSecret = process.env.CRON_SECRET;
 const auth = request.headers.get('Authorization');
-if (auth !== `Bearer ${process.env.CRON_SECRET}`) {
+if (!cronSecret || auth !== `Bearer ${cronSecret}`) {
   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 }
 ```
