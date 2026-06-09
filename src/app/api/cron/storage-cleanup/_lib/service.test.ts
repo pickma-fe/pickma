@@ -80,9 +80,6 @@ describe('runStorageCleanup', () => {
         [{ name: 'upload-1', id: null }],
         [{ name: 'business_license', id: null }],
         [{ name: 'file.pdf', id: 'file-id', created_at: daysAgo(31) }],
-        [],
-        [],
-        [],
       ],
     });
 
@@ -99,9 +96,6 @@ describe('runStorageCleanup', () => {
         [{ name: 'upload-1', id: null }],
         [{ name: 'business_license', id: null }],
         [{ name: 'file.pdf', id: 'file-id', created_at: daysAgo(29) }],
-        [],
-        [],
-        [],
       ],
     });
 
@@ -118,9 +112,6 @@ describe('runStorageCleanup', () => {
         [{ name: 'upload-1', id: null }],
         [{ name: 'business_license', id: null }],
         [{ name: 'file.pdf', id: 'file-id', created_at: daysAgo(31) }],
-        [],
-        [],
-        [],
       ],
     });
 
@@ -134,10 +125,7 @@ describe('runStorageCleanup', () => {
 
   it('created_at이 null인 파일은 삭제하지 않는다', async () => {
     const { mockRemove } = makeClient({
-      listResponses: [
-        [{ name: 'file.pdf', id: 'file-id', created_at: null }],
-        [],
-      ],
+      listResponses: [[{ name: 'file.pdf', id: 'file-id', created_at: null }]],
     });
 
     const result = await runStorageCleanup();
@@ -155,10 +143,8 @@ describe('runStorageCleanup', () => {
         ],
         [{ name: 'upload-1', id: null }],
         [{ name: 'file-a.pdf', id: 'id-a', created_at: daysAgo(31) }],
-        [],
         [{ name: 'upload-2', id: null }],
         [{ name: 'file-b.pdf', id: 'id-b', created_at: daysAgo(10) }],
-        [],
       ],
     });
 
@@ -194,7 +180,6 @@ describe('runStorageCleanup', () => {
     makeClient({
       listResponses: [
         [{ name: 'file.pdf', id: 'file-id', created_at: daysAgo(31) }],
-        [],
       ],
       removeError: { message: 'remove error' },
     });
