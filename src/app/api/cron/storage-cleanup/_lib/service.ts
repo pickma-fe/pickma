@@ -5,7 +5,7 @@ import { createServiceRoleClient } from '@/lib/supabase/service';
 const BUCKET = 'seller-application-documents';
 const ORPHAN_DAYS = 30;
 const LIST_LIMIT = 100;
-const DB_LIMIT = 10000;
+const DB_PAGE_SIZE = 1000;
 
 interface StorageFile {
   path: string;
@@ -59,16 +59,26 @@ function daysSince(isoString: string): number {
 export async function runStorageCleanup(): Promise<{ deletedCount: number }> {
   const supabase = createServiceRoleClient();
 
-  const { data: dbRows, error: dbError } = await supabase
-    .from('seller_application_documents')
-    .select('storage_path')
-    .limit(DB_LIMIT);
+  const dbPaths = new Set<string>();
+  let dbOffset = 0;
 
-  if (dbError) {
-    throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
+  while (true) {
+    const { data, error: dbError } = await supabase
+      .from('seller_application_documents')
+      .select('storage_path')
+      .range(dbOffset, dbOffset + DB_PAGE_SIZE - 1);
+
+    if (dbError) {
+      throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
+    }
+
+    if (!data || data.length === 0) break;
+
+    for (const row of data) dbPaths.add(row.storage_path);
+
+    if (data.length < DB_PAGE_SIZE) break;
+    dbOffset += DB_PAGE_SIZE;
   }
-
-  const dbPaths = new Set((dbRows ?? []).map((r) => r.storage_path));
 
   const allFiles = await listAllFiles(supabase, '');
 

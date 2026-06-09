@@ -32,7 +32,7 @@ function makeClient({
   removeError = null as object | null,
 } = {}) {
   const mockSelect = vi.fn().mockReturnValue({
-    limit: vi.fn().mockResolvedValue({ data: dbRows, error: dbError }),
+    range: vi.fn().mockResolvedValue({ data: dbRows, error: dbError }),
   });
 
   const mockFrom = vi.fn().mockReturnValue({ select: mockSelect });
