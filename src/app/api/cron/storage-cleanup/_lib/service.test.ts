@@ -25,16 +25,24 @@ type MockFile = {
   created_at?: string | null;
 };
 
+type DbRow = { storage_path: string };
+type DbResponse = DbRow[] | { error: object };
+
 function makeClient({
-  dbRows = [] as { storage_path: string }[],
-  dbError = null as object | null,
+  dbResponses = [[]] as DbResponse[],
   listResponses = [] as (MockFile[] | { error: object })[],
   removeError = null as object | null,
 } = {}) {
-  const mockSelect = vi.fn().mockReturnValue({
-    range: vi.fn().mockResolvedValue({ data: dbRows, error: dbError }),
+  let dbCallIndex = 0;
+  const mockRange = vi.fn().mockImplementation(() => {
+    const response = dbResponses[dbCallIndex++] ?? [];
+    if (Array.isArray(response)) {
+      return Promise.resolve({ data: response, error: null });
+    }
+    return Promise.resolve({ data: null, error: response.error });
   });
 
+  const mockSelect = vi.fn().mockReturnValue({ range: mockRange });
   const mockFrom = vi.fn().mockReturnValue({ select: mockSelect });
 
   let listCallIndex = 0;
@@ -74,7 +82,7 @@ describe('runStorageCleanup', () => {
   it('모든 파일이 DB에 존재하면 remove 미호출', async () => {
     const path = 'user-1/upload-1/business_license/file.pdf';
     const { mockRemove } = makeClient({
-      dbRows: [{ storage_path: path }],
+      dbResponses: [[{ storage_path: path }]],
       listResponses: [
         [{ name: 'user-1', id: null }],
         [{ name: 'upload-1', id: null }],
@@ -167,9 +175,29 @@ describe('runStorageCleanup', () => {
     expect(mockRemove).toHaveBeenCalledWith(['user-1/upload-1/file-a.pdf']);
   });
 
+  it('DB 2페이지 이상 조회 시 모든 경로를 수집해 orphan을 오판하지 않는다', async () => {
+    const page1 = Array.from({ length: 1000 }, (_, i) => ({
+      storage_path: `other-path-${i}`,
+    }));
+    const page2 = [{ storage_path: 'user-1/file.pdf' }];
+
+    const { mockRemove } = makeClient({
+      dbResponses: [page1, page2],
+      listResponses: [
+        [{ name: 'user-1', id: null }],
+        [{ name: 'file.pdf', id: 'file-id', created_at: daysAgo(31) }],
+      ],
+    });
+
+    const result = await runStorageCleanup();
+
+    expect(result.deletedCount).toBe(0);
+    expect(mockRemove).not.toHaveBeenCalled();
+  });
+
   it('DB 조회 실패 시 AppError(500)을 throw하고 remove 미호출', async () => {
     const { mockRemove } = makeClient({
-      dbError: { message: 'db error' },
+      dbResponses: [{ error: { message: 'db error' } }],
     });
 
     await expect(runStorageCleanup()).rejects.toMatchObject({
