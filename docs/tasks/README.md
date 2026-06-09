@@ -63,7 +63,7 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 | T35 | AppError 객체 인수 리팩터링                                  | P3       | 진행 전 | 확인 필요    | 없음                         | [T35_apperror_object_argument_refactor.md](T35_apperror_object_argument_refactor.md)                             |
 | T36 | 판매자 신청 서류 수정/재업로드 정책                          | P3       | 진행 전 | 확인 필요    | T06, T44, T61                | [T36_seller_application_document_reupload_policy.md](T36_seller_application_document_reupload_policy.md)         |
 | T37 | 운영 CS/모니터링/관리자 권한 정책 정리                       | P3       | 진행 전 | 확인 필요    | T01, T06                     | [T37_ops_cs_monitoring_admin_permission_policy.md](T37_ops_cs_monitoring_admin_permission_policy.md)             |
-| T38 | 판매자 랜딩/온보딩 CTA 정리                                  | P2       | 진행 전 | 확인 필요    | T10                          | [T38_seller_landing_onboarding_cta.md](T38_seller_landing_onboarding_cta.md)                                     |
+| T38 | 판매자 랜딩/온보딩 CTA 정리                                  | P2       | 완료    | 244          | T10                          | [T38_seller_landing_onboarding_cta.md](T38_seller_landing_onboarding_cta.md)                                     |
 | T39 | public 이미지 자산 구조 및 Footer badge 크기 정리            | P1       | 진행 전 | 확인 필요    | T18                          | [T39_public_image_asset_footer_badge_cleanup.md](T39_public_image_asset_footer_badge_cleanup.md)                 |
 | T40 | Storage orphan cleanup API 및 hook 통합                      | P1       | 완료    | 235          | T06                          | [T40_storage_orphan_cleanup_api_hook.md](T40_storage_orphan_cleanup_api_hook.md)                                 |
 | T41 | Storage lifecycle 주기적 orphan scanner                      | P2       | 진행 전 | 확인 필요    | T40, T43                     | [T41_storage_lifecycle_cron.md](T41_storage_lifecycle_cron.md)                                                   |
@@ -100,8 +100,8 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 
 1. P1 기반/운영 차단 해소: T39
 2. P1/P2 독립 기반 작업: T43, T26, T25
-3. 기능 확장: T21, T22, T38, T59, T30, T23, T41
-4. 공통 컴포넌트 접근성 및 폴더 통일 (T46~T49 선행 필수): T65
+3. 기능 확장: T21, T22, T59, T30, T23, T41
+4. 공통 컴포넌트 접근성 및 폴더 통일 (T46~T49 선행 필수): T64, T65
 5. UI/UX 개선 묶음: T46, T47, T48, T49
 6. 독립 진행 (별도 일정): T66(모바일 앱 래핑), T67(i18n)
 7. 확장/운영 고도화: T32, T33, T34, T35, T36, T37
