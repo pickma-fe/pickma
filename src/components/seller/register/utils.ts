@@ -1,4 +1,4 @@
-import type { AuthStepState } from './types';
+import type { AuthStepState } from '@/types/seller-register';
 
 export function getButtonColor(status: string): 'primary' | 'gray' {
   if (status === 'done') return 'gray';

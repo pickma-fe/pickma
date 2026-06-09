@@ -1,14 +1,11 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 
-import type { SellerOnboardingStatus } from '@/types/seller-application';
+import type { AuthStepState } from '@/types/seller-register';
 import type { BusinessInfoData } from '@/types/store';
-import { sellerOnboardingApi } from '@/api/seller/onboarding/sellerOnboardingApi';
 import { useCreateSellerApplication } from '@/hooks/seller/applications/useCreateSellerApplication';
-
-import type { AuthStepState } from './types';
+import { useSellerOnboardingStatus } from '@/hooks/seller/onboarding/useSellerOnboardingStatus';
 
 // TODO(T29): API 확장 후 신청 데이터(businessInfo, termsAgreed, documentFiles) 복원 필요
 // 현재는 applicationStatus만 반환하므로 페이지 이동 후 로컬 state 초기화 불가
@@ -36,10 +33,7 @@ export function useSellerAuth() {
     error: applicationError,
   } = useCreateSellerApplication();
 
-  const { data: onboardingStatus } = useQuery<SellerOnboardingStatus>({
-    queryKey: ['sellers', 'onboarding-status'],
-    queryFn: () => sellerOnboardingApi.getSellerOnboardingStatus(),
-    staleTime: 10 * 1000,
+  const { data: onboardingStatus } = useSellerOnboardingStatus({
     refetchInterval: (query) => {
       const status = query.state.data?.applicationStatus;
       if (status === 'pending') return 10 * 1000;
@@ -54,8 +48,6 @@ export function useSellerAuth() {
   const isApiRejected = applicationStatus === 'rejected';
   const hasApplication = isApiPending || isApiApproved || isApiRejected;
 
-  // 로컬 제출 상태 OR API 신청 존재 여부로 결정
-  // TODO(T29): API 확장 후 실제 데이터 복원 필요
   const resolvedDocumentsSubmitted = documentsSubmitted || hasApplication;
   const resolvedBusinessInfoSubmitted = businessInfoSubmitted || hasApplication;
   const resolvedTermsSubmitted = termsSubmitted || hasApplication;

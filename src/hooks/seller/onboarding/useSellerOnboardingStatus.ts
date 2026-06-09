@@ -8,12 +8,18 @@ import { sellerOnboardingApi } from '@/api/seller/onboarding/sellerOnboardingApi
 
 interface UseSellerOnboardingStatusOptions {
   enabled?: boolean;
+  refetchInterval?:
+    | number
+    | false
+    | ((query: {
+        state: { data: SellerOnboardingStatus | undefined };
+      }) => number | false);
 }
 
 export function useSellerOnboardingStatus(
   options: UseSellerOnboardingStatusOptions = {}
 ) {
-  const { enabled = true } = options;
+  const { enabled = true, refetchInterval } = options;
 
   return useQuery<SellerOnboardingStatus>({
     queryKey: queryKeys.seller.onboardingStatus(),
@@ -21,5 +27,6 @@ export function useSellerOnboardingStatus(
     staleTime: 30 * 1000,
     enabled,
     retry: false,
+    refetchInterval,
   });
 }

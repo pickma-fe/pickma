@@ -3,7 +3,10 @@
 import Link from 'next/link';
 import { useState } from 'react';
 
+import type { ModalType } from '@/types/seller-register';
 import type { BusinessInfoData, StoreInfoData } from '@/types/store';
+import { useSellerAuth } from '@/hooks/seller/register/useSellerAuth';
+import { useStoreRegister } from '@/hooks/seller/register/useStoreRegister';
 import { Button } from '@/components/common/Button/Button';
 import { Section } from '@/components/common/Section/Section';
 
@@ -15,9 +18,6 @@ import { StepModal } from './StepModal';
 import { StoreInfoStep } from './StoreInfoStep';
 import { StoreStepList } from './StoreStepList';
 import { TermsStep } from './TermsStep';
-import type { ModalType } from './types';
-import { useSellerAuth } from './useSellerAuth';
-import { useStoreRegister } from './useStoreRegister';
 
 export function RegisterContent() {
   const [activeModal, setActiveModal] = useState<ModalType>(null);
