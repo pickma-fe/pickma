@@ -1,11 +1,20 @@
 import type {
+  AdminOrderListQuery,
+  AdminOrderListResponse,
+  AdminOrderResponse,
   AdminPendingSellerApplicationListQuery,
   AdminPendingSellerApplicationListResponse,
   AdminPendingSellerApplicationResponse,
   AdminDashboardStatsResponse,
+  AdminProductListQuery,
+  AdminProductListResponse,
+  AdminProductResponse,
   AdminStoreListQuery,
   AdminStoreListResponse,
   AdminStoreResponse,
+  AdminUserListQuery,
+  AdminUserListResponse,
+  AdminUserResponse,
 } from '@/contracts/admin';
 import type { SellerApplicationDocumentReadUrlResponse } from '@/contracts/seller-application';
 
@@ -48,7 +57,7 @@ function getKoreanDateString(value: string): string {
 }
 
 function sanitizeMockSearchValue(value: string): string {
-  return value.replace(/[%,()]/g, ' ').trim();
+  return value.replace(/[,()*]/g, ' ').trim();
 }
 
 function matchesPendingSellerApplicationQuery(
@@ -198,6 +207,223 @@ export const mockPendingAdminStoreList: AdminStoreListResponse = {
   totalCount: pendingStores.length,
   totalPages: Math.ceil(pendingStores.length / PAGE_SIZE),
 };
+
+export const mockAdminUsers: AdminUserResponse[] = [
+  {
+    id: 'user_customer_1',
+    email: 'customer@example.com',
+    name: '김픽마',
+    phone: '010-1111-2222',
+    role: 'customer',
+    status: 'active',
+    createdAt: '2026-05-01T00:00:00.000Z',
+    updatedAt: '2026-05-01T00:00:00.000Z',
+  },
+  {
+    id: 'user_seller_1',
+    email: 'seller@example.com',
+    name: '박판매',
+    phone: '010-3333-4444',
+    role: 'seller',
+    status: 'active',
+    createdAt: '2026-05-02T00:00:00.000Z',
+    updatedAt: '2026-05-02T00:00:00.000Z',
+  },
+  {
+    id: 'user_admin_1',
+    email: 'admin@example.com',
+    name: '관리자',
+    role: 'admin',
+    status: 'active',
+    createdAt: '2026-05-03T00:00:00.000Z',
+    updatedAt: '2026-05-03T00:00:00.000Z',
+  },
+];
+
+export function filterMockAdminUsers(
+  query: AdminUserListQuery = {}
+): AdminUserListResponse {
+  const page = query.page ?? 1;
+  const pageSize = query.pageSize ?? PAGE_SIZE;
+  const keyword = query.keyword
+    ? sanitizeMockSearchValue(query.keyword).toLowerCase()
+    : '';
+  const filteredItems = mockAdminUsers.filter((user) => {
+    const matchesKeyword = keyword
+      ? [user.email, user.name, user.phone]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase()
+          .includes(keyword)
+      : true;
+    const matchesRole = query.role ? user.role === query.role : true;
+    const matchesStatus = query.status ? user.status === query.status : true;
+
+    return matchesKeyword && matchesRole && matchesStatus;
+  });
+  const offset = (page - 1) * pageSize;
+
+  return {
+    items: filteredItems.slice(offset, offset + pageSize),
+    page,
+    pageSize,
+    totalCount: filteredItems.length,
+    totalPages: Math.ceil(filteredItems.length / pageSize),
+  };
+}
+
+export const mockAdminProducts: AdminProductResponse[] = [
+  {
+    id: 'product_1',
+    storeId: 'store_1',
+    storeName: '픽마 베이커리',
+    categoryId: 'category_bakery',
+    categoryName: '베이커리',
+    menuItemId: 'menu_item_1',
+    name: '마감 식빵 세트',
+    originalPrice: 12000,
+    discountPrice: 7000,
+    discountRate: 42,
+    stock: 10,
+    reservedStock: 2,
+    availableStock: 8,
+    isSoldOut: false,
+    isExpired: false,
+    displayStatus: 'available',
+    endAt: '2026-06-30T09:00:00.000Z',
+    pickupStartTime: '18:00',
+    pickupEndTime: '20:00',
+    status: 'active',
+    updatedAt: '2026-06-01T00:00:00.000Z',
+  },
+  {
+    id: 'product_2',
+    storeId: 'store_inactive_1',
+    storeName: '픽마 델리',
+    categoryName: '음식점',
+    menuItemId: 'menu_item_2',
+    name: '샐러드 런치팩',
+    originalPrice: 10000,
+    discountPrice: 6000,
+    discountRate: 40,
+    stock: 0,
+    reservedStock: 4,
+    availableStock: 0,
+    isSoldOut: true,
+    isExpired: false,
+    displayStatus: 'soldOut',
+    endAt: '2026-06-30T09:00:00.000Z',
+    pickupStartTime: '17:00',
+    pickupEndTime: '19:00',
+    status: 'closed',
+    updatedAt: '2026-06-02T00:00:00.000Z',
+  },
+];
+
+export function filterMockAdminProducts(
+  query: AdminProductListQuery = {}
+): AdminProductListResponse {
+  const page = query.page ?? 1;
+  const pageSize = query.pageSize ?? PAGE_SIZE;
+  const keyword = query.keyword
+    ? sanitizeMockSearchValue(query.keyword).toLowerCase()
+    : '';
+  const filteredItems = mockAdminProducts.filter((product) => {
+    const matchesKeyword = keyword
+      ? [product.name, product.storeName].some((value) =>
+          value.toLowerCase().includes(keyword)
+        )
+      : true;
+    const matchesStatus = query.status ? product.status === query.status : true;
+    const matchesStore = query.storeId
+      ? product.storeId === query.storeId
+      : true;
+
+    return matchesKeyword && matchesStatus && matchesStore;
+  });
+  const offset = (page - 1) * pageSize;
+
+  return {
+    items: filteredItems.slice(offset, offset + pageSize),
+    page,
+    pageSize,
+    totalCount: filteredItems.length,
+    totalPages: Math.ceil(filteredItems.length / pageSize),
+  };
+}
+
+export const mockAdminOrders: AdminOrderResponse[] = [
+  {
+    id: 'order_1',
+    orderNumber: 'ORDER-20260601-0001',
+    storeId: 'store_1',
+    storeName: '픽마 베이커리',
+    totalAmount: 12000,
+    discountAmount: 5000,
+    paymentAmount: 7000,
+    status: 'reserved',
+    pickupAt: '2026-06-01T10:00:00.000Z',
+    pickupServiceDate: '2026-06-01',
+    storeOrderNumber: '20260601-0000001',
+    pickupNumber: '101',
+    createdAt: '2026-06-01T01:00:00.000Z',
+    updatedAt: '2026-06-01T01:00:00.000Z',
+  },
+  {
+    id: 'order_2',
+    orderNumber: 'ORDER-20260602-0002',
+    storeId: 'store_inactive_1',
+    storeName: '픽마 델리',
+    totalAmount: 10000,
+    discountAmount: 4000,
+    paymentAmount: 6000,
+    status: 'processing',
+    pickupAt: '2026-06-02T10:00:00.000Z',
+    pickupServiceDate: '2026-06-02',
+    createdAt: '2026-06-02T01:00:00.000Z',
+    updatedAt: '2026-06-02T01:00:00.000Z',
+  },
+];
+
+export function filterMockAdminOrders(
+  query: AdminOrderListQuery = {}
+): AdminOrderListResponse {
+  const page = query.page ?? 1;
+  const pageSize = query.pageSize ?? PAGE_SIZE;
+  const keyword = query.keyword
+    ? sanitizeMockSearchValue(query.keyword).toLowerCase()
+    : '';
+  const sortedOrders = [...mockAdminOrders].sort((a, b) => {
+    const sort = query.sort ?? 'createdAt';
+    const order = query.order ?? 'desc';
+    const left = sort === 'pickupAt' ? a.pickupAt : a.createdAt;
+    const right = sort === 'pickupAt' ? b.pickupAt : b.createdAt;
+    const direction = order === 'asc' ? 1 : -1;
+
+    return left.localeCompare(right) * direction;
+  });
+  const filteredItems = sortedOrders.filter((order) => {
+    const matchesKeyword = keyword
+      ? [order.orderNumber, order.storeOrderNumber, order.pickupNumber]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase()
+          .includes(keyword)
+      : true;
+    const matchesStatus = query.status ? order.status === query.status : true;
+
+    return matchesKeyword && matchesStatus;
+  });
+  const offset = (page - 1) * pageSize;
+
+  return {
+    items: filteredItems.slice(offset, offset + pageSize),
+    page,
+    pageSize,
+    totalCount: filteredItems.length,
+    totalPages: Math.ceil(filteredItems.length / pageSize),
+  };
+}
 
 export const mockAdminDashboardStats: AdminDashboardStatsResponse = {
   totalStores: mockAdminStores.length,

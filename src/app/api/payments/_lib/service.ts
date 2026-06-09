@@ -7,10 +7,10 @@ import type { PaymentCompensationFailedPayload } from '@/contracts/payment-event
 import { AppError } from '@/lib/errors/appError';
 import { ERROR_CODE } from '@/lib/errors/errorCodes';
 import { createServiceRoleClient } from '@/lib/supabase/service';
+import { callTossCancel } from '@/app/api/_lib/toss-cancel';
 
 import {
   buildTossCheckoutUrl,
-  callTossCancel,
   callTossConfirm,
   type TossConfirmResult,
 } from './toss';
@@ -153,7 +153,7 @@ export async function confirmPayment(
   try {
     if (process.env.PAYMENT_MOCK === 'true') {
       confirmed = {
-        providerPaymentKey: body.paymentKey,
+        paymentKey: body.paymentKey,
         providerOrderId: body.orderNumber,
         method: 'card',
         methodDetail: null,
@@ -180,8 +180,7 @@ export async function confirmPayment(
 
   const { error: rpcError } = await supabase.rpc('confirm_payment', {
     p_order_number: body.orderNumber,
-    p_provider: 'toss',
-    p_provider_payment_key: confirmed.providerPaymentKey,
+    p_payment_key: confirmed.paymentKey,
     p_provider_order_id: confirmed.providerOrderId,
     p_method: confirmed.method,
     p_method_detail: confirmed.methodDetail ?? '',
@@ -195,7 +194,7 @@ export async function confirmPayment(
       try {
         await callTossCancel({
           orderNumber: body.orderNumber,
-          paymentKey: confirmed.providerPaymentKey,
+          paymentKey: confirmed.paymentKey,
           cancelReason: 'PickMa order confirmation failed',
           cancelAmount: order.payment_amount,
         });
@@ -214,7 +213,7 @@ export async function confirmPayment(
               paymentStateAssumption: 'approved_may_remain',
               manualAction: 'check_toss_and_cancel_or_refund',
               orderStatus: 'processing',
-              tossPaymentKey: confirmed.providerPaymentKey,
+              paymentKey: confirmed.paymentKey,
             } satisfies PaymentCompensationFailedPayload,
           })
         ).catch(() => {});
@@ -241,11 +240,121 @@ export async function confirmPayment(
             paymentStateAssumption: 'cancelled_may_be_done',
             manualAction: 'restore_order_status',
             orderStatus: 'processing',
-            tossPaymentKey: confirmed.providerPaymentKey,
+            paymentKey: confirmed.paymentKey,
           } satisfies PaymentCompensationFailedPayload,
         })
       ).catch(() => {});
     }
     throw mapConfirmRpcError(rpcError.message);
+  }
+}
+
+const ADMIN_CANCEL_ALLOWED_STATUSES = new Set([
+  'reserved',
+  'accepted',
+  'cancelling',
+]);
+
+export async function cancelPaymentById(
+  paymentId: string,
+  reason: string
+): Promise<void> {
+  const supabase = createServiceRoleClient();
+
+  const { data: payment, error: payError } = await supabase
+    .from('payments')
+    .select('id, payment_key, status, order_id')
+    .eq('id', paymentId)
+    .maybeSingle();
+
+  if (payError) throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
+  if (!payment) throw new AppError(ERROR_CODE.NOT_FOUND, 404);
+  if (payment.status !== 'paid') {
+    throw new AppError(ERROR_CODE.INVALID_ORDER_STATUS, 409);
+  }
+
+  const { data: order, error: orderError } = await supabase
+    .from('orders')
+    .select(
+      'id, order_number, store_id, status, payment_amount, cancel_claimed_status'
+    )
+    .eq('id', payment.order_id)
+    .single();
+
+  if (orderError) throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
+  if (!ADMIN_CANCEL_ALLOWED_STATUSES.has(order.status)) {
+    throw new AppError(ERROR_CODE.INVALID_ORDER_STATUS, 409);
+  }
+
+  if (order.status !== 'cancelling') {
+    const { data: claimed, error: claimError } = await supabase
+      .from('orders')
+      .update({
+        status: 'cancelling',
+        cancel_claimed_status: order.status,
+        cancel_claimed_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', order.id)
+      .eq('status', order.status)
+      .select('id');
+    if (claimError) throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
+    if (!claimed || claimed.length === 0)
+      throw new AppError(ERROR_CODE.INVALID_ORDER_STATUS, 409);
+  }
+
+  if (process.env.PAYMENT_MOCK !== 'true') {
+    if (!payment.payment_key) {
+      throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
+    }
+    try {
+      await callTossCancel({
+        orderNumber: order.order_number,
+        paymentKey: payment.payment_key,
+        cancelReason: reason,
+        cancelAmount: order.payment_amount,
+      });
+    } catch {
+      const revertStatus =
+        order.status !== 'cancelling'
+          ? order.status
+          : (order.cancel_claimed_status ?? order.status);
+      await supabase
+        .from('orders')
+        .update({
+          status: revertStatus,
+          cancel_claimed_status: null,
+          cancel_claimed_at: null,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', order.id)
+        .eq('status', 'cancelling');
+      throw new AppError(ERROR_CODE.PAYMENT_CANCEL_FAILED, 502);
+    }
+  }
+
+  const { error: finalizeError } = await supabase.rpc('cancel_order', {
+    p_order_id: order.id,
+    p_reason: reason,
+  });
+  if (finalizeError) {
+    await Promise.resolve(
+      supabase.from('payment_events').insert({
+        order_id: order.id,
+        order_number: order.order_number,
+        store_id: order.store_id,
+        event_type: 'payment_compensation_failed',
+        status: 'processed',
+        processed_at: new Date().toISOString(),
+        payload: {
+          failureStage: 'cancel_finalize',
+          paymentStateAssumption: 'toss_cancelled_db_pending',
+          manualAction: 'finalize_order_cancel_manually',
+          orderStatus: 'cancelling',
+          paymentKey: payment.payment_key,
+        } satisfies PaymentCompensationFailedPayload,
+      })
+    ).catch(() => {});
+    throw new AppError(ERROR_CODE.PAYMENT_CANCEL_FAILED, 502);
   }
 }

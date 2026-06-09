@@ -35,7 +35,7 @@ const tabStatusMap: Record<
 > = {
   pendingPickup: ['reserved', 'accepted', 'ready'],
   completed: ['completed'],
-  cancelled: ['cancelled', 'noShow', 'expired'],
+  cancelled: ['cancelling', 'cancelled', 'noShow', 'expired'],
 };
 
 export function MypageReservationList({

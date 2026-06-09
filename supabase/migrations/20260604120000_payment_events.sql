@@ -10,8 +10,7 @@ CREATE TABLE IF NOT EXISTS payment_events (
   store_id            uuid        REFERENCES stores(id),
   payment_id          uuid        REFERENCES payments(id),
   event_type          text        NOT NULL,
-  provider            text,
-  provider_key        text,
+  payment_key         text,
   provider_event_type text,
   provider_event_id   text,
   payload             jsonb,
@@ -23,7 +22,7 @@ CREATE TABLE IF NOT EXISTS payment_events (
 
 -- 2. webhook 중복 수신 방지 unique index
 CREATE UNIQUE INDEX IF NOT EXISTS payment_events_provider_event_uniq
-  ON payment_events (provider, provider_event_id)
+  ON payment_events (provider_event_id)
   WHERE provider_event_id IS NOT NULL;
 
 -- 3. RLS 활성화 (별도 정책 없이 service_role bypass)
@@ -36,20 +35,19 @@ GRANT ALL ON TABLE payment_events TO service_role;
 -- 4. confirm_payment RPC 갱신 (7-arg → 8-arg + payment_events atomic INSERT)
 -- ============================================================
 
--- 기존 7개 인자 함수 제거
+-- 기존 6개 인자 함수 제거 (initial_schema의 payment_provider 없는 버전)
 DROP FUNCTION IF EXISTS confirm_payment(
-  varchar, payment_provider, varchar, varchar, payment_method, text, int
+  varchar, varchar, varchar, payment_method, text, int
 );
 
 CREATE OR REPLACE FUNCTION confirm_payment(
-  p_order_number         varchar,
-  p_provider             payment_provider,
-  p_provider_payment_key varchar,
-  p_provider_order_id    varchar,
-  p_method               payment_method,
-  p_method_detail        text,
-  p_amount               int,
-  p_pg_response          jsonb
+  p_order_number      varchar,
+  p_payment_key       varchar,
+  p_provider_order_id varchar,
+  p_method            payment_method,
+  p_method_detail     text,
+  p_amount            int,
+  p_pg_response       jsonb
 )
 RETURNS TABLE(success boolean)
 LANGUAGE plpgsql
@@ -110,10 +108,10 @@ BEGIN
      AND p.id = oi.product_id;
 
   INSERT INTO payments (
-    order_id, provider, provider_payment_key, provider_order_id,
+    order_id, payment_key, provider_order_id,
     method, method_detail, amount, status, paid_at, pg_response
   ) VALUES (
-    v_order.id, p_provider, p_provider_payment_key, p_provider_order_id,
+    v_order.id, p_payment_key, p_provider_order_id,
     p_method, p_method_detail, p_amount, 'paid', now(), p_pg_response
   )
   RETURNING id INTO v_payment_id;
@@ -127,10 +125,10 @@ BEGIN
 
   INSERT INTO payment_events (
     order_id, order_number, store_id, payment_id,
-    event_type, provider, provider_key, payload, status, processed_at
+    event_type, payment_key, payload, status, processed_at
   ) VALUES (
     v_order.id, p_order_number, v_order.store_id, v_payment_id,
-    'payment_confirmed', p_provider::text, p_provider_payment_key, p_pg_response,
+    'payment_confirmed', p_payment_key, p_pg_response,
     'processed', now()
   );
 
@@ -139,8 +137,8 @@ END;
 $$;
 
 REVOKE EXECUTE ON FUNCTION confirm_payment(
-  varchar, payment_provider, varchar, varchar, payment_method, text, int, jsonb
+  varchar, varchar, varchar, payment_method, text, int, jsonb
 ) FROM PUBLIC;
 GRANT  EXECUTE ON FUNCTION confirm_payment(
-  varchar, payment_provider, varchar, varchar, payment_method, text, int, jsonb
+  varchar, varchar, varchar, payment_method, text, int, jsonb
 ) TO service_role;

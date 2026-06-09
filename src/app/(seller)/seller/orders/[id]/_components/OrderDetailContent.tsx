@@ -28,7 +28,13 @@ interface OrderDetailContentProps {
 
 type DisplayableOrderStatus = Extract<
   OrderStatus,
-  'reserved' | 'accepted' | 'ready' | 'completed' | 'cancelled' | 'noShow'
+  | 'reserved'
+  | 'accepted'
+  | 'ready'
+  | 'completed'
+  | 'cancelling'
+  | 'cancelled'
+  | 'noShow'
 >;
 
 const STATUS_BADGE: Record<
@@ -39,6 +45,7 @@ const STATUS_BADGE: Record<
   accepted: { label: '주문 승인', color: 'info' },
   ready: { label: '픽업 대기', color: 'info' },
   completed: { label: '픽업 완료', color: 'success' },
+  cancelling: { label: '취소 처리 중', color: 'warning' },
   cancelled: { label: '취소/환불', color: 'danger' },
   noShow: { label: '미수령', color: 'gray' },
 };
@@ -48,6 +55,7 @@ const STATUS_DESCRIPTION: Record<DisplayableOrderStatus, string> = {
   accepted: '주문 상품을 준비해주세요.',
   ready: '고객 픽업을 기다리고 있습니다.',
   completed: '픽업이 완료되었습니다.',
+  cancelling: '결제 취소 처리 중입니다.',
   cancelled: '주문이 취소/환불되었습니다.',
   noShow: '고객이 미수령하였습니다.',
 };
@@ -139,6 +147,12 @@ function ActionButtons({
             {isPending ? '처리 중...' : '미수령 처리'}
           </Button>
         </div>
+      );
+    case 'cancelling':
+      return (
+        <p className="text-sm text-gray-500">
+          결제 취소 처리 중으로 액션이 제한됩니다.
+        </p>
       );
     default:
       return null;

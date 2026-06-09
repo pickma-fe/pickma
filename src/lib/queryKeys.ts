@@ -77,6 +77,18 @@ export const queryKeys = {
       all: () => ['admin', 'stores'] as const,
       list: (params: object) => ['admin', 'stores', 'list', params] as const,
     },
+    users: {
+      all: () => ['admin', 'users'] as const,
+      list: (params: object) => ['admin', 'users', 'list', params] as const,
+    },
+    products: {
+      all: () => ['admin', 'products'] as const,
+      list: (params: object) => ['admin', 'products', 'list', params] as const,
+    },
+    orders: {
+      all: () => ['admin', 'orders'] as const,
+      list: (params: object) => ['admin', 'orders', 'list', params] as const,
+    },
   },
 } as const;
 

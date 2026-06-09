@@ -65,11 +65,11 @@ CREATE UNIQUE INDEX payment_events_provider_event_uniq
 
 ```jsonc
 {
-  "failureStage": "toss_cancel" | "revert_processing",
-  "paymentStateAssumption": "approved_may_remain" | "cancelled_may_be_done",
-  "manualAction": "check_toss_and_cancel_or_refund" | "restore_order_status",
-  "orderStatus": "processing",
-  "tossPaymentKey": "<string | null>"
+  "failureStage": "toss_cancel" | "revert_processing" | "cancel_finalize",
+  "paymentStateAssumption": "approved_may_remain" | "cancelled_may_be_done" | "toss_cancelled_db_pending",
+  "manualAction": "check_toss_and_cancel_or_refund" | "restore_order_status" | "finalize_order_cancel_manually",
+  "orderStatus": "<string>",
+  "paymentKey": "<string | null>"
 }
 ```
 
@@ -77,6 +77,7 @@ CREATE UNIQUE INDEX payment_events_provider_event_uniq
 
 - `failureStage='toss_cancel'`: Toss 승인 결제가 남아 있을 수 있다. 운영자는 Toss 결제 상태를 확인하고 취소/환불 또는 주문 복구를 결정한다.
 - `failureStage='revert_processing'`: Toss cancel은 성공했을 수 있으나 주문이 `processing`에 잔류한다. 운영자는 주문 상태 복구를 우선 확인한다.
+- `failureStage='cancel_finalize'`: Toss 취소는 성공했으나 `cancel_order` RPC 실패로 DB가 `cancelling` 잔류한다. 운영자는 주문 취소 DB 처리를 완료해야 한다.
 
 ### 이벤트 타입별 INSERT 기본 `status`
 

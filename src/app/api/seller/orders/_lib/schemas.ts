@@ -13,6 +13,7 @@ export const sellerOrderListQuerySchema = z
         'ready',
         'completed',
         'cancelled',
+        'cancelling',
         'no_show',
         'expired',
       ])

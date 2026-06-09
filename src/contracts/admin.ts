@@ -1,6 +1,8 @@
 import type { PaginatedResult } from './common';
-import type { OrderStatusParam } from './order';
+import type { OrderListItemResponse, OrderStatusParam } from './order';
+import type { ProductListItemResponse } from './product';
 import type { SellerApplicationDocumentResponse } from './seller-application';
+import type { UserResponse } from './user';
 
 export interface AdminStoreResponse {
   id: string;
@@ -100,4 +102,41 @@ export interface AdminPendingSellerApplicationListQuery {
 
 export interface RejectSellerApplicationRequest {
   reason: string;
+}
+
+export type AdminUserResponse = UserResponse;
+
+export type AdminUserListResponse = PaginatedResult<AdminUserResponse>;
+
+export interface AdminUserListQuery {
+  page?: number;
+  pageSize?: number;
+  keyword?: string;
+  role?: AdminUserResponse['role'];
+  status?: AdminUserResponse['status'];
+}
+
+export type AdminProductResponse = ProductListItemResponse;
+
+export type AdminProductListResponse = PaginatedResult<AdminProductResponse>;
+
+export interface AdminProductListQuery {
+  page?: number;
+  pageSize?: number;
+  keyword?: string;
+  status?: AdminProductResponse['status'];
+  storeId?: string;
+}
+
+export type AdminOrderResponse = OrderListItemResponse;
+
+export type AdminOrderListResponse = PaginatedResult<AdminOrderResponse>;
+
+export interface AdminOrderListQuery {
+  page?: number;
+  pageSize?: number;
+  keyword?: string;
+  status?: OrderStatusParam;
+  sort?: 'createdAt' | 'pickupAt';
+  order?: 'asc' | 'desc';
 }

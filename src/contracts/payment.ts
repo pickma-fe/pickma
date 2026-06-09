@@ -18,6 +18,10 @@ export interface ConfirmPaymentRequest {
   amount: number;
 }
 
+export interface CancelPaymentRequest {
+  reason: string;
+}
+
 export interface PaymentResponse {
   id: string;
   orderId: string;

@@ -104,13 +104,13 @@ export interface PaginatedResult<T> {
 
 API contract의 status 값은 JSON-safe string이며, DB 저장 값과 Domain Type 값이 1:1 대응한다고 가정하지 않는다.
 
-| 대상    | API/DB 기준 값                                                                                                   | Domain 기준 값/파생값                                                                                                  |
-| ------- | ---------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| User    | `active`, `suspended`, `deleted`                                                                                 | 동일                                                                                                                   |
-| Store   | `status: active \| inactive`, `operation_status: open \| closed`                                                 | 신규 가게는 `active/open`으로 생성. `canSell = role === 'seller' && status === 'active' && operationStatus === 'open'` |
-| Product | `active`, `closed`                                                                                               | `status: active \| closed`, `isSoldOut`, `isExpired`, `displayStatus` 파생                                             |
-| Order   | `payment_pending`, `processing`, `reserved`, `accepted`, `ready`, `completed`, `cancelled`, `no_show`, `expired` | `paymentPending`, `processing`, `reserved`, `accepted`, `ready`, `completed`, `cancelled`, `noShow`, `expired`         |
-| Payment | `pending`, `paid`, `failed`, `cancelled`, `refunded`                                                             | 동일                                                                                                                   |
+| 대상    | API/DB 기준 값                                                                                                                 | Domain 기준 값/파생값                                                                                                        |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
+| User    | `active`, `suspended`, `deleted`                                                                                               | 동일                                                                                                                         |
+| Store   | `status: active \| inactive`, `operation_status: open \| closed`                                                               | 신규 가게는 `active/open`으로 생성. `canSell = role === 'seller' && status === 'active' && operationStatus === 'open'`       |
+| Product | `active`, `closed`                                                                                                             | `status: active \| closed`, `isSoldOut`, `isExpired`, `displayStatus` 파생                                                   |
+| Order   | `payment_pending`, `processing`, `reserved`, `accepted`, `ready`, `completed`, `cancelling`, `cancelled`, `no_show`, `expired` | `paymentPending`, `processing`, `reserved`, `accepted`, `ready`, `completed`, `cancelling`, `cancelled`, `noShow`, `expired` |
+| Payment | `pending`, `paid`, `failed`, `cancelled`, `refunded`                                                                           | 동일                                                                                                                         |
 
 Product `displayStatus` 계산 기준:
 
@@ -1288,6 +1288,18 @@ Admin API는 `/api/admin/*`로 분리한다. 모든 Admin API는 `requireAdmin()
 | A-USER-01 | 사용자 목록 조회 | GET    | `/api/admin/users`                | P1       |
 | A-USER-02 | 사용자 상태 변경 | PATCH  | `/api/admin/users/:userId/status` | P1       |
 
+`GET /api/admin/users` query:
+
+- `page`: positive integer, default `1`
+- `pageSize`: positive integer, max `100`, default `20`
+- `keyword`: optional string, 이름/이메일/연락처 검색
+- `role`: optional `customer | seller | admin`
+- `status`: optional `active | suspended | deleted`
+
+응답은 공통 `PaginatedResult<AdminUserResponse>` envelope를 사용하며, 모든 요청은 `requireAdmin()`을 통과해야 한다.
+
+사용자 상태 변경 API는 T57 범위에서 운영 UI에 노출하지 않는다. 실제 정지/활성화 정책과 audit logging 기준 확정 후 별도 구현한다.
+
 ### 10.4 Products / Orders
 
 | PRD ID     | 기능           | Method | API                   | Priority |
@@ -1295,7 +1307,28 @@ Admin API는 `/api/admin/*`로 분리한다. 모든 Admin API는 `requireAdmin()
 | A-PROD-01  | 전체 상품 조회 | GET    | `/api/admin/products` | P1       |
 | A-ORDER-01 | 전체 주문 조회 | GET    | `/api/admin/orders`   | P1       |
 
-A-ORDER-01은 `status=processing` filter를 지원해야 한다. `processing` 잔류 주문 운영 확인(30분 알람 기준)에 사용된다. 우선순위 P1 유지, T04 이후 구현 예정.
+A-ORDER-01은 `status=processing` filter를 지원한다. `processing` 잔류 주문 운영 확인(30분 알람 기준)에 사용된다.
+
+`GET /api/admin/products` query:
+
+- `page`: positive integer, default `1`
+- `pageSize`: positive integer, max `100`, default `20`
+- `keyword`: optional string, 상품명/가게명 검색
+- `status`: optional `active | closed`
+- `storeId`: optional uuid
+
+응답은 공통 `PaginatedResult<AdminProductResponse>` envelope를 사용하며, 모든 요청은 `requireAdmin()`을 통과해야 한다.
+
+`GET /api/admin/orders` query:
+
+- `page`: positive integer, default `1`
+- `pageSize`: positive integer, max `100`, default `20`
+- `keyword`: optional string, 주문번호/매장별 주문번호/픽업번호/가게명 검색
+- `status`: optional `payment_pending | processing | reserved | accepted | ready | completed | cancelled | no_show | expired`
+- `sort`: optional `createdAt | pickupAt`, default `createdAt`
+- `order`: optional `asc | desc`, default `desc`
+
+응답은 공통 `PaginatedResult<AdminOrderResponse>` envelope를 사용하며, 모든 요청은 `requireAdmin()`을 통과해야 한다.
 
 ### 10.5 Dashboard
 
@@ -1355,7 +1388,6 @@ RPC에서 raise하는 예외는 아래 정책으로 API error code로 변환한�
 | `PICKUP_NUMBER_EXHAUSTED`     | `PICKUP_NUMBER_EXHAUSTED` 409    | `confirm_payment`                                                                                                                     |
 | `INVALID_ORDER_STATUS`        | `INVALID_ORDER_STATUS` 409       | `confirm_payment`, `expire_order`, `accept_seller_order`, `mark_seller_order_ready`, `complete_seller_order`                          |
 | `ORDER_NOT_EXPIRED`           | `VALIDATION_ERROR` 400           | `expire_order`                                                                                                                        |
-| `NOT_IMPLEMENTED`             | `NOT_IMPLEMENTED` 501            | `cancel_order`                                                                                                                        |
 | `APPLICATION_NOT_PENDING`     | `VALIDATION_ERROR` 400           | `approve_seller_application`                                                                                                          |
 
 `create_order`의 validation 예외는 Zod 스키마 검증이 선행되므로 정상 흐름에서는 도달하지 않아야 한다.
@@ -1402,6 +1434,7 @@ RPC에서 raise하는 예외는 아래 정책으로 API error code로 변환한�
 | `DUPLICATE_PRODUCT_IN_ORDER`            | 400  | 주문 항목에 중복된 상품이 있습니다.                            |
 | `PAYMENT_AMOUNT_MISMATCH`               | 400  | 결제 금액이 일치하지 않습니다.                                 |
 | `PAYMENT_CONFIRM_FAILED`                | 502  | 결제 승인에 실패했습니다.                                      |
+| `PAYMENT_CANCEL_FAILED`                 | 502  | 결제 취소에 실패했습니다.                                      |
 | `PAYMENT_ALREADY_CONFIRMED`             | 409  | 이미 완료된 결제입니다.                                        |
 | `ORDER_NUMBER_EXHAUSTED`                | 503  | 주문번호가 모두 소진되었습니다.                                |
 | `PICKUP_NUMBER_EXHAUSTED`               | 409  | 픽업 번호가 모두 소진되었습니다.                               |
@@ -1415,10 +1448,7 @@ RPC에서 raise하는 예외는 아래 정책으로 API error code로 변환한�
 `API_MOCK_ENABLED=false`에서 `NOT_IMPLEMENTED` 501을 반환하는 endpoint 목록이다.
 각 endpoint의 실제 구현은 담당 task에서 진행하며, 담당 task 완료 기준에 `NOT_IMPLEMENTED` 반환 코드 제거가 포함된다.
 
-| endpoint                                | method | real mode | mock mode | UI 연결 여부           | 운영 노출 위험 | 담당 task |
-| --------------------------------------- | ------ | --------- | --------- | ---------------------- | -------------- | --------- |
-| `PATCH /api/orders/{orderId}/cancel`    | PATCH  | 501       | 성공      | hook 정의됨, UI 미연결 | 낮음           | T31       |
-| `POST /api/payments/{paymentId}/cancel` | POST   | 501       | 성공      | hook 정의됨, UI 미연결 | 낮음           | T31       |
+현재 미구현 endpoint 없음 (T31 완료로 취소 API 구현 완료).
 
 ### 501 연결 액션 운영 노출 정책
 

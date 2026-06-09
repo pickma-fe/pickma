@@ -46,6 +46,7 @@ const STATUS_BADGE: Record<
   accepted: { label: '주문 승인', color: 'info' },
   ready: { label: '픽업 대기', color: 'info' },
   completed: { label: '픽업 완료', color: 'success' },
+  cancelling: { label: '취소 처리 중', color: 'warning' },
   cancelled: { label: '취소/환불', color: 'danger' },
   noShow: { label: '미수령', color: 'gray' },
 };
@@ -55,6 +56,7 @@ const STATUS_DESCRIPTION: Record<SellerOrderDisplayStatus, string> = {
   accepted: '주문 상품을 준비해주세요.',
   ready: '고객 픽업을 기다리고 있습니다.',
   completed: '픽업이 완료되었습니다.',
+  cancelling: '결제 취소 처리 중입니다.',
   cancelled: '주문이 취소/환불되었습니다.',
   noShow: '고객이 미수령하였습니다.',
 };
@@ -152,6 +154,7 @@ function OrderActionButtons({
           </Button>
         </div>
       );
+    case 'cancelling':
     case 'completed':
     case 'cancelled':
     case 'noShow':

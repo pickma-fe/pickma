@@ -1,4 +1,4 @@
-import type { OrderStatus } from './order';
+import type { Order, OrderStatus } from './order';
 
 export interface AdminDashboardStats {
   totalStores: number;
@@ -39,3 +39,5 @@ export interface AdminDashboardRecentUser {
   email: string;
   createdAt: Date;
 }
+
+export type AdminOrderListItem = Omit<Order, 'items' | 'payment'>;

@@ -9,6 +9,7 @@ export type OrderStatusParam =
   | 'ready'
   | 'completed'
   | 'cancelled'
+  | 'cancelling'
   | 'no_show'
   | 'expired';
 
@@ -16,6 +17,10 @@ export interface CreateOrderRequest {
   productId: string;
   quantity: number;
   pickupAt: string;
+}
+
+export interface CancelOrderRequest {
+  reason: string;
 }
 
 export interface CreateOrderResponse {

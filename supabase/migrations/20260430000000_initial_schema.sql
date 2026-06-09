@@ -23,10 +23,10 @@ CREATE TYPE order_status AS ENUM (
   'ready',
   'completed',
   'cancelled',
+  'cancelling',
   'no_show',
   'expired'
 );
-CREATE TYPE payment_provider AS ENUM ('toss', 'kakao_pay', 'naver_pay');
 CREATE TYPE payment_method AS ENUM ('card', 'virtual_account', 'mobile', 'easy_pay');
 CREATE TYPE payment_status AS ENUM ('pending', 'paid', 'failed', 'cancelled', 'refunded');
 CREATE TYPE social_provider AS ENUM ('google', 'kakao');
@@ -138,6 +138,8 @@ CREATE TABLE orders (
   picked_up_at          timestamptz,
   cancelled_at          timestamptz,
   cancel_reason         varchar(500),
+  cancel_claimed_status order_status,
+  cancel_claimed_at     timestamptz,
   created_at            timestamptz   NOT NULL DEFAULT now(),
   updated_at            timestamptz   NOT NULL DEFAULT now()
 );
@@ -155,23 +157,22 @@ CREATE TABLE order_items (
 );
 
 CREATE TABLE payments (
-  id                   uuid             PRIMARY KEY DEFAULT gen_random_uuid(),
-  order_id             uuid             UNIQUE NOT NULL REFERENCES orders(id) ON DELETE RESTRICT,
-  provider             payment_provider NOT NULL,
-  provider_payment_key varchar(200),
-  provider_order_id    varchar(200),
-  method               payment_method   NOT NULL,
-  method_detail        text,
-  amount               int              NOT NULL,
-  status               payment_status   NOT NULL,
-  paid_at              timestamptz,
-  refunded_at          timestamptz,
-  refund_reason        varchar(500),
-  pg_response          jsonb,
-  created_at           timestamptz      NOT NULL DEFAULT now(),
-  updated_at           timestamptz      NOT NULL DEFAULT now(),
-  CONSTRAINT check_provider_identifiers CHECK (
-    provider_payment_key IS NOT NULL OR provider_order_id IS NOT NULL
+  id                uuid           PRIMARY KEY DEFAULT gen_random_uuid(),
+  order_id          uuid           UNIQUE NOT NULL REFERENCES orders(id) ON DELETE RESTRICT,
+  payment_key       varchar(200),
+  provider_order_id varchar(200),
+  method            payment_method NOT NULL,
+  method_detail     text,
+  amount            int            NOT NULL,
+  status            payment_status NOT NULL,
+  paid_at           timestamptz,
+  refunded_at       timestamptz,
+  refund_reason     varchar(500),
+  pg_response       jsonb,
+  created_at        timestamptz    NOT NULL DEFAULT now(),
+  updated_at        timestamptz    NOT NULL DEFAULT now(),
+  CONSTRAINT check_payment_key CHECK (
+    payment_key IS NOT NULL OR provider_order_id IS NOT NULL
   )
 );
 
@@ -242,13 +243,13 @@ CREATE INDEX idx_orders_user_store_created
 CREATE INDEX idx_orders_store_pickup_sequence
   ON orders(store_id, pickup_service_date, store_order_sequence);
 
--- Partial unique indexes: provider payment keys are only unique when assigned
-CREATE UNIQUE INDEX idx_payments_unique_provider_payment_key
-  ON payments(provider, provider_payment_key)
-  WHERE provider_payment_key IS NOT NULL;
+-- Partial unique indexes: payment keys are only unique when assigned
+CREATE UNIQUE INDEX idx_payments_unique_payment_key
+  ON payments(payment_key)
+  WHERE payment_key IS NOT NULL;
 
 CREATE UNIQUE INDEX idx_payments_unique_provider_order_id
-  ON payments(provider, provider_order_id)
+  ON payments(provider_order_id)
   WHERE provider_order_id IS NOT NULL;
 
 -- Partial unique index: at most one pending/approved application per user
@@ -660,20 +661,19 @@ GRANT  EXECUTE ON FUNCTION check_pickup_capacity(varchar) TO service_role;
 -- ============================================================
 -- RPC 3: confirm_payment
 -- Role: atomic payment confirmation + stock finalization + sequence/number issuance
--- Input: p_order_number, p_provider, p_provider_payment_key, p_provider_order_id,
+-- Input: p_order_number, p_payment_key, p_provider_order_id,
 --        p_method, p_method_detail, p_amount
 -- Output: success
--- Note: p_method must be mapped from provider response by Route Handler service before calling
+-- Note: p_method must be mapped from Toss response by Route Handler service before calling
 -- ============================================================
 
 CREATE OR REPLACE FUNCTION confirm_payment(
-  p_order_number         varchar,
-  p_provider             payment_provider,
-  p_provider_payment_key varchar,
-  p_provider_order_id    varchar,
-  p_method               payment_method,
-  p_method_detail        text,
-  p_amount               int
+  p_order_number      varchar,
+  p_payment_key       varchar,
+  p_provider_order_id varchar,
+  p_method            payment_method,
+  p_method_detail     text,
+  p_amount            int
 )
 RETURNS TABLE(success boolean)
 LANGUAGE plpgsql
@@ -733,10 +733,10 @@ BEGIN
      AND p.id = oi.product_id;
 
   INSERT INTO payments (
-    order_id, provider, provider_payment_key, provider_order_id,
+    order_id, payment_key, provider_order_id,
     method, method_detail, amount, status, paid_at
   ) VALUES (
-    v_order.id, p_provider, p_provider_payment_key, p_provider_order_id,
+    v_order.id, p_payment_key, p_provider_order_id,
     p_method, p_method_detail, p_amount, 'paid', now()
   );
 
@@ -751,8 +751,8 @@ BEGIN
 END;
 $$;
 
-REVOKE EXECUTE ON FUNCTION confirm_payment(varchar, payment_provider, varchar, varchar, payment_method, text, int) FROM PUBLIC;
-GRANT  EXECUTE ON FUNCTION confirm_payment(varchar, payment_provider, varchar, varchar, payment_method, text, int) TO service_role;
+REVOKE EXECUTE ON FUNCTION confirm_payment(varchar, varchar, varchar, payment_method, text, int) FROM PUBLIC;
+GRANT  EXECUTE ON FUNCTION confirm_payment(varchar, varchar, varchar, payment_method, text, int) TO service_role;
 
 -- ============================================================
 -- RPC 4: expire_order
@@ -876,12 +876,67 @@ REVOKE EXECUTE ON FUNCTION revert_payment_processing(uuid) FROM PUBLIC;
 GRANT  EXECUTE ON FUNCTION revert_payment_processing(uuid) TO service_role;
 
 -- ============================================================
--- RPC 7: cancel_order (contract only — SQL implementation in Phase 6)
--- Role: user-initiated order cancellation + reserved stock restoration
+-- RPC 7: begin_order_cancel
+-- Role: claim order for cancellation — sets status=cancelling, saves prior status
+-- Input: p_order_id, p_user_id
+-- Output: success
+-- Note: Locks the row FOR UPDATE. Caller must proceed with Toss cancel then
+--       cancel_order (finalize) on success, or revert_order_cancel_claim on failure.
+--       Issued store_order_sequence / store_order_number / pickup_number are NOT reclaimed.
+-- ============================================================
+
+CREATE OR REPLACE FUNCTION begin_order_cancel(
+  p_order_id uuid,
+  p_user_id  uuid
+)
+RETURNS TABLE(success boolean)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_order orders%ROWTYPE;
+BEGIN
+  SELECT * INTO v_order
+  FROM orders
+  WHERE id = p_order_id AND user_id = p_user_id
+  FOR UPDATE;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'ORDER_NOT_FOUND';
+  END IF;
+
+  IF v_order.status = 'cancelled' THEN
+    RETURN QUERY SELECT true;
+  END IF;
+  IF v_order.status = 'cancelling' THEN
+    RETURN QUERY SELECT true;
+  END IF;
+  IF v_order.status NOT IN ('reserved', 'accepted') THEN
+    RAISE EXCEPTION 'INVALID_ORDER_STATUS';
+  END IF;
+
+  UPDATE orders
+     SET status                = 'cancelling',
+         cancel_claimed_status = v_order.status,
+         cancel_claimed_at     = now(),
+         updated_at            = now()
+   WHERE id = p_order_id;
+
+  RETURN QUERY SELECT true;
+END;
+$$;
+
+REVOKE EXECUTE ON FUNCTION begin_order_cancel(uuid, uuid) FROM PUBLIC;
+GRANT  EXECUTE ON FUNCTION begin_order_cancel(uuid, uuid) TO service_role;
+
+-- ============================================================
+-- RPC 8: cancel_order (finalize)
+-- Role: finalize order cancellation after Toss cancel succeeded
 -- Input: p_order_id, p_reason
 -- Output: success
--- Note: Cancellation conditions and refund flow are defined in Phase 6/7.
---       Issued store_order_sequence / store_order_number / pickup_number are NOT reclaimed.
+-- Note: Sets order→cancelled, payment→cancelled, restores reserved_stock,
+--       inserts payment_cancelled event. Clears cancel claim fields.
 -- ============================================================
 
 CREATE OR REPLACE FUNCTION cancel_order(
@@ -893,13 +948,118 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public
 AS $$
+DECLARE
+  v_order   orders%ROWTYPE;
+  v_payment payments%ROWTYPE;
 BEGIN
-  RAISE EXCEPTION 'NOT_IMPLEMENTED';
+  SELECT * INTO v_order
+  FROM orders
+  WHERE id = p_order_id
+  FOR UPDATE;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'ORDER_NOT_FOUND';
+  END IF;
+
+  IF v_order.status != 'cancelling' THEN
+    RAISE EXCEPTION 'INVALID_ORDER_STATUS';
+  END IF;
+
+  SELECT * INTO v_payment
+  FROM payments
+  WHERE order_id = p_order_id
+  FOR UPDATE;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'PAYMENT_NOT_FOUND';
+  END IF;
+
+  UPDATE orders
+     SET status                = 'cancelled',
+         cancelled_at          = now(),
+         cancel_reason         = p_reason,
+         cancel_claimed_status = NULL,
+         cancel_claimed_at     = NULL,
+         updated_at            = now()
+   WHERE id = p_order_id;
+
+  UPDATE payments
+     SET status        = 'cancelled',
+         refunded_at   = now(),
+         refund_reason = p_reason,
+         updated_at    = now()
+   WHERE id = v_payment.id;
+
+  -- restores stock (paid order cancel)
+  UPDATE products p
+     SET stock = p.stock + oi.quantity
+    FROM order_items oi
+   WHERE oi.order_id = p_order_id
+     AND p.id = oi.product_id;
+
+  INSERT INTO payment_events (
+    order_id, order_number, store_id, payment_id,
+    event_type, payment_key, status, processed_at
+  ) VALUES (
+    p_order_id, v_order.order_number, v_order.store_id, v_payment.id,
+    'payment_cancelled', v_payment.payment_key, 'processed', now()
+  );
+
+  RETURN QUERY SELECT true;
 END;
 $$;
 
 REVOKE EXECUTE ON FUNCTION cancel_order(uuid, varchar) FROM PUBLIC;
 GRANT  EXECUTE ON FUNCTION cancel_order(uuid, varchar) TO service_role;
+
+-- ============================================================
+-- RPC 9: revert_order_cancel_claim
+-- Role: restore order status when Toss cancel failed
+-- Input: p_order_id
+-- Output: success
+-- ============================================================
+
+CREATE OR REPLACE FUNCTION revert_order_cancel_claim(
+  p_order_id uuid
+)
+RETURNS TABLE(success boolean)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_order orders%ROWTYPE;
+BEGIN
+  SELECT * INTO v_order
+  FROM orders
+  WHERE id = p_order_id
+  FOR UPDATE;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'ORDER_NOT_FOUND';
+  END IF;
+
+  IF v_order.status != 'cancelling' THEN
+    RAISE EXCEPTION 'INVALID_ORDER_STATUS';
+  END IF;
+
+  IF v_order.cancel_claimed_status IS NULL THEN
+    RAISE EXCEPTION 'CANCEL_CLAIM_NOT_FOUND';
+  END IF;
+
+  UPDATE orders
+     SET status                = v_order.cancel_claimed_status,
+         cancel_claimed_status = NULL,
+         cancel_claimed_at     = NULL,
+         updated_at            = now()
+   WHERE id = p_order_id;
+
+  RETURN QUERY SELECT true;
+END;
+$$;
+
+REVOKE EXECUTE ON FUNCTION revert_order_cancel_claim(uuid) FROM PUBLIC;
+GRANT  EXECUTE ON FUNCTION revert_order_cancel_claim(uuid) TO service_role;
 
 -- ============================================================
 -- RPC 8: approve_seller_application

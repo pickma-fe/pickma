@@ -205,8 +205,7 @@ describe('mapOrderDetailRow', () => {
     const paymentRow: PaymentRow = {
       id: 'payment-1',
       order_id: baseListRow.id,
-      provider: 'toss',
-      provider_payment_key: 'ppk_test',
+      payment_key: 'ppk_test',
       provider_order_id: 'poi_test',
       method: 'card',
       method_detail: null,
