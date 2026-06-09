@@ -25,6 +25,7 @@ async function listAllFiles(
       .list(parentPath, { limit: LIST_LIMIT, offset });
 
     if (error) {
+      // TODO: logger 추가 후 error 원본 로깅
       throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
     }
 
@@ -69,6 +70,7 @@ export async function runStorageCleanup(): Promise<{ deletedCount: number }> {
       .range(dbOffset, dbOffset + DB_PAGE_SIZE - 1);
 
     if (dbError) {
+      // TODO: logger 추가 후 dbError 원본 로깅
       throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
     }
 
@@ -100,6 +102,7 @@ export async function runStorageCleanup(): Promise<{ deletedCount: number }> {
     .remove(orphanPaths);
 
   if (removeError) {
+    // TODO: logger 추가 후 removeError 원본 로깅
     throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
   }
 
