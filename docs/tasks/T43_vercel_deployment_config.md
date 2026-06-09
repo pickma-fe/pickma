@@ -1,10 +1,10 @@
 # T43. Vercel 배포 설정 및 Cron 환경 구성
 
 - 상태:
-  진행 전
+  완료
 
 - GitHub Issue:
-  확인 필요
+  #254
 
 - 우선순위:
   P2
@@ -42,6 +42,15 @@
   - Vercel project settings
   - `docs/system_architecture.md`
   - `docs/tasks/T41_storage_lifecycle_cron.md`
+
+- 구현 결과:
+  - `vercel.json` 생성 — `GET /api/cron/storage-cleanup` 스케줄 `0 18 * * *` (UTC) 등록
+  - `.env.example`에 `CRON_SECRET` 항목 추가
+  - Vercel 프로젝트 연결 (`drcloys-projects/pickma-test`), 환경 변수 전체 등록
+  - `docs/system_architecture.md` §10 `CRON_SECRET`/`IP_SOURCE_HEADER` 행 추가, §17 Vercel 배포 환경 구성 절 신규 추가
+  - Production 배포 완료, `pickma.shop` 도메인 연결 및 HTTPS 확인
+  - Supabase Auth Site URL/Redirect URLs `https://pickma.shop` 추가, 로그인 동작 확인
+  - Vercel Dashboard Cron Jobs 스케줄 등록 확인
 
 - 예상 난이도:
   낮음

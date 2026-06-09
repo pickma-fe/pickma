@@ -68,7 +68,7 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 | T40 | Storage orphan cleanup API 및 hook 통합                      | P1       | 완료    | 235          | T06                          | [T40_storage_orphan_cleanup_api_hook.md](T40_storage_orphan_cleanup_api_hook.md)                                 |
 | T41 | Storage lifecycle 주기적 orphan scanner                      | P2       | 진행 전 | 확인 필요    | T40, T43                     | [T41_storage_lifecycle_cron.md](T41_storage_lifecycle_cron.md)                                                   |
 | T42 | 법적 고지 페이지 및 동의 흐름 구현                           | P1       | 완료    | 204          | T44, T61                     | [T42_legal_compliance_pages.md](T42_legal_compliance_pages.md)                                                   |
-| T43 | Vercel 배포 설정 및 Cron 환경 구성                           | P2       | 진행 전 | 확인 필요    | T24                          | [T43_vercel_deployment_config.md](T43_vercel_deployment_config.md)                                               |
+| T43 | Vercel 배포 설정 및 Cron 환경 구성                           | P2       | 완료    | 254          | T24                          | [T43_vercel_deployment_config.md](T43_vercel_deployment_config.md)                                               |
 | T44 | 판매자 신분증 원본 처리 및 KYC 보관 정책 결정                | P0       | 완료    | 191          | T06                          | [T44_seller_id_document_kyc_policy.md](T44_seller_id_document_kyc_policy.md)                                     |
 | T45 | UI/UX 및 접근성 baseline 기준 수립                           | P1       | 완료    | 238          | T09                          | [T45_ui_accessibility_baseline_policy.md](T45_ui_accessibility_baseline_policy.md)                               |
 | T46 | Consumer UI/UX 및 접근성 개선                                | P2       | 진행 전 | 확인 필요    | T45, T64, T65, T12, T13      | [T46_consumer_ui_accessibility_improvement.md](T46_consumer_ui_accessibility_improvement.md)                     |
@@ -99,7 +99,7 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 완료 task는 제외하고, `진행 중`과 `진행 전` task만 기준으로 정렬한다.
 
 1. P1 기반/운영 차단 해소: T39
-2. P1/P2 독립 기반 작업: T43, T26, T25
+2. P1/P2 독립 기반 작업: T26, T25
 3. 기능 확장: T21, T22, T59, T30, T23, T41
 4. 공통 컴포넌트 접근성 및 폴더 통일 (T46~T49 선행 필수): T64, T65
 5. UI/UX 개선 묶음: T46, T47, T48, T49

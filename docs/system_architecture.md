@@ -600,6 +600,8 @@ src/
 | `AUTH_EMAIL_FROM`                           | OTP 메일 발신 주소 (Resend 인증 도메인)                       | Secret    |
 | `AUTH_EMAIL_OTP_TTL_SECONDS`                | OTP 유효 시간 (기본값 600초)                                  | Secret    |
 | `AUTH_EMAIL_VERIFICATION_TOKEN_TTL_SECONDS` | verification token 유효 시간 (기본값 1800초)                  | Secret    |
+| `CRON_SECRET`                               | Vercel Cron 인증용 서버 시크릿 (32바이트 이상 랜덤값)         | Secret    |
+| `IP_SOURCE_HEADER`                          | rate limit 기준 헤더 (`x-forwarded-for`)                      | Secret    |
 
 ---
 
@@ -846,3 +848,64 @@ Branch protection은 `dev` 대상 PR에서 `CI / Lint, typecheck, and test` 통�
 | `POST /api/payments/[paymentId]/cancel`                      | P1       | admin                    | 없음        | 구현됨 (T31)          | —                       |
 | `PATCH /api/seller/orders/[orderId]/no-show`                 | P1       | sellerStore              | 없음        | 구현됨, 테스트 미추가 | T52                     |
 | `PATCH /api/seller/products/[productId]/stock`               | P1       | sellerStore              | 없음        | 구현됨                | T28                     |
+
+---
+
+## 17. Vercel 배포 환경 구성
+
+### 17.1 환경 변수 등록 기준
+
+| 변수                                        | 등록 환경            | 노출 범위       | 비고                                          |
+| ------------------------------------------- | -------------------- | --------------- | --------------------------------------------- |
+| `CRON_SECRET`                               | Production + Preview | 서버 전용       | Cron 인증용, 32바이트 이상 랜덤값             |
+| `NEXT_PUBLIC_SUPABASE_URL`                  | Production + Preview | 클라이언트 노출 | Supabase Auth 클라이언트 초기화에 필요        |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`      | Production + Preview | 클라이언트 노출 | Supabase Auth 클라이언트 초기화에 필요        |
+| `SUPABASE_SECRET_KEY`                       | Production + Preview | 서버 전용       | service role key                              |
+| `NEXT_PUBLIC_TOSS_CLIENT_KEY`               | Production + Preview | 클라이언트 노출 | test key 사용 중; live key로 교체 시 업데이트 |
+| `TOSS_SECRET_KEY`                           | Production + Preview | 서버 전용       | test key 사용 중; live key로 교체 시 업데이트 |
+| `UPSTASH_REDIS_REST_URL`                    | Production + Preview | 서버 전용       | 이메일 OTP 상태 저장소                        |
+| `UPSTASH_REDIS_REST_TOKEN`                  | Production + Preview | 서버 전용       |                                               |
+| `AUTH_EMAIL_HASH_SECRET`                    | Production + Preview | 서버 전용       |                                               |
+| `RESEND_API_KEY`                            | Production + Preview | 서버 전용       |                                               |
+| `AUTH_EMAIL_FROM`                           | Production + Preview | 서버 전용       |                                               |
+| `IP_SOURCE_HEADER`                          | Production + Preview | 서버 전용       | `x-forwarded-for` 고정                        |
+| `NEXT_PUBLIC_APP_URL`                       | Production + Preview | 클라이언트 노출 | `https://pickma.shop`                         |
+| `AUTH_EMAIL_OTP_TTL_SECONDS`                | Production + Preview | 서버 전용       | 기본값 600; 생략 시 기본값 사용               |
+| `AUTH_EMAIL_VERIFICATION_TOKEN_TTL_SECONDS` | Production + Preview | 서버 전용       | 기본값 1800; 생략 시 기본값 사용              |
+| `API_MOCK_ENABLED`                          | **Preview only**     | 서버 전용       | production에서 미설정                         |
+| `PAYMENT_MOCK`                              | **Preview only**     | 서버 전용       | production에서 미설정                         |
+
+로컬 개발 환경(`Development`)은 `.env.local`을 직접 사용하고 Vercel에 별도 등록하지 않는다.
+
+### 17.2 Cron 인증 기준
+
+Vercel Cron은 등록된 path를 스케줄에 따라 GET 요청으로 호출한다. `CRON_SECRET`이 설정된 경우 `Authorization: Bearer ${CRON_SECRET}` 헤더를 자동으로 포함한다.
+
+Route Handler(`/api/cron/storage-cleanup`)는 이 헤더를 검증한다:
+
+```ts
+const cronSecret = process.env.CRON_SECRET;
+const auth = request.headers.get('Authorization');
+if (!cronSecret || auth !== `Bearer ${cronSecret}`) {
+  return NextResponse.json(
+    {
+      statusCode: 401,
+      error: {
+        code: 'UNAUTHORIZED',
+        message: 'Unauthorized',
+      },
+    },
+    { status: 401 }
+  );
+}
+```
+
+Vercel Cron은 **production 배포에서만 실행**된다. preview 환경에서는 수동 HTTP 요청으로 테스트한다.
+
+### 17.3 Cron 동작 확인 방법
+
+1. **스케줄 등록 확인**: Vercel Dashboard → 프로젝트 → Settings → Cron Jobs
+2. **실행 로그 확인**: Vercel Dashboard → 프로젝트 → Logs → Function Logs → `/api/cron/storage-cleanup` 필터
+3. **수동 트리거**: Vercel Dashboard → Settings → Cron Jobs → 해당 job → **Run Now**
+
+Hobby 플랜 제약: Cron은 하루 1회로 제한되며 실행 시각은 ±59분 오차가 발생할 수 있다.
