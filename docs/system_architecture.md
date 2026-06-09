@@ -855,23 +855,25 @@ Branch protection은 `dev` 대상 PR에서 `CI / Lint, typecheck, and test` 통�
 
 ### 17.1 환경 변수 등록 기준
 
-| 변수                                   | 등록 환경            | 노출 범위       | 비고                                          |
-| -------------------------------------- | -------------------- | --------------- | --------------------------------------------- |
-| `CRON_SECRET`                          | Production + Preview | 서버 전용       | Cron 인증용, 32바이트 이상 랜덤값             |
-| `NEXT_PUBLIC_SUPABASE_URL`             | Production + Preview | 클라이언트 노출 | Supabase Auth 클라이언트 초기화에 필요        |
-| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Production + Preview | 클라이언트 노출 | Supabase Auth 클라이언트 초기화에 필요        |
-| `SUPABASE_SECRET_KEY`                  | Production + Preview | 서버 전용       | service role key                              |
-| `NEXT_PUBLIC_TOSS_CLIENT_KEY`          | Production + Preview | 클라이언트 노출 | test key 사용 중; live key로 교체 시 업데이트 |
-| `TOSS_SECRET_KEY`                      | Production + Preview | 서버 전용       | test key 사용 중; live key로 교체 시 업데이트 |
-| `UPSTASH_REDIS_REST_URL`               | Production + Preview | 서버 전용       | 이메일 OTP 상태 저장소                        |
-| `UPSTASH_REDIS_REST_TOKEN`             | Production + Preview | 서버 전용       |                                               |
-| `AUTH_EMAIL_HASH_SECRET`               | Production + Preview | 서버 전용       |                                               |
-| `RESEND_API_KEY`                       | Production + Preview | 서버 전용       |                                               |
-| `AUTH_EMAIL_FROM`                      | Production + Preview | 서버 전용       |                                               |
-| `IP_SOURCE_HEADER`                     | Production + Preview | 서버 전용       | `x-forwarded-for` 고정                        |
-| `NEXT_PUBLIC_APP_URL`                  | Production + Preview | 클라이언트 노출 | `https://pickma.shop`                         |
-| `API_MOCK_ENABLED`                     | **Preview only**     | 서버 전용       | production에서 미설정                         |
-| `PAYMENT_MOCK`                         | **Preview only**     | 서버 전용       | production에서 미설정                         |
+| 변수                                        | 등록 환경            | 노출 범위       | 비고                                          |
+| ------------------------------------------- | -------------------- | --------------- | --------------------------------------------- |
+| `CRON_SECRET`                               | Production + Preview | 서버 전용       | Cron 인증용, 32바이트 이상 랜덤값             |
+| `NEXT_PUBLIC_SUPABASE_URL`                  | Production + Preview | 클라이언트 노출 | Supabase Auth 클라이언트 초기화에 필요        |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`      | Production + Preview | 클라이언트 노출 | Supabase Auth 클라이언트 초기화에 필요        |
+| `SUPABASE_SECRET_KEY`                       | Production + Preview | 서버 전용       | service role key                              |
+| `NEXT_PUBLIC_TOSS_CLIENT_KEY`               | Production + Preview | 클라이언트 노출 | test key 사용 중; live key로 교체 시 업데이트 |
+| `TOSS_SECRET_KEY`                           | Production + Preview | 서버 전용       | test key 사용 중; live key로 교체 시 업데이트 |
+| `UPSTASH_REDIS_REST_URL`                    | Production + Preview | 서버 전용       | 이메일 OTP 상태 저장소                        |
+| `UPSTASH_REDIS_REST_TOKEN`                  | Production + Preview | 서버 전용       |                                               |
+| `AUTH_EMAIL_HASH_SECRET`                    | Production + Preview | 서버 전용       |                                               |
+| `RESEND_API_KEY`                            | Production + Preview | 서버 전용       |                                               |
+| `AUTH_EMAIL_FROM`                           | Production + Preview | 서버 전용       |                                               |
+| `IP_SOURCE_HEADER`                          | Production + Preview | 서버 전용       | `x-forwarded-for` 고정                        |
+| `NEXT_PUBLIC_APP_URL`                       | Production + Preview | 클라이언트 노출 | `https://pickma.shop`                         |
+| `AUTH_EMAIL_OTP_TTL_SECONDS`                | Production + Preview | 서버 전용       | 기본값 600; 생략 시 기본값 사용               |
+| `AUTH_EMAIL_VERIFICATION_TOKEN_TTL_SECONDS` | Production + Preview | 서버 전용       | 기본값 1800; 생략 시 기본값 사용              |
+| `API_MOCK_ENABLED`                          | **Preview only**     | 서버 전용       | production에서 미설정                         |
+| `PAYMENT_MOCK`                              | **Preview only**     | 서버 전용       | production에서 미설정                         |
 
 로컬 개발 환경(`Development`)은 `.env.local`을 직접 사용하고 Vercel에 별도 등록하지 않는다.
 
