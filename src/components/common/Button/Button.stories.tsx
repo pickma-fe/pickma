@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { SearchIcon } from 'lucide-react';
 import { fn } from 'storybook/test';
 
 import { Button } from './Button';
@@ -57,6 +58,26 @@ export const GhostGray: Story = {
 export const Disabled: Story = {
   args: {
     children: '버튼',
+    variant: 'filled',
+    color: 'primary',
+    disabled: true,
+  },
+};
+
+// 아이콘 전용 버튼은 반드시 aria-label로 accessible name을 제공해야 한다.
+export const IconOnly: Story = {
+  args: {
+    children: <SearchIcon size={16} />,
+    variant: 'ghost',
+    color: 'primary',
+    'aria-label': '검색',
+  },
+};
+
+// 액션 진행 중 중복 클릭 방지 패턴: disabled + 진행 중 텍스트
+export const LoadingInProgress: Story = {
+  args: {
+    children: '저장 중...',
     variant: 'filled',
     color: 'primary',
     disabled: true,

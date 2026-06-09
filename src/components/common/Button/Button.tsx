@@ -12,6 +12,12 @@ interface ButtonProps extends Omit<
 const baseStyles =
   'inline-flex items-center justify-center rounded-sm border px-4 py-2 font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-gray-200';
 
+const ringColorStyles = {
+  primary: 'focus-visible:ring-primary-500',
+  danger: 'focus-visible:ring-red-500',
+  gray: 'focus-visible:ring-gray-400',
+};
+
 const variantStyles = {
   filled: {
     primary:
@@ -40,11 +46,12 @@ export function Button({
   ...props
 }: ButtonProps) {
   const style = variantStyles[variant][color];
+  const ringColor = ringColorStyles[color];
 
   return (
     <button
       type={type}
-      className={`${baseStyles} ${style} ${className ?? ''}`}
+      className={`${baseStyles} ${ringColor} ${style} ${className ?? ''}`}
       {...props}
     >
       {children}
