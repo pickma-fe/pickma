@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createServiceRoleClient } from '@/lib/supabase/service';
 
@@ -13,6 +13,10 @@ const NOW = new Date('2025-06-09T00:00:00.000Z').getTime();
 beforeEach(() => {
   vi.clearAllMocks();
   vi.spyOn(Date, 'now').mockReturnValue(NOW);
+});
+
+afterEach(() => {
+  vi.restoreAllMocks();
 });
 
 function daysAgo(days: number): string {
