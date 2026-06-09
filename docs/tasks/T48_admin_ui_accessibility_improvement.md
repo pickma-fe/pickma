@@ -55,4 +55,4 @@
   - 필요한 후속 개선이 별도 task 또는 확인 필요 항목으로 분리된다.
 
 - 확인 필요 사항:
-  - `src/app/(admin)/admin/orders/_components/adminOrderUtils.ts`의 `ORDER_STATUS_QUERY_VALUES`에 `cancelling` 상태가 누락되어 있다. T64 pre-commit hook 통과를 위해 `ORDER_STATUS_LABELS`에만 임시 추가한 상태이므로, 관리자 주문 필터 UI 점검 시 `ORDER_STATUS_QUERY_VALUES`와 `ORDER_STATUS_QUERY_LABELS`에도 `cancelling` 추가 여부를 결정해야 한다.
+  - `src/app/(admin)/admin/orders/_components/adminOrderUtils.ts`에 `cancelling` 상태가 불완전하게 반영되어 있다. `ORDER_STATUS_LABELS`(camelCase key, 화면 표시용)에는 추가됐지만, 필터 UI에서 사용하는 `ORDER_STATUS_QUERY_VALUES`(snake_case 배열)와 `ORDER_STATUS_QUERY_LABELS`(snake_case key, 필터 표시용)에는 `'cancelling'` 항목이 누락된 상태다. 관리자 주문 필터 UI 점검 시 두 필터 상수에 `cancelling` 추가 여부를 결정해야 한다.
