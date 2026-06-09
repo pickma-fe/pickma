@@ -10,7 +10,7 @@ interface ButtonProps extends Omit<
 }
 
 const baseStyles =
-  'inline-flex items-center justify-center rounded-sm border px-4 py-2 font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-gray-200';
+  'inline-flex items-center justify-center rounded-sm border px-4 py-2 font-medium transition focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:bg-gray-200';
 
 const ringColorStyles = {
   primary: 'focus-visible:ring-primary-500',
