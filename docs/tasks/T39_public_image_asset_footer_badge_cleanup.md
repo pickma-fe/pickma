@@ -59,3 +59,4 @@
   - Footer badge가 브랜드 지정 height와 원본 SVG 비율을 함께 고려한 크기로 렌더링된다.
   - Footer 전체가 desktop/mobile viewport에서 직접 확인되었고 badge 왜곡, 간격 깨짐, 줄바꿈 문제가 없다.
   - 관련 story 또는 화면에서 깨진 이미지가 없다.
+  - T64에서 FooterGroup 링크와 SupportSection tel/mailto 링크에 `focus-visible:ring-2 focus-visible:ring-offset-2 rounded-sm`이 추가됐다. 이미지/badge 수정 후 Footer 반응형 레이아웃을 재확인하고 focus ring 스타일과의 시각 충돌이 없는지 검증한다.

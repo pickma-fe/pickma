@@ -11,7 +11,10 @@ interface OrderPageProps {
   }>;
 }
 
-export default async function OrderPage({ params, searchParams }: OrderPageProps) {
+export default async function OrderPage({
+  params,
+  searchParams,
+}: OrderPageProps) {
   const { productId } = await params;
   const resolvedSearchParams = await searchParams;
 

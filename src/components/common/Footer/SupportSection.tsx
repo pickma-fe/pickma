@@ -9,7 +9,7 @@ export function SupportSection() {
         <div className="space-y-4">
           <a
             href="tel:15880000"
-            className="text-primary-600 flex items-center gap-3 text-base font-semibold lg:gap-2"
+            className="text-primary-600 flex items-center gap-3 rounded-sm text-base font-semibold focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none lg:gap-2"
           >
             <PhoneCall size={20} />
             1588-0000
@@ -19,7 +19,7 @@ export function SupportSection() {
         <div className="mt-2 space-y-6 border-t border-transparent pt-2 lg:mt-4 lg:space-y-4 lg:border-gray-200 lg:pt-4">
           <a
             href="mailto:support@pickma.kr"
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 rounded-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
           >
             <MailIcon size={16} />
             support@pickma.kr

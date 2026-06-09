@@ -55,7 +55,10 @@ export function FooterGroup() {
           <ul className="space-y-6 text-sm font-medium text-gray-500 lg:space-y-2">
             {section.items.map((item) => (
               <li key={item.label}>
-                <Link href={item.href} className="hover:text-gray-800">
+                <Link
+                  href={item.href}
+                  className="rounded-sm hover:text-gray-800 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+                >
                   {item.label}
                 </Link>
               </li>
