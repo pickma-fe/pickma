@@ -105,6 +105,19 @@ describe('runStorageCleanup', () => {
     expect(mockRemove).not.toHaveBeenCalled();
   });
 
+  it('DB에 없고 정확히 30일 파일은 삭제하지 않는다', async () => {
+    const { mockRemove } = makeClient({
+      listResponses: [
+        [{ name: 'file.pdf', id: 'file-id', created_at: daysAgo(30) }],
+      ],
+    });
+
+    const result = await runStorageCleanup();
+
+    expect(result.deletedCount).toBe(0);
+    expect(mockRemove).not.toHaveBeenCalled();
+  });
+
   it('DB에 없고 31일 파일은 삭제한다', async () => {
     const { mockRemove } = makeClient({
       listResponses: [
