@@ -8,7 +8,7 @@ import type { BusinessInfoData } from '@/types/store';
 import { sellerOnboardingApi } from '@/api/seller/onboarding/sellerOnboardingApi';
 import { useCreateSellerApplication } from '@/hooks/seller/applications/useCreateSellerApplication';
 
-import type { AuthStepState } from '../_components/types';
+import type { AuthStepState } from './types';
 
 // TODO(T29): API 확장 후 신청 데이터(businessInfo, termsAgreed, documentFiles) 복원 필요
 // 현재는 applicationStatus만 반환하므로 페이지 이동 후 로컬 state 초기화 불가

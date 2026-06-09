@@ -1,4 +1,4 @@
-import { OrderDetailContent } from './_components/OrderDetailContent';
+import { OrderDetailContent } from '@/components/seller/orders/OrderDetailContent';
 
 interface Props {
   params: Promise<{ id: string }>;

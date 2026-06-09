@@ -24,7 +24,7 @@ import { OrderTable } from './OrderTable';
 import type {
   SellerOrderActionStatus,
   SellerOrderDisplayStatus,
-} from '../_lib/sellerOrderTypes';
+} from './sellerOrderTypes';
 
 type SellerOrderFilterStatus = SellerOrderDisplayStatus | '전체';
 

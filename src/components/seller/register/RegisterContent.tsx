@@ -16,8 +16,8 @@ import { StoreInfoStep } from './StoreInfoStep';
 import { StoreStepList } from './StoreStepList';
 import { TermsStep } from './TermsStep';
 import type { ModalType } from './types';
-import { useSellerAuth } from '../_hooks/useSellerAuth';
-import { useStoreRegister } from '../_hooks/useStoreRegister';
+import { useSellerAuth } from './useSellerAuth';
+import { useStoreRegister } from './useStoreRegister';
 
 export function RegisterContent() {
   const [activeModal, setActiveModal] = useState<ModalType>(null);

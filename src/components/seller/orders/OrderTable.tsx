@@ -10,7 +10,7 @@ import { Pagination } from '@/components/common/Pagination/Pagination';
 import type {
   SellerOrderActionStatus,
   SellerOrderDisplayStatus,
-} from '../_lib/sellerOrderTypes';
+} from './sellerOrderTypes';
 
 type SellerOrderListItem = Omit<Order, 'items' | 'payment'>;
 

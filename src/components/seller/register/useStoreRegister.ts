@@ -5,7 +5,7 @@ import { useState } from 'react';
 import type { StoreInfoData } from '@/types/store';
 import { useCreateStore } from '@/hooks/stores/useCreateStore';
 
-import type { StoreStepState } from '../_components/types';
+import type { StoreStepState } from './types';
 
 const INITIAL_STORE_STATE: StoreStepState = {
   storeInfoSubmitted: false,
