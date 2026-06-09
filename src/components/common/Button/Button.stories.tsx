@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { SearchIcon } from 'lucide-react';
 import { fn } from 'storybook/test';
 
 import { Button } from './Button';
@@ -57,6 +58,24 @@ export const GhostGray: Story = {
 export const Disabled: Story = {
   args: {
     children: '버튼',
+    variant: 'filled',
+    color: 'primary',
+    disabled: true,
+  },
+};
+
+export const IconOnly: Story = {
+  args: {
+    children: <SearchIcon size={16} />,
+    variant: 'ghost',
+    color: 'primary',
+    'aria-label': '검색',
+  },
+};
+
+export const LoadingInProgress: Story = {
+  args: {
+    children: '저장 중...',
     variant: 'filled',
     color: 'primary',
     disabled: true,

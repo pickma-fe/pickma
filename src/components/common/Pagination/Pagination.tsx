@@ -66,7 +66,7 @@ export function Pagination({
         onClick={handlePrevClick}
         disabled={safeCurrentPage === 1 || safeTotalPages === 0}
         className={cn(
-          'flex h-9 w-9 items-center justify-center rounded-md border border-gray-200',
+          'flex h-9 w-9 items-center justify-center rounded-md border border-gray-200 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
           safeCurrentPage === 1 || safeTotalPages === 0
             ? 'cursor-default text-gray-300'
             : 'text-gray-500 hover:bg-gray-100'
@@ -83,7 +83,7 @@ export function Pagination({
           aria-current={safeCurrentPage === page ? 'page' : undefined}
           onClick={handlePageClick(page)}
           className={cn(
-            'flex h-9 w-9 items-center justify-center rounded-md text-sm',
+            'flex h-9 w-9 items-center justify-center rounded-md text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
             safeCurrentPage === page
               ? 'border-primary-500 text-primary-500 border font-semibold'
               : 'text-gray-500 hover:bg-gray-100'
@@ -99,7 +99,7 @@ export function Pagination({
         onClick={handleNextClick}
         disabled={safeCurrentPage === safeTotalPages || safeTotalPages === 0}
         className={cn(
-          'flex h-9 w-9 items-center justify-center rounded-md border border-gray-200',
+          'flex h-9 w-9 items-center justify-center rounded-md border border-gray-200 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
           safeCurrentPage === safeTotalPages || safeTotalPages === 0
             ? 'cursor-default text-gray-300'
             : 'text-gray-500 hover:bg-gray-100'

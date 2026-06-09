@@ -89,7 +89,7 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 | T61 | 판매자 신청 서류 문서 타입 정리 (신분증 제거 및 타입명 통일) | P1       | 완료    | 195          | T44                          | [T61_seller_id_card_removal.md](T61_seller_id_card_removal.md)                                                   |
 | T62 | payment_events 테이블 migration 및 이벤트 contract 구현      | P1       | 완료    | 226          | T11                          | [T62_payment_events_migration_contract.md](T62_payment_events_migration_contract.md)                             |
 | T63 | POST /api/payments/webhook Route Handler 구현                | P1       | 완료    | 231          | T62                          | [T63_payment_webhook_route_handler.md](T63_payment_webhook_route_handler.md)                                     |
-| T64 | 공통 컴포넌트 접근성 baseline 적용                           | P1       | 진행 전 | 확인 필요    | T45                          | [T64_shared_component_accessibility_baseline.md](T64_shared_component_accessibility_baseline.md)                 |
+| T64 | 공통 컴포넌트 접근성 baseline 적용                           | P1       | 완료    | 250          | T45                          | [T64_shared_component_accessibility_baseline.md](T64_shared_component_accessibility_baseline.md)                 |
 | T65 | 도메인 컴포넌트 폴더 구조 통일                               | P1       | 진행 전 | 확인 필요    | T64                          | [T65_domain_component_folder_unification.md](T65_domain_component_folder_unification.md)                         |
 | T66 | 모바일 앱 래핑 (Capacitor / PWA)                             | P3       | 진행 전 | 확인 필요    | T45                          | [T66_mobile_app_capacitor_pwa.md](T66_mobile_app_capacitor_pwa.md)                                               |
 | T67 | i18n 기본 설정 (next-intl, 한국어)                           | P2       | 진행 전 | 확인 필요    | T45                          | [T67_i18n_setup.md](T67_i18n_setup.md)                                                                           |
@@ -98,10 +98,10 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 
 완료 task는 제외하고, `진행 중`과 `진행 전` task만 기준으로 정렬한다.
 
-1. P1 기반/운영 차단 해소: T31, T39
+1. P1 기반/운영 차단 해소: T39
 2. P1/P2 독립 기반 작업: T43, T26, T25
 3. 기능 확장: T21, T22, T38, T59, T30, T23, T41
-4. 공통 컴포넌트 접근성 및 폴더 통일 (T46~T49 선행 필수): T64, T65
+4. 공통 컴포넌트 접근성 및 폴더 통일 (T46~T49 선행 필수): T65
 5. UI/UX 개선 묶음: T46, T47, T48, T49
 6. 독립 진행 (별도 일정): T66(모바일 앱 래핑), T67(i18n)
 7. 확장/운영 고도화: T32, T33, T34, T35, T36, T37

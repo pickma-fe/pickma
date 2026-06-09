@@ -31,12 +31,12 @@ export function SocialLinks() {
                 href={href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center rounded-full border border-gray-200 p-2 text-gray-800"
+                className="inline-flex items-center justify-center rounded-full border border-gray-200 p-2 text-gray-800 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
               >
                 <span aria-hidden="true">
                   <Icon size={12} />
                 </span>
-                <span className="sr-only">{label}</span>
+                <span className="sr-only">{label} (새 탭에서 열림)</span>
               </a>
             )}
           </li>

@@ -87,3 +87,22 @@ export const SoftDark: Story = {
 export const RoundedMd: Story = {
   args: { children: '30%', variant: 'solid', color: 'danger', rounded: 'md' },
 };
+
+export const StatusBadge: Story = {
+  args: {
+    children: '준비 완료',
+    variant: 'soft',
+    color: 'success',
+    role: 'status',
+  },
+};
+
+export const ContextualBadge: Story = {
+  args: {
+    children: '30%',
+    variant: 'solid',
+    color: 'danger',
+    role: 'img',
+    'aria-label': '30% 할인',
+  },
+};

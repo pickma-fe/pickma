@@ -72,7 +72,7 @@ export function Modal({
               type="button"
               onClick={onClose}
               aria-label="닫기"
-              className="text-gray-400 hover:text-gray-500"
+              className="rounded-sm text-gray-400 hover:text-gray-500 focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2 focus-visible:outline-none"
             >
               <X className="h-5 w-5" />
             </button>
