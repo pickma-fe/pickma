@@ -38,7 +38,6 @@ reviews:
         - 공유 지침에는 팀 공통 규칙만 두고, 로컬 전용 명령 금지는 AGENTS.override.md, CLAUDE.local.md, .claude/settings.local.json 같은 ignored 파일로 분리하는가.
         - AGENTS.md와 CLAUDE.md는 간결한 entry point로 유지하고, 세부 규칙은 .codex/instructions 또는 .claude/rules로 분리하는가.
         - Codex와 Claude의 문서 포맷 차이를 존중하는가. Codex 스킬은 .agents/skills, Claude 스킬은 .claude/skills에 둔다.
-        - review-plan, team-pr-review는 Codex 전용 스킬로 유지하는가.
         - task 기반 임시 산출물은 temp/Txx-plan.md, temp/Txx-code-review.md, temp/Txx-checkpoint.md처럼 task ID를 파일명 맨 앞에 두는가.
         - update-phase 같은 phase 중심 workflow를 되살리지 않았는가.
 
@@ -58,7 +57,6 @@ reviews:
       instructions: |
         ## Codex skill 검토 기준
         - .agents/skills는 Codex 스킬로 유지하는가.
-        - review-plan, team-pr-review는 Codex 전용 스킬로 유지하는가.
         - task 기반 임시 산출물은 temp/Txx-plan.md, temp/Txx-code-review.md, temp/Txx-checkpoint.md처럼 task ID를 파일명 맨 앞에 두는가.
         - update-phase 같은 phase 중심 workflow를 되살리지 않았는가.
 
@@ -66,7 +64,6 @@ reviews:
       instructions: |
         ## Claude harness 검토 기준
         - .claude/rules는 path-scoped rule, .claude/skills는 Claude 전용 skill로 분리하는가.
-        - review-plan, team-pr-review를 Claude 스킬로 추가하지 않는가.
         - task 기반 임시 산출물은 temp/Txx-plan.md, temp/Txx-code-review.md, temp/Txx-checkpoint.md처럼 task ID를 파일명 맨 앞에 두는가.
         - update-phase 같은 phase 중심 workflow를 되살리지 않았는가.
 
