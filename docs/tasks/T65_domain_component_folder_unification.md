@@ -50,3 +50,13 @@
   - 이동 후 TypeScript 검사와 lint가 통과한다.
   - 이동 대상 화면이 desktop/tablet/mobile에서 정상 렌더링됨을 수동 확인한다.
   - T46~T49 task가 이 task를 선행 조건으로 참조한다.
+
+  - 구현 결과:
+  - `src/app/(seller)/**` 내 컴포넌트 → `src/components/seller/` 이동 완료
+  - `src/app/(admin)/**` 내 컴포넌트 → `src/components/admin/` 이동 완료
+  - `src/app/payment/success/PaymentSuccessClient.tsx` → `src/components/payment/` 이동 완료
+  - 영향받는 모든 import 경로 수정 완료
+  - `src/app/(admin)/**`, `src/app/(seller)/**` 내 `_components/`, `_hooks/`, `_lib/` 폴더 제거 완료
+  - `npx tsc --noEmit` 검증 통과 (오류 없음)
+  - `npx eslint src --ext .ts,.tsx` 검증 통과 (error 없음)
+  - 브라우저 수동 테스트: admin 및 seller 전체 경로 desktop/tablet/mobile viewport 정상 렌더링 확인
