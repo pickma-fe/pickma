@@ -52,5 +52,5 @@
 - 구현 결과:
   - `src/app/api/cron/storage-cleanup/route.ts`: CRON_SECRET 인증 + service 호출 Route Handler
   - `src/app/api/cron/storage-cleanup/_lib/service.ts`: bucket 재귀 탐색, DB 비교, 30일 초과 orphan 삭제
-  - `src/app/api/cron/storage-cleanup/route.test.ts`, `_lib/service.test.ts`: 14개 unit test 통과
+  - `src/app/api/cron/storage-cleanup/route.test.ts`, `_lib/service.test.ts`: 16개 unit test 통과
   - `vercel.json` cron 등록(`0 18 * * *`)은 T43에서 완료, Route Handler와 연동 확인
