@@ -97,7 +97,7 @@ export const StatusBadge: Story = {
   },
 };
 
-export const DecorationBadge: Story = {
+export const ContextualBadge: Story = {
   args: {
     children: '30%',
     variant: 'solid',
