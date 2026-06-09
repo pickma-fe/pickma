@@ -64,7 +64,6 @@ export const Disabled: Story = {
   },
 };
 
-// 아이콘 전용 버튼은 반드시 aria-label로 accessible name을 제공해야 한다.
 export const IconOnly: Story = {
   args: {
     children: <SearchIcon size={16} />,
@@ -74,7 +73,6 @@ export const IconOnly: Story = {
   },
 };
 
-// 액션 진행 중 중복 클릭 방지 패턴: disabled + 진행 중 텍스트
 export const LoadingInProgress: Story = {
   args: {
     children: '저장 중...',
