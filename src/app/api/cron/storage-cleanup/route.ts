@@ -5,6 +5,8 @@ import { fail, routeError, success } from '@/app/api/_lib/response';
 
 import { runStorageCleanup } from './_lib/service';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest): Promise<Response> {
   const secret = process.env.CRON_SECRET;
   if (!secret) {
