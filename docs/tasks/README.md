@@ -66,7 +66,7 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 | T38 | 판매자 랜딩/온보딩 CTA 정리                                  | P2       | 완료    | 244          | T10                          | [T38_seller_landing_onboarding_cta.md](T38_seller_landing_onboarding_cta.md)                                     |
 | T39 | public 이미지 자산 구조 및 Footer badge 크기 정리            | P1       | 진행 전 | 확인 필요    | T18                          | [T39_public_image_asset_footer_badge_cleanup.md](T39_public_image_asset_footer_badge_cleanup.md)                 |
 | T40 | Storage orphan cleanup API 및 hook 통합                      | P1       | 완료    | 235          | T06                          | [T40_storage_orphan_cleanup_api_hook.md](T40_storage_orphan_cleanup_api_hook.md)                                 |
-| T41 | Storage lifecycle 주기적 orphan scanner                      | P2       | 진행 전 | 확인 필요    | T40, T43                     | [T41_storage_lifecycle_cron.md](T41_storage_lifecycle_cron.md)                                                   |
+| T41 | Storage lifecycle 주기적 orphan scanner                      | P2       | 완료    | #256         | T40, T43                     | [T41_storage_lifecycle_cron.md](T41_storage_lifecycle_cron.md)                                                   |
 | T42 | 법적 고지 페이지 및 동의 흐름 구현                           | P1       | 완료    | 204          | T44, T61                     | [T42_legal_compliance_pages.md](T42_legal_compliance_pages.md)                                                   |
 | T43 | Vercel 배포 설정 및 Cron 환경 구성                           | P2       | 완료    | 254          | T24                          | [T43_vercel_deployment_config.md](T43_vercel_deployment_config.md)                                               |
 | T44 | 판매자 신분증 원본 처리 및 KYC 보관 정책 결정                | P0       | 완료    | 191          | T06                          | [T44_seller_id_document_kyc_policy.md](T44_seller_id_document_kyc_policy.md)                                     |
@@ -100,7 +100,7 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 
 1. P1 기반/운영 차단 해소: T39
 2. P1/P2 독립 기반 작업: T26, T25
-3. 기능 확장: T21, T22, T59, T30, T23, T41
+3. 기능 확장: T21, T22, T59, T30, T23
 4. 공통 컴포넌트 접근성 및 폴더 통일 (T46~T49 선행 필수): T64, T65
 5. UI/UX 개선 묶음: T46, T47, T48, T49
 6. 독립 진행 (별도 일정): T66(모바일 앱 래핑), T67(i18n)
