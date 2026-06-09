@@ -34,6 +34,8 @@ interface BadgeProps {
     | 'dark';
   rounded?: 'full' | 'md';
   className?: string;
+  role?: 'status' | 'img';
+  'aria-label'?: string;
 }
 
 const baseStyles = 'inline-flex items-center px-2 py-0.5 text-xs font-semibold';
@@ -71,11 +73,15 @@ export function Badge({
   color = 'primary',
   rounded = 'full',
   className = '',
+  role,
+  'aria-label': ariaLabel,
   ...props
 }: BadgeProps) {
   return (
     <span
       className={`${baseStyles} ${variantStyles[variant][color]} ${roundedStyles[rounded]} ${className}`}
+      role={role}
+      aria-label={ariaLabel}
       {...props}
     >
       {children}
