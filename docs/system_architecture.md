@@ -809,40 +809,40 @@ Branch protection은 `dev` 대상 PR에서 `CI / Lint, typecheck, and test` 통�
 
 ### 16.4 P0/P1 API owner scope 테스트 커버리지
 
-| API                                                          | 우선순위 | 필요 scope               | 현재 테스트 | T07 조치               | 후속 task               |
-| ------------------------------------------------------------ | -------- | ------------------------ | ----------- | ---------------------- | ----------------------- |
-| `GET /api/admin/sellers/pending`                             | P0       | admin                    | 없음        | 추가                   | —                       |
-| `POST /api/admin/sellers/[applicationId]/approve`            | P0       | admin                    | 없음        | 추가                   | —                       |
-| `POST /api/admin/sellers/[applicationId]/reject`             | P0       | admin                    | 없음        | 추가                   | —                       |
-| `POST /api/admin/seller-application-documents/[id]/read-url` | P0       | admin                    | 없음        | 추가                   | —                       |
-| `GET /api/admin/stores`                                      | P0       | admin                    | 추가        | 완료                   | —                       |
-| `GET /api/admin/dashboard/stats`                             | P1       | admin                    | 추가        | 완료                   | —                       |
-| `POST /api/seller-applications`                              | P0       | activeUser + eligibility | 없음        | 추가                   | —                       |
-| `GET /api/seller/onboarding-status`                          | P0       | activeUser               | 없음        | 추가                   | —                       |
-| `GET /api/users/me`                                          | P0       | activeUser               | 없음        | 추가                   | —                       |
-| `POST /api/stores`                                           | P0       | seller                   | 있음        | 기존 확인              | —                       |
-| `GET /api/stores/me`                                         | P0       | seller                   | 있음        | 기존 확인              | —                       |
-| `GET /api/seller/products`                                   | P0       | seller                   | 있음        | 기존 확인              | —                       |
-| `POST /api/seller/products`                                  | P0       | seller                   | 있음        | 기존 확인              | —                       |
-| `PATCH /api/seller/products/[productId]`                     | P0       | seller                   | 있음        | 기존 확인              | —                       |
-| `DELETE /api/seller/products/[productId]`                    | P0       | seller                   | 있음        | 기존 확인              | —                       |
-| `GET /api/seller/orders`                                     | P0       | sellerStore              | 있음        | 기존 확인              | —                       |
-| `GET /api/seller/orders/[orderId]`                           | P0       | sellerStore              | 있음        | 기존 확인              | —                       |
-| `PATCH /api/seller/orders/[orderId]/accept`                  | P0       | sellerStore              | 있음        | 기존 확인              | —                       |
-| `PATCH /api/seller/orders/[orderId]/ready`                   | P0       | sellerStore              | 있음        | 기존 확인              | —                       |
-| `PATCH /api/seller/orders/[orderId]/complete`                | P0       | sellerStore              | 있음        | 기존 확인              | —                       |
-| `GET /api/orders`                                            | P0       | activeUser               | 있음        | 기존 확인              | —                       |
-| `POST /api/orders`                                           | P0       | activeUser               | 있음        | 기존 확인              | —                       |
-| `GET /api/orders/[orderId]`                                  | P0       | owner                    | 있음        | 기존 확인              | —                       |
-| `POST /api/payments/prepare`                                 | P0       | activeUser               | 있음        | 기존 확인              | —                       |
-| `POST /api/payments/confirm`                                 | P0       | activeUser               | 있음        | 기존 확인              | —                       |
-| `POST /api/files/upload-url`                                 | P0       | purpose별                | 없음        | 추가                   | T16 (purpose 권한 강화) |
-| `GET /api/products/[productId]`                              | P0       | 없음 (public)            | 있음        | 기존 확인              | —                       |
-| `GET /api/stores`                                            | P1       | 없음 (public)            | 있음        | 기존 확인              | —                       |
-| `PATCH /api/users/me`                                        | P1       | activeUser               | 없음        | 추가                   | —                       |
-| `DELETE /api/users/me`                                       | P1       | activeUser               | 없음        | 추가                   | —                       |
-| `PATCH /api/stores/me`                                       | P1       | seller                   | 있음        | 기존 확인              | —                       |
-| `PATCH /api/orders/[orderId]/cancel`                         | P1       | activeUser (자기 주문)   | 없음        | 구현됨 (T31)           | —                       |
-| `POST /api/payments/[paymentId]/cancel`                      | P1       | admin                    | 없음        | 구현됨 (T31)           | —                       |
-| `PATCH /api/seller/orders/[orderId]/no-show`                 | P1       | sellerStore              | 없음        | 구현됨, 테스트 미추가  | T52                     |
-| `PATCH /api/seller/products/[productId]/stock`               | P1       | sellerStore              | 없음        | 구현됨                 | T28                     |
+| API                                                          | 우선순위 | 필요 scope               | 현재 테스트 | T07 조치              | 후속 task               |
+| ------------------------------------------------------------ | -------- | ------------------------ | ----------- | --------------------- | ----------------------- |
+| `GET /api/admin/sellers/pending`                             | P0       | admin                    | 없음        | 추가                  | —                       |
+| `POST /api/admin/sellers/[applicationId]/approve`            | P0       | admin                    | 없음        | 추가                  | —                       |
+| `POST /api/admin/sellers/[applicationId]/reject`             | P0       | admin                    | 없음        | 추가                  | —                       |
+| `POST /api/admin/seller-application-documents/[id]/read-url` | P0       | admin                    | 없음        | 추가                  | —                       |
+| `GET /api/admin/stores`                                      | P0       | admin                    | 추가        | 완료                  | —                       |
+| `GET /api/admin/dashboard/stats`                             | P1       | admin                    | 추가        | 완료                  | —                       |
+| `POST /api/seller-applications`                              | P0       | activeUser + eligibility | 없음        | 추가                  | —                       |
+| `GET /api/seller/onboarding-status`                          | P0       | activeUser               | 없음        | 추가                  | —                       |
+| `GET /api/users/me`                                          | P0       | activeUser               | 없음        | 추가                  | —                       |
+| `POST /api/stores`                                           | P0       | seller                   | 있음        | 기존 확인             | —                       |
+| `GET /api/stores/me`                                         | P0       | seller                   | 있음        | 기존 확인             | —                       |
+| `GET /api/seller/products`                                   | P0       | seller                   | 있음        | 기존 확인             | —                       |
+| `POST /api/seller/products`                                  | P0       | seller                   | 있음        | 기존 확인             | —                       |
+| `PATCH /api/seller/products/[productId]`                     | P0       | seller                   | 있음        | 기존 확인             | —                       |
+| `DELETE /api/seller/products/[productId]`                    | P0       | seller                   | 있음        | 기존 확인             | —                       |
+| `GET /api/seller/orders`                                     | P0       | sellerStore              | 있음        | 기존 확인             | —                       |
+| `GET /api/seller/orders/[orderId]`                           | P0       | sellerStore              | 있음        | 기존 확인             | —                       |
+| `PATCH /api/seller/orders/[orderId]/accept`                  | P0       | sellerStore              | 있음        | 기존 확인             | —                       |
+| `PATCH /api/seller/orders/[orderId]/ready`                   | P0       | sellerStore              | 있음        | 기존 확인             | —                       |
+| `PATCH /api/seller/orders/[orderId]/complete`                | P0       | sellerStore              | 있음        | 기존 확인             | —                       |
+| `GET /api/orders`                                            | P0       | activeUser               | 있음        | 기존 확인             | —                       |
+| `POST /api/orders`                                           | P0       | activeUser               | 있음        | 기존 확인             | —                       |
+| `GET /api/orders/[orderId]`                                  | P0       | owner                    | 있음        | 기존 확인             | —                       |
+| `POST /api/payments/prepare`                                 | P0       | activeUser               | 있음        | 기존 확인             | —                       |
+| `POST /api/payments/confirm`                                 | P0       | activeUser               | 있음        | 기존 확인             | —                       |
+| `POST /api/files/upload-url`                                 | P0       | purpose별                | 없음        | 추가                  | T16 (purpose 권한 강화) |
+| `GET /api/products/[productId]`                              | P0       | 없음 (public)            | 있음        | 기존 확인             | —                       |
+| `GET /api/stores`                                            | P1       | 없음 (public)            | 있음        | 기존 확인             | —                       |
+| `PATCH /api/users/me`                                        | P1       | activeUser               | 없음        | 추가                  | —                       |
+| `DELETE /api/users/me`                                       | P1       | activeUser               | 없음        | 추가                  | —                       |
+| `PATCH /api/stores/me`                                       | P1       | seller                   | 있음        | 기존 확인             | —                       |
+| `PATCH /api/orders/[orderId]/cancel`                         | P1       | activeUser (자기 주문)   | 없음        | 구현됨 (T31)          | —                       |
+| `POST /api/payments/[paymentId]/cancel`                      | P1       | admin                    | 없음        | 구현됨 (T31)          | —                       |
+| `PATCH /api/seller/orders/[orderId]/no-show`                 | P1       | sellerStore              | 없음        | 구현됨, 테스트 미추가 | T52                     |
+| `PATCH /api/seller/products/[productId]/stock`               | P1       | sellerStore              | 없음        | 구현됨                | T28                     |
