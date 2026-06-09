@@ -887,7 +887,16 @@ Route Handler(`/api/cron/storage-cleanup`)는 이 헤더를 검증한다:
 const cronSecret = process.env.CRON_SECRET;
 const auth = request.headers.get('Authorization');
 if (!cronSecret || auth !== `Bearer ${cronSecret}`) {
-  return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  return NextResponse.json(
+    {
+      statusCode: 401,
+      error: {
+        code: 'UNAUTHORIZED',
+        message: 'Unauthorized',
+      },
+    },
+    { status: 401 }
+  );
 }
 ```
 
