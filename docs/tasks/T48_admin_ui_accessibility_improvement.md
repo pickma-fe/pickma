@@ -53,3 +53,6 @@
   - 관리자 table/list의 loading/error/empty 상태가 일관된다.
   - desktop/tablet(768–1024px)/mobile(375–430px) viewport에서 주요 화면을 수동 검증한다.
   - 필요한 후속 개선이 별도 task 또는 확인 필요 항목으로 분리된다.
+
+- 확인 필요 사항:
+  - `src/app/(admin)/admin/orders/_components/adminOrderUtils.ts`의 `ORDER_STATUS_QUERY_VALUES`에 `cancelling` 상태가 누락되어 있다. T64 pre-commit hook 통과를 위해 `ORDER_STATUS_LABELS`에만 임시 추가한 상태이므로, 관리자 주문 필터 UI 점검 시 `ORDER_STATUS_QUERY_VALUES`와 `ORDER_STATUS_QUERY_LABELS`에도 `cancelling` 추가 여부를 결정해야 한다.
