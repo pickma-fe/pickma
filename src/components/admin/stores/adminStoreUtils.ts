@@ -1,4 +1,5 @@
 import type { OperationStatus, StoreStatus } from '@/types/store';
+import { formatDate } from '@/lib/format';
 
 export const STORE_STATUS_LABELS: Record<StoreStatus, string> = {
   active: '활성',
@@ -10,11 +11,4 @@ export const OPERATION_STATUS_LABELS: Record<OperationStatus, string> = {
   closed: '운영 중지',
 };
 
-export function formatAdminStoreDate(value: Date): string {
-  return new Intl.DateTimeFormat('ko-KR', {
-    timeZone: 'Asia/Seoul',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).format(value);
-}
+export { formatDate as formatAdminStoreDate };

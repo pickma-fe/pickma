@@ -5,9 +5,8 @@ import { useParams, useRouter } from 'next/navigation';
 
 import { useSellerProduct } from '@/hooks/seller/products/useSellerProduct';
 import { useUpdateSellerProduct } from '@/hooks/seller/products/useUpdateSellerProduct';
-
-import type { ProductEditFormData } from '../../_components/ProductEditForm';
-import { ProductEditForm } from '../../_components/ProductEditForm';
+import type { ProductEditFormData } from '@/components/seller/products/ProductEditForm';
+import { ProductEditForm } from '@/components/seller/products/ProductEditForm';
 
 export default function SellerProductEditPage() {
   const { id } = useParams<{ id: string }>();

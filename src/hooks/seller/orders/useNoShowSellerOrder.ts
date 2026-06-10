@@ -12,7 +12,7 @@ export function useNoShowSellerOrder() {
     mutationFn: (orderId) => sellerOrderApi.noShowOrder(orderId),
     onSuccess: () => {
       void queryClient.invalidateQueries({
-        queryKey: queryKeys.seller.orders.all(),
+        queryKey: queryKeys.sellers.orders.all(),
       });
     },
   });

@@ -1,8 +1,8 @@
 'use client';
 
 import type { User } from '@/types/user';
+import { AdminTable } from '@/components/admin/AdminTable';
 import { Badge } from '@/components/common/Badge/Badge';
-import { AdminTable } from '@/app/(admin)/admin/_components/AdminTable';
 
 import {
   formatAdminUserDate,

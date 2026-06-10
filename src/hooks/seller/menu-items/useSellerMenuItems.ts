@@ -9,7 +9,7 @@ import { sellerMenuItemApi } from '@/api/seller/menu-items/sellerMenuItemApi';
 
 export function useSellerMenuItems(params?: SellerMenuItemListParams) {
   return useQuery<MenuItem[]>({
-    queryKey: queryKeys.seller.menuItems.list(params ?? {}),
+    queryKey: queryKeys.sellers.menuItems.list(params ?? {}),
     queryFn: () => sellerMenuItemApi.getMenuItems(params),
   });
 }

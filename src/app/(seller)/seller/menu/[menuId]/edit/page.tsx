@@ -3,8 +3,7 @@
 import { use } from 'react';
 
 import { useSellerMenuItems } from '@/hooks/seller/menu-items/useSellerMenuItems';
-
-import { MenuForm } from '../../_components/MenuForm';
+import { MenuForm } from '@/components/seller/menu/MenuForm';
 
 interface MenuEditPageProps {
   params: Promise<{ menuId: string }>;

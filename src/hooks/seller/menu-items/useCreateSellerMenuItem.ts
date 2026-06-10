@@ -14,7 +14,7 @@ export function useCreateSellerMenuItem() {
     mutationFn: (body) => sellerMenuItemApi.createMenuItem(body),
     onSuccess: () => {
       void queryClient.invalidateQueries({
-        queryKey: queryKeys.seller.menuItems.all(),
+        queryKey: queryKeys.sellers.menuItems.all(),
       });
     },
   });

@@ -102,7 +102,7 @@ export function useCreateSellerApplication() {
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({
-        queryKey: queryKeys.seller.onboardingStatus(),
+        queryKey: queryKeys.sellers.onboardingStatus(),
       });
     },
   });

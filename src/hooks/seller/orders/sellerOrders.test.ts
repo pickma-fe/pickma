@@ -56,7 +56,7 @@ describe('useSellerOrders', () => {
     renderHook(() => useSellerOrders(), { wrapper });
 
     const queries = queryClient.getQueryCache().getAll();
-    expect(queries[0].queryKey).toEqual(queryKeys.seller.orders.list({}));
+    expect(queries[0].queryKey).toEqual(queryKeys.sellers.orders.list({}));
   });
 
   it('params를 queryKey와 queryFn에 반영한다', async () => {
@@ -73,7 +73,7 @@ describe('useSellerOrders', () => {
     renderHook(() => useSellerOrders(params), { wrapper });
 
     const queries = queryClient.getQueryCache().getAll();
-    expect(queries[0].queryKey).toEqual(queryKeys.seller.orders.list(params));
+    expect(queries[0].queryKey).toEqual(queryKeys.sellers.orders.list(params));
     await waitFor(() =>
       expect(sellerOrderApi.getOrders).toHaveBeenCalledWith(params)
     );
@@ -101,7 +101,7 @@ describe('useSellerOrder', () => {
 
     const queries = queryClient.getQueryCache().getAll();
     expect(queries[0].queryKey).toEqual(
-      queryKeys.seller.orders.detail(ORDER_ID)
+      queryKeys.sellers.orders.detail(ORDER_ID)
     );
     await waitFor(() =>
       expect(sellerOrderApi.getOrder).toHaveBeenCalledWith(ORDER_ID)
@@ -128,7 +128,7 @@ describe('useAcceptSellerOrder', () => {
     expect(sellerOrderApi.acceptOrder).toHaveBeenCalledWith(ORDER_ID);
     expect(invalidateSpy).toHaveBeenCalledTimes(1);
     expect(invalidateSpy).toHaveBeenCalledWith({
-      queryKey: queryKeys.seller.orders.all(),
+      queryKey: queryKeys.sellers.orders.all(),
     });
   });
 });
@@ -152,7 +152,7 @@ describe('useMarkSellerOrderReady', () => {
     expect(sellerOrderApi.markOrderReady).toHaveBeenCalledWith(ORDER_ID);
     expect(invalidateSpy).toHaveBeenCalledTimes(1);
     expect(invalidateSpy).toHaveBeenCalledWith({
-      queryKey: queryKeys.seller.orders.all(),
+      queryKey: queryKeys.sellers.orders.all(),
     });
   });
 });
@@ -176,7 +176,7 @@ describe('useCompleteSellerOrder', () => {
     expect(sellerOrderApi.completeOrder).toHaveBeenCalledWith(ORDER_ID);
     expect(invalidateSpy).toHaveBeenCalledTimes(1);
     expect(invalidateSpy).toHaveBeenCalledWith({
-      queryKey: queryKeys.seller.orders.all(),
+      queryKey: queryKeys.sellers.orders.all(),
     });
   });
 });

@@ -1,4 +1,4 @@
-import { AdminStoresPageContent } from './_components/AdminStoresPageContent';
+import { AdminStoresPageContent } from '@/components/admin/stores/AdminStoresPageContent';
 
 export default function AdminStoresPage() {
   return <AdminStoresPageContent />;

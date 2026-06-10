@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 
+import type { AuthStepState, ModalType } from '@/types/seller-register';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/common/Button/Button';
 
@@ -12,7 +13,6 @@ import {
   REVIEW_STATUS_TEXT,
 } from './constants';
 import { StatusBadge } from './StatusBadge';
-import type { AuthStepState, ModalType } from './types';
 import {
   getButtonColor,
   getButtonVariant,

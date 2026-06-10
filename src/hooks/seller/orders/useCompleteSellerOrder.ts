@@ -12,7 +12,7 @@ export function useCompleteSellerOrder() {
     mutationFn: (id) => sellerOrderApi.completeOrder(id),
     onSuccess: () => {
       void queryClient.invalidateQueries({
-        queryKey: queryKeys.seller.orders.all(),
+        queryKey: queryKeys.sellers.orders.all(),
       });
     },
   });

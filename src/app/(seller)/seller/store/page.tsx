@@ -1,4 +1,4 @@
-import { StoreInfoContent } from './_components/StoreInfoContent';
+import { StoreInfoContent } from '@/components/seller/store/StoreInfoContent';
 
 export default function SellerStorePage() {
   return <StoreInfoContent />;

@@ -8,7 +8,7 @@ import { sellerOrderApi } from '@/api/seller/orders/sellerOrderApi';
 
 export function useSellerOrder(id: string) {
   return useQuery<Order>({
-    queryKey: queryKeys.seller.orders.detail(id),
+    queryKey: queryKeys.sellers.orders.detail(id),
     queryFn: () => sellerOrderApi.getOrder(id),
     enabled: Boolean(id),
   });
