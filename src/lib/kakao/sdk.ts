@@ -35,18 +35,25 @@ export function loadKakaoMapsSDK(): Promise<void> {
   }
   sdkLoadingPromise = loadScript(
     `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${appKey}&libraries=services&autoload=false`
-  ).then(
-    () =>
-      new Promise<void>((resolve, reject) => {
-        const loaded = window as { kakao?: { maps?: { load?: unknown } } };
-        if (typeof loaded.kakao?.maps?.load !== 'function') {
-          reject(
-            new Error('Kakao Maps SDK 로드 실패: load 함수를 찾을 수 없습니다.')
-          );
-          return;
-        }
-        loaded.kakao.maps.load(resolve);
-      })
-  );
+  )
+    .then(
+      () =>
+        new Promise<void>((resolve, reject) => {
+          const loaded = window as { kakao?: { maps?: { load?: unknown } } };
+          if (typeof loaded.kakao?.maps?.load !== 'function') {
+            reject(
+              new Error(
+                'Kakao Maps SDK 로드 실패: load 함수를 찾을 수 없습니다.'
+              )
+            );
+            return;
+          }
+          loaded.kakao.maps.load(resolve);
+        })
+    )
+    .catch((error: unknown) => {
+      sdkLoadingPromise = null;
+      throw error;
+    });
   return sdkLoadingPromise;
 }
