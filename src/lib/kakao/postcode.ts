@@ -82,7 +82,8 @@ async function loadKakaoMaps(): Promise<void> {
 }
 
 export async function openPostcodeSearch(
-  onSelect: (info: AddressInfo) => void
+  onSelect: (info: AddressInfo) => void,
+  onError?: () => void
 ): Promise<void> {
   await loadScript(POSTCODE_SDK_URL);
   await loadKakaoMaps();
@@ -103,6 +104,8 @@ export async function openPostcodeSearch(
             latitude: parseFloat(first.y),
             longitude: parseFloat(first.x),
           });
+        } else {
+          onError?.();
         }
       });
     },

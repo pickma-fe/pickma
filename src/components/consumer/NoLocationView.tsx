@@ -1,6 +1,7 @@
 'use client';
 
 import { MapPinIcon } from 'lucide-react';
+import { useState } from 'react';
 
 import { openPostcodeSearch } from '@/lib/kakao/postcode';
 import type { UserLocation } from '@/hooks/consumer/useUserLocation';
@@ -11,14 +12,20 @@ interface NoLocationViewProps {
 }
 
 export function NoLocationView({ onLocationChange }: NoLocationViewProps) {
+  const [geocodeError, setGeocodeError] = useState(false);
+
   const handleSetLocation = async () => {
-    await openPostcodeSearch((info) => {
-      onLocationChange({
-        lat: info.latitude,
-        lng: info.longitude,
-        address: info.address,
-      });
-    });
+    setGeocodeError(false);
+    await openPostcodeSearch(
+      (info) => {
+        onLocationChange({
+          lat: info.latitude,
+          lng: info.longitude,
+          address: info.address,
+        });
+      },
+      () => setGeocodeError(true)
+    );
   };
 
   return (
@@ -33,6 +40,11 @@ export function NoLocationView({ onLocationChange }: NoLocationViewProps) {
         </p>
       </div>
       <Button onClick={() => void handleSetLocation()}>위치 설정하기</Button>
+      {geocodeError && (
+        <p className="text-sm text-red-500">
+          좌표를 가져오지 못했습니다. 다시 시도해 주세요.
+        </p>
+      )}
     </div>
   );
 }
