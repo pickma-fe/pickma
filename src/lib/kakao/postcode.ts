@@ -52,41 +52,14 @@ interface KakaoSDKWindow {
 const POSTCODE_SDK_URL =
   'https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js';
 
-function loadScript(url: string): Promise<void> {
-  return new Promise((resolve, reject) => {
-    if (document.querySelector(`script[src="${url}"]`)) {
-      resolve();
-      return;
-    }
-    const script = document.createElement('script');
-    script.src = url;
-    script.onload = () => resolve();
-    script.onerror = () => reject(new Error('스크립트 로드 실패'));
-    document.head.appendChild(script);
-  });
-}
-
-let kakaoMapsLoaded = false;
-
-async function loadKakaoMaps(): Promise<void> {
-  if (kakaoMapsLoaded) return;
-
-  const appKey = process.env.NEXT_PUBLIC_KAKAO_MAPS_APP_KEY;
-  await loadScript(
-    `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${appKey}&libraries=services&autoload=false`
-  );
-
-  const sdk = window as unknown as KakaoSDKWindow;
-  await new Promise<void>((resolve) => sdk.kakao.maps.load(resolve));
-  kakaoMapsLoaded = true;
-}
+import { loadKakaoMapsSDK, loadScript } from './sdk';
 
 export async function openPostcodeSearch(
   onSelect: (info: AddressInfo) => void,
   onError?: () => void
 ): Promise<void> {
   await loadScript(POSTCODE_SDK_URL);
-  await loadKakaoMaps();
+  await loadKakaoMapsSDK();
 
   const sdk = window as unknown as KakaoSDKWindow;
 

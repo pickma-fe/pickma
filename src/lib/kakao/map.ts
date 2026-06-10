@@ -31,38 +31,7 @@ interface KakaoSDKWindow {
 }
 
 export type { KakaoMapInstance, KakaoMarkerInstance };
-
-let sdkLoaded = false;
-
-function loadScript(url: string): Promise<void> {
-  return new Promise((resolve, reject) => {
-    if (document.querySelector(`script[src="${url}"]`)) {
-      resolve();
-      return;
-    }
-    const script = document.createElement('script');
-    script.src = url;
-    script.onload = () => resolve();
-    script.onerror = () => reject(new Error('Kakao Maps SDK 로드 실패'));
-    document.head.appendChild(script);
-  });
-}
-
-export async function loadKakaoMapsSDK(): Promise<void> {
-  const win = window as unknown as KakaoSDKWindow;
-  if (sdkLoaded || typeof win.kakao?.maps?.Map === 'function') {
-    sdkLoaded = true;
-    return;
-  }
-  const appKey = process.env.NEXT_PUBLIC_KAKAO_MAPS_APP_KEY;
-  await loadScript(
-    `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${appKey}&libraries=services&autoload=false`
-  );
-  await new Promise<void>((resolve) => {
-    (window as unknown as KakaoSDKWindow).kakao.maps.load(resolve);
-  });
-  sdkLoaded = true;
-}
+export { loadKakaoMapsSDK } from './sdk';
 
 export function getKakaoMaps(): KakaoMapsConstructors {
   return (window as unknown as KakaoSDKWindow).kakao.maps;
