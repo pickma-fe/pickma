@@ -35,8 +35,8 @@ async function cleanupPaths(paths: string[]): Promise<void> {
   if (paths.length === 0) return;
   try {
     await fileApi.deleteFiles(paths);
-  } catch (err) {
-    console.error('[useCreateSellerApplication] cleanup failed', err);
+  } catch {
+    // TODO: logger 추가 후 cleanup 실패 원본 로깅
   }
 }
 
