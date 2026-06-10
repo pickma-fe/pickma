@@ -37,12 +37,15 @@ export function loadKakaoMapsSDK(): Promise<void> {
     `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${appKey}&libraries=services&autoload=false`
   ).then(
     () =>
-      new Promise<void>((resolve) => {
-        (
-          window as unknown as {
-            kakao: { maps: { load: (cb: () => void) => void } };
-          }
-        ).kakao.maps.load(resolve);
+      new Promise<void>((resolve, reject) => {
+        const loaded = window as { kakao?: { maps?: { load?: unknown } } };
+        if (typeof loaded.kakao?.maps?.load !== 'function') {
+          reject(
+            new Error('Kakao Maps SDK 로드 실패: load 함수를 찾을 수 없습니다.')
+          );
+          return;
+        }
+        loaded.kakao.maps.load(resolve);
       })
   );
   return sdkLoadingPromise;
