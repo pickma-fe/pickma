@@ -10,13 +10,14 @@ export type ProductDiscountOption =
 export interface ProductListParams {
   page: number;
   pageSize: number;
-  region?: string;
+  userLat?: number;
+  userLng?: number;
   categoryId?: string;
   keyword?: string;
   minPrice?: number;
   maxPrice?: number;
   discountOption?: ProductDiscountOption;
-  sort?: 'endAt' | 'discountRate' | 'discountPrice';
+  sort?: 'endAt' | 'discountRate' | 'discountPrice' | 'distance';
   order?: 'asc' | 'desc';
   availableOnly?: boolean;
 }
@@ -44,6 +45,7 @@ export interface ProductListItemResponse {
   pickupEndTime: string;
   status: 'active' | 'closed';
   updatedAt: string;
+  distanceKm?: number;
 }
 
 export type ProductListResponse = PaginatedResult<ProductListItemResponse>;

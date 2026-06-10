@@ -5,23 +5,19 @@ import type {
   ProductListResponse,
 } from '@/contracts/product';
 
-import { mockProductDetailsMap, mockProductList } from './products';
+import { mockProductList } from './products';
 
 export function buildMockProductListResponse(
   params: ProductListParams,
   products: ProductListItemResponse[] = mockProductList.items
 ): ProductListResponse {
-  const { page, pageSize, region, categoryId, keyword } = params;
+  const { page, pageSize, categoryId, keyword } = params;
   const discountOption = params.discountOption ?? 'all';
   const from = (page - 1) * pageSize;
   const to = from + pageSize;
   const filteredProducts = products
     .filter((product) => product.status === 'active')
     .filter((product) => !params.availableOnly || isAvailableProduct(product))
-    .filter(
-      (product) =>
-        !region || mockProductDetailsMap[product.id]?.store.region === region
-    )
     .filter((product) => !categoryId || product.categoryId === categoryId)
     .filter(
       (product) =>

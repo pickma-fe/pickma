@@ -15,10 +15,14 @@ describe('productListSchema', () => {
     expect(result.data).toEqual({ page: 1, pageSize: 20 });
   });
 
-  it('region 필터를 허용한다', () => {
-    const result = productListSchema.safeParse({ region: '서울 마포구' });
+  it('userLat/userLng 파라미터를 허용한다', () => {
+    const result = productListSchema.safeParse({
+      userLat: '37.5654',
+      userLng: '126.9031',
+    });
     expect(result.success).toBe(true);
-    expect(result.data?.region).toBe('서울 마포구');
+    expect(result.data?.userLat).toBe(37.5654);
+    expect(result.data?.userLng).toBe(126.9031);
   });
 
   it('categoryId 파라미터를 허용한다', () => {

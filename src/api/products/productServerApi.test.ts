@@ -48,7 +48,6 @@ describe('productServerApi', () => {
     const result = await productServerApi.getProducts({
       page: 1,
       pageSize: 10,
-      region: '서울 마포구',
       availableOnly: true,
       sort: 'endAt',
       order: 'asc',
@@ -57,7 +56,6 @@ describe('productServerApi', () => {
     expect(serverApiClient.get).toHaveBeenCalledWith('/api/products', {
       page: 1,
       pageSize: 10,
-      region: '서울 마포구',
       availableOnly: true,
       sort: 'endAt',
       order: 'asc',

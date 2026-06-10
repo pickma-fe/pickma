@@ -481,14 +481,14 @@ Behavior:
 
 소비자 공개 상품 조회 API이다.
 
-| PRD ID    | 기능           | Method | API                          | Auth   | Priority |
-| --------- | -------------- | ------ | ---------------------------- | ------ | -------- |
-| C-PROD-01 | 상품 목록 조회 | GET    | `/api/products`              | public | P0       |
-| C-PROD-02 | 상품 상세 조회 | GET    | `/api/products/:productId`   | public | P0       |
-| C-PROD-03 | 지역 필터      | GET    | `/api/products?region=`      | public | P0       |
-| C-PROD-04 | 카테고리 필터  | GET    | `/api/products?categoryId=`  | public | P0       |
-| C-PROD-05 | 검색           | GET    | `/api/products?keyword=`     | public | P0       |
-| C-PROD-06 | 정렬           | GET    | `/api/products?sort=&order=` | public | P2       |
+| PRD ID    | 기능           | Method | API                                    | Auth   | Priority |
+| --------- | -------------- | ------ | -------------------------------------- | ------ | -------- |
+| C-PROD-01 | 상품 목록 조회 | GET    | `/api/products`                        | public | P0       |
+| C-PROD-02 | 상품 상세 조회 | GET    | `/api/products/:productId`             | public | P0       |
+| C-PROD-03 | 거리 기반 조회 | GET    | `/api/products?sort=distance&userLat=` | public | P0       |
+| C-PROD-04 | 카테고리 필터  | GET    | `/api/products?categoryId=`            | public | P0       |
+| C-PROD-05 | 검색           | GET    | `/api/products?keyword=`               | public | P0       |
+| C-PROD-06 | 정렬           | GET    | `/api/products?sort=&order=`           | public | P2       |
 
 ### 4.1 `GET /api/products`
 
@@ -498,15 +498,20 @@ Query:
 export interface ProductListParams {
   page: number;
   pageSize: number;
-  region?: string;
+  userLat?: number;
+  userLng?: number;
   categoryId?: string;
   keyword?: string;
-  sort?: 'endAt' | 'discountRate' | 'price' | 'createdAt';
+  minPrice?: number;
+  maxPrice?: number;
+  discountOption?: ProductDiscountOption;
+  sort?: 'endAt' | 'discountRate' | 'discountPrice' | 'distance';
   order?: 'asc' | 'desc';
+  availableOnly?: boolean;
 }
 ```
 
-기본 정렬은 `sort=endAt`, `order=asc`이다.
+기본 정렬은 `sort=endAt`, `order=asc`이다. `sort=distance`는 `userLat`/`userLng`가 필요하며, 두 값이 없으면 기본 쿼리로 폴백된다.
 
 Response:
 
@@ -535,15 +540,15 @@ export interface ProductListItemResponse {
   pickupStartTime: string;
   pickupEndTime: string;
   status: 'active' | 'closed';
+  updatedAt: string;
+  distanceKm?: number;
 }
 ```
 
 DB source:
 
-- `products`
-- `menu_items`
-- `stores`
-- `categories`
+- `sort=distance`: `get_products_near` RPC (Haversine 거리 계산, 3km 반경 고정)
+- 그 외: `products` + `menu_items` + `stores` + `categories` 직접 쿼리
 
 Mapping:
 
@@ -553,10 +558,11 @@ Mapping:
 - `isSoldOut = availableStock <= 0`
 - `isExpired = endAt <= now`
 - `displayStatus`는 `status`, `isSoldOut`, `isExpired` 기준으로 계산한다.
+- `distanceKm`은 `sort=distance`일 때만 반환된다 (RPC `distance_km` 컬럼).
 
 Behavior:
 
-- `region`은 `stores.region` 기준으로 필터링한다.
+- `sort=distance`이고 `userLat`/`userLng`가 있으면 `get_products_near` RPC를 호출해 3km 반경 내 가게의 상품을 거리순으로 반환한다. 좌표 없는 가게의 상품은 제외된다.
 - `categoryId`는 `products.category_id` 기준으로 필터링한다.
 - `keyword`는 상품명(`menu_items.name`) ILIKE 기준으로 필터링한다. 가게명(`stores.name`) 검색은 지원하지 않는다.
 - `sort` 기본값은 `endAt`, `order` 기본값은 `asc`이다.

@@ -38,6 +38,8 @@ const baseRow: ProductRow = {
     address_detail: '1층',
     region: '서울 마포구',
     image: null,
+    latitude: null,
+    longitude: null,
   },
 };
 

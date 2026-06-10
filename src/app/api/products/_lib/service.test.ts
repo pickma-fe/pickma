@@ -40,6 +40,8 @@ const baseRow: ProductRow = {
     address_detail: '1층',
     region: '서울 마포구',
     image: null,
+    latitude: null,
+    longitude: null,
   },
 };
 
@@ -125,35 +127,15 @@ describe('getProducts', () => {
     );
   });
 
-  it('region 파라미터가 있으면 stores.region 필터를 적용한다', async () => {
-    const supabase = buildSupabase({ data: [], error: null, count: 0 });
-
-    await getProducts(supabase, {
-      page: 1,
-      pageSize: 20,
-      region: '서울 마포구',
-    });
-
-    expect(supabase._chain.eq).toHaveBeenCalledWith(
-      'stores.region',
-      '서울 마포구'
-    );
-  });
-
-  it('region과 availableOnly를 함께 사용해도 DB 조회 결과를 유지한다', async () => {
+  it('availableOnly가 있으면 DB 조회 결과를 유지한다', async () => {
     const supabase = buildSupabase({ data: [baseRow], error: null, count: 1 });
 
     const result = await getProducts(supabase, {
       page: 1,
       pageSize: 20,
-      region: '서울 마포구',
       availableOnly: true,
     });
 
-    expect(supabase._chain.eq).toHaveBeenCalledWith(
-      'stores.region',
-      '서울 마포구'
-    );
     expect(result.items).toHaveLength(1);
     expect(result.items[0].id).toBe(baseRow.id);
   });

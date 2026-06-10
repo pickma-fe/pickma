@@ -106,7 +106,6 @@ export function SearchResultPageContent({
       page: currentPage,
       pageSize: CONSUMER_PRODUCTS_PER_PAGE,
       keyword: submittedKeyword || undefined,
-      region: selectedRegion,
       categoryId:
         selectedCategoryId === ALL_CATEGORY_ID ? undefined : selectedCategoryId,
       minPrice: selectedPriceRange.minPrice,

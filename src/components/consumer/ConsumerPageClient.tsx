@@ -94,7 +94,6 @@ export function ConsumerPageClient({
     {
       page: currentPage,
       pageSize: CONSUMER_PRODUCTS_PER_PAGE,
-      region: selectedRegion,
       categoryId:
         selectedCategoryId === ALL_CATEGORY_ID ? undefined : selectedCategoryId,
       discountOption:
