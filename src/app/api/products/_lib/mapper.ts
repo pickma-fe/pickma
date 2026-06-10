@@ -129,7 +129,12 @@ export function mapRpcProductRow(row: RpcProductRow): ProductListItemResponse {
   const availableStock = row.available_stock;
   const isSoldOut = availableStock <= 0;
   const isExpired = new Date(row.end_at) <= new Date();
-  const status = row.status;
+  const { status } = row;
+  if (status !== 'active' && status !== 'closed') {
+    throw new Error(
+      `RPC에서 유효하지 않은 product status가 반환됐습니다: ${status}`
+    );
+  }
 
   return {
     id: row.id,
