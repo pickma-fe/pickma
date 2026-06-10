@@ -118,6 +118,25 @@ describe('mapProductRow', () => {
       }).image
     ).toBe('/img/test.jpg');
   });
+
+  it('stores 좌표와 dist_km을 storeLat/storeLng/distanceKm으로 매핑한다', () => {
+    const row = {
+      ...baseRow,
+      dist_km: 1.23,
+      stores: { ...baseRow.stores, latitude: 37.55, longitude: 126.97 },
+    };
+    const result = mapProductRow(row);
+    expect(result.distanceKm).toBe(1.23);
+    expect(result.storeLat).toBe(37.55);
+    expect(result.storeLng).toBe(126.97);
+  });
+
+  it('stores 좌표와 dist_km이 null이면 storeLat/storeLng/distanceKm을 undefined로 반환한다', () => {
+    const result = mapProductRow(baseRow);
+    expect(result.distanceKm).toBeUndefined();
+    expect(result.storeLat).toBeUndefined();
+    expect(result.storeLng).toBeUndefined();
+  });
 });
 
 describe('mapProductDetailRow', () => {
