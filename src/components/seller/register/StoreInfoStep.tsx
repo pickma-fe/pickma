@@ -75,18 +75,25 @@ export function StoreInfoStep({
     };
 
   const handleAddressSearch = async () => {
-    await openPostcodeSearch((addressInfo) => {
-      setInfo((prev) => ({
+    try {
+      await openPostcodeSearch((addressInfo) => {
+        setInfo((prev) => ({
+          ...prev,
+          address: addressInfo.address,
+          region: addressInfo.region,
+          latitude: addressInfo.latitude,
+          longitude: addressInfo.longitude,
+        }));
+        if (errors.address) {
+          setErrors((prev) => ({ ...prev, address: undefined }));
+        }
+      });
+    } catch {
+      setErrors((prev) => ({
         ...prev,
-        address: addressInfo.address,
-        region: addressInfo.region,
-        latitude: addressInfo.latitude,
-        longitude: addressInfo.longitude,
+        address: '주소 검색 중 오류가 발생했습니다. 다시 시도해 주세요.',
       }));
-      if (errors.address) {
-        setErrors((prev) => ({ ...prev, address: undefined }));
-      }
-    });
+    }
   };
 
   const validate = (): boolean => {

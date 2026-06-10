@@ -48,16 +48,20 @@ export function StoreEditForm({
   const [error, setError] = useState<string | null>(null);
 
   const handleAddressSearch = async () => {
-    await openPostcodeSearch((info) => {
-      setFormData((prev) => ({
-        ...prev,
-        address: info.address,
-        region: info.region,
-        latitude: info.latitude,
-        longitude: info.longitude,
-      }));
-      setError(null);
-    });
+    try {
+      await openPostcodeSearch((info) => {
+        setFormData((prev) => ({
+          ...prev,
+          address: info.address,
+          region: info.region,
+          latitude: info.latitude,
+          longitude: info.longitude,
+        }));
+        setError(null);
+      });
+    } catch {
+      setError('주소 검색 중 오류가 발생했습니다. 다시 시도해 주세요.');
+    }
   };
 
   const handleChange = (field: keyof StoreEditData, value: string) => {
