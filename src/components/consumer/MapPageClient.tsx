@@ -31,13 +31,18 @@ export function MapPageClient() {
     if (location || geoAttempted.current || !navigator.geolocation) return;
 
     geoAttempted.current = true;
-    navigator.geolocation.getCurrentPosition((pos) => {
-      saveLocation({
-        lat: pos.coords.latitude,
-        lng: pos.coords.longitude,
-        address: '현재 위치',
-      });
-    });
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        saveLocation({
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude,
+          address: '현재 위치',
+        });
+      },
+      () => {
+        // TODO: logger 추가 후 위치 조회 실패 원본 로깅
+      }
+    );
   }, [location, saveLocation]);
 
   const { data: productList } = useProducts(
