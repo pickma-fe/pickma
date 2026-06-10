@@ -26,6 +26,13 @@ export function loadKakaoMapsSDK(): Promise<void> {
   }
 
   const appKey = process.env.NEXT_PUBLIC_KAKAO_MAPS_APP_KEY;
+  if (!appKey) {
+    return Promise.reject(
+      new Error(
+        'NEXT_PUBLIC_KAKAO_MAPS_APP_KEY 환경 변수가 설정되지 않았습니다.'
+      )
+    );
+  }
   sdkLoadingPromise = loadScript(
     `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${appKey}&libraries=services&autoload=false`
   ).then(
