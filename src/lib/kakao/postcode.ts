@@ -65,7 +65,11 @@ export async function openPostcodeSearch(
 
   new sdk.daum.Postcode({
     oncomplete(data) {
-      const address = data.roadAddress || data.address;
+      const address = (data.roadAddress || data.address).trim();
+      if (!address) {
+        onError?.();
+        return;
+      }
       const region = [data.sido, data.sigungu].filter(Boolean).join(' ');
       const geocoder = new sdk.kakao.maps.services.Geocoder();
       geocoder.addressSearch(address, (result, status) => {
