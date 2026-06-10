@@ -37,24 +37,24 @@ export const queryKeys = {
     detail: (id: string) => ['orders', 'detail', id] as const,
   },
 
-  seller: {
+  sellers: {
     orders: {
-      all: () => ['seller', 'orders'] as const,
-      lists: () => ['seller', 'orders', 'list'] as const,
-      list: (params: object) => ['seller', 'orders', 'list', params] as const,
-      details: () => ['seller', 'orders', 'detail'] as const,
-      detail: (id: string) => ['seller', 'orders', 'detail', id] as const,
+      all: () => ['sellers', 'orders'] as const,
+      lists: () => ['sellers', 'orders', 'list'] as const,
+      list: (params: object) => ['sellers', 'orders', 'list', params] as const,
+      details: () => ['sellers', 'orders', 'detail'] as const,
+      detail: (id: string) => ['sellers', 'orders', 'detail', id] as const,
     },
     menuItems: {
-      all: () => ['seller', 'menu-items'] as const,
-      list: (params: object) => ['seller', 'menu-items', params] as const,
+      all: () => ['sellers', 'menu-items'] as const,
+      list: (params: object) => ['sellers', 'menu-items', params] as const,
     },
-    onboardingStatus: () => ['seller', 'onboarding-status'] as const,
+    onboardingStatus: () => ['sellers', 'onboarding-status'] as const,
     application: {
-      my: () => ['seller', 'application', 'my'] as const,
+      my: () => ['sellers', 'application', 'my'] as const,
       documentSignedUrl: (documentId: string) =>
         [
-          'seller',
+          'sellers',
           'application',
           'document',
           documentId,

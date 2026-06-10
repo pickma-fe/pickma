@@ -1,4 +1,5 @@
 import type { ProductDisplayStatus, ProductStatus } from '@/types/product';
+import { formatDateTimeOrEmpty, formatNumber } from '@/lib/format';
 
 export const PRODUCT_STATUS_LABELS: Record<ProductStatus, string> = {
   active: '판매 중',
@@ -15,20 +16,7 @@ export const PRODUCT_DISPLAY_STATUS_LABELS: Record<
   closed: '판매 종료',
 };
 
-export function formatAdminProductDate(value: Date | undefined): string {
-  if (!value) return '-';
-
-  return new Intl.DateTimeFormat('ko-KR', {
-    timeZone: 'Asia/Seoul',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false,
-  }).format(value);
-}
-
-export function formatAdminProductPrice(value: number): string {
-  return new Intl.NumberFormat('ko-KR').format(value);
-}
+export {
+  formatDateTimeOrEmpty as formatAdminProductDate,
+  formatNumber as formatAdminProductPrice,
+};

@@ -22,7 +22,7 @@ export function useSellerOnboardingStatus(
   const { enabled = true, refetchInterval } = options;
 
   return useQuery<SellerOnboardingStatus>({
-    queryKey: queryKeys.seller.onboardingStatus(),
+    queryKey: queryKeys.sellers.onboardingStatus(),
     queryFn: () => sellerOnboardingApi.getSellerOnboardingStatus(),
     staleTime: 10 * 1000,
     enabled,

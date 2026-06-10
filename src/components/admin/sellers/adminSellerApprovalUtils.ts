@@ -1,4 +1,5 @@
 import type { SellerApplicationDocumentType } from '@/contracts/seller-application';
+import { formatDateTime } from '@/lib/format';
 
 export const SELLER_APPLICATION_DOCUMENT_LABELS: Record<
   SellerApplicationDocumentType,
@@ -9,14 +10,4 @@ export const SELLER_APPLICATION_DOCUMENT_LABELS: Record<
   bank_account: '통장 사본',
 };
 
-export function formatAdminDateTime(value: Date): string {
-  return new Intl.DateTimeFormat('ko-KR', {
-    timeZone: 'Asia/Seoul',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false,
-  }).format(value);
-}
+export { formatDateTime as formatAdminDateTime };

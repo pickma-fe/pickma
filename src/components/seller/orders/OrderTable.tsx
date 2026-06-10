@@ -3,14 +3,13 @@
 import { useRouter } from 'next/navigation';
 
 import type { Order } from '@/types/order';
-import { Badge } from '@/components/common/Badge/Badge';
-import { Button } from '@/components/common/Button/Button';
-import { Pagination } from '@/components/common/Pagination/Pagination';
-
 import type {
   SellerOrderActionStatus,
   SellerOrderDisplayStatus,
-} from './sellerOrderTypes';
+} from '@/types/seller-order';
+import { Badge } from '@/components/common/Badge/Badge';
+import { Button } from '@/components/common/Button/Button';
+import { Pagination } from '@/components/common/Pagination/Pagination';
 
 type SellerOrderListItem = Omit<Order, 'items' | 'payment'>;
 

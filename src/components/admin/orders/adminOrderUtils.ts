@@ -1,4 +1,5 @@
 import type { OrderStatus } from '@/types/order';
+import { formatDateTime, formatNumber } from '@/lib/format';
 
 export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
   paymentPending: '결제 대기',
@@ -42,18 +43,7 @@ export const ORDER_STATUS_QUERY_LABELS: Record<
   expired: '만료',
 };
 
-export function formatAdminOrderDate(value: Date): string {
-  return new Intl.DateTimeFormat('ko-KR', {
-    timeZone: 'Asia/Seoul',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false,
-  }).format(value);
-}
-
-export function formatAdminOrderAmount(value: number): string {
-  return new Intl.NumberFormat('ko-KR').format(value);
-}
+export {
+  formatDateTime as formatAdminOrderDate,
+  formatNumber as formatAdminOrderAmount,
+};

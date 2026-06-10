@@ -1,4 +1,5 @@
 import type { UserRole, UserStatus } from '@/types/user';
+import { formatDate } from '@/lib/format';
 
 export const USER_ROLE_LABELS: Record<UserRole, string> = {
   customer: '소비자',
@@ -12,11 +13,4 @@ export const USER_STATUS_LABELS: Record<UserStatus, string> = {
   deleted: '삭제',
 };
 
-export function formatAdminUserDate(value: Date): string {
-  return new Intl.DateTimeFormat('ko-KR', {
-    timeZone: 'Asia/Seoul',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).format(value);
-}
+export { formatDate as formatAdminUserDate };

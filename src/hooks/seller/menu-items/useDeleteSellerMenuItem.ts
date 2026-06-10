@@ -12,7 +12,7 @@ export function useDeleteSellerMenuItem() {
     mutationFn: (id) => sellerMenuItemApi.deleteMenuItem(id),
     onSuccess: () => {
       void queryClient.invalidateQueries({
-        queryKey: queryKeys.seller.menuItems.all(),
+        queryKey: queryKeys.sellers.menuItems.all(),
       });
       void queryClient.invalidateQueries({
         queryKey: queryKeys.products.sellerList(),

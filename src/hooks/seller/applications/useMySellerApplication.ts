@@ -8,7 +8,7 @@ import { sellerApplicationApi } from '@/api/seller-applications/sellerApplicatio
 
 export function useMySellerApplication() {
   return useQuery<SellerApplication>({
-    queryKey: queryKeys.seller.application.my(),
+    queryKey: queryKeys.sellers.application.my(),
     queryFn: () => sellerApplicationApi.getMyApplication(),
     staleTime: 5 * 60 * 1000,
     retry: false,

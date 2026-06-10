@@ -254,7 +254,7 @@ describe('useCreateSellerApplication', () => {
     });
 
     expect(invalidateSpy).toHaveBeenCalledWith({
-      queryKey: queryKeys.seller.onboardingStatus(),
+      queryKey: queryKeys.sellers.onboardingStatus(),
     });
   });
 });

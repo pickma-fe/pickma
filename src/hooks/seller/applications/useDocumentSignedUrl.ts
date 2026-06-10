@@ -15,7 +15,7 @@ export function useDocumentSignedUrl({
   enabled = true,
 }: UseDocumentSignedUrlOptions) {
   return useQuery<string>({
-    queryKey: queryKeys.seller.application.documentSignedUrl(documentId),
+    queryKey: queryKeys.sellers.application.documentSignedUrl(documentId),
     queryFn: () => sellerApplicationApi.getDocumentSignedUrl(documentId),
     enabled: Boolean(documentId) && enabled,
     staleTime: 4 * 60 * 1000, // signed URL 만료(5분)보다 1분 짧게

@@ -12,6 +12,10 @@ import {
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 
+import type {
+  SellerOrderActionStatus,
+  SellerOrderDisplayStatus,
+} from '@/types/seller-order';
 import type { SellerOrderListParams } from '@/contracts/order';
 import { useAcceptSellerOrder } from '@/hooks/seller/orders/useAcceptSellerOrder';
 import { useCompleteSellerOrder } from '@/hooks/seller/orders/useCompleteSellerOrder';
@@ -21,10 +25,6 @@ import { Section } from '@/components/common/Section/Section';
 
 import { OrderFilter } from './OrderFilter';
 import { OrderTable } from './OrderTable';
-import type {
-  SellerOrderActionStatus,
-  SellerOrderDisplayStatus,
-} from './sellerOrderTypes';
 
 type SellerOrderFilterStatus = SellerOrderDisplayStatus | '전체';
 
