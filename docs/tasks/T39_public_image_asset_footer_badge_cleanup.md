@@ -84,3 +84,4 @@
   - `src/mocks/admin.ts` - `store-bakery.jpg` → `stores/bakery.png`
   - `public/images/mock/stores/salad.jpg` 신규 추가 (`menu-salad.jpg` 복사)
 - Footer `BrandSection.tsx` App Store badge width `120` → `130` 수정 (원본 viewBox 비율 준수)
+- T64 focus ring 스타일과 Footer 이미지/배지 수정 후 시각 충돌 없음 확인 (desktop/mobile viewport 검증 완료)
