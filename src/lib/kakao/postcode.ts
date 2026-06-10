@@ -75,12 +75,13 @@ export async function openPostcodeSearch(
       geocoder.addressSearch(address, (result, status) => {
         if (status === sdk.kakao.maps.services.Status.OK && result.length > 0) {
           const first = result[0];
-          onSelect({
-            address,
-            region,
-            latitude: parseFloat(first.y),
-            longitude: parseFloat(first.x),
-          });
+          const latitude = parseFloat(first.y);
+          const longitude = parseFloat(first.x);
+          if (Number.isNaN(latitude) || Number.isNaN(longitude)) {
+            onError?.();
+            return;
+          }
+          onSelect({ address, region, latitude, longitude });
         } else {
           onError?.();
         }
