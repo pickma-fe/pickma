@@ -91,7 +91,9 @@ function compareProducts(
   const direction = getSortOrder(params) === 'asc' ? 1 : -1;
 
   if (sort === 'distance') {
-    return (a.distanceKm ?? Infinity) - (b.distanceKm ?? Infinity);
+    return (
+      ((a.distanceKm ?? Infinity) - (b.distanceKm ?? Infinity)) * direction
+    );
   }
 
   if (sort === 'discountRate') {
