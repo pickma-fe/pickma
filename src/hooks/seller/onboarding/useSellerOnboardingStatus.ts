@@ -9,7 +9,11 @@ import { sellerOnboardingApi } from '@/api/seller/onboarding/sellerOnboardingApi
 
 interface UseSellerOnboardingStatusOptions {
   enabled?: boolean;
-  refetchInterval?: UseQueryOptions<SellerOnboardingStatus>['refetchInterval'];
+  refetchInterval?: UseQueryOptions<
+    SellerOnboardingStatus,
+    Error,
+    SellerOnboardingStatus
+  >['refetchInterval'];
 }
 
 export function useSellerOnboardingStatus(
