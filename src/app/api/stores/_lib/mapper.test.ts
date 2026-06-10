@@ -78,6 +78,21 @@ describe('mapStoreRow', () => {
     expect(result.closeTime).toBe('21:00:00');
   });
 
+  it('latitude/longitude null은 undefined로 변환한다', () => {
+    const result = mapStoreRow(baseRow, false);
+    expect(result.latitude).toBeUndefined();
+    expect(result.longitude).toBeUndefined();
+  });
+
+  it('latitude/longitude 값이 있으면 그대로 반환한다', () => {
+    const result = mapStoreRow(
+      { ...baseRow, latitude: 37.5654, longitude: 126.9031 },
+      false
+    );
+    expect(result.latitude).toBe(37.5654);
+    expect(result.longitude).toBe(126.9031);
+  });
+
   it('canSell 파라미터를 DTO에 그대로 반영한다', () => {
     expect(mapStoreRow(baseRow, false).canSell).toBe(false);
     expect(mapStoreRow(baseRow, true).canSell).toBe(true);
