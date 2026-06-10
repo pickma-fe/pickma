@@ -3,27 +3,16 @@
 import { SearchIcon } from 'lucide-react';
 import type { FormEvent } from 'react';
 
-import { Dropdown, Input } from '@/components/common';
-
-type RegionItem = {
-  label: string;
-  value: string;
-};
+import { Input } from '@/components/common';
 
 type ConsumerHeaderSearchProps = {
-  regionItems: RegionItem[];
-  selectedRegion: string;
   keyword: string;
-  onRegionChange: (region: string) => void;
   onKeywordChange: (keyword: string) => void;
   onSearch: () => void;
 };
 
 export function ConsumerHeaderSearch({
-  regionItems,
-  selectedRegion,
   keyword,
-  onRegionChange,
   onKeywordChange,
   onSearch,
 }: ConsumerHeaderSearchProps) {
@@ -33,19 +22,7 @@ export function ConsumerHeaderSearch({
   };
 
   return (
-    <form
-      className="flex w-full max-w-120 min-w-0 items-center gap-2 lg:max-w-160 xl:max-w-220 xl:gap-4"
-      onSubmit={handleSubmit}
-    >
-      <div className="hidden shrink-0 xl:block">
-        <Dropdown
-          type="select"
-          value={selectedRegion}
-          onChange={onRegionChange}
-          items={regionItems}
-        />
-      </div>
-
+    <form className="flex w-full min-w-0 items-center" onSubmit={handleSubmit}>
       <div className="min-w-0 flex-1">
         <Input
           aria-label="상품 검색"

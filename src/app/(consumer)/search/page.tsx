@@ -4,7 +4,6 @@ interface SearchPageProps {
   searchParams: Promise<{
     q?: string;
     keyword?: string;
-    region?: string;
     categoryId?: string;
     page?: string;
     sort?: string;
@@ -64,7 +63,6 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     <SearchResultPageContent
       key={getSearchPageKey(resolvedSearchParams)}
       initialKeyword={getSearchKeyword(resolvedSearchParams)}
-      initialRegion={resolvedSearchParams.region}
       initialCategoryId={resolvedSearchParams.categoryId}
       initialPage={getSearchPage(resolvedSearchParams)}
       initialSortOption={resolvedSearchParams.sort}
