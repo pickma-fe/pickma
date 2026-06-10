@@ -89,8 +89,13 @@ export function StoreMapView({ location, products }: StoreMapViewProps) {
     }
   }, [mapReady, products]);
 
-  const storeProducts = selectedStoreId
-    ? products.filter((p) => p.storeId === selectedStoreId)
+  const validSelectedStoreId =
+    selectedStoreId && products.some((p) => p.storeId === selectedStoreId)
+      ? selectedStoreId
+      : null;
+
+  const storeProducts = validSelectedStoreId
+    ? products.filter((p) => p.storeId === validSelectedStoreId)
     : [];
 
   return (
@@ -107,7 +112,7 @@ export function StoreMapView({ location, products }: StoreMapViewProps) {
       )}
       <div ref={containerRef} className="h-full w-full" />
       <StoreProductBottomSheet
-        storeId={selectedStoreId}
+        storeId={validSelectedStoreId}
         products={storeProducts}
         onClose={() => setSelectedStoreId(null)}
       />
