@@ -90,6 +90,10 @@ function compareProducts(
   const sort = params.sort ?? 'endAt';
   const direction = getSortOrder(params) === 'asc' ? 1 : -1;
 
+  if (sort === 'distance') {
+    return (a.distanceKm ?? Infinity) - (b.distanceKm ?? Infinity);
+  }
+
   if (sort === 'discountRate') {
     return (a.discountRate - b.discountRate) * direction;
   }
