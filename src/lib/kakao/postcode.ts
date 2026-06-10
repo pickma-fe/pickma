@@ -58,34 +58,41 @@ export async function openPostcodeSearch(
   onSelect: (info: AddressInfo) => void,
   onError?: () => void
 ): Promise<void> {
-  await loadScript(POSTCODE_SDK_URL);
-  await loadKakaoMapsSDK();
+  try {
+    await loadScript(POSTCODE_SDK_URL);
+    await loadKakaoMapsSDK();
 
-  const sdk = window as unknown as KakaoSDKWindow;
+    const sdk = window as unknown as KakaoSDKWindow;
 
-  new sdk.daum.Postcode({
-    oncomplete(data) {
-      const address = (data.roadAddress || data.address).trim();
-      if (!address) {
-        onError?.();
-        return;
-      }
-      const region = [data.sido, data.sigungu].filter(Boolean).join(' ');
-      const geocoder = new sdk.kakao.maps.services.Geocoder();
-      geocoder.addressSearch(address, (result, status) => {
-        if (status === sdk.kakao.maps.services.Status.OK && result.length > 0) {
-          const first = result[0];
-          const latitude = parseFloat(first.y);
-          const longitude = parseFloat(first.x);
-          if (Number.isNaN(latitude) || Number.isNaN(longitude)) {
-            onError?.();
-            return;
-          }
-          onSelect({ address, region, latitude, longitude });
-        } else {
+    new sdk.daum.Postcode({
+      oncomplete(data) {
+        const address = (data.roadAddress || data.address).trim();
+        if (!address) {
           onError?.();
+          return;
         }
-      });
-    },
-  }).open();
+        const region = [data.sido, data.sigungu].filter(Boolean).join(' ');
+        const geocoder = new sdk.kakao.maps.services.Geocoder();
+        geocoder.addressSearch(address, (result, status) => {
+          if (
+            status === sdk.kakao.maps.services.Status.OK &&
+            result.length > 0
+          ) {
+            const first = result[0];
+            const latitude = parseFloat(first.y);
+            const longitude = parseFloat(first.x);
+            if (Number.isNaN(latitude) || Number.isNaN(longitude)) {
+              onError?.();
+              return;
+            }
+            onSelect({ address, region, latitude, longitude });
+          } else {
+            onError?.();
+          }
+        });
+      },
+    }).open();
+  } catch {
+    onError?.();
+  }
 }
