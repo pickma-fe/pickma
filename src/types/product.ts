@@ -40,6 +40,7 @@ export interface Product {
   isSoldOut: boolean;
   isExpired: boolean;
   displayStatus: ProductDisplayStatus;
+  distanceKm?: number;
   createdAt?: Date;
   updatedAt?: Date;
 }

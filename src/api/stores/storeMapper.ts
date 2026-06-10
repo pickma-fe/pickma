@@ -12,6 +12,8 @@ export function mapMyStore(dto: StoreResponse): MyStore {
     address: dto.address,
     addressDetail: dto.addressDetail,
     region: dto.region,
+    latitude: dto.latitude,
+    longitude: dto.longitude,
     image: dto.image,
     openTime: dto.openTime,
     closeTime: dto.closeTime,

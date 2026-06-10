@@ -40,6 +40,7 @@ export function mapProduct(dto: ProductListItemResponse): Product {
     isSoldOut: dto.isSoldOut,
     isExpired: dto.isExpired,
     displayStatus: toDisplayStatus(dto),
+    distanceKm: dto.distanceKm,
     updatedAt: new Date(dto.updatedAt),
   };
 }

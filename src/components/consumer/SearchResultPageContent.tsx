@@ -5,7 +5,6 @@ import { useMemo, useState } from 'react';
 
 import {
   CONSUMER_PRODUCTS_PER_PAGE,
-  CONSUMER_REGION_ITEMS,
   getProductSortQuery,
 } from '@/lib/consumerPageConfig';
 import {
@@ -62,9 +61,7 @@ export function SearchResultPageContent({
   const router = useRouter();
   const [keyword, setKeyword] = useState(initialKeyword);
   const [submittedKeyword, setSubmittedKeyword] = useState(initialKeyword);
-  const [selectedRegion, setSelectedRegion] = useState(
-    initialRegion || CONSUMER_REGION_ITEMS[0].value
-  );
+  const [selectedRegion, setSelectedRegion] = useState(initialRegion || '');
   const [currentPage, setCurrentPage] = useState(initialPage);
   const [selectedSortOption, setSelectedSortOption] =
     useState<ProductSortOptionId>(
@@ -111,7 +108,7 @@ export function SearchResultPageContent({
       minPrice: selectedPriceRange.minPrice,
       maxPrice: selectedPriceRange.maxPrice,
       sort: productSortQuery.sort,
-      order: productSortQuery.order,
+      order: 'order' in productSortQuery ? productSortQuery.order : undefined,
       availableOnly: true,
     },
     { enabled: hasKeyword }
@@ -224,7 +221,7 @@ export function SearchResultPageContent({
       <ConsumerHeader
         slot={
           <ConsumerHeaderSearch
-            regionItems={CONSUMER_REGION_ITEMS}
+            regionItems={[]}
             selectedRegion={selectedRegion}
             keyword={keyword}
             onRegionChange={handleRegionChange}

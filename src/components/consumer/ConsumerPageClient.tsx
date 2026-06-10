@@ -8,7 +8,6 @@ import type { PaginatedResult } from '@/types/common';
 import type { Product } from '@/types/product';
 import {
   CONSUMER_PRODUCTS_PER_PAGE,
-  CONSUMER_REGION_ITEMS,
   getProductSortQuery,
 } from '@/lib/consumerPageConfig';
 import {
@@ -52,9 +51,7 @@ export function ConsumerPageClient({
 }: ConsumerPageClientProps) {
   const router = useRouter();
   const [selectedCategoryId, setSelectedCategoryId] = useState(ALL_CATEGORY_ID);
-  const [selectedRegion, setSelectedRegion] = useState(
-    CONSUMER_REGION_ITEMS[0].value
-  );
+  const [selectedRegion, setSelectedRegion] = useState('');
   const [selectedSortOption, setSelectedSortOption] =
     useState<ProductSortOptionId>(DEFAULT_SORT_OPTION_ID);
   const [selectedDiscountOption, setSelectedDiscountOption] =
@@ -65,7 +62,6 @@ export function ConsumerPageClient({
   const shouldUseInitialProducts =
     currentPage === 1 &&
     selectedCategoryId === ALL_CATEGORY_ID &&
-    selectedRegion === CONSUMER_REGION_ITEMS[0].value &&
     selectedSortOption === DEFAULT_SORT_OPTION_ID &&
     selectedDiscountOption === DEFAULT_DISCOUNT_OPTION_ID;
   const { data: categories = [] } = useCategories({
@@ -101,7 +97,7 @@ export function ConsumerPageClient({
           ? undefined
           : selectedDiscountOption,
       sort: productSortQuery.sort,
-      order: productSortQuery.order,
+      order: 'order' in productSortQuery ? productSortQuery.order : undefined,
       availableOnly: true,
     },
     {
@@ -266,7 +262,7 @@ export function ConsumerPageClient({
       <ConsumerHeader
         slot={
           <ConsumerHeaderSearch
-            regionItems={CONSUMER_REGION_ITEMS}
+            regionItems={[]}
             selectedRegion={selectedRegion}
             keyword={keyword}
             onRegionChange={handleRegionChange}
