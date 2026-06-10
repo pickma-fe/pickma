@@ -119,6 +119,8 @@ export function mapProductRow(row: ProductRow): ProductListItemResponse {
     status: row.status,
     updatedAt: row.updated_at,
     distanceKm: row.dist_km ?? undefined,
+    storeLat: row.stores.latitude ?? undefined,
+    storeLng: row.stores.longitude ?? undefined,
   };
 }
 
@@ -152,6 +154,8 @@ export function mapRpcProductRow(row: RpcProductRow): ProductListItemResponse {
     status,
     updatedAt: row.updated_at,
     distanceKm: row.distance_km,
+    storeLat: row.store_lat,
+    storeLng: row.store_lng,
   };
 }
 

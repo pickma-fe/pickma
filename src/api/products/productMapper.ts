@@ -41,6 +41,8 @@ export function mapProduct(dto: ProductListItemResponse): Product {
     isExpired: dto.isExpired,
     displayStatus: toDisplayStatus(dto),
     distanceKm: dto.distanceKm,
+    storeLat: dto.storeLat,
+    storeLng: dto.storeLng,
     updatedAt: new Date(dto.updatedAt),
   };
 }

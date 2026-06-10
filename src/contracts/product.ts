@@ -46,6 +46,8 @@ export interface ProductListItemResponse {
   status: 'active' | 'closed';
   updatedAt: string;
   distanceKm?: number;
+  storeLat?: number;
+  storeLng?: number;
 }
 
 export type ProductListResponse = PaginatedResult<ProductListItemResponse>;

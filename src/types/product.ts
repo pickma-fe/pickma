@@ -41,6 +41,8 @@ export interface Product {
   isExpired: boolean;
   displayStatus: ProductDisplayStatus;
   distanceKm?: number;
+  storeLat?: number;
+  storeLng?: number;
   createdAt?: Date;
   updatedAt?: Date;
 }
