@@ -1,6 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
+import { useEffect, useRef } from 'react';
 
 import { useUserLocation } from '@/hooks/consumer/useUserLocation';
 import { useProducts } from '@/hooks/products/useProducts';
@@ -24,6 +25,20 @@ const MAP_PRODUCT_PAGE_SIZE = 50;
 
 export function MapPageClient() {
   const { location, saveLocation } = useUserLocation();
+  const geoAttempted = useRef(false);
+
+  useEffect(() => {
+    if (location || geoAttempted.current || !navigator.geolocation) return;
+
+    geoAttempted.current = true;
+    navigator.geolocation.getCurrentPosition((pos) => {
+      saveLocation({
+        lat: pos.coords.latitude,
+        lng: pos.coords.longitude,
+        address: '현재 위치',
+      });
+    });
+  }, [location, saveLocation]);
 
   const { data: productList } = useProducts(
     {
