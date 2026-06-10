@@ -31,6 +31,17 @@ function subscribe(callback: () => void): () => void {
   };
 }
 
+function isUserLocation(value: unknown): value is UserLocation {
+  if (typeof value !== 'object' || value === null) return false;
+  const obj = value as Record<string, unknown>;
+  return (
+    typeof obj.lat === 'number' &&
+    typeof obj.lng === 'number' &&
+    typeof obj.address === 'string' &&
+    typeof obj.savedAt === 'number'
+  );
+}
+
 function getSnapshot(): UserLocation | null {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -40,7 +51,13 @@ function getSnapshot(): UserLocation | null {
       cachedLocation = null;
       return null;
     }
-    cachedLocation = JSON.parse(raw) as UserLocation;
+    const parsed: unknown = JSON.parse(raw);
+    if (!isUserLocation(parsed)) {
+      cachedRaw = null;
+      cachedLocation = null;
+      return null;
+    }
+    cachedLocation = parsed;
     return cachedLocation;
   } catch {
     cachedRaw = null;
