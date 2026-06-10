@@ -12,6 +12,8 @@ export interface UserLocation {
 }
 
 const listeners = new Set<() => void>();
+let cachedRaw: string | null = undefined as unknown as string | null;
+let cachedLocation: UserLocation | null = null;
 
 function notify() {
   for (const listener of listeners) listener();
@@ -29,9 +31,17 @@ function subscribe(callback: () => void): () => void {
 function getSnapshot(): UserLocation | null {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return null;
-    return JSON.parse(raw) as UserLocation;
+    if (raw === cachedRaw) return cachedLocation;
+    cachedRaw = raw;
+    if (!raw) {
+      cachedLocation = null;
+      return null;
+    }
+    cachedLocation = JSON.parse(raw) as UserLocation;
+    return cachedLocation;
   } catch {
+    cachedRaw = null;
+    cachedLocation = null;
     return null;
   }
 }
