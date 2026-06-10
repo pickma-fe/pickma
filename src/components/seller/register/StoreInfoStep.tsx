@@ -75,8 +75,8 @@ export function StoreInfoStep({
     };
 
   const handleAddressSearch = async () => {
-    try {
-      await openPostcodeSearch((addressInfo) => {
+    await openPostcodeSearch(
+      (addressInfo) => {
         setInfo((prev) => ({
           ...prev,
           address: addressInfo.address,
@@ -87,13 +87,13 @@ export function StoreInfoStep({
         if (errors.address) {
           setErrors((prev) => ({ ...prev, address: undefined }));
         }
-      });
-    } catch {
-      setErrors((prev) => ({
-        ...prev,
-        address: '주소 검색 중 오류가 발생했습니다. 다시 시도해 주세요.',
-      }));
-    }
+      },
+      () =>
+        setErrors((prev) => ({
+          ...prev,
+          address: '주소 검색 중 오류가 발생했습니다. 다시 시도해 주세요.',
+        }))
+    );
   };
 
   const validate = (): boolean => {

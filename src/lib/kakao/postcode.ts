@@ -56,7 +56,7 @@ import { loadKakaoMapsSDK, loadScript } from './sdk';
 
 export async function openPostcodeSearch(
   onSelect: (info: AddressInfo) => void,
-  onError?: () => void
+  onError: () => void
 ): Promise<void> {
   try {
     await loadScript(POSTCODE_SDK_URL);
@@ -68,7 +68,7 @@ export async function openPostcodeSearch(
       oncomplete(data) {
         const address = (data.roadAddress || data.address).trim();
         if (!address) {
-          onError?.();
+          onError();
           return;
         }
         const region = [data.sido, data.sigungu].filter(Boolean).join(' ');
@@ -82,17 +82,17 @@ export async function openPostcodeSearch(
             const latitude = parseFloat(first.y);
             const longitude = parseFloat(first.x);
             if (Number.isNaN(latitude) || Number.isNaN(longitude)) {
-              onError?.();
+              onError();
               return;
             }
             onSelect({ address, region, latitude, longitude });
           } else {
-            onError?.();
+            onError();
           }
         });
       },
     }).open();
   } catch {
-    onError?.();
+    onError();
   }
 }
