@@ -12,7 +12,7 @@ export interface UserLocation {
 }
 
 const listeners = new Set<() => void>();
-let cachedRaw: string | null = undefined as unknown as string | null;
+let cachedRaw: string | null = null;
 let cachedLocation: UserLocation | null = null;
 
 function notify() {
