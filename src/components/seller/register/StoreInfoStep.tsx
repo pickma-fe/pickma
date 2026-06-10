@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { z } from 'zod';
 
 import type { StoreInfoData } from '@/types/store';
+import { openPostcodeSearch } from '@/lib/kakao/postcode';
 import { Button } from '@/components/common/Button/Button';
 import { Input } from '@/components/common/Input/Input';
 
@@ -73,6 +74,21 @@ export function StoreInfoStep({
       }
     };
 
+  const handleAddressSearch = async () => {
+    await openPostcodeSearch((addressInfo) => {
+      setInfo((prev) => ({
+        ...prev,
+        address: addressInfo.address,
+        region: addressInfo.region,
+        latitude: addressInfo.latitude,
+        longitude: addressInfo.longitude,
+      }));
+      if (errors.address) {
+        setErrors((prev) => ({ ...prev, address: undefined }));
+      }
+    });
+  };
+
   const validate = (): boolean => {
     const result = storeInfoSchema.safeParse(info);
 
@@ -116,7 +132,6 @@ export function StoreInfoStep({
     { key: 'storeName' as const, label: '가게명', required: true },
     { key: 'category' as const, label: '카테고리', required: true },
     { key: 'phone' as const, label: '가게 전화번호', required: true },
-    { key: 'address' as const, label: '가게 주소', required: true },
   ];
 
   if (isViewMode && !isEditing) {
@@ -133,6 +148,10 @@ export function StoreInfoStep({
               </dd>
             </div>
           ))}
+          <div className="flex flex-col gap-1">
+            <dt className="text-sm font-medium text-gray-500">가게 주소</dt>
+            <dd className="text-sm text-gray-900">{info.address || '-'}</dd>
+          </div>
           <div className="flex flex-col gap-1">
             <dt className="text-sm font-medium text-gray-500">가게 소개</dt>
             <dd className="text-sm text-gray-900">{info.description || '-'}</dd>
@@ -160,6 +179,27 @@ export function StoreInfoStep({
             error={errors[field.key]}
           />
         ))}
+        <div className="flex flex-col gap-1">
+          <span className="text-sm text-gray-500">가게 주소 *</span>
+          <div className="flex items-start gap-2">
+            <div className="flex-1">
+              <Input
+                value={info.address}
+                readOnly
+                placeholder="주소 검색 버튼을 눌러주세요"
+                error={errors.address}
+              />
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              color="gray"
+              onClick={() => void handleAddressSearch()}
+            >
+              주소 검색
+            </Button>
+          </div>
+        </div>
         <div className="flex flex-col gap-1">
           <label htmlFor="description" className="text-sm text-gray-500">
             가게 소개

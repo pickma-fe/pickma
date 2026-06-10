@@ -92,4 +92,7 @@ export interface StoreInfoData {
   phone: string;
   address: string;
   description: string;
+  region?: string;
+  latitude?: number;
+  longitude?: number;
 }
