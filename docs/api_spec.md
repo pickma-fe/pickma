@@ -542,6 +542,8 @@ export interface ProductListItemResponse {
   status: 'active' | 'closed';
   updatedAt: string;
   distanceKm?: number;
+  storeLat?: number;
+  storeLng?: number;
 }
 ```
 
@@ -559,6 +561,7 @@ Mapping:
 - `isExpired = endAt <= now`
 - `displayStatus`는 `status`, `isSoldOut`, `isExpired` 기준으로 계산한다.
 - `distanceKm`은 `sort=distance`일 때만 반환된다 (RPC `distance_km` 컬럼).
+- `storeLat`, `storeLng`는 `sort=distance`일 때만 반환된다 (RPC 결과의 store 좌표, 지도 마커 배치용).
 
 Behavior:
 
