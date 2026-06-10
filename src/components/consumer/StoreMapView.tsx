@@ -29,6 +29,7 @@ export function StoreMapView({ location, products }: StoreMapViewProps) {
   const mapRef = useRef<KakaoMapInstance | null>(null);
   const markersRef = useRef<StoreMarker[]>([]);
   const [mapReady, setMapReady] = useState(false);
+  const [mapError, setMapError] = useState(false);
   const [selectedStoreId, setSelectedStoreId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -36,14 +37,19 @@ export function StoreMapView({ location, products }: StoreMapViewProps) {
     let mounted = true;
 
     setMapReady(false);
-    void loadKakaoMapsSDK().then(() => {
-      if (!mounted || !containerRef.current) return;
-      mapRef.current = initKakaoMap(containerRef.current, {
-        lat: location.lat,
-        lng: location.lng,
+    setMapError(false);
+    void loadKakaoMapsSDK()
+      .then(() => {
+        if (!mounted || !containerRef.current) return;
+        mapRef.current = initKakaoMap(containerRef.current, {
+          lat: location.lat,
+          lng: location.lng,
+        });
+        setMapReady(true);
+      })
+      .catch(() => {
+        if (mounted) setMapError(true);
       });
-      setMapReady(true);
-    });
 
     return () => {
       mounted = false;
@@ -89,9 +95,14 @@ export function StoreMapView({ location, products }: StoreMapViewProps) {
 
   return (
     <div className="relative h-full w-full">
-      {!mapReady && (
+      {!mapReady && !mapError && (
         <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
           <p className="text-sm text-gray-500">지도를 불러오는 중...</p>
+        </div>
+      )}
+      {mapError && (
+        <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
+          <p className="text-sm text-gray-500">지도를 불러올 수 없습니다.</p>
         </div>
       )}
       <div ref={containerRef} className="h-full w-full" />
