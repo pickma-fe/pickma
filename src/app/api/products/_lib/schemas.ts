@@ -24,8 +24,12 @@ export const productListSchema = z
   .object({
     page: z.coerce.number().int().positive().default(1),
     pageSize: z.coerce.number().int().positive().max(100).default(20),
-    userLat: optionalFloatQuerySchema,
-    userLng: optionalFloatQuerySchema,
+    userLat: optionalFloatQuerySchema.pipe(
+      z.number().min(-90).max(90).optional()
+    ),
+    userLng: optionalFloatQuerySchema.pipe(
+      z.number().min(-180).max(180).optional()
+    ),
     categoryId: z.string().trim().min(1).optional(),
     keyword: z.string().trim().min(1).optional(),
     minPrice: optionalNumberQuerySchema.refine(
