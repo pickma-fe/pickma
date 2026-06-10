@@ -60,24 +60,26 @@
 
 ## 2.3 stores (가게)
 
-| 컬럼명             | 타입         | 제약조건                        | 설명                                    |
-| ------------------ | ------------ | ------------------------------- | --------------------------------------- |
-| `id`               | uuid         | PK                              | 가게 ID                                 |
-| `user_id`          | uuid         | FK → users.id, UNIQUE, NOT NULL | 소유자 ID                               |
-| `name`             | varchar(100) | NOT NULL                        | 가게명                                  |
-| `description`      | text         |                                 | 가게 소개                               |
-| `business_number`  | varchar(20)  | UNIQUE, NOT NULL                | 사업자등록번호                          |
-| `phone`            | varchar(20)  | NOT NULL                        | 연락처                                  |
-| `address`          | varchar(255) | NOT NULL                        | 주소                                    |
-| `address_detail`   | varchar(255) |                                 | 상세 주소                               |
-| `region`           | varchar(50)  | NOT NULL                        | 지역                                    |
-| `image`            | varchar(500) |                                 | 이미지                                  |
-| `open_time`        | time         |                                 | 영업 시작                               |
-| `close_time`       | time         |                                 | 영업 종료                               |
-| `status`           | enum         | NOT NULL, DEFAULT 'active'      | 관리자 승인 상태 (`active`\|`inactive`) |
-| `operation_status` | enum         | NOT NULL, DEFAULT 'open'        | 판매자 운영 상태 (`open`\|`closed`)     |
-| `created_at`       | timestamp    | NOT NULL, DEFAULT now()         | 생성일시                                |
-| `updated_at`       | timestamp    | NOT NULL, DEFAULT now()         | 수정일시                                |
+| 컬럼명             | 타입             | 제약조건                        | 설명                                          |
+| ------------------ | ---------------- | ------------------------------- | --------------------------------------------- |
+| `id`               | uuid             | PK                              | 가게 ID                                       |
+| `user_id`          | uuid             | FK → users.id, UNIQUE, NOT NULL | 소유자 ID                                     |
+| `name`             | varchar(100)     | NOT NULL                        | 가게명                                        |
+| `description`      | text             |                                 | 가게 소개                                     |
+| `business_number`  | varchar(20)      | UNIQUE, NOT NULL                | 사업자등록번호                                |
+| `phone`            | varchar(20)      | NOT NULL                        | 연락처                                        |
+| `address`          | varchar(255)     | NOT NULL                        | 주소                                          |
+| `address_detail`   | varchar(255)     |                                 | 상세 주소                                     |
+| `region`           | varchar(50)      | NOT NULL                        | 지역 (Daum Postcode 역지오코딩으로 자동 파생) |
+| `latitude`         | double precision |                                 | 위도 (WGS84, Daum Postcode y 값)              |
+| `longitude`        | double precision |                                 | 경도 (WGS84, Daum Postcode x 값)              |
+| `image`            | varchar(500)     |                                 | 이미지                                        |
+| `open_time`        | time             |                                 | 영업 시작                                     |
+| `close_time`       | time             |                                 | 영업 종료                                     |
+| `status`           | enum             | NOT NULL, DEFAULT 'active'      | 관리자 승인 상태 (`active`\|`inactive`)       |
+| `operation_status` | enum             | NOT NULL, DEFAULT 'open'        | 판매자 운영 상태 (`open`\|`closed`)           |
+| `created_at`       | timestamp        | NOT NULL, DEFAULT now()         | 생성일시                                      |
+| `updated_at`       | timestamp        | NOT NULL, DEFAULT now()         | 수정일시                                      |
 
 신규 설계에서는 가게 등록을 seller 승인 이후에만 허용하고, 새 가게는 `active` 상태로 생성한다. `operation_status`는 판매자가 당일 운영 여부를 직접 제어하는 필드이며, `inactive` 가게는 `operation_status` 변경 불가.
 
@@ -369,6 +371,7 @@
 
 - users(email)
 - stores(region, status)
+- stores(latitude, longitude) — 거리 기반 bounding box 필터용
 - products(store_id, status, end_at)
 - orders(user_id, store_id, created_at)
 - orders(store_id, pickup_service_date, store_order_sequence)

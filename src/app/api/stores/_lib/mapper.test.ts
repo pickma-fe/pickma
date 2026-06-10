@@ -16,6 +16,8 @@ const baseRow: StoresRow = {
   address: '서울시 마포구 월드컵북로 12',
   address_detail: null,
   region: '서울 마포구',
+  latitude: null,
+  longitude: null,
   image: null,
   open_time: null,
   close_time: null,

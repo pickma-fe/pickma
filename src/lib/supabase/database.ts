@@ -649,6 +649,8 @@ export type Database = {
           description: string | null;
           id: string;
           image: string | null;
+          latitude: number | null;
+          longitude: number | null;
           name: string;
           open_time: string | null;
           operation_status: Database['public']['Enums']['store_operation_status'];
@@ -667,6 +669,8 @@ export type Database = {
           description?: string | null;
           id?: string;
           image?: string | null;
+          latitude?: number | null;
+          longitude?: number | null;
           name: string;
           open_time?: string | null;
           operation_status?: Database['public']['Enums']['store_operation_status'];
@@ -685,6 +689,8 @@ export type Database = {
           description?: string | null;
           id?: string;
           image?: string | null;
+          latitude?: number | null;
+          longitude?: number | null;
           name?: string;
           open_time?: string | null;
           operation_status?: Database['public']['Enums']['store_operation_status'];
