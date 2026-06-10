@@ -2,6 +2,7 @@ import type {
   ProductDetailResponse,
   ProductListItemResponse,
 } from '@/contracts/product';
+import type { Database } from '@/lib/supabase/database';
 
 export type ProductRow = {
   id: string;
@@ -58,7 +59,7 @@ export type RpcProductRow = {
   end_at: string;
   pickup_start_time: string;
   pickup_end_time: string;
-  status: string;
+  status: Database['public']['Enums']['product_status'];
   updated_at: string;
   menu_item_name: string;
   menu_item_description: string | null;
@@ -128,7 +129,7 @@ export function mapRpcProductRow(row: RpcProductRow): ProductListItemResponse {
   const availableStock = row.available_stock;
   const isSoldOut = availableStock <= 0;
   const isExpired = new Date(row.end_at) <= new Date();
-  const status = row.status as 'active' | 'closed';
+  const status = row.status;
 
   return {
     id: row.id,

@@ -134,10 +134,10 @@ async function getProductsNear(
     p_radius_km: 3.0,
     p_page: params.page,
     p_page_size: params.pageSize,
-    p_category_id: params.categoryId ?? null,
-    p_keyword: params.keyword ?? null,
-    p_min_price: params.minPrice ?? null,
-    p_max_price: params.maxPrice ?? null,
+    p_category_id: params.categoryId ?? undefined,
+    p_keyword: params.keyword ?? undefined,
+    p_min_price: params.minPrice ?? undefined,
+    p_max_price: params.maxPrice ?? undefined,
     p_available_only: params.availableOnly ?? true,
   });
 

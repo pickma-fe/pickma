@@ -870,6 +870,57 @@ export type Database = {
         }[];
       };
       generate_order_number: { Args: never; Returns: string };
+      get_products_near: {
+        Args: {
+          p_available_only?: boolean;
+          p_category_id?: string;
+          p_keyword?: string;
+          p_max_price?: number;
+          p_min_price?: number;
+          p_page?: number;
+          p_page_size?: number;
+          p_radius_km?: number;
+          p_user_lat: number;
+          p_user_lng: number;
+        };
+        Returns: {
+          available_stock: number;
+          cat_id: string;
+          cat_name: string;
+          category_id: string;
+          discount_price: number;
+          discount_rate: number;
+          distance_km: number;
+          end_at: string;
+          id: string;
+          menu_item_description: string;
+          menu_item_id: string;
+          menu_item_image: string;
+          menu_item_name: string;
+          original_price: number;
+          pickup_end_time: string;
+          pickup_start_time: string;
+          reserved_stock: number;
+          status: Database['public']['Enums']['product_status'];
+          stock: number;
+          store_address: string;
+          store_address_detail: string;
+          store_description: string;
+          store_id: string;
+          store_image: string;
+          store_lat: number;
+          store_lng: number;
+          store_name: string;
+          store_phone: string;
+          store_region: string;
+          total_count: number;
+          updated_at: string;
+        }[];
+      };
+      haversine_km: {
+        Args: { lat1: number; lat2: number; lng1: number; lng2: number };
+        Returns: number;
+      };
       revert_order_cancel_claim: {
         Args: { p_order_id: string };
         Returns: {
@@ -883,62 +934,6 @@ export type Database = {
         }[];
       };
       sequence_to_pickup_number: { Args: { seq: number }; Returns: string };
-      haversine_km: {
-        Args: {
-          lat1: number;
-          lng1: number;
-          lat2: number;
-          lng2: number;
-        };
-        Returns: number;
-      };
-      get_products_near: {
-        Args: {
-          p_user_lat: number;
-          p_user_lng: number;
-          p_radius_km?: number;
-          p_page?: number;
-          p_page_size?: number;
-          p_category_id?: string | null;
-          p_keyword?: string | null;
-          p_min_price?: number | null;
-          p_max_price?: number | null;
-          p_available_only?: boolean;
-        };
-        Returns: {
-          id: string;
-          store_id: string;
-          menu_item_id: string;
-          category_id: string | null;
-          discount_price: number;
-          original_price: number;
-          discount_rate: number;
-          available_stock: number;
-          stock: number;
-          reserved_stock: number;
-          end_at: string;
-          pickup_start_time: string;
-          pickup_end_time: string;
-          status: string;
-          updated_at: string;
-          menu_item_name: string;
-          menu_item_description: string | null;
-          menu_item_image: string | null;
-          cat_id: string | null;
-          cat_name: string | null;
-          store_name: string;
-          store_description: string | null;
-          store_phone: string;
-          store_address: string;
-          store_address_detail: string | null;
-          store_region: string;
-          store_image: string | null;
-          store_lat: number;
-          store_lng: number;
-          distance_km: number;
-          total_count: number;
-        }[];
-      };
     };
     Enums: {
       menu_item_status: 'active' | 'inactive';
