@@ -83,7 +83,7 @@ DECLARE
   -- 위도 1도 ≈ 111km → bounding box delta
   v_lat_delta double precision := p_radius_km / 111.0;
   -- 경도 1도 ≈ 111km * cos(lat)
-  v_lng_delta double precision := p_radius_km / (111.0 * COS(RADIANS(p_user_lat)));
+  v_lng_delta double precision := p_radius_km / (111.0 * GREATEST(ABS(COS(RADIANS(p_user_lat))), 1e-12));
   v_now       timestamptz := NOW();
 BEGIN
   RETURN QUERY
