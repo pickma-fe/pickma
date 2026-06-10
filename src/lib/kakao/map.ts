@@ -26,15 +26,17 @@ interface KakaoMapsConstructors {
   load(callback: () => void): void;
 }
 
-interface KakaoSDKWindow {
-  kakao: { maps: KakaoMapsConstructors };
-}
-
 export type { KakaoMapInstance, KakaoMarkerInstance };
 export { loadKakaoMapsSDK } from './sdk';
 
 export function getKakaoMaps(): KakaoMapsConstructors {
-  return (window as unknown as KakaoSDKWindow).kakao.maps;
+  const win = window as { kakao?: { maps?: KakaoMapsConstructors } };
+  if (!win.kakao?.maps) {
+    throw new Error(
+      'Kakao Maps SDK가 로드되지 않았습니다. loadKakaoMapsSDK()를 먼저 호출하세요.'
+    );
+  }
+  return win.kakao.maps;
 }
 
 export interface MapInitOptions {
