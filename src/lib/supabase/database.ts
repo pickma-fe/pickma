@@ -875,7 +875,9 @@ export type Database = {
           p_available_only?: boolean;
           p_category_id?: string;
           p_keyword?: string;
+          p_max_discount_rate?: number;
           p_max_price?: number;
+          p_min_discount_rate?: number;
           p_min_price?: number;
           p_page?: number;
           p_page_size?: number;

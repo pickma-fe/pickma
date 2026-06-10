@@ -124,10 +124,28 @@ export async function getProducts(
   };
 }
 
+function getDiscountRateRange(
+  discountOption: ProductListParams['discountOption']
+): { min: number | undefined; max: number | undefined } {
+  switch (discountOption) {
+    case 'over-40':
+      return { min: 40, max: undefined };
+    case '30-to-40':
+      return { min: 30, max: 40 };
+    case '20-to-30':
+      return { min: 20, max: 30 };
+    case 'under-20':
+      return { min: undefined, max: 20 };
+    default:
+      return { min: undefined, max: undefined };
+  }
+}
+
 async function getProductsNear(
   supabase: SupabaseClient<Database>,
   params: ProductListParams
 ): Promise<ProductListResponse> {
+  const discountRange = getDiscountRateRange(params.discountOption);
   const { data, error } = await supabase.rpc('get_products_near', {
     p_user_lat: params.userLat as number,
     p_user_lng: params.userLng as number,
@@ -139,6 +157,8 @@ async function getProductsNear(
     p_min_price: params.minPrice ?? undefined,
     p_max_price: params.maxPrice ?? undefined,
     p_available_only: params.availableOnly ?? true,
+    p_min_discount_rate: discountRange.min,
+    p_max_discount_rate: discountRange.max,
   });
 
   if (error) throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);

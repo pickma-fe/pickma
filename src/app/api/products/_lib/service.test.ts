@@ -492,6 +492,42 @@ describe('getProducts - sort=distance (RPC 경로)', () => {
     );
   });
 
+  it.each([
+    ['over-40', 40, undefined],
+    ['30-to-40', 30, 40],
+    ['20-to-30', 20, 30],
+    ['under-20', undefined, 20],
+  ] as const)(
+    'discountOption=%s을 RPC 할인율 범위 파라미터로 변환한다',
+    async (discountOption, expectedMin, expectedMax) => {
+      const supabase = buildRpcSupabase({ data: [], error: null });
+
+      await getProducts(supabase, { ...distanceParams, discountOption });
+
+      expect(supabase.rpc).toHaveBeenCalledWith(
+        'get_products_near',
+        expect.objectContaining({
+          p_min_discount_rate: expectedMin,
+          p_max_discount_rate: expectedMax,
+        })
+      );
+    }
+  );
+
+  it('discountOption 미지정 시 할인율 파라미터를 undefined로 전달한다', async () => {
+    const supabase = buildRpcSupabase({ data: [], error: null });
+
+    await getProducts(supabase, distanceParams);
+
+    expect(supabase.rpc).toHaveBeenCalledWith(
+      'get_products_near',
+      expect.objectContaining({
+        p_min_discount_rate: undefined,
+        p_max_discount_rate: undefined,
+      })
+    );
+  });
+
   it('userLat/userLng 없이 sort=distance면 일반 쿼리를 사용한다', async () => {
     const chain = {
       select: vi.fn().mockReturnThis(),

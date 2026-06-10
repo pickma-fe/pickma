@@ -31,9 +31,11 @@ CREATE OR REPLACE FUNCTION get_products_near(
   p_page_size   int              DEFAULT 10,
   p_category_id uuid             DEFAULT NULL,
   p_keyword     text             DEFAULT NULL,
-  p_min_price   int              DEFAULT NULL,
-  p_max_price   int              DEFAULT NULL,
-  p_available_only boolean       DEFAULT true
+  p_min_price         int              DEFAULT NULL,
+  p_max_price         int              DEFAULT NULL,
+  p_available_only    boolean          DEFAULT true,
+  p_min_discount_rate int              DEFAULT NULL,
+  p_max_discount_rate int              DEFAULT NULL
 )
 RETURNS TABLE(
   -- products 기본 필드
@@ -144,6 +146,10 @@ BEGIN
       AND (p_min_price IS NULL OR p.discount_price >= p_min_price)
       -- 최대 가격 필터 (optional)
       AND (p_max_price IS NULL OR p.discount_price <= p_max_price)
+      -- 최소 할인율 필터 (optional)
+      AND (p_min_discount_rate IS NULL OR p.discount_rate >= p_min_discount_rate)
+      -- 최대 할인율 필터 (optional)
+      AND (p_max_discount_rate IS NULL OR p.discount_rate < p_max_discount_rate)
   ),
   radius_filtered AS (
     SELECT *
