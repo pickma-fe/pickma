@@ -9,8 +9,7 @@ import { AuthModal } from '@/components/auth/AuthModal';
 import { useAuthModal } from '@/components/auth/useAuthModal';
 import { Header } from '@/components/common/Header/Header';
 import { Sidebar } from '@/components/common/Sidebar/Sidebar';
-
-import { sellerSidebarSections } from './_components/sellerSidebarSections';
+import { sellerSidebarSections } from '@/components/seller/sellerSidebarSections';
 
 const SELLER_MANAGEMENT_PREFIXES = [
   '/seller/dashboard',

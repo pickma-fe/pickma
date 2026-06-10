@@ -90,7 +90,7 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 | T62 | payment_events 테이블 migration 및 이벤트 contract 구현      | P1       | 완료    | 226          | T11                          | [T62_payment_events_migration_contract.md](T62_payment_events_migration_contract.md)                             |
 | T63 | POST /api/payments/webhook Route Handler 구현                | P1       | 완료    | 231          | T62                          | [T63_payment_webhook_route_handler.md](T63_payment_webhook_route_handler.md)                                     |
 | T64 | 공통 컴포넌트 접근성 baseline 적용                           | P1       | 완료    | 250          | T45                          | [T64_shared_component_accessibility_baseline.md](T64_shared_component_accessibility_baseline.md)                 |
-| T65 | 도메인 컴포넌트 폴더 구조 통일                               | P1       | 진행 전 | 확인 필요    | T64                          | [T65_domain_component_folder_unification.md](T65_domain_component_folder_unification.md)                         |
+| T65 | 도메인 컴포넌트 폴더 구조 통일                               | P1       | 완료    | 253          | T64                          | [T65_domain_component_folder_unification.md](T65_domain_component_folder_unification.md)                         |
 | T66 | 모바일 앱 래핑 (Capacitor / PWA)                             | P3       | 진행 전 | 확인 필요    | T45                          | [T66_mobile_app_capacitor_pwa.md](T66_mobile_app_capacitor_pwa.md)                                               |
 | T67 | i18n 기본 설정 (next-intl, 한국어)                           | P2       | 진행 전 | 확인 필요    | T45                          | [T67_i18n_setup.md](T67_i18n_setup.md)                                                                           |
 

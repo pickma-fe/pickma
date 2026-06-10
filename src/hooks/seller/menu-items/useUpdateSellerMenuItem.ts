@@ -19,7 +19,7 @@ export function useUpdateSellerMenuItem() {
     mutationFn: ({ id, body }) => sellerMenuItemApi.updateMenuItem(id, body),
     onSuccess: () => {
       void queryClient.invalidateQueries({
-        queryKey: queryKeys.seller.menuItems.all(),
+        queryKey: queryKeys.sellers.menuItems.all(),
       });
       void queryClient.invalidateQueries({
         queryKey: queryKeys.products.sellerList(),

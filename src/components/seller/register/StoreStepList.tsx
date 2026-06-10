@@ -1,5 +1,10 @@
 'use client';
 
+import type {
+  StoreStep,
+  ModalType,
+  StoreStepState,
+} from '@/types/seller-register';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/common/Button/Button';
 
@@ -10,7 +15,6 @@ import {
   CERTIFICATION_STATUS_TEXT,
 } from './constants';
 import { StatusBadge } from './StatusBadge';
-import type { StoreStep, ModalType, StoreStepState } from './types';
 import {
   getStepCircleClass,
   getStepLabel,

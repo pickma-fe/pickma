@@ -10,7 +10,7 @@ import { sellerOrderApi } from '@/api/seller/orders/sellerOrderApi';
 
 export function useSellerOrders(params?: Partial<SellerOrderListParams>) {
   return useQuery<PaginatedResult<Omit<Order, 'items' | 'payment'>>>({
-    queryKey: queryKeys.seller.orders.list(params ?? {}),
+    queryKey: queryKeys.sellers.orders.list(params ?? {}),
     queryFn: () => sellerOrderApi.getOrders(params),
   });
 }

@@ -1,4 +1,8 @@
-import type { ReviewStatus, CertificationStatus, StoreStep } from './types';
+import type {
+  ReviewStatus,
+  CertificationStatus,
+  StoreStep,
+} from '@/types/seller-register';
 
 export const REVIEW_STATUS_TEXT: Record<ReviewStatus, string> = {
   pending: '심사 대기',

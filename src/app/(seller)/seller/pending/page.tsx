@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
 
-import { PendingContent } from './_components/PendingContent';
+import { PendingContent } from '@/components/seller/pending/PendingContent';
 
 function PendingFallback() {
   return (

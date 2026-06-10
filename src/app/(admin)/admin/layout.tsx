@@ -5,10 +5,9 @@ import { useEffect } from 'react';
 
 import { useRoleGuard } from '@/hooks/auth/useRoleGuard';
 import { useSignOut } from '@/hooks/auth/useSignOut';
+import { adminSidebarSections } from '@/components/admin/adminSidebarSections';
 import { Header } from '@/components/common/Header/Header';
 import { Sidebar } from '@/components/common/Sidebar/Sidebar';
-
-import { adminSidebarSections } from './_components/adminSidebarSections';
 
 export default function AdminLayout({
   children,

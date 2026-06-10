@@ -1,9 +1,9 @@
 'use client';
 
 import type { AdminPendingSellerApplication } from '@/types/seller-application';
+import { AdminTable } from '@/components/admin/AdminTable';
 import { Badge } from '@/components/common/Badge/Badge';
 import { Button } from '@/components/common/Button/Button';
-import { AdminTable } from '@/app/(admin)/admin/_components/AdminTable';
 
 import { formatAdminDateTime } from './adminSellerApprovalUtils';
 

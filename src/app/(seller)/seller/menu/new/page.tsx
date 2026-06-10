@@ -1,4 +1,4 @@
-import { MenuForm } from '../_components/MenuForm';
+import { MenuForm } from '@/components/seller/menu/MenuForm';
 
 export default function MenuNewPage() {
   return (

@@ -1,4 +1,4 @@
-import { OrderManageContent } from './_components/OrderManageContent';
+import { OrderManageContent } from '@/components/seller/orders/OrderManageContent';
 
 export default function SellerOrderPage() {
   return <OrderManageContent />;
