@@ -20,11 +20,14 @@ function notify() {
 }
 
 function subscribe(callback: () => void): () => void {
+  const handler = (e: StorageEvent) => {
+    if (e.key === STORAGE_KEY) callback();
+  };
   listeners.add(callback);
-  window.addEventListener('storage', callback);
+  window.addEventListener('storage', handler);
   return () => {
     listeners.delete(callback);
-    window.removeEventListener('storage', callback);
+    window.removeEventListener('storage', handler);
   };
 }
 
