@@ -16,14 +16,12 @@ export function StoreProductBottomSheet({
   products,
   onClose,
 }: StoreProductBottomSheetProps) {
+  if (!storeId) return null;
+
   const storeName = products[0]?.storeName;
 
   return (
-    <div
-      className={`absolute inset-x-0 bottom-0 z-30 rounded-t-2xl bg-white shadow-2xl transition-transform duration-300 ${
-        storeId ? 'translate-y-0' : 'translate-y-full'
-      }`}
-    >
+    <div className="absolute inset-x-0 bottom-0 z-30 rounded-t-2xl bg-white shadow-2xl">
       <div className="flex items-center justify-between border-b border-gray-100 px-4 py-4">
         <h2 className="text-base font-semibold text-gray-900">
           {storeName ?? '가게 정보'}
