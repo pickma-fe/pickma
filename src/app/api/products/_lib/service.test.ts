@@ -474,6 +474,20 @@ describe('getProducts - sort=distance (RPC 경로)', () => {
         p_radius_km: 3.0,
         p_page: 1,
         p_page_size: 10,
+        p_available_only: true,
+      })
+    );
+  });
+
+  it('availableOnly: false를 RPC에 전달한다', async () => {
+    const supabase = buildRpcSupabase({ data: [], error: null });
+
+    await getProducts(supabase, { ...distanceParams, availableOnly: false });
+
+    expect(supabase.rpc).toHaveBeenCalledWith(
+      'get_products_near',
+      expect.objectContaining({
+        p_available_only: false,
       })
     );
   });
