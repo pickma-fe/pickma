@@ -1,6 +1,6 @@
 import type { Order, OrderStatus } from '@/types/order';
 
-const FALLBACK_RESERVATION_IMAGE_URL = '/images/products/bread.jpg';
+const FALLBACK_RESERVATION_IMAGE_URL = '/images/fallback/bread.jpg';
 
 export interface MypageReservation {
   id: string;

@@ -17,7 +17,7 @@ const mockUser: User = {
   email: 'customer@example.com',
   name: '픽마 고객',
   phone: '010-1234-5678',
-  profileImage: '/images/mock/profile.jpg',
+  profileImage: '/images/fallback/profile.jpg',
   role: 'customer',
   status: 'active',
   createdAt: new Date('2026-04-01T00:00:00.000Z'),

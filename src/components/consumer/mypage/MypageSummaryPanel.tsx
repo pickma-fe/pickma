@@ -8,7 +8,7 @@ import { getSafeProfileImage } from '@/lib/image';
 import { useRecentProducts } from '@/hooks/products/useRecentProducts';
 import { useMe } from '@/hooks/users/useMe';
 
-const FALLBACK_RECENT_PRODUCT_IMAGE = '/images/products/noimage.png';
+const FALLBACK_RECENT_PRODUCT_IMAGE = '/images/fallback/noimage.png';
 
 function getSafeProductImage(imageUrl?: string) {
   if (!imageUrl) {

@@ -131,7 +131,7 @@ export const mockAdminStores: AdminStoreResponse[] = [
     address: '서울시 마포구 월드컵북로 12',
     addressDetail: '1층',
     region: '서울 마포구',
-    image: '/images/mock/store-bakery.jpg',
+    image: '/images/mock/stores/bakery.png',
     status: 'active',
     operationStatus: 'open',
     createdAt: '2026-04-01T00:00:00.000Z',

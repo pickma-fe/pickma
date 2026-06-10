@@ -6,7 +6,7 @@ export const mockUser: UserResponse = {
   name: '픽마 고객',
   phone: '010-1234-5678',
   authProvider: 'kakao',
-  profileImage: '/images/mock/profile.jpg',
+  profileImage: '/images/fallback/profile.jpg',
   role: 'customer',
   status: 'active',
   createdAt: '2026-04-01T00:00:00.000Z',

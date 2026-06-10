@@ -14,7 +14,7 @@ type ProductCardProps = {
   product: Product;
 };
 
-const FALLBACK_PRODUCT_IMAGE = '/images/products/noimage.png';
+const FALLBACK_PRODUCT_IMAGE = '/images/fallback/noimage.png';
 
 // 마감 시간
 function formatRemainingTime(endAt: Date, now: number) {

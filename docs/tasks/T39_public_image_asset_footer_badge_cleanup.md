@@ -1,10 +1,10 @@
 # T39. public 이미지 자산 구조 및 Footer badge 크기 정리
 
 - 상태:
-  진행 전
+  완료
 
 - GitHub Issue:
-  확인 필요
+  259
 
 - 우선순위:
   P1
