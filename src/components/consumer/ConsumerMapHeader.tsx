@@ -21,16 +21,20 @@ export function ConsumerMapHeader({
 
   const handleLocationClick = async () => {
     setGeocodeError(false);
-    await openPostcodeSearch(
-      (info) => {
-        onLocationChange({
-          lat: info.latitude,
-          lng: info.longitude,
-          address: info.address,
-        });
-      },
-      () => setGeocodeError(true)
-    );
+    try {
+      await openPostcodeSearch(
+        (info) => {
+          onLocationChange({
+            lat: info.latitude,
+            lng: info.longitude,
+            address: info.address,
+          });
+        },
+        () => setGeocodeError(true)
+      );
+    } catch {
+      setGeocodeError(true);
+    }
   };
 
   return (
