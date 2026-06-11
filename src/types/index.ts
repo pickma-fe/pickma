@@ -46,6 +46,13 @@ export type {
   ProductStatus,
   UpdateSellerProductInput,
 } from './product';
-export type { MyStore, OperationStatus, Store, StoreStatus } from './store';
+export type {
+  CreateStoreInput,
+  MyStore,
+  OperationStatus,
+  Store,
+  StoreStatus,
+  UpdateStoreInput,
+} from './store';
 export type { PaginatedResult, SortOrder } from './common';
 export type { UpdateMeInput, User, UserRole, UserStatus } from './user';
