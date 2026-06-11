@@ -2,7 +2,7 @@
 
 ## 디렉터리 구조
 
-```
+```text
 public/images/
 ├── badges/          # 앱스토어 배지 등 브랜드 자산
 ├── banners/         # 서비스 배너 이미지

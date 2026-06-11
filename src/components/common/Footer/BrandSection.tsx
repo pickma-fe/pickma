@@ -23,7 +23,7 @@ export function BrandSection() {
           src="/images/badges/apple.svg"
           alt="App Store (준비중)"
           height={40}
-          width={135}
+          width={130}
         />
       </div>
     </section>
