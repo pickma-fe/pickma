@@ -1,4 +1,4 @@
-const FALLBACK_PROFILE_IMAGE = '/images/mock/profile.jpg';
+const FALLBACK_PROFILE_IMAGE = '/images/fallback/profile.jpg';
 const OAUTH_PROFILE_IMAGE_HOSTS = new Set([
   'lh3.googleusercontent.com',
   'k.kakaocdn.net',

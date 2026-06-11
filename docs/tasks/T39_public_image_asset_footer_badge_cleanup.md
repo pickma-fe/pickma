@@ -1,10 +1,10 @@
 # T39. public 이미지 자산 구조 및 Footer badge 크기 정리
 
 - 상태:
-  진행 전
+  완료
 
 - GitHub Issue:
-  확인 필요
+  259
 
 - 우선순위:
   P1
@@ -60,3 +60,28 @@
   - Footer 전체가 desktop/mobile viewport에서 직접 확인되었고 badge 왜곡, 간격 깨짐, 줄바꿈 문제가 없다.
   - 관련 story 또는 화면에서 깨진 이미지가 없다.
   - T64에서 FooterGroup 링크와 SupportSection tel/mailto 링크에 `focus-visible:ring-2 focus-visible:ring-offset-2 rounded-sm`이 추가됐다. 이미지/badge 수정 후 Footer 반응형 레이아웃을 재확인하고 focus ring 스타일과의 시각 충돌이 없는지 검증한다.
+
+## 구현 결과
+
+- `docs/public-image-asset-guide.md` 신규 생성하여 public 이미지 자산 구조 및 사용 규칙 문서화
+- `public/images/` 하위 디렉터리를 `badges/`, `banners/`, `fallback/`, `mock/` 기준으로 분류
+- `public/images/fallback/` 디렉터리 신규 생성 및 fallback 이미지 이동
+  - `public/images/products/noimage.png` → `public/images/fallback/noimage.png`
+  - `public/images/products/bread.jpg` → `public/images/fallback/bread.jpg`
+  - `public/images/mock/profile.jpg` → `public/images/fallback/profile.jpg`
+- fallback 이미지 경로를 `/images/fallback/*` 기준으로 통일
+  - `src/components/consumer/ProductCard.tsx`
+  - `src/components/consumer/ProductImageGallery.tsx`
+  - `src/components/consumer/SearchProductListItem.tsx`
+  - `src/components/consumer/order/OrderProductSummary.tsx`
+  - `src/components/consumer/mypage/MypageSummaryPanel.tsx`
+  - `src/components/consumer/mypage/mypageReservationMapper.ts`
+  - `src/lib/image.ts`
+  - `src/mocks/users.ts`
+  - `src/hooks/users/useMe.test.ts`
+- mock 데이터 이미지 경로 정리
+  - `src/mocks/products.ts` - `store-bakery.jpg` → `stores/bakery.png`, `store-salad.jpg` → `stores/salad.jpg`
+  - `src/mocks/admin.ts` - `store-bakery.jpg` → `stores/bakery.png`
+  - `public/images/mock/stores/salad.jpg` 신규 추가 (`menu-salad.jpg` 복사)
+- Footer `BrandSection.tsx` App Store badge width `120` → `130` 수정 (원본 viewBox 비율 준수)
+- T64 focus ring 스타일과 Footer 이미지/배지 수정 후 시각 충돌 없음 확인 (desktop/mobile viewport 검증 완료)

@@ -15,7 +15,7 @@ interface OrderProductSummaryProps {
   onQuantityChange: (quantity: number) => void;
 }
 
-const FALLBACK_PRODUCT_IMAGE = '/images/products/bread.jpg';
+const FALLBACK_PRODUCT_IMAGE = '/images/fallback/bread.jpg';
 
 export function OrderProductSummary({
   product,

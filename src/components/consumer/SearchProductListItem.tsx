@@ -7,7 +7,7 @@ import Link from 'next/link';
 import type { Product } from '@/types/product';
 import { formatPickupTime } from '@/lib/formatPickupTime';
 
-const FALLBACK_PRODUCT_IMAGE = '/images/products/noimage.png';
+const FALLBACK_PRODUCT_IMAGE = '/images/fallback/noimage.png';
 
 export function SearchProductListItem({ product }: { product: Product }) {
   return (

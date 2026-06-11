@@ -5,7 +5,7 @@ interface ProductImageGalleryProps {
   imageUrl?: string;
 }
 
-const FALLBACK_IMAGE_URL = '/images/products/noimage.png';
+const FALLBACK_IMAGE_URL = '/images/fallback/noimage.png';
 
 export function ProductImageGallery({
   productName,

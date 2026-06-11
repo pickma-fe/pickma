@@ -303,7 +303,7 @@ export const mockProductDetail: ProductDetailResponse = {
     address: '서울시 마포구 월드컵북로 12',
     addressDetail: '1층',
     region: '서울 마포구',
-    image: '/images/mock/store-bakery.jpg',
+    image: '/images/mock/stores/bakery.png',
   },
 };
 
@@ -317,7 +317,7 @@ export const mockProductDetail2: ProductDetailResponse = {
     phone: '02-9876-5432',
     address: '서울시 성동구 왕십리로 20',
     region: '서울 성동구',
-    image: '/images/mock/store-salad.jpg',
+    image: '/images/mock/stores/salad.jpg',
   },
 };
 
