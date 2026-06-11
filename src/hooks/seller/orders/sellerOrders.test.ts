@@ -11,10 +11,12 @@ import { useCompleteSellerOrder } from './useCompleteSellerOrder';
 import { useMarkSellerOrderReady } from './useMarkSellerOrderReady';
 import { useSellerOrder } from './useSellerOrder';
 import { useSellerOrders } from './useSellerOrders';
+import { useSellerOrderSummary } from './useSellerOrderSummary';
 
 vi.mock('@/api/seller/orders/sellerOrderApi', () => ({
   sellerOrderApi: {
     getOrders: vi.fn(),
+    getOrderSummary: vi.fn(),
     getOrder: vi.fn(),
     acceptOrder: vi.fn(),
     markOrderReady: vi.fn(),
@@ -105,6 +107,37 @@ describe('useSellerOrder', () => {
     );
     await waitFor(() =>
       expect(sellerOrderApi.getOrder).toHaveBeenCalledWith(ORDER_ID)
+    );
+  });
+});
+
+describe('useSellerOrderSummary', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('summary queryKey를 사용하고 sellerOrderApi.getOrderSummary를 호출한다', async () => {
+    vi.mocked(sellerOrderApi.getOrderSummary).mockResolvedValue({
+      totalCount: 0,
+      statusCounts: {
+        reserved: 0,
+        accepted: 0,
+        ready: 0,
+        completed: 0,
+        cancelling: 0,
+        cancelled: 0,
+        noShow: 0,
+        expired: 0,
+      },
+    });
+
+    const { queryClient, wrapper } = createWrapper();
+    renderHook(() => useSellerOrderSummary(), { wrapper });
+
+    const queries = queryClient.getQueryCache().getAll();
+    expect(queries[0].queryKey).toEqual(queryKeys.sellers.orders.summary());
+    await waitFor(() =>
+      expect(sellerOrderApi.getOrderSummary).toHaveBeenCalled()
     );
   });
 });

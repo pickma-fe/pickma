@@ -1183,6 +1183,7 @@ Seller product API의 pickup time은 서버 schema에서 `HH:mm:ss`로 정규화
 | PRD ID     | 기능           | Method | API                                    | Auth   | Priority |
 | ---------- | -------------- | ------ | -------------------------------------- | ------ | -------- |
 | S-ORDER-01 | 주문 목록 조회 | GET    | `/api/seller/orders`                   | seller | P0       |
+| S-ORDER-07 | 주문 요약 조회 | GET    | `/api/seller/orders/summary`           | seller | P2       |
 | S-ORDER-02 | 주문 상세 조회 | GET    | `/api/seller/orders/:orderId`          | seller | P0       |
 | S-ORDER-05 | 접수 처리      | PATCH  | `/api/seller/orders/:orderId/accept`   | seller | P0       |
 | S-ORDER-06 | 준비 완료 처리 | PATCH  | `/api/seller/orders/:orderId/ready`    | seller | P0       |
@@ -1229,6 +1230,34 @@ export interface SellerOrderListParams {
 ```
 
 - 오류: `ORDER_NOT_FOUND` 404 (orderId 불일치 또는 타 store 주문), `INVALID_ORDER_STATUS` 409
+
+### 9.3 주문 summary
+
+운영 화면의 상태별 count는 목록 응답의 현재 page items 또는 client list 계산에 의존하지 않고 별도 summary endpoint를 사용한다.
+
+`GET /api/seller/orders/summary`
+
+- Auth: seller
+- Query: 없음
+- Response:
+
+```ts
+export interface SellerOrderSummaryResponse {
+  totalCount: number;
+  statusCounts: {
+    reserved: number;
+    accepted: number;
+    ready: number;
+    completed: number;
+    cancelling: number;
+    cancelled: number;
+    noShow: number;
+    expired: number;
+  };
+}
+```
+
+- 기준: seller store에 속한 전체 주문을 status별로 count한다.
 
 ---
 

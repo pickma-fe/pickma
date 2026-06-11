@@ -20,6 +20,7 @@ import { useAcceptSellerOrder } from '@/hooks/seller/orders/useAcceptSellerOrder
 import { useCompleteSellerOrder } from '@/hooks/seller/orders/useCompleteSellerOrder';
 import { useMarkSellerOrderReady } from '@/hooks/seller/orders/useMarkSellerOrderReady';
 import { useSellerOrders } from '@/hooks/seller/orders/useSellerOrders';
+import { useSellerOrderSummary } from '@/hooks/seller/orders/useSellerOrderSummary';
 import { Section } from '@/components/common/Section/Section';
 
 import { OrderFilter } from './OrderFilter';
@@ -118,12 +119,7 @@ export function OrderManageContent() {
 
   const serverStatus = selectedStatus === '전체' ? undefined : selectedStatus;
 
-  const { data: totalData } = useSellerOrders({
-    page: 1,
-    pageSize: 1,
-    sort: 'createdAt',
-    order: 'desc',
-  });
+  const { data: summary } = useSellerOrderSummary();
 
   const { data, isLoading, isError } = useSellerOrders({
     page: currentPage,
@@ -150,14 +146,13 @@ export function OrderManageContent() {
         .includes(searchKeyword.trim().toLowerCase())
   );
 
-  const totalCount = totalData?.totalCount ?? 0;
   const totalPages = data?.totalPages ?? 0;
 
-  // TODO: T26 summary API 구현 후 상태별 집계 연결
   const getCount = (value: SellerOrderFilterStatus): number | null => {
-    if (value === '전체') return totalCount;
-    if (value === selectedStatus) return data?.totalCount ?? null;
-    return null;
+    if (!summary) return null;
+    if (value === '전체') return summary.totalCount;
+    if (value === 'noShow') return summary.statusCounts.noShow;
+    return summary.statusCounts[value];
   };
 
   const handleOrderAction = (

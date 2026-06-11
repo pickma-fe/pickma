@@ -67,6 +67,20 @@ export interface OrderListItemResponse {
 
 export type OrderListResponse = PaginatedResult<OrderListItemResponse>;
 
+export interface SellerOrderSummaryResponse {
+  totalCount: number;
+  statusCounts: {
+    reserved: number;
+    accepted: number;
+    ready: number;
+    completed: number;
+    cancelling: number;
+    cancelled: number;
+    noShow: number;
+    expired: number;
+  };
+}
+
 export interface OrderItemResponse {
   id: string;
   orderId: string;

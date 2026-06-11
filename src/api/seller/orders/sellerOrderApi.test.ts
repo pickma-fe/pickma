@@ -1,7 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { Order } from '@/types/order';
-import type { OrderDetailResponse, OrderListResponse } from '@/contracts/order';
+import type {
+  OrderDetailResponse,
+  OrderListResponse,
+  SellerOrderSummaryResponse,
+} from '@/contracts/order';
 
 import { sellerOrderApi } from './sellerOrderApi';
 import { mapSellerOrder, mapSellerOrderListItem } from './sellerOrderMapper';
@@ -57,6 +61,19 @@ const mockDetailResponse: OrderDetailResponse = {
 
 const mockOrder = { id: ORDER_ID } as Order;
 const mockOrderListItem = { id: ORDER_ID } as Omit<Order, 'items' | 'payment'>;
+const mockSummaryResponse: SellerOrderSummaryResponse = {
+  totalCount: 3,
+  statusCounts: {
+    reserved: 1,
+    accepted: 0,
+    ready: 0,
+    completed: 1,
+    cancelling: 0,
+    cancelled: 0,
+    noShow: 1,
+    expired: 0,
+  },
+};
 
 describe('sellerOrderApi', () => {
   beforeEach(() => {
@@ -109,6 +126,17 @@ describe('sellerOrderApi', () => {
       );
       expect(mapSellerOrder).toHaveBeenCalledWith(mockDetailResponse);
       expect(result).toBe(mockOrder);
+    });
+  });
+
+  describe('getOrderSummary', () => {
+    it('summary endpoint를 호출하고 응답을 반환한다', async () => {
+      vi.mocked(apiClient.get).mockResolvedValue(mockSummaryResponse);
+
+      const result = await sellerOrderApi.getOrderSummary();
+
+      expect(apiClient.get).toHaveBeenCalledWith('/api/seller/orders/summary');
+      expect(result).toBe(mockSummaryResponse);
     });
   });
 

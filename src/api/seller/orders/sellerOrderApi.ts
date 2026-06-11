@@ -3,6 +3,7 @@ import type { Order, OrderStatus, SellerOrderListQuery } from '@/types/order';
 import type {
   OrderDetailResponse,
   OrderListResponse,
+  SellerOrderSummaryResponse,
   SellerOrderListParams,
 } from '@/contracts/order';
 import { apiClient } from '@/api/apiClient';
@@ -49,6 +50,12 @@ export const sellerOrderApi = {
         ...res,
         items: res.items.map(mapSellerOrderListItem),
       }));
+  },
+
+  getOrderSummary(): Promise<SellerOrderSummaryResponse> {
+    return apiClient.get<SellerOrderSummaryResponse>(
+      '/api/seller/orders/summary'
+    );
   },
 
   getOrder(id: string): Promise<Order> {

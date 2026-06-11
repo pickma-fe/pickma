@@ -1,10 +1,10 @@
 # T26. 운영 화면 summary/list API 분리
 
 - 상태:
-  진행 전
+  진행 중
 
 - GitHub Issue:
-  확인 필요
+  264
 
 - 우선순위:
   P2
