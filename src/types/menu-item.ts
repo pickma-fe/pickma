@@ -13,3 +13,26 @@ export interface MenuItem {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export interface SellerMenuItemListQuery {
+  categoryId?: string;
+  keyword?: string;
+  status?: MenuItemStatus;
+}
+
+export interface CreateMenuItemInput {
+  categoryId: string;
+  name: string;
+  description?: string;
+  image?: string;
+  originalPrice: number;
+}
+
+export interface UpdateMenuItemInput {
+  categoryId?: string;
+  name?: string;
+  description?: string;
+  image?: string;
+  originalPrice?: number;
+  status?: MenuItemStatus;
+}

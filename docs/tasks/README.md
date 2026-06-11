@@ -50,7 +50,7 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 | T22 | 실시간 알림 기반 설계 및 1차 구현                            | P2       | 진행 전 | 확인 필요    | T11, T62                     | [T22_realtime_notification_foundation.md](T22_realtime_notification_foundation.md)                               |
 | T23 | E2E 테스트 및 결제 팝업 모킹 전략                            | P2       | 진행 전 | 확인 필요    | T01, T02, T03, T04, T24      | [T23_e2e_payment_popup_mocking_strategy.md](T23_e2e_payment_popup_mocking_strategy.md)                           |
 | T24 | CI 기본 파이프라인 구축                                      | P1       | 완료    | 173          | 없음                         | [T24_ci_lint_test_pipeline.md](T24_ci_lint_test_pipeline.md)                                                     |
-| T25 | hook input Domain/UI 타입 분리                               | P2       | 진행 전 | 확인 필요    | T15                          | [T25_hook_input_domain_ui_type_split.md](T25_hook_input_domain_ui_type_split.md)                                 |
+| T25 | hook input Domain/UI 타입 분리                               | P2       | 완료    | 252          | T15                          | [T25_hook_input_domain_ui_type_split.md](T25_hook_input_domain_ui_type_split.md)                                 |
 | T26 | 운영 화면 summary/list API 분리                              | P2       | 진행 전 | 확인 필요    | T04                          | [T26_admin_seller_summary_list_api_split.md](T26_admin_seller_summary_list_api_split.md)                         |
 | T27 | Auth 이메일/Supabase SMTP/rate limit 정책 정리               | P0       | 완료    | 186          | 없음                         | [T27_auth_email_smtp_rate_limit_policy.md](T27_auth_email_smtp_rate_limit_policy.md)                             |
 | T28 | 판매자 상품 수정 진입점 결정 및 구현                         | P2       | 완료    | 229          | T15                          | [T28_seller_product_edit_entrypoint.md](T28_seller_product_edit_entrypoint.md)                                   |
@@ -101,7 +101,7 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 완료 task는 제외하고, `진행 중`과 `진행 전` task만 기준으로 정렬한다.
 
 1. P1 기반/운영 차단 해소: T39
-2. P1/P2 독립 기반 작업: T26, T25
+2. P1/P2 독립 기반 작업: T26
 3. 기능 확장: T22, T59, T30, T23
 4. 공통 컴포넌트 접근성 및 폴더 통일 (T46~T49 선행 필수): T64, T65
 5. UI/UX 개선 묶음: T46, T47, T48, T49

@@ -2,13 +2,12 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-import type { User } from '@/types/user';
-import type { UpdateMeRequest } from '@/contracts/user';
+import type { UpdateMeInput, User } from '@/types/user';
 import { queryKeys } from '@/lib/queryKeys';
 import { fileApi } from '@/api/files/fileApi';
 import { userApi } from '@/api/users/userApi';
 
-type UpdateMeVariables = UpdateMeRequest & { imageFile?: File };
+type UpdateMeVariables = UpdateMeInput & { imageFile?: File };
 
 export function useUpdateMe() {
   const queryClient = useQueryClient();

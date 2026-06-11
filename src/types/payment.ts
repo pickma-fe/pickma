@@ -21,3 +21,18 @@ export interface Payment {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export interface PreparePaymentInput {
+  orderNumber: string;
+  orderName: string;
+}
+
+export interface ConfirmPaymentInput {
+  paymentKey: string;
+  orderNumber: string;
+  amount: number;
+}
+
+export interface CancelPaymentInput {
+  reason: string;
+}

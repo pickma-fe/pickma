@@ -22,7 +22,7 @@ export default function SellerProductEditPage() {
         body: {
           discountPrice: Number(data.discountPrice),
           stock: Number(data.stock),
-          endAt: new Date(data.endAt).toISOString(),
+          endAt: new Date(data.endAt),
           pickupStartTime: data.pickupStartTime,
           pickupEndTime: data.pickupEndTime,
           status: data.status,

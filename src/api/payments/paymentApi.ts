@@ -1,4 +1,9 @@
 import type {
+  CancelPaymentInput,
+  ConfirmPaymentInput,
+  PreparePaymentInput,
+} from '@/types/payment';
+import type {
   CancelPaymentRequest,
   ConfirmPaymentRequest,
   PreparePaymentRequest,
@@ -7,20 +12,44 @@ import type {
 
 import { apiClient } from '../apiClient';
 
+function toPreparePaymentRequest(
+  input: PreparePaymentInput
+): PreparePaymentRequest {
+  return { ...input };
+}
+
+function toConfirmPaymentRequest(
+  input: ConfirmPaymentInput
+): ConfirmPaymentRequest {
+  return { ...input };
+}
+
+function toCancelPaymentRequest(
+  input: CancelPaymentInput
+): CancelPaymentRequest {
+  return { ...input };
+}
+
 export const paymentApi = {
-  preparePayment(body: PreparePaymentRequest): Promise<PreparePaymentResponse> {
+  preparePayment(input: PreparePaymentInput): Promise<PreparePaymentResponse> {
     return apiClient.post<PreparePaymentResponse>(
       '/api/payments/prepare',
-      body
+      toPreparePaymentRequest(input)
     );
   },
-  confirmPayment(body: ConfirmPaymentRequest): Promise<void> {
-    return apiClient.post<void>('/api/payments/confirm', body);
+  confirmPayment(input: ConfirmPaymentInput): Promise<void> {
+    return apiClient.post<void>(
+      '/api/payments/confirm',
+      toConfirmPaymentRequest(input)
+    );
   },
 
-  cancelPayment(paymentId: string, body: CancelPaymentRequest): Promise<void> {
+  cancelPayment(paymentId: string, input: CancelPaymentInput): Promise<void> {
     return apiClient
-      .post<void>(`/api/payments/${paymentId}/cancel`, body)
+      .post<void>(
+        `/api/payments/${paymentId}/cancel`,
+        toCancelPaymentRequest(input)
+      )
       .then(() => undefined);
   },
 };

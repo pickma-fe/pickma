@@ -1,6 +1,25 @@
+import type { ProductDiscountOption } from '@/contracts/product';
+
 import type { Store } from './store';
 
+export type { ProductDiscountOption } from '@/contracts/product';
+
 export type ProductStatus = 'active' | 'closed';
+
+export interface ProductListQuery {
+  page: number;
+  pageSize: number;
+  userLat?: number;
+  userLng?: number;
+  categoryId?: string;
+  keyword?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  discountOption?: ProductDiscountOption;
+  sort?: 'endAt' | 'discountRate' | 'discountPrice' | 'distance';
+  order?: 'asc' | 'desc';
+  availableOnly?: boolean;
+}
 
 export interface CreateSellerProductInput {
   menuItemId: string;
@@ -9,6 +28,15 @@ export interface CreateSellerProductInput {
   endAt: Date;
   pickupStartTime: string;
   pickupEndTime: string;
+}
+
+export interface UpdateSellerProductInput {
+  discountPrice?: number;
+  stock?: number;
+  endAt?: Date;
+  pickupStartTime?: string;
+  pickupEndTime?: string;
+  status?: ProductStatus;
 }
 
 export type ProductDisplayStatus =

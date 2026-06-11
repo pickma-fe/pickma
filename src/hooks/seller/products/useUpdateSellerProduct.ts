@@ -2,14 +2,13 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-import type { Product } from '@/types/product';
-import type { UpdateSellerProductRequest } from '@/contracts/product';
+import type { Product, UpdateSellerProductInput } from '@/types/product';
 import { queryKeys } from '@/lib/queryKeys';
 import { sellerProductApi } from '@/api/seller/products/sellerProductApi';
 
 interface UpdateSellerProductVariables {
   id: string;
-  body: UpdateSellerProductRequest;
+  body: UpdateSellerProductInput;
 }
 
 export function useUpdateSellerProduct() {

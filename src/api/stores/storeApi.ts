@@ -1,4 +1,8 @@
-import type { MyStore } from '@/types/store';
+import type {
+  CreateStoreInput,
+  MyStore,
+  UpdateStoreInput,
+} from '@/types/store';
 import type {
   CreateStoreRequest,
   StoreResponse,
@@ -8,14 +12,24 @@ import type {
 import { ApiError, apiClient } from '../apiClient';
 import { mapMyStore } from './storeMapper';
 
+function toCreateStoreRequest(input: CreateStoreInput): CreateStoreRequest {
+  return { ...input };
+}
+
+function toUpdateStoreRequest(input: UpdateStoreInput): UpdateStoreRequest {
+  return { ...input };
+}
+
 export const storeApi = {
-  createStore(body: CreateStoreRequest): Promise<MyStore> {
-    return apiClient.post<StoreResponse>('/api/stores', body).then(mapMyStore);
+  createStore(input: CreateStoreInput): Promise<MyStore> {
+    return apiClient
+      .post<StoreResponse>('/api/stores', toCreateStoreRequest(input))
+      .then(mapMyStore);
   },
 
-  updateStore(body: UpdateStoreRequest): Promise<MyStore> {
+  updateStore(input: UpdateStoreInput): Promise<MyStore> {
     return apiClient
-      .patch<StoreResponse>('/api/stores/me', body)
+      .patch<StoreResponse>('/api/stores/me', toUpdateStoreRequest(input))
       .then(mapMyStore);
   },
 

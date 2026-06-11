@@ -37,9 +37,14 @@ describe('orderApi.createOrder', () => {
     const result = await orderApi.createOrder({
       productId: 'f47ac10b-58cc-4372-a567-0e02b2c3d479',
       quantity: 2,
-      pickupAt: '2026-05-11T11:00:00.000Z',
+      pickupAt: new Date('2026-05-11T11:00:00.000Z'),
     });
 
+    expect(apiClient.post).toHaveBeenCalledWith('/api/orders', {
+      productId: 'f47ac10b-58cc-4372-a567-0e02b2c3d479',
+      quantity: 2,
+      pickupAt: '2026-05-11T11:00:00.000Z',
+    });
     expect(result).toEqual({
       id: 'order-1',
       orderNumber: 'PM20260511A1B2C3D4E5',
@@ -58,7 +63,7 @@ describe('orderApi.createOrder', () => {
       orderApi.createOrder({
         productId: 'f47ac10b-58cc-4372-a567-0e02b2c3d479',
         quantity: 1,
-        pickupAt: '2026-05-11T11:00:00.000Z',
+        pickupAt: new Date('2026-05-11T11:00:00.000Z'),
       })
     ).rejects.toBe(error);
   });

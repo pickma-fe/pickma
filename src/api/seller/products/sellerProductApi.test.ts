@@ -50,30 +50,36 @@ describe('sellerProductApi', () => {
 
   it('createProduct는 request body를 전달하고 mapper 결과를 반환한다', async () => {
     vi.mocked(apiClient.post).mockResolvedValue(dto);
-    const body = {
+    const input = {
       menuItemId: 'menu-item-1',
       discountPrice: 7200,
       stock: 8,
-      endAt: '2099-12-31T23:59:59.000Z',
+      endAt: new Date('2099-12-31T23:59:59.000Z'),
       pickupStartTime: '10:00:00',
       pickupEndTime: '13:30:00',
     };
 
-    const result = await sellerProductApi.createProduct(body);
+    const result = await sellerProductApi.createProduct(input);
 
-    expect(apiClient.post).toHaveBeenCalledWith('/api/seller/products', body);
+    expect(apiClient.post).toHaveBeenCalledWith('/api/seller/products', {
+      ...input,
+      endAt: '2099-12-31T23:59:59.000Z',
+    });
     expect(result).toBe(product);
   });
 
   it('updateProduct는 product id 경로와 request body를 전달한다', async () => {
     vi.mocked(apiClient.patch).mockResolvedValue(dto);
-    const body = { stock: 5 };
+    const input = {
+      stock: 5,
+      endAt: new Date('2099-12-31T23:59:59.000Z'),
+    };
 
-    const result = await sellerProductApi.updateProduct('product-1', body);
+    const result = await sellerProductApi.updateProduct('product-1', input);
 
     expect(apiClient.patch).toHaveBeenCalledWith(
       '/api/seller/products/product-1',
-      body
+      { stock: 5, endAt: '2099-12-31T23:59:59.000Z' }
     );
     expect(result).toBe(product);
   });

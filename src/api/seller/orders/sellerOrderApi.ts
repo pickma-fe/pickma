@@ -1,5 +1,5 @@
 import type { PaginatedResult } from '@/types/common';
-import type { Order } from '@/types/order';
+import type { Order, OrderStatus, SellerOrderListQuery } from '@/types/order';
 import type {
   OrderDetailResponse,
   OrderListResponse,
@@ -9,12 +9,42 @@ import { apiClient } from '@/api/apiClient';
 
 import { mapSellerOrder, mapSellerOrderListItem } from './sellerOrderMapper';
 
+const ORDER_STATUS_TO_PARAM: Record<
+  Exclude<OrderStatus, 'paymentPending' | 'processing'>,
+  SellerOrderListParams['status']
+> = {
+  reserved: 'reserved',
+  accepted: 'accepted',
+  ready: 'ready',
+  completed: 'completed',
+  cancelled: 'cancelled',
+  cancelling: 'cancelling',
+  noShow: 'no_show',
+  expired: 'expired',
+};
+
+function toSellerOrderListParams(
+  query?: Partial<SellerOrderListQuery>
+): Partial<SellerOrderListParams> | undefined {
+  if (!query) {
+    return undefined;
+  }
+
+  return {
+    ...query,
+    status: query.status ? ORDER_STATUS_TO_PARAM[query.status] : undefined,
+  };
+}
+
 export const sellerOrderApi = {
   getOrders(
-    params?: Partial<SellerOrderListParams>
+    query?: Partial<SellerOrderListQuery>
   ): Promise<PaginatedResult<Omit<Order, 'items' | 'payment'>>> {
     return apiClient
-      .get<OrderListResponse>('/api/seller/orders', params)
+      .get<OrderListResponse>(
+        '/api/seller/orders',
+        toSellerOrderListParams(query)
+      )
       .then((res) => ({
         ...res,
         items: res.items.map(mapSellerOrderListItem),

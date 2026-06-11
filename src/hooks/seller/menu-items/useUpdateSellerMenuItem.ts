@@ -2,14 +2,13 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-import type { MenuItem } from '@/types/menu-item';
-import type { UpdateMenuItemRequest } from '@/contracts/menu-item';
+import type { MenuItem, UpdateMenuItemInput } from '@/types/menu-item';
 import { queryKeys } from '@/lib/queryKeys';
 import { sellerMenuItemApi } from '@/api/seller/menu-items/sellerMenuItemApi';
 
 interface UpdateSellerMenuItemVariables {
   id: string;
-  body: UpdateMenuItemRequest;
+  body: UpdateMenuItemInput;
 }
 
 export function useUpdateSellerMenuItem() {

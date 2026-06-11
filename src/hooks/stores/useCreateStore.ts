@@ -3,16 +3,11 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import type { CreateStoreInput, MyStore } from '@/types/store';
-import type { CreateStoreRequest } from '@/contracts/store';
 import { queryKeys } from '@/lib/queryKeys';
 import { fileApi } from '@/api/files/fileApi';
 import { storeApi } from '@/api/stores/storeApi';
 
 type CreateStoreVariables = CreateStoreInput & { imageFile?: File };
-
-function toCreateStoreRequest(input: CreateStoreInput): CreateStoreRequest {
-  return { ...input };
-}
 
 export function useCreateStore() {
   const queryClient = useQueryClient();
@@ -21,9 +16,9 @@ export function useCreateStore() {
     mutationFn: async ({ imageFile, ...input }) => {
       if (imageFile) {
         const image = await fileApi.uploadFile('store_image', imageFile);
-        return storeApi.createStore(toCreateStoreRequest({ ...input, image }));
+        return storeApi.createStore({ ...input, image });
       }
-      return storeApi.createStore(toCreateStoreRequest(input));
+      return storeApi.createStore(input);
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.stores.my() });

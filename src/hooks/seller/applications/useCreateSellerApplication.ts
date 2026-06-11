@@ -3,33 +3,24 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import type {
+  CreateSellerApplicationInput,
   SellerApplication,
+  SellerApplicationDocumentFiles,
+  SellerApplicationDocumentUploadInput,
   SellerApplicationDocumentType,
 } from '@/types/seller-application';
-import type { CreateSellerApplicationRequest } from '@/contracts/seller-application';
 import { queryKeys } from '@/lib/queryKeys';
 import { fileApi } from '@/api/files/fileApi';
 import { sellerApplicationApi } from '@/api/seller-applications/sellerApplicationApi';
 
-type DocumentFiles = {
-  businessLicense: File;
-  foodServicePermit: File;
-  bankAccount: File;
+const DOC_TYPE_MAP: Record<
+  keyof SellerApplicationDocumentFiles,
+  SellerApplicationDocumentType
+> = {
+  businessLicense: 'business_license',
+  foodServicePermit: 'food_service_permit',
+  bankAccount: 'bank_account',
 };
-
-export type CreateSellerApplicationInput = Omit<
-  CreateSellerApplicationRequest,
-  'documents'
-> & {
-  documents: DocumentFiles;
-};
-
-const DOC_TYPE_MAP: Record<keyof DocumentFiles, SellerApplicationDocumentType> =
-  {
-    businessLicense: 'business_license',
-    foodServicePermit: 'food_service_permit',
-    bankAccount: 'bank_account',
-  };
 
 async function cleanupPaths(paths: string[]): Promise<void> {
   if (paths.length === 0) return;
@@ -46,7 +37,7 @@ export function useCreateSellerApplication() {
   return useMutation<SellerApplication, Error, CreateSellerApplicationInput>({
     mutationFn: async ({ documents, ...rest }) => {
       const entries = Object.entries(documents) as [
-        keyof DocumentFiles,
+        keyof SellerApplicationDocumentFiles,
         File,
       ][];
 
@@ -69,13 +60,7 @@ export function useCreateSellerApplication() {
       );
 
       const uploadedPaths: string[] = [];
-      const uploadedDocs: {
-        type: SellerApplicationDocumentType;
-        storagePath: string;
-        originalFileName: string;
-        contentType: string;
-        size: number;
-      }[] = [];
+      const uploadedDocs: SellerApplicationDocumentUploadInput[] = [];
       const firstError = results.find((r) => r.status === 'rejected');
 
       for (const result of results) {

@@ -37,6 +37,38 @@ export interface SellerApplication {
   updatedAt: Date;
 }
 
+export type SellerApplicationDocumentFiles = {
+  businessLicense: File;
+  foodServicePermit: File;
+  bankAccount: File;
+};
+
+export interface CreateSellerApplicationInput {
+  businessNumber: string;
+  companyName: string;
+  representativeName: string;
+  businessAddress: string;
+  businessType: string;
+  businessCategory: string;
+  documentConsentAgreed: boolean;
+  documents: SellerApplicationDocumentFiles;
+}
+
+export interface SellerApplicationDocumentUploadInput {
+  type: SellerApplicationDocumentType;
+  storagePath: string;
+  originalFileName: string;
+  contentType: string;
+  size: number;
+}
+
+export interface CreateSellerApplicationPayload extends Omit<
+  CreateSellerApplicationInput,
+  'documents'
+> {
+  documents: SellerApplicationDocumentUploadInput[];
+}
+
 export interface AdminPendingSellerApplication extends Omit<
   SellerApplication,
   | 'status'

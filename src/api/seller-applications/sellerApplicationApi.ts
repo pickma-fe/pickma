@@ -1,4 +1,7 @@
-import type { SellerApplication } from '@/types/seller-application';
+import type {
+  CreateSellerApplicationPayload,
+  SellerApplication,
+} from '@/types/seller-application';
 import type {
   CreateSellerApplicationRequest,
   SellerApplicationDocumentReadUrlResponse,
@@ -8,12 +11,21 @@ import { apiClient } from '@/api/apiClient';
 
 import { mapSellerApplication } from './sellerApplicationMapper';
 
+function toCreateSellerApplicationRequest(
+  input: CreateSellerApplicationPayload
+): CreateSellerApplicationRequest {
+  return { ...input };
+}
+
 export const sellerApplicationApi = {
   createSellerApplication(
-    body: CreateSellerApplicationRequest
+    input: CreateSellerApplicationPayload
   ): Promise<SellerApplication> {
     return apiClient
-      .post<SellerApplicationResponse>('/api/seller-applications', body)
+      .post<SellerApplicationResponse>(
+        '/api/seller-applications',
+        toCreateSellerApplicationRequest(input)
+      )
       .then(mapSellerApplication);
   },
 

@@ -81,3 +81,48 @@ describe('storeApi.getMyStore', () => {
     await expect(storeApi.getMyStore()).rejects.toBe(error);
   });
 });
+
+describe('storeApi mutations', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(mapMyStore).mockReturnValue(mockMyStore);
+  });
+
+  it('createStore는 CreateStoreInput을 request body로 전달한다', async () => {
+    vi.mocked(apiClient.post).mockResolvedValue(mockStoreResponse);
+
+    const result = await storeApi.createStore({
+      name: '픽마 베이커리',
+      businessNumber: '123-45-67890',
+      phone: '02-1234-5678',
+      address: '서울시 마포구 월드컵북로 12',
+      region: '서울 마포구',
+      image: 'stores/store-1.png',
+    });
+
+    expect(apiClient.post).toHaveBeenCalledWith('/api/stores', {
+      name: '픽마 베이커리',
+      businessNumber: '123-45-67890',
+      phone: '02-1234-5678',
+      address: '서울시 마포구 월드컵북로 12',
+      region: '서울 마포구',
+      image: 'stores/store-1.png',
+    });
+    expect(result).toBe(mockMyStore);
+  });
+
+  it('updateStore는 UpdateStoreInput을 request body로 전달한다', async () => {
+    vi.mocked(apiClient.patch).mockResolvedValue(mockStoreResponse);
+
+    const result = await storeApi.updateStore({
+      name: '수정된 가게',
+      operationStatus: 'closed',
+    });
+
+    expect(apiClient.patch).toHaveBeenCalledWith('/api/stores/me', {
+      name: '수정된 가게',
+      operationStatus: 'closed',
+    });
+    expect(result).toBe(mockMyStore);
+  });
+});
