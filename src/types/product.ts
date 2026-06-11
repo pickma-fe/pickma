@@ -1,10 +1,13 @@
-import type { ProductDiscountOption } from '@/contracts/product';
-
 import type { Store } from './store';
 
-export type { ProductDiscountOption } from '@/contracts/product';
-
 export type ProductStatus = 'active' | 'closed';
+
+export type ProductDiscountOption =
+  | 'all'
+  | 'over-40'
+  | '30-to-40'
+  | '20-to-30'
+  | 'under-20';
 
 export interface ProductListQuery {
   page: number;
