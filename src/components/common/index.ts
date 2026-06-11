@@ -8,5 +8,7 @@ export { Modal } from './Modal/Modal';
 export { Pagination } from './Pagination/Pagination';
 export { Section } from './Section/Section';
 export { Sidebar } from './Sidebar/Sidebar';
-
 export type { SidebarItem, SidebarSection } from './Sidebar/Sidebar.types';
+export { Toast } from './Toast/Toast';
+
+export { ToastContainer } from './Toast/ToastContainer';
