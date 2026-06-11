@@ -37,6 +37,8 @@ export async function createStore(
       address: body.address,
       address_detail: body.addressDetail ?? null,
       region: body.region,
+      latitude: body.latitude ?? null,
+      longitude: body.longitude ?? null,
       image: body.image ?? null,
       open_time: body.openTime ? body.openTime.slice(0, 8) : null,
       close_time: body.closeTime ? body.closeTime.slice(0, 8) : null,
@@ -77,6 +79,8 @@ export async function updateMyStore(
         address_detail: body.addressDetail,
       }),
       ...(body.region !== undefined && { region: body.region }),
+      ...(body.latitude !== undefined && { latitude: body.latitude }),
+      ...(body.longitude !== undefined && { longitude: body.longitude }),
       ...(body.image !== undefined && { image: body.image }),
       ...(body.openTime !== undefined && {
         open_time: body.openTime.slice(0, 8),

@@ -1,10 +1,10 @@
 # T21. 지도 기반 조회 및 거리순 정렬
 
 - 상태:
-  진행 전
+  완료
 
 - GitHub Issue:
-  확인 필요
+  260
 
 - 우선순위:
   P2
@@ -50,3 +50,12 @@
   - 가게 위치가 저장된다.
   - 고객이 지도/거리순으로 상품을 탐색할 수 있다.
   - 거리 계산이 API 서버 메모리 전체 정렬에 의존하지 않는다.
+
+- 구현 결과:
+  - Migration: `20260610120000_store_location_columns.sql` (stores 위치 컬럼), `20260610130000_haversine_products_rpc.sql` (Haversine RPC + discountOption 필터 포함)
+  - API 확장: `GET /api/products`에 `userLat`/`userLng`, `sort=distance`, `discountOption` 필터 지원
+  - Contract/Domain 타입: `ProductListItemResponse`에 `distanceKm`, `storeLat`, `storeLng` 추가
+  - 판매자 UI: 가게 등록/수정에 Daum Postcode 연동 (`StoreInfoStep`, `StoreEditForm`)
+  - 소비자 UI: region 드롭다운 제거, `LocationPickerButton`, `NoLocationView`, `MapViewFab` 추가
+  - 지도 페이지: `/map` 신규 라우트, `StoreMapView` (Kakao Maps 핀), `StoreProductBottomSheet` 구현
+  - 후속 task: T68 (지도 UI/UX 개선, P2), T69 (소비자 위치/검색 기능 확장, P3)

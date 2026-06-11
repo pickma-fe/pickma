@@ -8,6 +8,8 @@ export interface UpdateStoreInput {
   address?: string;
   addressDetail?: string;
   region?: string;
+  latitude?: number;
+  longitude?: number;
   image?: string;
   openTime?: string;
   closeTime?: string;
@@ -22,6 +24,8 @@ export interface CreateStoreInput {
   address: string;
   addressDetail?: string;
   region: string;
+  latitude?: number;
+  longitude?: number;
   image?: string;
   openTime?: string;
   closeTime?: string;
@@ -37,6 +41,8 @@ export interface Store {
   address: string;
   addressDetail?: string;
   region: string;
+  latitude?: number;
+  longitude?: number;
   image?: string;
   openTime?: string;
   closeTime?: string;
@@ -86,4 +92,7 @@ export interface StoreInfoData {
   phone: string;
   address: string;
   description: string;
+  region?: string;
+  latitude?: number;
+  longitude?: number;
 }

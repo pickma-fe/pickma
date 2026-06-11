@@ -5,6 +5,8 @@ export interface UpdateStoreRequest {
   address?: string;
   addressDetail?: string;
   region?: string;
+  latitude?: number;
+  longitude?: number;
   image?: string;
   openTime?: string;
   closeTime?: string;
@@ -19,6 +21,8 @@ export interface CreateStoreRequest {
   address: string;
   addressDetail?: string;
   region: string;
+  latitude?: number;
+  longitude?: number;
   image?: string;
   openTime?: string;
   closeTime?: string;
@@ -34,6 +38,8 @@ export interface StoreResponse {
   address: string;
   addressDetail?: string;
   region: string;
+  latitude?: number;
+  longitude?: number;
   image?: string;
   openTime?: string;
   closeTime?: string;

@@ -4,11 +4,8 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 
 import type { Category } from '@/types/category';
-import type { PaginatedResult } from '@/types/common';
-import type { Product } from '@/types/product';
 import {
   CONSUMER_PRODUCTS_PER_PAGE,
-  CONSUMER_REGION_ITEMS,
   getProductSortQuery,
 } from '@/lib/consumerPageConfig';
 import {
@@ -21,22 +18,23 @@ import {
   type ProductSortOptionId,
 } from '@/lib/consumerProductFilters';
 import { useCategories } from '@/hooks/categories/useCategories';
+import { useUserLocation } from '@/hooks/consumer/useUserLocation';
 import { useProducts } from '@/hooks/products/useProducts';
 import { Button, Footer } from '@/components/common';
 
 import { ConsumerHeader } from './ConsumerHeader';
 import { ConsumerHeaderSearch } from './ConsumerHeaderSearch';
 import { ConsumerProductList } from './ConsumerProductList';
+import { LocationPickerButton } from './LocationPickerButton';
+import { MapViewFab } from './MapViewFab';
+import { NoLocationView } from './NoLocationView';
 import { ProductFilterSidebar } from './ProductFilterSidebar';
 import { PromotionCarousel } from './PromotionCarousel';
 
 interface ConsumerPageClientProps {
   initialCategories?: Category[];
-  initialProducts?: PaginatedResult<Product>;
 }
 
-// Keep a light interval refetch because stock, reservation count, and closing
-// time can change while the user is browsing the public product list.
 const PRODUCT_LIST_REFRESH_INTERVAL_MS = 60_000;
 const categoryIconMap: Record<string, string> = {
   bread: '🥖',
@@ -48,13 +46,10 @@ const categoryIconMap: Record<string, string> = {
 
 export function ConsumerPageClient({
   initialCategories,
-  initialProducts,
 }: ConsumerPageClientProps) {
   const router = useRouter();
+  const { location, saveLocation } = useUserLocation();
   const [selectedCategoryId, setSelectedCategoryId] = useState(ALL_CATEGORY_ID);
-  const [selectedRegion, setSelectedRegion] = useState(
-    CONSUMER_REGION_ITEMS[0].value
-  );
   const [selectedSortOption, setSelectedSortOption] =
     useState<ProductSortOptionId>(DEFAULT_SORT_OPTION_ID);
   const [selectedDiscountOption, setSelectedDiscountOption] =
@@ -62,12 +57,6 @@ export function ConsumerPageClient({
   const [keyword, setKeyword] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const productSortQuery = getProductSortQuery(selectedSortOption);
-  const shouldUseInitialProducts =
-    currentPage === 1 &&
-    selectedCategoryId === ALL_CATEGORY_ID &&
-    selectedRegion === CONSUMER_REGION_ITEMS[0].value &&
-    selectedSortOption === DEFAULT_SORT_OPTION_ID &&
-    selectedDiscountOption === DEFAULT_DISCOUNT_OPTION_ID;
   const { data: categories = [] } = useCategories({
     initialData: initialCategories,
   });
@@ -94,7 +83,6 @@ export function ConsumerPageClient({
     {
       page: currentPage,
       pageSize: CONSUMER_PRODUCTS_PER_PAGE,
-      region: selectedRegion,
       categoryId:
         selectedCategoryId === ALL_CATEGORY_ID ? undefined : selectedCategoryId,
       discountOption:
@@ -102,15 +90,12 @@ export function ConsumerPageClient({
           ? undefined
           : selectedDiscountOption,
       sort: productSortQuery.sort,
-      order: productSortQuery.order,
+      order: 'order' in productSortQuery ? productSortQuery.order : undefined,
+      userLat: location?.lat,
+      userLng: location?.lng,
       availableOnly: true,
     },
-    {
-      initialData:
-        shouldUseInitialProducts && initialProducts
-          ? initialProducts
-          : undefined,
-    }
+    { enabled: !!location }
   );
   const products = productList?.items;
 
@@ -175,11 +160,6 @@ export function ConsumerPageClient({
     setCurrentPage(1);
   };
 
-  const handleRegionChange = (region: string) => {
-    setSelectedRegion(region);
-    setCurrentPage(1);
-  };
-
   const handleSortChange = (sortOption: string) => {
     setSelectedSortOption(normalizeSortOptionId(sortOption));
     setCurrentPage(1);
@@ -207,12 +187,7 @@ export function ConsumerPageClient({
       return;
     }
 
-    const searchParams = new URLSearchParams({
-      keyword: trimmedKeyword,
-      region: selectedRegion,
-    });
-
-    router.push(`/search?${searchParams.toString()}`);
+    router.push(`/search?keyword=${encodeURIComponent(trimmedKeyword)}`);
   };
 
   const handleRetryProducts = () => {
@@ -220,6 +195,10 @@ export function ConsumerPageClient({
   };
 
   const productListContent = (() => {
+    if (!location) {
+      return <NoLocationView onLocationChange={saveLocation} />;
+    }
+
     if (isProductsLoading) {
       return (
         <div className="flex min-h-80 items-center justify-center rounded-lg border border-dashed border-gray-200 bg-gray-50 text-sm font-medium text-gray-500">
@@ -266,14 +245,17 @@ export function ConsumerPageClient({
     <div className="bg-white">
       <ConsumerHeader
         slot={
-          <ConsumerHeaderSearch
-            regionItems={CONSUMER_REGION_ITEMS}
-            selectedRegion={selectedRegion}
-            keyword={keyword}
-            onRegionChange={handleRegionChange}
-            onKeywordChange={handleKeywordChange}
-            onSearch={handleSearch}
-          />
+          <div className="flex w-full max-w-160 min-w-0 items-center gap-2">
+            <LocationPickerButton
+              location={location}
+              onLocationChange={saveLocation}
+            />
+            <ConsumerHeaderSearch
+              keyword={keyword}
+              onKeywordChange={handleKeywordChange}
+              onSearch={handleSearch}
+            />
+          </div>
         }
       />
 
@@ -297,6 +279,8 @@ export function ConsumerPageClient({
           </section>
         </div>
       </main>
+
+      <MapViewFab />
       <Footer />
     </div>
   );

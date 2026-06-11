@@ -9,7 +9,13 @@ import { AppError } from '@/lib/errors/appError';
 import { ERROR_CODE } from '@/lib/errors/errorCodes';
 import type { Database } from '@/lib/supabase/database';
 
-import { mapProductDetailRow, mapProductRow, type ProductRow } from './mapper';
+import {
+  mapProductDetailRow,
+  mapProductRow,
+  mapRpcProductRow,
+  type ProductRow,
+  type RpcProductRow,
+} from './mapper';
 
 const PRODUCT_SELECT = [
   'id',
@@ -29,14 +35,22 @@ const PRODUCT_SELECT = [
   'updated_at',
   'menu_items!inner(id, name, description, image)',
   'categories(id, name)',
-  'stores!inner(id, name, description, phone, address, address_detail, region, image)',
+  'stores!inner(id, name, description, phone, address, address_detail, region, image, latitude, longitude)',
 ].join(', ');
 
 export async function getProducts(
   supabase: SupabaseClient<Database>,
   params: ProductListParams
 ): Promise<ProductListResponse> {
-  const { region, categoryId, keyword } = params;
+  if (
+    params.sort === 'distance' &&
+    params.userLat !== undefined &&
+    params.userLng !== undefined
+  ) {
+    return getProductsNear(supabase, params);
+  }
+
+  const { categoryId, keyword } = params;
   const from = (params.page - 1) * params.pageSize;
   const to = from + params.pageSize - 1;
 
@@ -46,10 +60,6 @@ export async function getProducts(
     .eq('status', 'active')
     .eq('stores.status', 'active')
     .eq('stores.operation_status', 'open');
-
-  if (region) {
-    query = query.eq('stores.region', region);
-  }
 
   if (categoryId) {
     query = query.eq('category_id', categoryId);
@@ -107,6 +117,57 @@ export async function getProducts(
 
   return {
     items: ((data ?? []) as unknown as ProductRow[]).map(mapProductRow),
+    page: params.page,
+    pageSize: params.pageSize,
+    totalCount,
+    totalPages: Math.ceil(totalCount / params.pageSize),
+  };
+}
+
+function getDiscountRateRange(
+  discountOption: ProductListParams['discountOption']
+): { min: number | undefined; max: number | undefined } {
+  switch (discountOption) {
+    case 'over-40':
+      return { min: 40, max: undefined };
+    case '30-to-40':
+      return { min: 30, max: 40 };
+    case '20-to-30':
+      return { min: 20, max: 30 };
+    case 'under-20':
+      return { min: undefined, max: 20 };
+    default:
+      return { min: undefined, max: undefined };
+  }
+}
+
+async function getProductsNear(
+  supabase: SupabaseClient<Database>,
+  params: ProductListParams
+): Promise<ProductListResponse> {
+  const discountRange = getDiscountRateRange(params.discountOption);
+  const { data, error } = await supabase.rpc('get_products_near', {
+    p_user_lat: params.userLat as number,
+    p_user_lng: params.userLng as number,
+    p_radius_km: 3.0,
+    p_page: params.page,
+    p_page_size: params.pageSize,
+    p_category_id: params.categoryId ?? undefined,
+    p_keyword: params.keyword ?? undefined,
+    p_min_price: params.minPrice ?? undefined,
+    p_max_price: params.maxPrice ?? undefined,
+    p_available_only: params.availableOnly ?? true,
+    p_min_discount_rate: discountRange.min,
+    p_max_discount_rate: discountRange.max,
+  });
+
+  if (error) throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
+
+  const rows = (data ?? []) as unknown as RpcProductRow[];
+  const totalCount = rows.length > 0 ? Number(rows[0].total_count) : 0;
+
+  return {
+    items: rows.map(mapRpcProductRow),
     page: params.page,
     pageSize: params.pageSize,
     totalCount,

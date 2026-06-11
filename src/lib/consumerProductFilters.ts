@@ -8,7 +8,12 @@ export const ALL_CATEGORY_ID = 'category-all';
 export const DEFAULT_SORT_OPTION_ID = 'deadline';
 export const DEFAULT_DISCOUNT_OPTION_ID = 'all';
 
-const SORT_OPTION_IDS = ['deadline', 'discount-rate', 'price-low'] as const;
+const SORT_OPTION_IDS = [
+  'deadline',
+  'discount-rate',
+  'price-low',
+  'distance',
+] as const;
 const DISCOUNT_OPTION_IDS = [
   'all',
   'over-40',

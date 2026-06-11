@@ -12,11 +12,10 @@ describe('buildMockProductListResponse', () => {
     vi.useRealTimers();
   });
 
-  it('region, category, keyword, discountOption, sort 조건을 반영한다', () => {
+  it('category, keyword, discountOption, sort 조건을 반영한다', () => {
     const result = buildMockProductListResponse({
       page: 1,
       pageSize: 10,
-      region: '서울 강남구',
       categoryId: '00000000-0000-4000-8000-000000000011',
       keyword: '티라미수',
       discountOption: 'over-40',

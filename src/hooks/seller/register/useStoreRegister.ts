@@ -21,7 +21,9 @@ export function useStoreRegister(businessNumber: string) {
   const handleStoreInfoComplete = (data: StoreInfoData) => {
     setStoreInfo(data);
     const region =
-      data.address.split(' ').slice(0, 2).join(' ') || data.address;
+      data.region ||
+      data.address.split(' ').slice(0, 2).join(' ') ||
+      data.address;
     createStore(
       {
         name: data.storeName,
@@ -30,6 +32,8 @@ export function useStoreRegister(businessNumber: string) {
         description: data.description || undefined,
         businessNumber,
         region,
+        latitude: data.latitude,
+        longitude: data.longitude,
       },
       {
         onSuccess: () => {

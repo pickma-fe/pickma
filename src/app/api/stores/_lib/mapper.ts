@@ -14,6 +14,8 @@ export function mapStoreRow(row: StoresRow, canSell: boolean): StoreResponse {
     address: row.address,
     addressDetail: row.address_detail ?? undefined,
     region: row.region,
+    latitude: row.latitude ?? undefined,
+    longitude: row.longitude ?? undefined,
     image: row.image ?? undefined,
     openTime: row.open_time ?? undefined,
     closeTime: row.close_time ?? undefined,

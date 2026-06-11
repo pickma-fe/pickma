@@ -3,6 +3,7 @@
 import { useState } from 'react';
 
 import type { MyStore } from '@/types/store';
+import { openPostcodeSearch } from '@/lib/kakao/postcode';
 import { Button } from '@/components/common/Button/Button';
 import { Input } from '@/components/common/Input/Input';
 
@@ -19,6 +20,8 @@ export interface StoreEditData {
   address: string;
   addressDetail: string;
   region: string;
+  latitude?: number;
+  longitude?: number;
   description: string;
   openTime: string;
   closeTime: string;
@@ -36,11 +39,29 @@ export function StoreEditForm({
     address: storeInfo.address,
     addressDetail: storeInfo.addressDetail ?? '',
     region: storeInfo.region,
+    latitude: storeInfo.latitude,
+    longitude: storeInfo.longitude,
     description: storeInfo.description ?? '',
     openTime: storeInfo.openTime?.slice(0, 5) ?? '09:00',
     closeTime: storeInfo.closeTime?.slice(0, 5) ?? '22:00',
   });
   const [error, setError] = useState<string | null>(null);
+
+  const handleAddressSearch = async () => {
+    await openPostcodeSearch(
+      (info) => {
+        setFormData((prev) => ({
+          ...prev,
+          address: info.address,
+          region: info.region,
+          latitude: info.latitude,
+          longitude: info.longitude,
+        }));
+        setError(null);
+      },
+      () => setError('주소 검색 중 오류가 발생했습니다. 다시 시도해 주세요.')
+    );
+  };
 
   const handleChange = (field: keyof StoreEditData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -95,25 +116,32 @@ export function StoreEditForm({
           placeholder="02-1234-5678"
         />
 
-        <Input
-          label="가게 주소"
-          value={formData.address}
-          onChange={(e) => handleChange('address', e.target.value)}
-          placeholder="주소를 입력해주세요"
-        />
+        <div className="flex flex-col gap-1">
+          <span className="text-sm text-gray-500">가게 주소</span>
+          <div className="flex items-start gap-2">
+            <div className="flex-1">
+              <Input
+                value={formData.address}
+                readOnly
+                placeholder="주소 검색 버튼을 눌러주세요"
+              />
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              color="gray"
+              onClick={() => void handleAddressSearch()}
+            >
+              주소 검색
+            </Button>
+          </div>
+        </div>
 
         <Input
           label="상세 주소"
           value={formData.addressDetail}
           onChange={(e) => handleChange('addressDetail', e.target.value)}
           placeholder="상세 주소를 입력해주세요"
-        />
-
-        <Input
-          label="지역"
-          value={formData.region}
-          onChange={(e) => handleChange('region', e.target.value)}
-          placeholder="서울 마포구"
         />
 
         <Input

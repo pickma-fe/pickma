@@ -43,6 +43,9 @@ export const mockProducts: ProductListItemResponse[] = [
     pickupEndTime: '18:30:00',
     status: 'active',
     updatedAt: createMockDateTime('09:00'),
+    storeLat: 37.5571,
+    storeLng: 126.9021,
+    distanceKm: 0.4,
   },
   {
     id: '00000000-0000-4000-8000-000000000002',
@@ -67,6 +70,9 @@ export const mockProducts: ProductListItemResponse[] = [
     pickupEndTime: '19:00:00',
     status: 'active',
     updatedAt: createMockDateTime('09:30'),
+    storeLat: 37.5618,
+    storeLng: 127.0374,
+    distanceKm: 1.2,
   },
   {
     id: '00000000-0000-4000-8000-000000000003',
@@ -91,6 +97,9 @@ export const mockProducts: ProductListItemResponse[] = [
     pickupEndTime: '19:30:00',
     status: 'active',
     updatedAt: createMockDateTime('10:00'),
+    storeLat: 37.4992,
+    storeLng: 127.0327,
+    distanceKm: 2.1,
   },
   {
     id: '00000000-0000-4000-8000-000000000004',
@@ -115,6 +124,9 @@ export const mockProducts: ProductListItemResponse[] = [
     pickupEndTime: '20:00:00',
     status: 'active',
     updatedAt: createMockDateTime('11:00'),
+    storeLat: 37.5003,
+    storeLng: 127.0371,
+    distanceKm: 0.8,
   },
   {
     id: '00000000-0000-4000-8000-000000000005',
@@ -139,6 +151,9 @@ export const mockProducts: ProductListItemResponse[] = [
     pickupEndTime: '20:30:00',
     status: 'active',
     updatedAt: createMockDateTime('12:00'),
+    storeLat: 37.5502,
+    storeLng: 126.9132,
+    distanceKm: 1.7,
   },
   {
     id: '00000000-0000-4000-8000-000000000006',
@@ -163,6 +178,9 @@ export const mockProducts: ProductListItemResponse[] = [
     pickupEndTime: '21:00:00',
     status: 'active',
     updatedAt: createMockDateTime('13:00'),
+    storeLat: 37.4985,
+    storeLng: 127.0295,
+    distanceKm: 2.8,
   },
   {
     id: '00000000-0000-4000-8000-000000000007',
@@ -187,6 +205,9 @@ export const mockProducts: ProductListItemResponse[] = [
     pickupEndTime: '18:00:00',
     status: 'active',
     updatedAt: createMockDateTime('09:00'),
+    storeLat: 37.5612,
+    storeLng: 127.0373,
+    distanceKm: 0.6,
   },
   {
     id: '00000000-0000-4000-8000-000000000008',
@@ -211,6 +232,9 @@ export const mockProducts: ProductListItemResponse[] = [
     pickupEndTime: '19:00:00',
     status: 'active',
     updatedAt: createMockDateTime('10:00'),
+    storeLat: 37.5618,
+    storeLng: 127.0368,
+    distanceKm: 1.5,
   },
   {
     id: '00000000-0000-4000-8000-000000000009',
@@ -235,6 +259,9 @@ export const mockProducts: ProductListItemResponse[] = [
     pickupEndTime: '20:00:00',
     status: 'active',
     updatedAt: createMockDateTime('11:00'),
+    storeLat: 37.5495,
+    storeLng: 126.9143,
+    distanceKm: 2.3,
   },
   {
     id: '00000000-0000-4000-8000-000000000010',
@@ -259,6 +286,9 @@ export const mockProducts: ProductListItemResponse[] = [
     pickupEndTime: '21:30:00',
     status: 'active',
     updatedAt: createMockDateTime('14:00'),
+    storeLat: 37.4998,
+    storeLng: 127.0358,
+    distanceKm: 1.9,
   },
 ];
 

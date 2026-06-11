@@ -84,52 +84,52 @@ INSERT INTO public.users (id, email, name, role, status) VALUES
   ('00000000-0000-4000-8000-000000000028', 'seller7@pickma-seed.local', '씨드 판매자7', 'seller', 'active');
 
 -- Stores: 5 active+open, 1 inactive, 1 active+closed
-INSERT INTO public.stores (id, user_id, name, description, business_number, phone, address, address_detail, region, status) VALUES
+INSERT INTO public.stores (id, user_id, name, description, business_number, phone, address, address_detail, region, status, latitude, longitude) VALUES
   ('00000000-0000-4000-8000-000000000031',
    '00000000-0000-4000-8000-000000000021',
    '픽마 베이커리', '매일 아침 굽는 동네 베이커리입니다.',
    '1234567890', '02-1234-5678',
    '서울시 마포구 월드컵북로 12', '1층',
-   '서울 마포구', 'active'),
+   '서울 마포구', 'active', 37.5654, 126.9031),
   ('00000000-0000-4000-8000-000000000032',
    '00000000-0000-4000-8000-000000000022',
    '비활성 카페', '비활성 상태의 테스트 카페입니다.',
    '0987654321', '02-9876-5432',
    '서울시 서초구 강남대로 100', NULL,
-   '서울 서초구', 'inactive'),
+   '서울 서초구', 'inactive', 37.4840, 127.0325),
   ('00000000-0000-4000-8000-000000000033',
    '00000000-0000-4000-8000-000000000023',
    '씨드 델리', '가게 등록 후 바로 판매 가능한 상태입니다.',
    '1111111111', '02-1111-2222',
    '서울시 강남구 테헤란로 50', NULL,
-   '서울 강남구', 'active'),
+   '서울 강남구', 'active', 37.4987, 127.0270),
   ('00000000-0000-4000-8000-000000000034',
    '00000000-0000-4000-8000-000000000025',
    '한낮 도시락', '든든한 점심 도시락과 반찬을 준비합니다.',
    '2222222222', '02-2222-3333',
    '서울시 송파구 올림픽로 240', '지하 1층',
-   '서울 송파구', 'active'),
+   '서울 송파구', 'active', 37.5130, 127.0990),
   ('00000000-0000-4000-8000-000000000035',
    '00000000-0000-4000-8000-000000000026',
    '그린볼 샐러드', '신선한 채소와 샌드위치를 당일 조리합니다.',
    '3333333333', '02-3333-4444',
    '서울시 성동구 왕십리로 88', '2층',
-   '서울 성동구', 'active'),
+   '서울 성동구', 'active', 37.5607, 127.0375),
   ('00000000-0000-4000-8000-000000000036',
    '00000000-0000-4000-8000-000000000027',
    '달콤한 오후', '케이크와 쿠키를 소량 생산하는 디저트 숍입니다.',
    '4444444444', '02-4444-5555',
    '서울시 용산구 한강대로 120', NULL,
-   '서울 용산구', 'active');
+   '서울 용산구', 'active', 37.5293, 126.9641);
 
 -- T10 검증용: active이지만 operation_status=closed인 가게
-INSERT INTO public.stores (id, user_id, name, description, business_number, phone, address, region, status, operation_status) VALUES
+INSERT INTO public.stores (id, user_id, name, description, business_number, phone, address, region, status, operation_status, latitude, longitude) VALUES
   ('00000000-0000-4000-8000-000000000037',
    '00000000-0000-4000-8000-000000000028',
    '운영 중지 분식', '당일 운영 중지 상태 검증용 가게입니다.',
    '5555555555', '02-5555-6666',
    '서울시 종로구 종로 100',
-   '서울 종로구', 'active', 'closed');
+   '서울 종로구', 'active', 'closed', 37.5720, 126.9890);
 
 -- Menu items
 INSERT INTO public.menu_items (id, store_id, category_id, name, description, image, original_price) VALUES

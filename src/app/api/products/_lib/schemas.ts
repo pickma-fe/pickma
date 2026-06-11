@@ -15,11 +15,23 @@ const optionalNumberQuerySchema = z.preprocess((value) => {
   return value;
 }, z.coerce.number().int().optional());
 
+const optionalFloatQuerySchema = z.preprocess((value) => {
+  if (typeof value === 'string' && value.trim() === '') return undefined;
+  return value;
+}, z.coerce.number().optional());
+
 export const productListSchema = z
   .object({
     page: z.coerce.number().int().positive().default(1),
     pageSize: z.coerce.number().int().positive().max(100).default(20),
-    region: z.string().trim().min(1).optional(),
+    userLat: optionalFloatQuerySchema.refine(
+      (value) => value === undefined || (value >= -90 && value <= 90),
+      { message: 'userLat는 -90에서 90 사이여야 합니다.' }
+    ),
+    userLng: optionalFloatQuerySchema.refine(
+      (value) => value === undefined || (value >= -180 && value <= 180),
+      { message: 'userLng는 -180에서 180 사이여야 합니다.' }
+    ),
     categoryId: z.string().trim().min(1).optional(),
     keyword: z.string().trim().min(1).optional(),
     minPrice: optionalNumberQuerySchema.refine(
@@ -31,7 +43,9 @@ export const productListSchema = z
     discountOption: z
       .enum(['all', 'over-40', '30-to-40', '20-to-30', 'under-20'])
       .optional(),
-    sort: z.enum(['endAt', 'discountRate', 'discountPrice']).optional(),
+    sort: z
+      .enum(['endAt', 'discountRate', 'discountPrice', 'distance'])
+      .optional(),
     order: z.enum(['asc', 'desc']).optional(),
     availableOnly: booleanQuerySchema.optional(),
   })

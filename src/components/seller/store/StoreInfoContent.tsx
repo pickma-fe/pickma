@@ -88,6 +88,8 @@ export function StoreInfoContent() {
         address: data.address,
         addressDetail: data.addressDetail || undefined,
         region: data.region,
+        latitude: data.latitude,
+        longitude: data.longitude,
         description: data.description || undefined,
         openTime: `${data.openTime}:00`,
         closeTime: `${data.closeTime}:00`,

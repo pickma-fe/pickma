@@ -16,6 +16,8 @@ const baseRow: StoresRow = {
   address: '서울시 마포구 월드컵북로 12',
   address_detail: null,
   region: '서울 마포구',
+  latitude: null,
+  longitude: null,
   image: null,
   open_time: null,
   close_time: null,
@@ -74,6 +76,21 @@ describe('mapStoreRow', () => {
     expect(result.image).toBe('https://example.com/store.jpg');
     expect(result.openTime).toBe('09:00:00');
     expect(result.closeTime).toBe('21:00:00');
+  });
+
+  it('latitude/longitude null은 undefined로 변환한다', () => {
+    const result = mapStoreRow(baseRow, false);
+    expect(result.latitude).toBeUndefined();
+    expect(result.longitude).toBeUndefined();
+  });
+
+  it('latitude/longitude 값이 있으면 그대로 반환한다', () => {
+    const result = mapStoreRow(
+      { ...baseRow, latitude: 37.5654, longitude: 126.9031 },
+      false
+    );
+    expect(result.latitude).toBe(37.5654);
+    expect(result.longitude).toBe(126.9031);
   });
 
   it('canSell 파라미터를 DTO에 그대로 반영한다', () => {

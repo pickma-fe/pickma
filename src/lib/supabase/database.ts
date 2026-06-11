@@ -649,6 +649,8 @@ export type Database = {
           description: string | null;
           id: string;
           image: string | null;
+          latitude: number | null;
+          longitude: number | null;
           name: string;
           open_time: string | null;
           operation_status: Database['public']['Enums']['store_operation_status'];
@@ -667,6 +669,8 @@ export type Database = {
           description?: string | null;
           id?: string;
           image?: string | null;
+          latitude?: number | null;
+          longitude?: number | null;
           name: string;
           open_time?: string | null;
           operation_status?: Database['public']['Enums']['store_operation_status'];
@@ -685,6 +689,8 @@ export type Database = {
           description?: string | null;
           id?: string;
           image?: string | null;
+          latitude?: number | null;
+          longitude?: number | null;
           name?: string;
           open_time?: string | null;
           operation_status?: Database['public']['Enums']['store_operation_status'];
@@ -864,6 +870,59 @@ export type Database = {
         }[];
       };
       generate_order_number: { Args: never; Returns: string };
+      get_products_near: {
+        Args: {
+          p_available_only?: boolean;
+          p_category_id?: string;
+          p_keyword?: string;
+          p_max_discount_rate?: number;
+          p_max_price?: number;
+          p_min_discount_rate?: number;
+          p_min_price?: number;
+          p_page?: number;
+          p_page_size?: number;
+          p_radius_km?: number;
+          p_user_lat: number;
+          p_user_lng: number;
+        };
+        Returns: {
+          available_stock: number;
+          cat_id: string;
+          cat_name: string;
+          category_id: string;
+          discount_price: number;
+          discount_rate: number;
+          distance_km: number;
+          end_at: string;
+          id: string;
+          menu_item_description: string;
+          menu_item_id: string;
+          menu_item_image: string;
+          menu_item_name: string;
+          original_price: number;
+          pickup_end_time: string;
+          pickup_start_time: string;
+          reserved_stock: number;
+          status: Database['public']['Enums']['product_status'];
+          stock: number;
+          store_address: string;
+          store_address_detail: string;
+          store_description: string;
+          store_id: string;
+          store_image: string;
+          store_lat: number;
+          store_lng: number;
+          store_name: string;
+          store_phone: string;
+          store_region: string;
+          total_count: number;
+          updated_at: string;
+        }[];
+      };
+      haversine_km: {
+        Args: { lat1: number; lat2: number; lng1: number; lng2: number };
+        Returns: number;
+      };
       revert_order_cancel_claim: {
         Args: { p_order_id: string };
         Returns: {

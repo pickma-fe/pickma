@@ -17,6 +17,7 @@ export const sortOptions = [
   { id: 'deadline', label: '마감 임박순' },
   { id: 'discount-rate', label: '할인율 높은순' },
   { id: 'price-low', label: '가격 낮은순' },
+  { id: 'distance', label: '거리순' },
 ];
 
 interface ProductFilterSidebarProps {

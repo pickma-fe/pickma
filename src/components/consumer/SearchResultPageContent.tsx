@@ -5,7 +5,6 @@ import { useMemo, useState } from 'react';
 
 import {
   CONSUMER_PRODUCTS_PER_PAGE,
-  CONSUMER_REGION_ITEMS,
   getProductSortQuery,
 } from '@/lib/consumerPageConfig';
 import {
@@ -28,7 +27,6 @@ import { getPriceRange, getPriceRangeId } from './searchResultFilters';
 
 interface SearchResultPageContentProps {
   initialKeyword: string;
-  initialRegion?: string;
   initialCategoryId?: string;
   initialPage: number;
   initialSortOption?: string;
@@ -52,7 +50,6 @@ const categoryIconMap: Record<string, string> = {
 
 export function SearchResultPageContent({
   initialKeyword,
-  initialRegion,
   initialCategoryId,
   initialPage,
   initialSortOption,
@@ -62,9 +59,6 @@ export function SearchResultPageContent({
   const router = useRouter();
   const [keyword, setKeyword] = useState(initialKeyword);
   const [submittedKeyword, setSubmittedKeyword] = useState(initialKeyword);
-  const [selectedRegion, setSelectedRegion] = useState(
-    initialRegion || CONSUMER_REGION_ITEMS[0].value
-  );
   const [currentPage, setCurrentPage] = useState(initialPage);
   const [selectedSortOption, setSelectedSortOption] =
     useState<ProductSortOptionId>(
@@ -106,13 +100,12 @@ export function SearchResultPageContent({
       page: currentPage,
       pageSize: CONSUMER_PRODUCTS_PER_PAGE,
       keyword: submittedKeyword || undefined,
-      region: selectedRegion,
       categoryId:
         selectedCategoryId === ALL_CATEGORY_ID ? undefined : selectedCategoryId,
       minPrice: selectedPriceRange.minPrice,
       maxPrice: selectedPriceRange.maxPrice,
       sort: productSortQuery.sort,
-      order: productSortQuery.order,
+      order: 'order' in productSortQuery ? productSortQuery.order : undefined,
       availableOnly: true,
     },
     { enabled: hasKeyword }
@@ -123,14 +116,12 @@ export function SearchResultPageContent({
 
   function updateSearchUrl(next: {
     keyword?: string;
-    region?: string;
     page?: number;
     sortOption?: ProductSortOptionId;
     categoryId?: string;
     priceRangeId?: PriceRangeId;
   }): void {
     const nextKeyword = next.keyword ?? submittedKeyword;
-    const nextRegion = next.region ?? selectedRegion;
     const nextPage = next.page ?? currentPage;
     const nextSortOption = next.sortOption ?? selectedSortOption;
     const nextCategoryId = next.categoryId ?? selectedCategoryId;
@@ -141,10 +132,6 @@ export function SearchResultPageContent({
 
     if (nextKeyword.trim()) {
       params.set('q', nextKeyword.trim());
-    }
-
-    if (nextRegion) {
-      params.set('region', nextRegion);
     }
 
     if (nextPage > 1) {
@@ -176,12 +163,6 @@ export function SearchResultPageContent({
     setSubmittedKeyword(nextKeyword);
     setCurrentPage(1);
     updateSearchUrl({ keyword: nextKeyword, page: 1 });
-  }
-
-  function handleRegionChange(region: string): void {
-    setSelectedRegion(region);
-    setCurrentPage(1);
-    updateSearchUrl({ region, page: 1 });
   }
 
   function handleSortChange(sortOption: ProductSortOptionId): void {
@@ -225,10 +206,7 @@ export function SearchResultPageContent({
       <ConsumerHeader
         slot={
           <ConsumerHeaderSearch
-            regionItems={CONSUMER_REGION_ITEMS}
-            selectedRegion={selectedRegion}
             keyword={keyword}
-            onRegionChange={handleRegionChange}
             onKeywordChange={setKeyword}
             onSearch={submitSearch}
           />

@@ -5,7 +5,7 @@ import { AppError } from '@/lib/errors/appError';
 import { ERROR_CODE } from '@/lib/errors/errorCodes';
 import type { Database } from '@/lib/supabase/database';
 
-import type { ProductRow } from './mapper';
+import type { ProductRow, RpcProductRow } from './mapper';
 import { getProductById, getProducts } from './service';
 
 const baseRow: ProductRow = {
@@ -40,6 +40,8 @@ const baseRow: ProductRow = {
     address_detail: '1층',
     region: '서울 마포구',
     image: null,
+    latitude: null,
+    longitude: null,
   },
 };
 
@@ -125,35 +127,15 @@ describe('getProducts', () => {
     );
   });
 
-  it('region 파라미터가 있으면 stores.region 필터를 적용한다', async () => {
-    const supabase = buildSupabase({ data: [], error: null, count: 0 });
-
-    await getProducts(supabase, {
-      page: 1,
-      pageSize: 20,
-      region: '서울 마포구',
-    });
-
-    expect(supabase._chain.eq).toHaveBeenCalledWith(
-      'stores.region',
-      '서울 마포구'
-    );
-  });
-
-  it('region과 availableOnly를 함께 사용해도 DB 조회 결과를 유지한다', async () => {
+  it('availableOnly가 있으면 DB 조회 결과를 유지한다', async () => {
     const supabase = buildSupabase({ data: [baseRow], error: null, count: 1 });
 
     const result = await getProducts(supabase, {
       page: 1,
       pageSize: 20,
-      region: '서울 마포구',
       availableOnly: true,
     });
 
-    expect(supabase._chain.eq).toHaveBeenCalledWith(
-      'stores.region',
-      '서울 마포구'
-    );
     expect(result.items).toHaveLength(1);
     expect(result.items[0].id).toBe(baseRow.id);
   });
@@ -407,6 +389,182 @@ describe('getProducts', () => {
     await expect(
       getProducts(supabase, { page: 1, pageSize: 20 })
     ).rejects.toMatchObject({ code: ERROR_CODE.INTERNAL_SERVER_ERROR });
+  });
+});
+
+const baseRpcRow: RpcProductRow = {
+  id: '00000000-0000-4000-8000-000000000051',
+  store_id: '00000000-0000-4000-8000-000000000031',
+  menu_item_id: '00000000-0000-4000-8000-000000000041',
+  category_id: '00000000-0000-4000-8000-000000000011',
+  discount_price: 7200,
+  original_price: 12000,
+  discount_rate: 40,
+  available_stock: 6,
+  stock: 8,
+  reserved_stock: 2,
+  end_at: '2099-12-31T23:59:59.000Z',
+  pickup_start_time: '10:00:00',
+  pickup_end_time: '13:30:00',
+  status: 'active',
+  updated_at: '2026-05-07T09:00:00.000Z',
+  menu_item_name: '마감 할인 크루아상 세트',
+  menu_item_description: null,
+  menu_item_image: null,
+  cat_id: '00000000-0000-4000-8000-000000000011',
+  cat_name: '베이커리',
+  store_name: '픽마 베이커리',
+  store_description: null,
+  store_phone: '02-1234-5678',
+  store_address: '서울시 마포구 월드컵북로 12',
+  store_address_detail: '1층',
+  store_region: '서울 마포구',
+  store_image: null,
+  store_lat: 37.5665,
+  store_lng: 126.978,
+  distance_km: 1.2,
+  total_count: 5,
+};
+
+function buildRpcSupabase(result: {
+  data?: unknown;
+  error?: { code: string; message: string } | null;
+}) {
+  return {
+    rpc: vi.fn().mockResolvedValue(result),
+  } as unknown as SupabaseClient<Database>;
+}
+
+describe('getProducts - sort=distance (RPC 경로)', () => {
+  const distanceParams = {
+    page: 1,
+    pageSize: 10,
+    sort: 'distance' as const,
+    userLat: 37.5665,
+    userLng: 126.978,
+  };
+
+  it('get_products_near RPC를 호출하고 결과를 반환한다', async () => {
+    const supabase = buildRpcSupabase({
+      data: [baseRpcRow],
+      error: null,
+    });
+
+    const result = await getProducts(supabase, distanceParams);
+
+    expect(result.items).toHaveLength(1);
+    expect(result.items[0].id).toBe(baseRpcRow.id);
+    expect(result.items[0].distanceKm).toBe(1.2);
+    expect(result.items[0].storeLat).toBe(37.5665);
+    expect(result.items[0].storeLng).toBe(126.978);
+    expect(result.totalCount).toBe(5);
+    expect(result.page).toBe(1);
+  });
+
+  it('RPC에 올바른 파라미터를 전달한다', async () => {
+    const supabase = buildRpcSupabase({ data: [], error: null });
+
+    await getProducts(supabase, distanceParams);
+
+    expect(supabase.rpc).toHaveBeenCalledWith(
+      'get_products_near',
+      expect.objectContaining({
+        p_user_lat: 37.5665,
+        p_user_lng: 126.978,
+        p_radius_km: 3.0,
+        p_page: 1,
+        p_page_size: 10,
+        p_available_only: true,
+      })
+    );
+  });
+
+  it('availableOnly: false를 RPC에 전달한다', async () => {
+    const supabase = buildRpcSupabase({ data: [], error: null });
+
+    await getProducts(supabase, { ...distanceParams, availableOnly: false });
+
+    expect(supabase.rpc).toHaveBeenCalledWith(
+      'get_products_near',
+      expect.objectContaining({
+        p_available_only: false,
+      })
+    );
+  });
+
+  it.each([
+    ['over-40', 40, undefined],
+    ['30-to-40', 30, 40],
+    ['20-to-30', 20, 30],
+    ['under-20', undefined, 20],
+  ] as const)(
+    'discountOption=%s을 RPC 할인율 범위 파라미터로 변환한다',
+    async (discountOption, expectedMin, expectedMax) => {
+      const supabase = buildRpcSupabase({ data: [], error: null });
+
+      await getProducts(supabase, { ...distanceParams, discountOption });
+
+      expect(supabase.rpc).toHaveBeenCalledWith(
+        'get_products_near',
+        expect.objectContaining({
+          p_min_discount_rate: expectedMin,
+          p_max_discount_rate: expectedMax,
+        })
+      );
+    }
+  );
+
+  it('discountOption 미지정 시 할인율 파라미터를 undefined로 전달한다', async () => {
+    const supabase = buildRpcSupabase({ data: [], error: null });
+
+    await getProducts(supabase, distanceParams);
+
+    expect(supabase.rpc).toHaveBeenCalledWith(
+      'get_products_near',
+      expect.objectContaining({
+        p_min_discount_rate: undefined,
+        p_max_discount_rate: undefined,
+      })
+    );
+  });
+
+  it('userLat/userLng 없이 sort=distance면 일반 쿼리를 사용한다', async () => {
+    const chain = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      order: vi.fn().mockReturnThis(),
+      range: vi.fn().mockResolvedValue({ data: [], error: null, count: 0 }),
+    };
+    const supabase = {
+      from: vi.fn().mockReturnValue(chain),
+      rpc: vi.fn(),
+    } as unknown as SupabaseClient<Database>;
+
+    await getProducts(supabase, { page: 1, pageSize: 10, sort: 'distance' });
+
+    expect(supabase.rpc).not.toHaveBeenCalled();
+    expect(supabase.from).toHaveBeenCalled();
+  });
+
+  it('RPC 에러 시 INTERNAL_SERVER_ERROR를 throw한다', async () => {
+    const supabase = buildRpcSupabase({
+      data: null,
+      error: { code: '42501', message: 'permission denied' },
+    });
+
+    await expect(getProducts(supabase, distanceParams)).rejects.toMatchObject({
+      code: ERROR_CODE.INTERNAL_SERVER_ERROR,
+    });
+  });
+
+  it('빈 결과 시 totalCount가 0이다', async () => {
+    const supabase = buildRpcSupabase({ data: [], error: null });
+
+    const result = await getProducts(supabase, distanceParams);
+
+    expect(result.items).toHaveLength(0);
+    expect(result.totalCount).toBe(0);
+    expect(result.totalPages).toBe(0);
   });
 });
 

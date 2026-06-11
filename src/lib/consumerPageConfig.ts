@@ -1,15 +1,8 @@
 import type { ProductSortOptionId } from './consumerProductFilters';
 
-interface ProductSortQuery {
-  sort: 'endAt' | 'discountRate' | 'discountPrice';
-  order: 'asc' | 'desc';
-}
-
-export const CONSUMER_REGION_ITEMS = [
-  { label: '서울 강남구 역삼동', value: '서울 강남구' },
-  { label: '서울 성동구 왕십리', value: '서울 성동구' },
-  { label: '서울 마포구 합정동', value: '서울 마포구' },
-];
+type ProductSortQuery =
+  | { sort: 'endAt' | 'discountRate' | 'discountPrice'; order: 'asc' | 'desc' }
+  | { sort: 'distance' };
 
 export const CONSUMER_PRODUCTS_PER_PAGE = 10;
 
@@ -22,6 +15,10 @@ export function getProductSortQuery(
 
   if (sortOption === 'price-low') {
     return { sort: 'discountPrice' as const, order: 'asc' as const };
+  }
+
+  if (sortOption === 'distance') {
+    return { sort: 'distance' as const };
   }
 
   return { sort: 'endAt' as const, order: 'asc' as const };
