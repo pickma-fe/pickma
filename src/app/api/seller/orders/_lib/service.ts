@@ -2,20 +2,31 @@ import type {
   OrderDetailResponse,
   OrderListResponse,
   SellerOrderListParams,
+  SellerOrderSummaryResponse,
 } from '@/contracts/order';
 import { AppError } from '@/lib/errors/appError';
 import { ERROR_CODE } from '@/lib/errors/errorCodes';
+import { createServerClient } from '@/lib/supabase/server';
 import { createServiceRoleClient } from '@/lib/supabase/service';
 import {
   mapOrderDetailRow,
   mapOrderListRow,
 } from '@/app/api/_lib/order-mapper';
 
+import {
+  createEmptySellerOrderSummary,
+  SELLER_ORDER_SUMMARY_STATUSES,
+  SELLER_ORDER_SUMMARY_STATUS_KEY_MAP,
+  type SellerOrderSummaryStatus,
+} from './summary';
+
 const ORDER_LIST_SELECT =
   'id, order_number, store_id, total_amount, discount_amount, payment_amount, status, pickup_at, pickup_service_date, store_order_number, pickup_number, expires_at, created_at, updated_at, stores(name)';
 
 const ORDER_DETAIL_SELECT =
   'id, order_number, store_id, total_amount, discount_amount, payment_amount, status, pickup_at, pickup_service_date, store_order_number, pickup_number, expires_at, cancelled_at, cancel_reason, picked_up_at, created_at, updated_at, stores(name), order_items(id, order_id, product_id, product_name, original_price, discount_price, quantity, subtotal, created_at), payments(id, order_id, payment_key, provider_order_id, method, method_detail, amount, status, paid_at, refunded_at, refund_reason, created_at, updated_at)';
+
+type ServerClient = Awaited<ReturnType<typeof createServerClient>>;
 
 export async function getSellerOrders(
   storeId: string,
@@ -49,6 +60,48 @@ export async function getSellerOrders(
     totalCount,
     totalPages: Math.ceil(totalCount / params.pageSize),
   };
+}
+
+async function countSellerOrders(
+  supabase: ServerClient,
+  storeId: string,
+  status?: SellerOrderSummaryStatus
+): Promise<number> {
+  let query = supabase
+    .from('orders')
+    .select('id', { count: 'exact', head: true })
+    .eq('store_id', storeId);
+
+  if (status) {
+    query = query.eq('status', status);
+  }
+
+  const { count, error } = await query;
+
+  if (error) throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
+
+  return count ?? 0;
+}
+
+export async function getSellerOrderSummary(
+  storeId: string
+): Promise<SellerOrderSummaryResponse> {
+  const supabase = await createServerClient();
+  const [totalCount, ...statusCounts] = await Promise.all([
+    countSellerOrders(supabase, storeId),
+    ...SELLER_ORDER_SUMMARY_STATUSES.map((status) =>
+      countSellerOrders(supabase, storeId, status)
+    ),
+  ]);
+
+  return SELLER_ORDER_SUMMARY_STATUSES.reduce<SellerOrderSummaryResponse>(
+    (summary, status, index) => {
+      summary.statusCounts[SELLER_ORDER_SUMMARY_STATUS_KEY_MAP[status]] =
+        statusCounts[index] ?? 0;
+      return summary;
+    },
+    { ...createEmptySellerOrderSummary(), totalCount }
+  );
 }
 
 export async function getSellerOrder(

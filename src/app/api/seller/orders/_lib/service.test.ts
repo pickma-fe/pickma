@@ -1,17 +1,20 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ERROR_CODE } from '@/lib/errors/errorCodes';
+import { createServerClient } from '@/lib/supabase/server';
 import { createServiceRoleClient } from '@/lib/supabase/service';
 
 import {
   acceptSellerOrder,
   completeSellerOrder,
   getSellerOrder,
+  getSellerOrderSummary,
   getSellerOrders,
   markSellerOrderReady,
 } from './service';
 
 vi.mock('@/lib/supabase/service');
+vi.mock('@/lib/supabase/server');
 
 const STORE_ID = '00000000-0000-4000-8000-000000000031';
 const ORDER_ID = '00000000-0000-4000-8000-000000000051';
@@ -76,6 +79,12 @@ function mockServiceClient(client: object): void {
   );
 }
 
+function mockServerClient(client: object): void {
+  vi.mocked(createServerClient).mockResolvedValue(
+    client as Awaited<ReturnType<typeof createServerClient>>
+  );
+}
+
 describe('getSellerOrders', () => {
   beforeEach(() => vi.clearAllMocks());
 
@@ -124,6 +133,65 @@ describe('getSellerOrders', () => {
         order: 'desc',
       })
     ).rejects.toMatchObject({ code: ERROR_CODE.INTERNAL_SERVER_ERROR });
+  });
+});
+
+describe('getSellerOrderSummary', () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it('store_id 기준으로 전체 count와 상태별 count를 반환한다', async () => {
+    const totalChain = buildChain({ data: [], count: 12, error: null });
+    const reservedChain = buildChain({ data: [], count: 3, error: null });
+    const acceptedChain = buildChain({ data: [], count: 2, error: null });
+    const readyChain = buildChain({ data: [], count: 1, error: null });
+    const completedChain = buildChain({ data: [], count: 4, error: null });
+    const cancellingChain = buildChain({ data: [], count: 1, error: null });
+    const cancelledChain = buildChain({ data: [], count: 1, error: null });
+    const noShowChain = buildChain({ data: [], count: 0, error: null });
+    const expiredChain = buildChain({ data: [], count: 0, error: null });
+    const client = {
+      from: vi
+        .fn()
+        .mockReturnValueOnce(totalChain)
+        .mockReturnValueOnce(reservedChain)
+        .mockReturnValueOnce(acceptedChain)
+        .mockReturnValueOnce(readyChain)
+        .mockReturnValueOnce(completedChain)
+        .mockReturnValueOnce(cancellingChain)
+        .mockReturnValueOnce(cancelledChain)
+        .mockReturnValueOnce(noShowChain)
+        .mockReturnValueOnce(expiredChain),
+    };
+    mockServerClient(client);
+
+    const result = await getSellerOrderSummary(STORE_ID);
+
+    expect(result).toEqual({
+      totalCount: 12,
+      statusCounts: {
+        reserved: 3,
+        accepted: 2,
+        ready: 1,
+        completed: 4,
+        cancelling: 1,
+        cancelled: 1,
+        noShow: 0,
+        expired: 0,
+      },
+    });
+    expect(totalChain.eq).toHaveBeenCalledWith('store_id', STORE_ID);
+    expect(reservedChain.eq).toHaveBeenCalledWith('status', 'reserved');
+    expect(noShowChain.eq).toHaveBeenCalledWith('status', 'no_show');
+    expect(createServiceRoleClient).not.toHaveBeenCalled();
+  });
+
+  it('count query 오류 시 INTERNAL_SERVER_ERROR를 던진다', async () => {
+    const chain = buildChain({ data: null, error: { message: 'db error' } });
+    mockServerClient({ from: vi.fn().mockReturnValue(chain) });
+
+    await expect(getSellerOrderSummary(STORE_ID)).rejects.toMatchObject({
+      code: ERROR_CODE.INTERNAL_SERVER_ERROR,
+    });
   });
 });
 

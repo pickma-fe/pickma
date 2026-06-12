@@ -39,6 +39,7 @@ export type {
   OrderListResponse,
   OrderStatusParam,
   SellerOrderListParams,
+  SellerOrderSummaryResponse,
 } from './order';
 export type {
   CreateFileUploadUrlRequest,
