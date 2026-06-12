@@ -44,16 +44,18 @@ export function useOrderStatusNotification(userId: string | null) {
           const oldStatus = oldRecord.status;
           const newStatus = newRecord.status;
 
-          const dedupeKey = `${newRecord.id}-${newStatus}`;
-          if (receivedOrderUpdates.current.has(dedupeKey)) return;
-          receivedOrderUpdates.current.add(dedupeKey);
-
           void queryClient.invalidateQueries({
             queryKey: queryKeys.orders.lists(),
           });
           void queryClient.invalidateQueries({
             queryKey: queryKeys.orders.details(),
           });
+
+          if (oldStatus === newStatus) return;
+
+          const dedupeKey = `${newRecord.id}-${oldStatus ?? 'null'}->${newStatus}`;
+          if (receivedOrderUpdates.current.has(dedupeKey)) return;
+          receivedOrderUpdates.current.add(dedupeKey);
 
           const toastConfig = resolveConsumerOrderToast(
             oldStatus,
