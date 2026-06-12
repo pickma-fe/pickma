@@ -60,6 +60,9 @@ export interface User {
   name: string;
   phone?: string;
   profileImage?: string;
+  locationLat?: number;
+  locationLng?: number;
+  locationAddress?: string;
   role: UserRole;
   status: UserStatus;
   createdAt: Date;

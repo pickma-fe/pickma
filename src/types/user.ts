@@ -11,6 +11,9 @@ export interface User {
   phone?: string;
   authProvider?: AuthProvider;
   profileImage?: string;
+  locationLat?: number;
+  locationLng?: number;
+  locationAddress?: string;
   role: UserRole;
   status: UserStatus;
   createdAt: Date;
@@ -19,6 +22,9 @@ export interface User {
 
 export interface UpdateMeInput {
   name?: string;
-  phone?: string;
+  phone?: string | null;
   profileImage?: string;
+  locationLat?: number | null;
+  locationLng?: number | null;
+  locationAddress?: string | null;
 }

@@ -275,6 +275,9 @@ export interface UserResponse {
   name: string;
   phone?: string;
   profileImage?: string;
+  locationLat?: number;
+  locationLng?: number;
+  locationAddress?: string;
   role: 'customer' | 'seller' | 'admin';
   status: 'active' | 'suspended' | 'deleted';
   createdAt: string;
@@ -294,6 +297,11 @@ Request:
 ```ts
 export interface UpdateMeRequest {
   name?: string;
+  phone?: string | null;
+  profileImage?: string;
+  locationLat?: number | null;
+  locationLng?: number | null;
+  locationAddress?: string | null;
 }
 ```
 
@@ -301,6 +309,7 @@ Response: `UserResponse`
 
 - 수정할 필드가 하나 이상 있어야 한다.
 - `active` 상태 사용자만 허용한다.
+- 위치 저장은 `localStorage` 우선, `/api/users/me` DB fallback 방식으로 사용한다. 로그인 사용자가 위치를 저장하거나 지우면 `users.location_*` 컬럼도 함께 갱신한다.
 
 ---
 
@@ -549,7 +558,7 @@ export interface ProductListItemResponse {
 
 DB source:
 
-- `sort=distance`: `get_products_near` RPC (Haversine 거리 계산, 3km 반경 고정)
+- `sort=distance`: `get_products_near` RPC (Haversine 거리 계산, `radiusKm` 미지정 시 기본 3km)
 - 그 외: `products` + `menu_items` + `stores` + `categories` 직접 쿼리
 
 Mapping:
@@ -565,7 +574,7 @@ Mapping:
 
 Behavior:
 
-- `sort=distance`이고 `userLat`/`userLng`가 있으면 `get_products_near` RPC를 호출해 3km 반경 내 가게의 상품을 거리순으로 반환한다. 좌표 없는 가게의 상품은 제외된다.
+- `sort=distance`이고 `userLat`/`userLng`가 있으면 `get_products_near` RPC를 호출해 `radiusKm` 반경 내 가게의 상품을 거리순으로 반환한다. `radiusKm` 기본값은 3이며, 좌표 없는 가게의 상품은 제외된다.
 - `categoryId`는 `products.category_id` 기준으로 필터링한다.
 - `keyword`는 상품명(`menu_items.name`) ILIKE 기준으로 필터링한다. 가게명(`stores.name`) 검색은 지원하지 않는다.
 - `sort` 기본값은 `endAt`, `order` 기본값은 `asc`이다.

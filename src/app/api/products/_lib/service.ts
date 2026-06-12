@@ -149,7 +149,7 @@ async function getProductsNear(
   const { data, error } = await supabase.rpc('get_products_near', {
     p_user_lat: params.userLat as number,
     p_user_lng: params.userLng as number,
-    p_radius_km: 3.0,
+    p_radius_km: params.radiusKm ?? 3.0,
     p_page: params.page,
     p_page_size: params.pageSize,
     p_category_id: params.categoryId ?? undefined,

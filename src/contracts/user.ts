@@ -7,6 +7,9 @@ export interface UserResponse {
   phone?: string;
   authProvider?: AuthProvider;
   profileImage?: string;
+  locationLat?: number;
+  locationLng?: number;
+  locationAddress?: string;
   role: 'customer' | 'seller' | 'admin';
   status: 'active' | 'suspended' | 'deleted';
   createdAt: string;
@@ -15,6 +18,9 @@ export interface UserResponse {
 
 export interface UpdateMeRequest {
   name?: string;
-  phone?: string;
+  phone?: string | null;
   profileImage?: string;
+  locationLat?: number | null;
+  locationLng?: number | null;
+  locationAddress?: string | null;
 }

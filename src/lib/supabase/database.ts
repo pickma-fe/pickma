@@ -715,6 +715,9 @@ export type Database = {
           created_at: string;
           email: string;
           id: string;
+          location_address: string | null;
+          location_lat: number | null;
+          location_lng: number | null;
           marketing_agreed: boolean;
           marketing_agreed_at: string | null;
           name: string;
@@ -728,6 +731,9 @@ export type Database = {
           created_at?: string;
           email: string;
           id: string;
+          location_address?: string | null;
+          location_lat?: number | null;
+          location_lng?: number | null;
           marketing_agreed?: boolean;
           marketing_agreed_at?: string | null;
           name: string;
@@ -741,6 +747,9 @@ export type Database = {
           created_at?: string;
           email?: string;
           id?: string;
+          location_address?: string | null;
+          location_lat?: number | null;
+          location_lng?: number | null;
           marketing_agreed?: boolean;
           marketing_agreed_at?: string | null;
           name?: string;

@@ -4,6 +4,7 @@ import { ChevronRightIcon, StoreIcon } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
+import { formatDistanceKm } from '@/lib/formatDistanceKm';
 import { formatPickupTime } from '@/lib/formatPickupTime';
 import { isProductUnavailable } from '@/lib/product';
 import { useNow } from '@/hooks/useNow';
@@ -41,6 +42,7 @@ function formatRemainingTime(endAt: Date, now: number) {
 export function ProductCard({ product }: ProductCardProps) {
   const now = useNow();
   const isUnavailable = now === null || isProductUnavailable({ product, now });
+  const formattedDistance = formatDistanceKm(product.distanceKm);
 
   return (
     <article className="group relative w-full overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition hover:shadow-md">
@@ -83,26 +85,33 @@ export function ProductCard({ product }: ProductCardProps) {
           </h3>
         </div>
 
-        <div>
-          <p className="mt-3 flex items-center gap-1.5 text-xs text-gray-500">
+        <div className="mt-3 flex items-center justify-between gap-3">
+          <p className="flex min-w-0 items-center gap-1.5 text-xs text-gray-500">
             <StoreIcon
               className="text-primary-500 h-4 w-4 shrink-0"
               aria-hidden="true"
             />
             <span className="line-clamp-1">{product.storeName}</span>
           </p>
+          {formattedDistance ? (
+            <p className="shrink-0 pr-2 text-xs text-gray-500">
+              {formattedDistance}
+            </p>
+          ) : null}
         </div>
 
-        <div className="mt-3 flex flex-wrap items-end gap-x-3 gap-y-1">
-          <span className="text-xs text-gray-400 line-through">
-            {product.originalPrice.toLocaleString()}원
-          </span>
-          <strong className="text-primary-500 text-lg font-bold">
-            {product.discountPrice.toLocaleString()}원
-          </strong>
-          <span className="text-sm font-bold text-orange-500">
-            {product.discountRate}%
-          </span>
+        <div className="mt-2">
+          <div className="flex flex-wrap items-end gap-x-3 gap-y-1">
+            <span className="text-xs text-gray-400 line-through">
+              {product.originalPrice.toLocaleString()}원
+            </span>
+            <strong className="text-primary-500 text-lg font-bold">
+              {product.discountPrice.toLocaleString()}원
+            </strong>
+            <span className="text-sm font-bold text-orange-500">
+              {product.discountRate}%
+            </span>
+          </div>
         </div>
 
         <div className="mt-2 text-xs">

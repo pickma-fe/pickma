@@ -14,6 +14,9 @@ type UsersRow = Database['public']['Tables']['users']['Row'];
 const mockRow: UsersRow = {
   id: 'user-1',
   email: 'test@example.com',
+  location_address: null,
+  location_lat: null,
+  location_lng: null,
   marketing_agreed: false,
   marketing_agreed_at: null,
   name: '홍길동',
@@ -104,6 +107,28 @@ describe('updateUser', () => {
     await updateUser('user-1', { phone: null });
 
     expect(updateFn).toHaveBeenCalledWith({ phone: null });
+  });
+
+  it('위치 필드가 포함되면 users 위치 컬럼 업데이트 인자로 전달한다', async () => {
+    const { client, updateFn } = makeServiceClient({
+      data: mockRow,
+      error: null,
+    });
+    vi.mocked(createServiceRoleClient).mockReturnValue(
+      client as unknown as ReturnType<typeof createServiceRoleClient>
+    );
+
+    await updateUser('user-1', {
+      locationLat: 37.5665,
+      locationLng: 126.978,
+      locationAddress: '서울시 중구 세종대로',
+    });
+
+    expect(updateFn).toHaveBeenCalledWith({
+      location_lat: 37.5665,
+      location_lng: 126.978,
+      location_address: '서울시 중구 세종대로',
+    });
   });
 
   it('PGRST116 에러면 NOT_FOUND를 던진다', async () => {

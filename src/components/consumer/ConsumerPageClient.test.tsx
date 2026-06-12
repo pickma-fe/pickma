@@ -1,4 +1,4 @@
-import { render } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -66,6 +66,20 @@ vi.mock('./PromotionCarousel', () => ({
   PromotionCarousel: () => <section />,
 }));
 
+vi.mock('./SearchRadiusSelector', () => ({
+  SearchRadiusSelector: ({
+    radiusKm,
+    onRadiusChange,
+  }: {
+    radiusKm: number;
+    onRadiusChange: (radiusKm: number) => void;
+  }) => (
+    <button type="button" onClick={() => onRadiusChange(5)}>
+      반경 {radiusKm}
+    </button>
+  ),
+}));
+
 const mockCategory: Category = {
   id: '00000000-0000-4000-8000-000000000011',
   name: '베이커리',
@@ -122,8 +136,32 @@ describe('ConsumerPageClient', () => {
       expect.objectContaining({
         userLat: 37.5665,
         userLng: 126.978,
+        radiusKm: 3,
         page: 1,
         pageSize: 10,
+      }),
+      { enabled: true }
+    );
+  });
+
+  it('반경 변경 시 useProducts에 새 radiusKm를 전달한다', () => {
+    vi.mocked(useUserLocation).mockReturnValue({
+      location: {
+        lat: 37.5665,
+        lng: 126.978,
+        address: '서울시 중구',
+        savedAt: 0,
+      },
+      saveLocation: vi.fn(),
+      clearLocation: vi.fn(),
+    });
+
+    render(<ConsumerPageClient />);
+    fireEvent.click(screen.getByRole('button', { name: '반경 3' }));
+
+    expect(useProducts).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        radiusKm: 5,
       }),
       { enabled: true }
     );

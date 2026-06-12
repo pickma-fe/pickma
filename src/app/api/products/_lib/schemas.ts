@@ -32,6 +32,10 @@ export const productListSchema = z
       (value) => value === undefined || (value >= -180 && value <= 180),
       { message: 'userLng는 -180에서 180 사이여야 합니다.' }
     ),
+    radiusKm: optionalFloatQuerySchema.refine(
+      (value) => value === undefined || value > 0,
+      { message: 'radiusKm는 0보다 커야 합니다.' }
+    ),
     categoryId: z.string().trim().min(1).optional(),
     keyword: z.string().trim().min(1).optional(),
     minPrice: optionalNumberQuerySchema.refine(

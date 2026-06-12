@@ -1,6 +1,8 @@
 'use client';
 
-import { useCallback, useSyncExternalStore } from 'react';
+import { useCallback, useEffect, useRef, useSyncExternalStore } from 'react';
+
+import { userApi } from '@/api/users/userApi';
 
 const STORAGE_KEY = 'pickma_user_location';
 
@@ -70,22 +72,81 @@ function getServerSnapshot(): null {
   return null;
 }
 
+function persistLocation(next: UserLocation): void {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+  notify();
+}
+
+function getUserLocationFromProfile(
+  user: Awaited<ReturnType<typeof userApi.getMe>>
+): UserLocation | null {
+  if (
+    user.locationLat === undefined ||
+    user.locationLng === undefined ||
+    !user.locationAddress
+  ) {
+    return null;
+  }
+
+  return {
+    lat: user.locationLat,
+    lng: user.locationLng,
+    address: user.locationAddress,
+    savedAt: Date.now(),
+  };
+}
+
 export function useUserLocation() {
   const location = useSyncExternalStore(
     subscribe,
     getSnapshot,
     getServerSnapshot
   );
+  const attemptedServerHydrationRef = useRef(false);
+
+  useEffect(() => {
+    if (location || attemptedServerHydrationRef.current) return;
+
+    attemptedServerHydrationRef.current = true;
+
+    void userApi
+      .getMe()
+      .then((user) => {
+        const serverLocation = getUserLocationFromProfile(user);
+
+        if (!serverLocation || getSnapshot()) {
+          return;
+        }
+
+        persistLocation(serverLocation);
+      })
+      .catch(() => undefined);
+  }, [location]);
 
   const saveLocation = useCallback((next: Omit<UserLocation, 'savedAt'>) => {
     const value: UserLocation = { ...next, savedAt: Date.now() };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(value));
-    notify();
+    persistLocation(value);
+
+    void userApi
+      .updateMe({
+        locationLat: value.lat,
+        locationLng: value.lng,
+        locationAddress: value.address,
+      })
+      .catch(() => undefined);
   }, []);
 
   const clearLocation = useCallback(() => {
     localStorage.removeItem(STORAGE_KEY);
     notify();
+
+    void userApi
+      .updateMe({
+        locationLat: null,
+        locationLng: null,
+        locationAddress: null,
+      })
+      .catch(() => undefined);
   }, []);
 
   return { location, saveLocation, clearLocation };

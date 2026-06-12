@@ -12,6 +12,7 @@ export interface ProductListParams {
   pageSize: number;
   userLat?: number;
   userLng?: number;
+  radiusKm?: number;
   categoryId?: string;
   keyword?: string;
   minPrice?: number;

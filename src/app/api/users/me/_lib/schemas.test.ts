@@ -67,4 +67,22 @@ describe('updateMeSchema', () => {
       expect(result.data.phone).toBeNull();
     }
   });
+
+  it('locationAddress 공백 문자열은 null로 정규화한다', () => {
+    const result = updateMeSchema.safeParse({ locationAddress: '   ' });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.locationAddress).toBeNull();
+    }
+  });
+
+  it('위치 필드 3개를 함께 전달하면 통과한다', () => {
+    const result = updateMeSchema.safeParse({
+      locationLat: 37.5665,
+      locationLng: 126.978,
+      locationAddress: '서울시 중구 세종대로',
+    });
+
+    expect(result.success).toBe(true);
+  });
 });

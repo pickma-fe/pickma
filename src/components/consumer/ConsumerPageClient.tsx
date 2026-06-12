@@ -30,12 +30,14 @@ import { MapViewFab } from './MapViewFab';
 import { NoLocationView } from './NoLocationView';
 import { ProductFilterSidebar } from './ProductFilterSidebar';
 import { PromotionCarousel } from './PromotionCarousel';
+import { SearchRadiusSelector } from './SearchRadiusSelector';
 
 interface ConsumerPageClientProps {
   initialCategories?: Category[];
 }
 
 const PRODUCT_LIST_REFRESH_INTERVAL_MS = 60_000;
+const DEFAULT_SEARCH_RADIUS_KM = 3;
 const categoryIconMap: Record<string, string> = {
   bread: '🥖',
   coffee: '☕',
@@ -56,6 +58,9 @@ export function ConsumerPageClient({
     useState<ProductDiscountOptionId>(DEFAULT_DISCOUNT_OPTION_ID);
   const [keyword, setKeyword] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [searchRadiusKm, setSearchRadiusKm] = useState(
+    DEFAULT_SEARCH_RADIUS_KM
+  );
   const productSortQuery = getProductSortQuery(selectedSortOption);
   const { data: categories = [] } = useCategories({
     initialData: initialCategories,
@@ -93,6 +98,7 @@ export function ConsumerPageClient({
       order: 'order' in productSortQuery ? productSortQuery.order : undefined,
       userLat: location?.lat,
       userLng: location?.lng,
+      radiusKm: searchRadiusKm,
       availableOnly: true,
     },
     { enabled: !!location }
@@ -194,6 +200,11 @@ export function ConsumerPageClient({
     void refetchProducts();
   };
 
+  const handleSearchRadiusChange = (nextRadiusKm: number) => {
+    setSearchRadiusKm(nextRadiusKm);
+    setCurrentPage(1);
+  };
+
   const productListContent = (() => {
     if (!location) {
       return <NoLocationView onLocationChange={saveLocation} />;
@@ -274,6 +285,12 @@ export function ConsumerPageClient({
 
           <section className="px-5 py-6 lg:px-6">
             <PromotionCarousel />
+            <div className="mb-4">
+              <SearchRadiusSelector
+                radiusKm={searchRadiusKm}
+                onRadiusChange={handleSearchRadiusChange}
+              />
+            </div>
 
             {productListContent}
           </section>

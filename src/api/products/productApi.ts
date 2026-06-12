@@ -28,6 +28,7 @@ function toProductListParams(query: ProductListQuery): ProductListParams {
     pageSize: query.pageSize,
     userLat: query.userLat,
     userLng: query.userLng,
+    radiusKm: query.radiusKm,
     categoryId: query.categoryId,
     keyword: query.keyword,
     minPrice: query.minPrice,

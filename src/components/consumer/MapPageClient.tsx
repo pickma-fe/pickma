@@ -1,13 +1,14 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { useUserLocation } from '@/hooks/consumer/useUserLocation';
 import { useProducts } from '@/hooks/products/useProducts';
 
 import { ConsumerMapHeader } from './ConsumerMapHeader';
 import { NoLocationView } from './NoLocationView';
+import { SearchRadiusSelector } from './SearchRadiusSelector';
 
 const StoreMapView = dynamic(
   () => import('./StoreMapView').then((m) => m.StoreMapView),
@@ -22,10 +23,14 @@ const StoreMapView = dynamic(
 );
 
 const MAP_PRODUCT_PAGE_SIZE = 50;
+const DEFAULT_SEARCH_RADIUS_KM = 3;
 
 export function MapPageClient() {
   const { location, saveLocation } = useUserLocation();
   const geoAttempted = useRef(false);
+  const [searchRadiusKm, setSearchRadiusKm] = useState(
+    DEFAULT_SEARCH_RADIUS_KM
+  );
 
   useEffect(() => {
     if (location || geoAttempted.current || !navigator.geolocation) return;
@@ -50,6 +55,7 @@ export function MapPageClient() {
       sort: 'distance',
       userLat: location?.lat,
       userLng: location?.lng,
+      radiusKm: searchRadiusKm,
       page: 1,
       pageSize: MAP_PRODUCT_PAGE_SIZE,
     },
@@ -61,6 +67,12 @@ export function MapPageClient() {
   return (
     <div className="flex h-dvh flex-col">
       <ConsumerMapHeader location={location} onLocationChange={saveLocation} />
+      <div className="border-b border-gray-100 px-4 py-3">
+        <SearchRadiusSelector
+          radiusKm={searchRadiusKm}
+          onRadiusChange={setSearchRadiusKm}
+        />
+      </div>
       <main className="min-h-0 flex-1">
         {location ? (
           <StoreMapView location={location} products={products} />

@@ -8,7 +8,7 @@ import { createServiceRoleClient } from '@/lib/supabase/service';
 import { mapUserRow } from '@/app/api/_lib/user-mapper';
 
 const ADMIN_USER_SELECT_COLUMNS =
-  'id,email,name,phone,profile_image,role,status,marketing_agreed,marketing_agreed_at,created_at,updated_at';
+  'id,email,name,phone,profile_image,location_lat,location_lng,location_address,role,status,marketing_agreed,marketing_agreed_at,created_at,updated_at';
 
 function escapePostgrestLikeValue(value: string): string {
   return value

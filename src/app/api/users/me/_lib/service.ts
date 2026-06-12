@@ -20,6 +20,11 @@ export async function updateUser(
       ...(data.profileImage !== undefined && {
         profile_image: data.profileImage,
       }),
+      ...(data.locationLat !== undefined && { location_lat: data.locationLat }),
+      ...(data.locationLng !== undefined && { location_lng: data.locationLng }),
+      ...(data.locationAddress !== undefined && {
+        location_address: data.locationAddress,
+      }),
     })
     .eq('id', userId)
     .select('*')
