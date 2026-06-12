@@ -968,7 +968,7 @@ Hobby 플랜 제약: Cron은 하루 1회로 제한되며 실행 시각은 ±59�
 
 ### 18.7 NotificationBridge 마운트 구조
 
-```
+```text
 RootLayout
 └── Providers (QueryClientProvider)
     └── NotificationBridge ('use client')
