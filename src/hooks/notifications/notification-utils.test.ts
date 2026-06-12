@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  addBounded,
   isNewSellerOrder,
+  MAX_DEDUPE_SIZE,
   resolveConsumerOrderToast,
 } from './notification-utils';
 
@@ -90,5 +92,26 @@ describe('isNewSellerOrder', () => {
 
   it('oldStatus가 null이고 newStatus가 reserved면 true', () => {
     expect(isNewSellerOrder(null, 'reserved')).toBe(true);
+  });
+});
+
+describe('addBounded', () => {
+  it('상한 도달 시 가장 오래된 키를 제거하고 새 키를 추가한다', () => {
+    const set = new Set(
+      Array.from({ length: MAX_DEDUPE_SIZE }, (_, i) => `key-${i}`)
+    );
+
+    addBounded(set, 'key-new');
+
+    expect(set.size).toBe(MAX_DEDUPE_SIZE);
+    expect(set.has('key-0')).toBe(false);
+    expect(set.has('key-new')).toBe(true);
+  });
+
+  it('상한 미만이면 그냥 추가한다', () => {
+    const set = new Set<string>();
+    addBounded(set, 'key-a');
+    expect(set.size).toBe(1);
+    expect(set.has('key-a')).toBe(true);
   });
 });
