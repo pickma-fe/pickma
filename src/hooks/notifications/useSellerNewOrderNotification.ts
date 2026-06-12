@@ -12,6 +12,16 @@ import { isNewSellerOrder } from './notification-utils';
 
 type OrderRow = Database['public']['Tables']['orders']['Row'];
 
+const MAX_DEDUPE_SIZE = 200;
+
+function addBounded(set: Set<string>, key: string) {
+  if (set.size >= MAX_DEDUPE_SIZE) {
+    const oldest = set.values().next().value;
+    if (oldest !== undefined) set.delete(oldest);
+  }
+  set.add(key);
+}
+
 export function useSellerNewOrderNotification(storeId: string | null) {
   const queryClient = useQueryClient();
   const addToast = useToastStore((state) => state.addToast);
@@ -38,7 +48,7 @@ export function useSellerNewOrderNotification(storeId: string | null) {
           if (!isNewSellerOrder(oldOrder.status, newOrder.status)) return;
 
           if (receivedOrderIds.current.has(newOrder.id)) return;
-          receivedOrderIds.current.add(newOrder.id);
+          addBounded(receivedOrderIds.current, newOrder.id);
 
           addToast({ message: '새 주문이 접수되었습니다', type: 'success' });
           void queryClient.invalidateQueries({
