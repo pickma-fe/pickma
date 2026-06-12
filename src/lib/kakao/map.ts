@@ -18,15 +18,25 @@ interface KakaoMapsEvent {
   removeListener(target: object, event: string, handler: () => void): void;
 }
 
+interface KakaoMarkerClustererInstance {
+  addMarkers(markers: KakaoMarkerInstance[]): void;
+  clear(): void;
+}
+
 interface KakaoMapsConstructors {
   Map: new (container: HTMLElement, options: object) => KakaoMapInstance;
   LatLng: new (lat: number, lng: number) => KakaoLatLng;
   Marker: new (options: object) => KakaoMarkerInstance;
+  MarkerClusterer: new (options: object) => KakaoMarkerClustererInstance;
   event: KakaoMapsEvent;
   load(callback: () => void): void;
 }
 
-export type { KakaoMapInstance, KakaoMarkerInstance };
+export type {
+  KakaoMapInstance,
+  KakaoMarkerInstance,
+  KakaoMarkerClustererInstance,
+};
 export { loadKakaoMapsSDK } from './sdk';
 
 export function getKakaoMaps(): KakaoMapsConstructors {
@@ -62,4 +72,15 @@ export function createKakaoMarker(
   const maps = getKakaoMaps();
   const position = new maps.LatLng(lat, lng);
   return new maps.Marker({ position, map });
+}
+
+export function createMarkerClusterer(
+  map: KakaoMapInstance
+): KakaoMarkerClustererInstance {
+  const maps = getKakaoMaps();
+  return new maps.MarkerClusterer({
+    map,
+    averageCenter: true,
+    minLevel: 6,
+  });
 }

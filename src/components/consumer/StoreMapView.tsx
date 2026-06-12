@@ -5,11 +5,16 @@ import { useEffect, useRef, useState } from 'react';
 import type { Product } from '@/types/product';
 import {
   createKakaoMarker,
+  createMarkerClusterer,
   getKakaoMaps,
   initKakaoMap,
   loadKakaoMapsSDK,
 } from '@/lib/kakao/map';
-import type { KakaoMapInstance, KakaoMarkerInstance } from '@/lib/kakao/map';
+import type {
+  KakaoMapInstance,
+  KakaoMarkerClustererInstance,
+  KakaoMarkerInstance,
+} from '@/lib/kakao/map';
 import type { UserLocation } from '@/hooks/consumer/useUserLocation';
 
 import { StoreProductBottomSheet } from './StoreProductBottomSheet';
@@ -22,15 +27,26 @@ interface StoreMarker {
 interface StoreMapViewProps {
   location: UserLocation;
   products: Product[];
+  onCenterChange?: (lat: number, lng: number) => void;
 }
 
-export function StoreMapView({ location, products }: StoreMapViewProps) {
+export function StoreMapView({
+  location,
+  products,
+  onCenterChange,
+}: StoreMapViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<KakaoMapInstance | null>(null);
   const markersRef = useRef<StoreMarker[]>([]);
+  const clustererRef = useRef<KakaoMarkerClustererInstance | null>(null);
+  const onCenterChangeRef = useRef(onCenterChange);
   const [mapReady, setMapReady] = useState(false);
   const [mapError, setMapError] = useState(false);
   const [selectedStoreId, setSelectedStoreId] = useState<string | null>(null);
+
+  useEffect(() => {
+    onCenterChangeRef.current = onCenterChange;
+  }, [onCenterChange]);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -41,10 +57,20 @@ export function StoreMapView({ location, products }: StoreMapViewProps) {
     void loadKakaoMapsSDK()
       .then(() => {
         if (!mounted || !containerRef.current) return;
-        mapRef.current = initKakaoMap(containerRef.current, {
+        const map = initKakaoMap(containerRef.current, {
           lat: location.lat,
           lng: location.lng,
         });
+        mapRef.current = map;
+
+        const maps = getKakaoMaps();
+        const handleIdle = () => {
+          const center = map.getCenter();
+          onCenterChangeRef.current?.(center.getLat(), center.getLng());
+        };
+        maps.event.addListener(map, 'idle', handleIdle);
+
+        clustererRef.current = createMarkerClusterer(map);
         setMapReady(true);
       })
       .catch(() => {
@@ -57,12 +83,13 @@ export function StoreMapView({ location, products }: StoreMapViewProps) {
   }, [location.lat, location.lng]);
 
   useEffect(() => {
-    if (!mapReady || !mapRef.current) return;
+    if (!mapReady || !mapRef.current || !clustererRef.current) return;
 
     for (const { marker } of markersRef.current) {
       marker.setMap(null);
     }
     markersRef.current = [];
+    clustererRef.current.clear();
 
     const storeMap = new Map<string, { storeLat: number; storeLng: number }>();
     for (const product of products) {
@@ -79,6 +106,8 @@ export function StoreMapView({ location, products }: StoreMapViewProps) {
     }
 
     const maps = getKakaoMaps();
+    const newMarkers: KakaoMarkerInstance[] = [];
+
     for (const [storeId, { storeLat, storeLng }] of storeMap.entries()) {
       const marker = createKakaoMarker(mapRef.current, storeLat, storeLng);
       const capturedId = storeId;
@@ -86,7 +115,10 @@ export function StoreMapView({ location, products }: StoreMapViewProps) {
         setSelectedStoreId(capturedId);
       });
       markersRef.current.push({ storeId, marker });
+      newMarkers.push(marker);
     }
+
+    clustererRef.current.addMarkers(newMarkers);
   }, [mapReady, products]);
 
   const validSelectedStoreId =

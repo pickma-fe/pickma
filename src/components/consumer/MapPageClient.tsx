@@ -1,7 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useUserLocation } from '@/hooks/consumer/useUserLocation';
 import { useProducts } from '@/hooks/products/useProducts';
@@ -26,6 +26,10 @@ const MAP_PRODUCT_PAGE_SIZE = 50;
 export function MapPageClient() {
   const { location, saveLocation } = useUserLocation();
   const geoAttempted = useRef(false);
+  const [mapCenter, setMapCenter] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
 
   useEffect(() => {
     if (location || geoAttempted.current || !navigator.geolocation) return;
@@ -45,25 +49,39 @@ export function MapPageClient() {
     );
   }, [location, saveLocation]);
 
+  const queryLat = mapCenter?.lat ?? location?.lat;
+  const queryLng = mapCenter?.lng ?? location?.lng;
+
   const { data: productList } = useProducts(
     {
       sort: 'distance',
-      userLat: location?.lat,
-      userLng: location?.lng,
+      userLat: queryLat,
+      userLng: queryLng,
       page: 1,
       pageSize: MAP_PRODUCT_PAGE_SIZE,
     },
-    { enabled: !!location }
+    {
+      enabled: !!location,
+      keepPrevious: true,
+    }
   );
 
   const products = productList?.items ?? [];
+
+  const handleCenterChange = useCallback((lat: number, lng: number) => {
+    setMapCenter({ lat, lng });
+  }, []);
 
   return (
     <div className="flex h-dvh flex-col">
       <ConsumerMapHeader location={location} onLocationChange={saveLocation} />
       <main className="min-h-0 flex-1">
         {location ? (
-          <StoreMapView location={location} products={products} />
+          <StoreMapView
+            location={location}
+            products={products}
+            onCenterChange={handleCenterChange}
+          />
         ) : (
           <div className="flex h-full items-center justify-center p-6">
             <NoLocationView onLocationChange={saveLocation} />

@@ -34,7 +34,7 @@ export function loadKakaoMapsSDK(): Promise<void> {
     );
   }
   sdkLoadingPromise = loadScript(
-    `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${appKey}&libraries=services&autoload=false`
+    `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${appKey}&libraries=services,clusterer&autoload=false`
   )
     .then(
       () =>

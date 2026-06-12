@@ -1,7 +1,7 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
 import type { UseQueryResult } from '@tanstack/react-query';
+import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import { useState } from 'react';
 
 import type { PaginatedResult } from '@/types/common';
@@ -13,7 +13,9 @@ import { productApi } from '@/api/products/productApi';
 interface UseProductsOptions {
   enabled?: boolean;
   initialData?: PaginatedResult<Product>;
+  keepPrevious?: boolean;
 }
+
 const INITIAL_PRODUCT_LIST_STALE_TIME_MS = 30_000;
 
 export function useProducts(
@@ -33,5 +35,6 @@ export function useProducts(
     initialDataUpdatedAt,
     refetchOnMount: hasInitialData ? false : undefined,
     staleTime: hasInitialData ? INITIAL_PRODUCT_LIST_STALE_TIME_MS : 0,
+    placeholderData: options?.keepPrevious ? keepPreviousData : undefined,
   });
 }
