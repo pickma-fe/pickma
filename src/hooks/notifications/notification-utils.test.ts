@@ -113,5 +113,10 @@ describe('addBounded', () => {
     addBounded(set, 'key-a');
     expect(set.size).toBe(1);
     expect(set.has('key-a')).toBe(true);
+
+    addBounded(set, 'key-b');
+    expect(set.size).toBe(2);
+    expect(set.has('key-a')).toBe(true);
+    expect(set.has('key-b')).toBe(true);
   });
 });
