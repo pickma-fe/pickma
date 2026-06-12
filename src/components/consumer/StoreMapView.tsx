@@ -51,21 +51,25 @@ export function StoreMapView({
   useEffect(() => {
     if (!containerRef.current) return;
     let mounted = true;
+    let handleIdle: (() => void) | null = null;
+    let map: KakaoMapInstance | null = null;
 
     setMapReady(false);
     setMapError(false);
+
     void loadKakaoMapsSDK()
       .then(() => {
         if (!mounted || !containerRef.current) return;
-        const map = initKakaoMap(containerRef.current, {
+
+        map = initKakaoMap(containerRef.current, {
           lat: location.lat,
           lng: location.lng,
         });
         mapRef.current = map;
 
         const maps = getKakaoMaps();
-        const handleIdle = () => {
-          const center = map.getCenter();
+        handleIdle = () => {
+          const center = map!.getCenter();
           onCenterChangeRef.current?.(center.getLat(), center.getLng());
         };
         maps.event.addListener(map, 'idle', handleIdle);
@@ -79,6 +83,26 @@ export function StoreMapView({
 
     return () => {
       mounted = false;
+
+      // idle 리스너 제거
+      if (map && handleIdle) {
+        const maps = getKakaoMaps();
+        maps.event.removeListener(map, 'idle', handleIdle);
+      }
+
+      // 마커 detach
+      for (const { marker } of markersRef.current) {
+        marker.setMap(null);
+      }
+      markersRef.current = [];
+
+      // 클러스터러 clear
+      if (clustererRef.current) {
+        clustererRef.current.clear();
+        clustererRef.current = null;
+      }
+
+      mapRef.current = null;
     };
   }, [location.lat, location.lng]);
 
@@ -109,7 +133,6 @@ export function StoreMapView({
     const newMarkers: KakaoMarkerInstance[] = [];
 
     for (const [storeId, { storeLat, storeLng }] of storeMap.entries()) {
-      // map 인자 제거 → 클러스터러가 마커 소유/연결 담당
       const marker = createKakaoMarker(storeLat, storeLng);
       const capturedId = storeId;
       maps.event.addListener(marker, 'click', () => {
