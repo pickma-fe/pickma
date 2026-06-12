@@ -8,18 +8,10 @@ import { queryKeys } from '@/lib/queryKeys';
 import { createClient } from '@/lib/supabase/client';
 import type { Database } from '@/lib/supabase/database';
 import { useToastStore } from '@/stores/useToastStore';
-import type { ToastType } from '@/stores/useToastStore';
+
+import { resolveConsumerOrderToast } from './notification-utils';
 
 type OrderRow = Database['public']['Tables']['orders']['Row'];
-
-const STATUS_MESSAGES: Record<
-  string,
-  { message: string; type: ToastType } | undefined
-> = {
-  'reserved->accepted': { message: '주문이 접수되었습니다', type: 'success' },
-  'accepted->ready': { message: '준비가 완료되었습니다', type: 'success' },
-  'ready->completed': { message: '픽업이 완료되었습니다', type: 'info' },
-};
 
 export function useOrderStatusNotification(userId: string | null) {
   const pathname = usePathname();
@@ -52,8 +44,6 @@ export function useOrderStatusNotification(userId: string | null) {
           const oldStatus = oldRecord.status;
           const newStatus = newRecord.status;
 
-          if (!oldStatus || !newStatus) return;
-
           const dedupeKey = `${newRecord.id}-${newStatus}`;
           if (receivedOrderUpdates.current.has(dedupeKey)) return;
           receivedOrderUpdates.current.add(dedupeKey);
@@ -65,12 +55,12 @@ export function useOrderStatusNotification(userId: string | null) {
             queryKey: queryKeys.orders.details(),
           });
 
-          const transition = `${oldStatus}->${newStatus}`;
-          const toastConfig = STATUS_MESSAGES[transition];
-          if (!toastConfig) return;
-          if (pathnameRef.current.startsWith('/mypage/orders')) return;
-
-          addToast(toastConfig);
+          const toastConfig = resolveConsumerOrderToast(
+            oldStatus,
+            newStatus,
+            pathnameRef.current
+          );
+          if (toastConfig) addToast(toastConfig);
         }
       )
       .subscribe();

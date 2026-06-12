@@ -8,6 +8,8 @@ import { createClient } from '@/lib/supabase/client';
 import type { Database } from '@/lib/supabase/database';
 import { useToastStore } from '@/stores/useToastStore';
 
+import { isNewSellerOrder } from './notification-utils';
+
 type OrderRow = Database['public']['Tables']['orders']['Row'];
 
 export function useSellerNewOrderNotification(storeId: string | null) {
@@ -33,8 +35,7 @@ export function useSellerNewOrderNotification(storeId: string | null) {
           const newOrder = payload.new;
           const oldOrder = payload.old;
 
-          if (newOrder.status !== 'reserved' || oldOrder.status === 'reserved')
-            return;
+          if (!isNewSellerOrder(oldOrder.status, newOrder.status)) return;
 
           if (receivedOrderIds.current.has(newOrder.id)) return;
           receivedOrderIds.current.add(newOrder.id);
