@@ -15,7 +15,8 @@ export function resolveConsumerOrderToast(
   pathname: string
 ): { message: string; type: ToastType } | null {
   if (!oldStatus || !newStatus) return null;
-  if (pathname.startsWith('/mypage/orders')) return null;
+  if (pathname === '/mypage/orders' || pathname.startsWith('/mypage/orders/'))
+    return null;
   return STATUS_MESSAGES[`${oldStatus}->${newStatus}`] ?? null;
 }
 

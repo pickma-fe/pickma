@@ -52,6 +52,16 @@ describe('resolveConsumerOrderToast', () => {
     ).toBeNull();
   });
 
+  it('/mypage/orders로 시작하는 다른 경로는 억제하지 않음', () => {
+    expect(
+      resolveConsumerOrderToast(
+        'reserved',
+        'accepted',
+        '/mypage/orders-history'
+      )
+    ).toEqual({ message: '주문이 접수되었습니다', type: 'success' });
+  });
+
   it('oldStatus가 null이면 null 반환', () => {
     expect(resolveConsumerOrderToast(null, 'accepted', '/home')).toBeNull();
   });
