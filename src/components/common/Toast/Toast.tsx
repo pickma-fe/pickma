@@ -14,10 +14,11 @@ const typeStyles: Record<ToastItem['type'], string> = {
 };
 
 export function Toast({ toast, onClose }: ToastProps) {
+  const isError = toast.type === 'error';
   return (
     <div
-      role="alert"
-      aria-live="polite"
+      role={isError ? 'alert' : 'status'}
+      aria-live={isError ? 'assertive' : 'polite'}
       className={`flex min-w-64 items-center gap-3 rounded-md px-4 py-3 shadow-lg ${typeStyles[toast.type]}`}
     >
       <span className="flex-1 text-sm font-medium">{toast.message}</span>
