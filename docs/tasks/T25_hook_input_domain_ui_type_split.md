@@ -1,10 +1,10 @@
 # T25. hook input Domain/UI 타입 분리
 
 - 상태:
-  진행 전
+  완료
 
 - GitHub Issue:
-  확인 필요
+  252
 
 - 우선순위:
   P2
@@ -48,3 +48,10 @@
 - 완료 기준:
   - 주요 mutation hook 외부 props가 Contract DTO에 직접 결합되지 않는다.
   - 변환 책임이 API boundary에 위치한다.
+
+- 구현 결과:
+  - `src/types/*`에 주문 생성, 결제 확인, 상품 목록 query, 판매자 상품 생성/수정, 메뉴 생성/수정, 스토어 생성/수정, 사용자 정보 수정, 판매자 신청 입력 타입을 추가했다.
+  - `src/hooks/**`의 주요 mutation/query 입력에서 Contract request 타입 직접 노출을 제거하고 Domain/UI 타입을 사용하도록 정리했다.
+  - `src/api/**` client wrapper에서 Domain/UI 입력을 Contract DTO로 변환한 뒤 request body/query로 전달하도록 이동했다.
+  - Date 기반 입력(`pickupAt`, `endAt`)은 API boundary에서 ISO string으로 변환하도록 고정했다.
+  - 주문/결제/판매자 상품/스토어 API 테스트와 관련 hook 테스트로 변환 경로를 검증했다.

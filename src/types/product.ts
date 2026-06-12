@@ -2,6 +2,28 @@ import type { Store } from './store';
 
 export type ProductStatus = 'active' | 'closed';
 
+export type ProductDiscountOption =
+  | 'all'
+  | 'over-40'
+  | '30-to-40'
+  | '20-to-30'
+  | 'under-20';
+
+export interface ProductListQuery {
+  page: number;
+  pageSize: number;
+  userLat?: number;
+  userLng?: number;
+  categoryId?: string;
+  keyword?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  discountOption?: ProductDiscountOption;
+  sort?: 'endAt' | 'discountRate' | 'discountPrice' | 'distance';
+  order?: 'asc' | 'desc';
+  availableOnly?: boolean;
+}
+
 export interface CreateSellerProductInput {
   menuItemId: string;
   discountPrice: number;
@@ -9,6 +31,15 @@ export interface CreateSellerProductInput {
   endAt: Date;
   pickupStartTime: string;
   pickupEndTime: string;
+}
+
+export interface UpdateSellerProductInput {
+  discountPrice?: number;
+  stock?: number;
+  endAt?: Date;
+  pickupStartTime?: string;
+  pickupEndTime?: string;
+  status?: ProductStatus;
 }
 
 export type ProductDisplayStatus =

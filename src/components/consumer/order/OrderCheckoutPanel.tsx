@@ -47,7 +47,7 @@ function getPickupPlace(product: ProductDetail) {
 function createPickupAt(
   pickupBaseDateTime: string,
   pickupTime: PickupTimeOption
-) {
+): Date | null {
   const [hour, minute] = pickupTime.startAt.split(':').map(Number);
 
   if (
@@ -79,7 +79,7 @@ function createPickupAt(
     0
   );
 
-  return pickupAt.toISOString();
+  return pickupAt;
 }
 
 export function OrderCheckoutPanel({

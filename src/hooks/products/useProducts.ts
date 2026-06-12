@@ -5,8 +5,7 @@ import type { UseQueryResult } from '@tanstack/react-query';
 import { useState } from 'react';
 
 import type { PaginatedResult } from '@/types/common';
-import type { Product } from '@/types/product';
-import type { ProductListParams } from '@/contracts/product';
+import type { Product, ProductListQuery } from '@/types/product';
 import { queryKeys } from '@/lib/queryKeys';
 import { productApi } from '@/api/products/productApi';
 
@@ -17,7 +16,7 @@ interface UseProductsOptions {
 const INITIAL_PRODUCT_LIST_STALE_TIME_MS = 30_000;
 
 export function useProducts(
-  params: ProductListParams,
+  params: ProductListQuery,
   options?: UseProductsOptions
 ): UseQueryResult<PaginatedResult<Product>> {
   const hasInitialData = Boolean(options?.initialData);

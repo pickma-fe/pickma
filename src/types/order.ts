@@ -57,6 +57,20 @@ export interface ConsumerOrderListQuery {
   order: 'asc' | 'desc';
 }
 
+export interface SellerOrderListQuery {
+  page: number;
+  pageSize: number;
+  status?: Exclude<OrderStatus, 'paymentPending' | 'processing'>;
+  sort: 'createdAt' | 'pickupAt';
+  order: 'asc' | 'desc';
+}
+
+export interface CreateOrderInput {
+  productId: string;
+  quantity: number;
+  pickupAt: Date;
+}
+
 export interface CreatedOrderPaymentInfo {
   id: string;
   orderNumber: string;

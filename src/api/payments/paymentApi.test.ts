@@ -42,3 +42,25 @@ describe('paymentApi.cancelPayment', () => {
     expect(result).toBeUndefined();
   });
 });
+
+describe('paymentApi.confirmPayment', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('confirmPayment는 결제 확인 입력을 contract body로 전달한다', async () => {
+    vi.mocked(apiClient.post).mockResolvedValue(undefined);
+
+    await paymentApi.confirmPayment({
+      paymentKey: 'payment-key-1',
+      orderNumber: 'PM20260611A1B2C3',
+      amount: 7200,
+    });
+
+    expect(apiClient.post).toHaveBeenCalledWith('/api/payments/confirm', {
+      paymentKey: 'payment-key-1',
+      orderNumber: 'PM20260611A1B2C3',
+      amount: 7200,
+    });
+  });
+});

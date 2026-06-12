@@ -1,5 +1,11 @@
 import type { PaginatedResult } from '@/types/common';
-import type { CreatedOrderPaymentInfo, Order } from '@/types/order';
+import type {
+  ConsumerOrderListQuery,
+  CreatedOrderPaymentInfo,
+  CreateOrderInput,
+  Order,
+  OrderStatus,
+} from '@/types/order';
 import type {
   ConsumerOrderListParams,
   CreateOrderRequest,
@@ -11,10 +17,40 @@ import type {
 import { apiClient } from '../apiClient';
 import { mapOrder, mapOrderListItem } from './orderMapper';
 
+const ORDER_STATUS_TO_PARAM = {
+  paymentPending: 'payment_pending',
+  reserved: 'reserved',
+  ready: 'ready',
+  completed: 'completed',
+  cancelled: 'cancelled',
+  cancelling: 'cancelling',
+  noShow: 'no_show',
+  expired: 'expired',
+} satisfies Record<
+  Exclude<OrderStatus, 'accepted' | 'processing'>,
+  ConsumerOrderListParams['status']
+>;
+
+function toCreateOrderRequest(input: CreateOrderInput): CreateOrderRequest {
+  return {
+    ...input,
+    pickupAt: input.pickupAt.toISOString(),
+  };
+}
+
+function toConsumerOrderListParams(
+  query: ConsumerOrderListQuery
+): ConsumerOrderListParams {
+  return {
+    ...query,
+    status: query.status ? ORDER_STATUS_TO_PARAM[query.status] : undefined,
+  };
+}
+
 export const orderApi = {
-  createOrder(body: CreateOrderRequest): Promise<CreatedOrderPaymentInfo> {
+  createOrder(input: CreateOrderInput): Promise<CreatedOrderPaymentInfo> {
     return apiClient
-      .post<CreateOrderResponse>('/api/orders', body)
+      .post<CreateOrderResponse>('/api/orders', toCreateOrderRequest(input))
       .then((res) => ({
         id: res.id,
         orderNumber: res.orderNumber,
@@ -25,10 +61,10 @@ export const orderApi = {
   },
 
   getOrders(
-    params: ConsumerOrderListParams
+    query: ConsumerOrderListQuery
   ): Promise<PaginatedResult<Omit<Order, 'items' | 'payment'>>> {
     return apiClient
-      .get<OrderListResponse>('/api/orders', params)
+      .get<OrderListResponse>('/api/orders', toConsumerOrderListParams(query))
       .then((res) => ({ ...res, items: res.items.map(mapOrderListItem) }));
   },
 

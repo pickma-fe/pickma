@@ -1,4 +1,8 @@
-import type { Product } from '@/types/product';
+import type {
+  CreateSellerProductInput,
+  Product,
+  UpdateSellerProductInput,
+} from '@/types/product';
 import type {
   CreateSellerProductRequest,
   ProductListItemResponse,
@@ -7,6 +11,24 @@ import type {
 import { apiClient } from '@/api/apiClient';
 
 import { mapSellerProduct } from './sellerProductMapper';
+
+function toCreateSellerProductRequest(
+  input: CreateSellerProductInput
+): CreateSellerProductRequest {
+  return {
+    ...input,
+    endAt: input.endAt.toISOString(),
+  };
+}
+
+function toUpdateSellerProductRequest(
+  input: UpdateSellerProductInput
+): UpdateSellerProductRequest {
+  return {
+    ...input,
+    endAt: input.endAt?.toISOString(),
+  };
+}
 
 export const sellerProductApi = {
   getProducts(): Promise<Product[]> {
@@ -21,18 +43,21 @@ export const sellerProductApi = {
       .then(mapSellerProduct);
   },
 
-  createProduct(body: CreateSellerProductRequest): Promise<Product> {
+  createProduct(input: CreateSellerProductInput): Promise<Product> {
     return apiClient
-      .post<ProductListItemResponse>('/api/seller/products', body)
+      .post<ProductListItemResponse>(
+        '/api/seller/products',
+        toCreateSellerProductRequest(input)
+      )
       .then(mapSellerProduct);
   },
 
-  updateProduct(
-    id: string,
-    body: UpdateSellerProductRequest
-  ): Promise<Product> {
+  updateProduct(id: string, input: UpdateSellerProductInput): Promise<Product> {
     return apiClient
-      .patch<ProductListItemResponse>(`/api/seller/products/${id}`, body)
+      .patch<ProductListItemResponse>(
+        `/api/seller/products/${id}`,
+        toUpdateSellerProductRequest(input)
+      )
       .then(mapSellerProduct);
   },
 

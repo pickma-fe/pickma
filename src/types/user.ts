@@ -16,3 +16,9 @@ export interface User {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export interface UpdateMeInput {
+  name?: string;
+  phone?: string;
+  profileImage?: string;
+}

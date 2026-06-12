@@ -16,7 +16,6 @@ import type {
   SellerOrderActionStatus,
   SellerOrderDisplayStatus,
 } from '@/types/seller-order';
-import type { SellerOrderListParams } from '@/contracts/order';
 import { useAcceptSellerOrder } from '@/hooks/seller/orders/useAcceptSellerOrder';
 import { useCompleteSellerOrder } from '@/hooks/seller/orders/useCompleteSellerOrder';
 import { useMarkSellerOrderReady } from '@/hooks/seller/orders/useMarkSellerOrderReady';
@@ -27,19 +26,6 @@ import { OrderFilter } from './OrderFilter';
 import { OrderTable } from './OrderTable';
 
 type SellerOrderFilterStatus = SellerOrderDisplayStatus | '전체';
-
-const DOMAIN_TO_CONTRACT_STATUS: Record<
-  SellerOrderDisplayStatus,
-  Exclude<SellerOrderListParams['status'], undefined>
-> = {
-  reserved: 'reserved',
-  accepted: 'accepted',
-  ready: 'ready',
-  completed: 'completed',
-  cancelling: 'cancelling',
-  cancelled: 'cancelled',
-  noShow: 'no_show',
-};
 
 const VALID_STATUSES: SellerOrderDisplayStatus[] = [
   'reserved',
@@ -130,10 +116,7 @@ export function OrderManageContent() {
   const [actionError, setActionError] = useState<string | null>(null);
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
 
-  const serverStatus =
-    selectedStatus === '전체'
-      ? undefined
-      : DOMAIN_TO_CONTRACT_STATUS[selectedStatus];
+  const serverStatus = selectedStatus === '전체' ? undefined : selectedStatus;
 
   const { data: totalData } = useSellerOrders({
     page: 1,
