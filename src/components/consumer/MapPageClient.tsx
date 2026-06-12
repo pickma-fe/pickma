@@ -26,7 +26,7 @@ const MAP_PRODUCT_PAGE_SIZE = 50;
 export function MapPageClient() {
   const { location, saveLocation } = useUserLocation();
   const geoAttempted = useRef(false);
-  const [mapCenter, setMapCenter] = useState<{
+  const [mapOffset, setMapOffset] = useState<{
     lat: number;
     lng: number;
   } | null>(null);
@@ -49,8 +49,8 @@ export function MapPageClient() {
     );
   }, [location, saveLocation]);
 
-  const queryLat = mapCenter?.lat ?? location?.lat;
-  const queryLng = mapCenter?.lng ?? location?.lng;
+  const queryLat = mapOffset?.lat ?? location?.lat;
+  const queryLng = mapOffset?.lng ?? location?.lng;
 
   const { data: productList } = useProducts(
     {
@@ -69,8 +69,10 @@ export function MapPageClient() {
   const products = productList?.items ?? [];
 
   const handleCenterChange = useCallback((lat: number, lng: number) => {
-    setMapCenter({ lat, lng });
+    setMapOffset({ lat, lng });
   }, []);
+
+  const locationKey = location ? `${location.lat},${location.lng}` : 'none';
 
   return (
     <div className="flex h-dvh flex-col">
@@ -78,6 +80,7 @@ export function MapPageClient() {
       <main className="min-h-0 flex-1">
         {location ? (
           <StoreMapView
+            key={locationKey}
             location={location}
             products={products}
             onCenterChange={handleCenterChange}

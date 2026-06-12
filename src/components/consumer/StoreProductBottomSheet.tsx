@@ -12,6 +12,45 @@ interface StoreProductBottomSheetProps {
   onClose: () => void;
 }
 
+interface StorePanelProps {
+  storeName: string | undefined;
+  products: Product[];
+  onClose: () => void;
+  containerClass: string;
+  contentClass: string;
+}
+
+function StorePanel({
+  storeName,
+  products,
+  onClose,
+  containerClass,
+  contentClass,
+}: StorePanelProps) {
+  return (
+    <div className={containerClass}>
+      <div className="flex items-center justify-between border-b border-gray-100 px-4 py-4">
+        <h2 className="text-base font-semibold text-gray-900">
+          {storeName ?? '가게 정보'}
+        </h2>
+        <Button
+          type="button"
+          variant="ghost"
+          color="gray"
+          className="p-1"
+          onClick={onClose}
+          aria-label="닫기"
+        >
+          <XIcon className="h-5 w-5" />
+        </Button>
+      </div>
+      <div className={contentClass}>
+        <ProductList products={products} />
+      </div>
+    </div>
+  );
+}
+
 export function StoreProductBottomSheet({
   storeId,
   products,
@@ -24,48 +63,21 @@ export function StoreProductBottomSheet({
   return (
     <>
       {/* 모바일: 하단 시트 */}
-      <div className="absolute inset-x-0 bottom-0 z-30 rounded-t-2xl bg-white shadow-2xl md:hidden">
-        <div className="flex items-center justify-between border-b border-gray-100 px-4 py-4">
-          <h2 className="text-base font-semibold text-gray-900">
-            {storeName ?? '가게 정보'}
-          </h2>
-          <Button
-            type="button"
-            variant="ghost"
-            color="gray"
-            className="p-1"
-            onClick={onClose}
-            aria-label="닫기"
-          >
-            <XIcon className="h-5 w-5" />
-          </Button>
-        </div>
-        <div className="max-h-72 overflow-y-auto px-4 py-3">
-          <ProductList products={products} />
-        </div>
-      </div>
-
+      <StorePanel
+        storeName={storeName}
+        products={products}
+        onClose={onClose}
+        containerClass="absolute inset-x-0 bottom-0 z-30 rounded-t-2xl bg-white shadow-2xl md:hidden"
+        contentClass="max-h-72 overflow-y-auto px-4 py-3"
+      />
       {/* 데스크탑: 우측 사이드바 */}
-      <div className="absolute inset-y-0 right-0 z-30 hidden w-80 flex-col bg-white shadow-2xl md:flex">
-        <div className="flex items-center justify-between border-b border-gray-100 px-4 py-4">
-          <h2 className="text-base font-semibold text-gray-900">
-            {storeName ?? '가게 정보'}
-          </h2>
-          <Button
-            type="button"
-            variant="ghost"
-            color="gray"
-            className="p-1"
-            onClick={onClose}
-            aria-label="닫기"
-          >
-            <XIcon className="h-5 w-5" />
-          </Button>
-        </div>
-        <div className="flex-1 overflow-y-auto px-4 py-3">
-          <ProductList products={products} />
-        </div>
-      </div>
+      <StorePanel
+        storeName={storeName}
+        products={products}
+        onClose={onClose}
+        containerClass="absolute inset-y-0 right-0 z-30 hidden w-80 flex-col bg-white shadow-2xl md:flex"
+        contentClass="flex-1 overflow-y-auto px-4 py-3"
+      />
     </>
   );
 }

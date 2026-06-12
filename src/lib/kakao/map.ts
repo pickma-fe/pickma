@@ -65,13 +65,12 @@ export function initKakaoMap(
 }
 
 export function createKakaoMarker(
-  map: KakaoMapInstance,
   lat: number,
   lng: number
 ): KakaoMarkerInstance {
   const maps = getKakaoMaps();
   const position = new maps.LatLng(lat, lng);
-  return new maps.Marker({ position, map });
+  return new maps.Marker({ position });
 }
 
 export function createMarkerClusterer(

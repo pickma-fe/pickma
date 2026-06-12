@@ -109,7 +109,8 @@ export function StoreMapView({
     const newMarkers: KakaoMarkerInstance[] = [];
 
     for (const [storeId, { storeLat, storeLng }] of storeMap.entries()) {
-      const marker = createKakaoMarker(mapRef.current, storeLat, storeLng);
+      // map 인자 제거 → 클러스터러가 마커 소유/연결 담당
+      const marker = createKakaoMarker(storeLat, storeLng);
       const capturedId = storeId;
       maps.event.addListener(marker, 'click', () => {
         setSelectedStoreId(capturedId);
