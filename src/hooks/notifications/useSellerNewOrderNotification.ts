@@ -8,12 +8,12 @@ import { createClient } from '@/lib/supabase/client';
 import type { Database } from '@/lib/supabase/database';
 import { useToastStore } from '@/stores/useToastStore';
 
-type PaymentEventRow = Database['public']['Tables']['payment_events']['Row'];
+type OrderRow = Database['public']['Tables']['orders']['Row'];
 
 export function useSellerNewOrderNotification(storeId: string | null) {
   const queryClient = useQueryClient();
   const addToast = useToastStore((state) => state.addToast);
-  const receivedEventIds = useRef(new Set<string>());
+  const receivedOrderIds = useRef(new Set<string>());
 
   useEffect(() => {
     if (!storeId) return;
@@ -21,25 +21,28 @@ export function useSellerNewOrderNotification(storeId: string | null) {
     const supabase = createClient();
     const channel = supabase
       .channel(`seller-orders-${storeId}`)
-      .on<PaymentEventRow>(
+      .on<OrderRow>(
         'postgres_changes',
         {
-          event: 'INSERT',
+          event: 'UPDATE',
           schema: 'public',
-          table: 'payment_events',
+          table: 'orders',
           filter: `store_id=eq.${storeId}`,
         },
         (payload) => {
-          const event = payload.new;
-          if (receivedEventIds.current.has(event.id)) return;
-          receivedEventIds.current.add(event.id);
+          const newOrder = payload.new;
+          const oldOrder = payload.old;
 
-          if (event.event_type === 'payment_confirmed') {
-            addToast({ message: '새 주문이 접수되었습니다', type: 'success' });
-            void queryClient.invalidateQueries({
-              queryKey: queryKeys.sellers.orders.all(),
-            });
-          }
+          if (newOrder.status !== 'reserved' || oldOrder.status === 'reserved')
+            return;
+
+          if (receivedOrderIds.current.has(newOrder.id)) return;
+          receivedOrderIds.current.add(newOrder.id);
+
+          addToast({ message: '새 주문이 접수되었습니다', type: 'success' });
+          void queryClient.invalidateQueries({
+            queryKey: queryKeys.sellers.orders.all(),
+          });
         }
       )
       .subscribe();
