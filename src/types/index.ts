@@ -55,4 +55,9 @@ export type {
   UpdateStoreInput,
 } from './store';
 export type { PaginatedResult, SortOrder } from './common';
+export type {
+  SellerOrderActionStatus,
+  SellerOrderDisplayStatus,
+  SellerOrderSummary,
+} from './seller-order';
 export type { UpdateMeInput, User, UserRole, UserStatus } from './user';

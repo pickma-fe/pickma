@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ERROR_CODE } from '@/lib/errors/errorCodes';
+import { createServerClient } from '@/lib/supabase/server';
 import { createServiceRoleClient } from '@/lib/supabase/service';
 
 import {
@@ -13,6 +14,7 @@ import {
 } from './service';
 
 vi.mock('@/lib/supabase/service');
+vi.mock('@/lib/supabase/server');
 
 const STORE_ID = '00000000-0000-4000-8000-000000000031';
 const ORDER_ID = '00000000-0000-4000-8000-000000000051';
@@ -74,6 +76,12 @@ function buildChain(result: {
 function mockServiceClient(client: object): void {
   vi.mocked(createServiceRoleClient).mockReturnValue(
     client as ReturnType<typeof createServiceRoleClient>
+  );
+}
+
+function mockServerClient(client: object): void {
+  vi.mocked(createServerClient).mockResolvedValue(
+    client as Awaited<ReturnType<typeof createServerClient>>
   );
 }
 
@@ -154,7 +162,7 @@ describe('getSellerOrderSummary', () => {
         .mockReturnValueOnce(noShowChain)
         .mockReturnValueOnce(expiredChain),
     };
-    mockServiceClient(client);
+    mockServerClient(client);
 
     const result = await getSellerOrderSummary(STORE_ID);
 
@@ -174,11 +182,12 @@ describe('getSellerOrderSummary', () => {
     expect(totalChain.eq).toHaveBeenCalledWith('store_id', STORE_ID);
     expect(reservedChain.eq).toHaveBeenCalledWith('status', 'reserved');
     expect(noShowChain.eq).toHaveBeenCalledWith('status', 'no_show');
+    expect(createServiceRoleClient).not.toHaveBeenCalled();
   });
 
   it('count query 오류 시 INTERNAL_SERVER_ERROR를 던진다', async () => {
     const chain = buildChain({ data: null, error: { message: 'db error' } });
-    mockServiceClient({ from: vi.fn().mockReturnValue(chain) });
+    mockServerClient({ from: vi.fn().mockReturnValue(chain) });
 
     await expect(getSellerOrderSummary(STORE_ID)).rejects.toMatchObject({
       code: ERROR_CODE.INTERNAL_SERVER_ERROR,

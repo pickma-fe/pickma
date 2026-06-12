@@ -15,3 +15,17 @@ export type SellerOrderDisplayStatus = Extract<
   | 'cancelled'
   | 'noShow'
 >;
+
+export interface SellerOrderSummary {
+  totalCount: number;
+  statusCounts: {
+    reserved: number;
+    accepted: number;
+    ready: number;
+    completed: number;
+    cancelling: number;
+    cancelled: number;
+    noShow: number;
+    expired: number;
+  };
+}

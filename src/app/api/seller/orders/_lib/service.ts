@@ -6,11 +6,19 @@ import type {
 } from '@/contracts/order';
 import { AppError } from '@/lib/errors/appError';
 import { ERROR_CODE } from '@/lib/errors/errorCodes';
+import { createServerClient } from '@/lib/supabase/server';
 import { createServiceRoleClient } from '@/lib/supabase/service';
 import {
   mapOrderDetailRow,
   mapOrderListRow,
 } from '@/app/api/_lib/order-mapper';
+
+import {
+  createEmptySellerOrderSummary,
+  SELLER_ORDER_SUMMARY_STATUSES,
+  SELLER_ORDER_SUMMARY_STATUS_KEY_MAP,
+  type SellerOrderSummaryStatus,
+} from './summary';
 
 const ORDER_LIST_SELECT =
   'id, order_number, store_id, total_amount, discount_amount, payment_amount, status, pickup_at, pickup_service_date, store_order_number, pickup_number, expires_at, created_at, updated_at, stores(name)';
@@ -18,32 +26,7 @@ const ORDER_LIST_SELECT =
 const ORDER_DETAIL_SELECT =
   'id, order_number, store_id, total_amount, discount_amount, payment_amount, status, pickup_at, pickup_service_date, store_order_number, pickup_number, expires_at, cancelled_at, cancel_reason, picked_up_at, created_at, updated_at, stores(name), order_items(id, order_id, product_id, product_name, original_price, discount_price, quantity, subtotal, created_at), payments(id, order_id, payment_key, provider_order_id, method, method_detail, amount, status, paid_at, refunded_at, refund_reason, created_at, updated_at)';
 
-const SELLER_ORDER_SUMMARY_STATUSES = [
-  'reserved',
-  'accepted',
-  'ready',
-  'completed',
-  'cancelling',
-  'cancelled',
-  'no_show',
-  'expired',
-] as const;
-
-type SellerOrderSummaryStatus = (typeof SELLER_ORDER_SUMMARY_STATUSES)[number];
-
-const SUMMARY_STATUS_KEY_MAP: Record<
-  SellerOrderSummaryStatus,
-  keyof SellerOrderSummaryResponse['statusCounts']
-> = {
-  reserved: 'reserved',
-  accepted: 'accepted',
-  ready: 'ready',
-  completed: 'completed',
-  cancelling: 'cancelling',
-  cancelled: 'cancelled',
-  no_show: 'noShow',
-  expired: 'expired',
-};
+type ServerClient = Awaited<ReturnType<typeof createServerClient>>;
 
 export async function getSellerOrders(
   storeId: string,
@@ -80,11 +63,10 @@ export async function getSellerOrders(
 }
 
 async function countSellerOrders(
+  supabase: ServerClient,
   storeId: string,
   status?: SellerOrderSummaryStatus
 ): Promise<number> {
-  const supabase = createServiceRoleClient();
-
   let query = supabase
     .from('orders')
     .select('id', { count: 'exact', head: true })
@@ -104,32 +86,21 @@ async function countSellerOrders(
 export async function getSellerOrderSummary(
   storeId: string
 ): Promise<SellerOrderSummaryResponse> {
+  const supabase = await createServerClient();
   const [totalCount, ...statusCounts] = await Promise.all([
-    countSellerOrders(storeId),
+    countSellerOrders(supabase, storeId),
     ...SELLER_ORDER_SUMMARY_STATUSES.map((status) =>
-      countSellerOrders(storeId, status)
+      countSellerOrders(supabase, storeId, status)
     ),
   ]);
 
   return SELLER_ORDER_SUMMARY_STATUSES.reduce<SellerOrderSummaryResponse>(
     (summary, status, index) => {
-      summary.statusCounts[SUMMARY_STATUS_KEY_MAP[status]] =
+      summary.statusCounts[SELLER_ORDER_SUMMARY_STATUS_KEY_MAP[status]] =
         statusCounts[index] ?? 0;
       return summary;
     },
-    {
-      totalCount,
-      statusCounts: {
-        reserved: 0,
-        accepted: 0,
-        ready: 0,
-        completed: 0,
-        cancelling: 0,
-        cancelled: 0,
-        noShow: 0,
-        expired: 0,
-      },
-    }
+    { ...createEmptySellerOrderSummary(), totalCount }
   );
 }
 

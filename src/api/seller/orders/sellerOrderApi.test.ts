@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { Order } from '@/types/order';
+import type { SellerOrderSummary } from '@/types/seller-order';
 import type {
   OrderDetailResponse,
   OrderListResponse,
@@ -8,7 +9,11 @@ import type {
 } from '@/contracts/order';
 
 import { sellerOrderApi } from './sellerOrderApi';
-import { mapSellerOrder, mapSellerOrderListItem } from './sellerOrderMapper';
+import {
+  mapSellerOrder,
+  mapSellerOrderListItem,
+  mapSellerOrderSummary,
+} from './sellerOrderMapper';
 import { apiClient } from '../../apiClient';
 
 vi.mock('../../apiClient', async (importOriginal) => {
@@ -27,6 +32,7 @@ vi.mock('../../apiClient', async (importOriginal) => {
 vi.mock('./sellerOrderMapper', () => ({
   mapSellerOrder: vi.fn(),
   mapSellerOrderListItem: vi.fn(),
+  mapSellerOrderSummary: vi.fn(),
 }));
 
 const ORDER_ID = 'order-1';
@@ -61,6 +67,19 @@ const mockDetailResponse: OrderDetailResponse = {
 
 const mockOrder = { id: ORDER_ID } as Order;
 const mockOrderListItem = { id: ORDER_ID } as Omit<Order, 'items' | 'payment'>;
+const mockSummary = {
+  totalCount: 3,
+  statusCounts: {
+    reserved: 1,
+    accepted: 0,
+    ready: 0,
+    completed: 1,
+    cancelling: 0,
+    cancelled: 0,
+    noShow: 1,
+    expired: 0,
+  },
+} satisfies SellerOrderSummary;
 const mockSummaryResponse: SellerOrderSummaryResponse = {
   totalCount: 3,
   statusCounts: {
@@ -80,6 +99,7 @@ describe('sellerOrderApi', () => {
     vi.clearAllMocks();
     vi.mocked(mapSellerOrder).mockReturnValue(mockOrder);
     vi.mocked(mapSellerOrderListItem).mockReturnValue(mockOrderListItem);
+    vi.mocked(mapSellerOrderSummary).mockReturnValue(mockSummary);
   });
 
   describe('getOrders', () => {
@@ -130,13 +150,14 @@ describe('sellerOrderApi', () => {
   });
 
   describe('getOrderSummary', () => {
-    it('summary endpoint를 호출하고 응답을 반환한다', async () => {
+    it('summary endpoint를 호출하고 mapper 결과를 반환한다', async () => {
       vi.mocked(apiClient.get).mockResolvedValue(mockSummaryResponse);
 
       const result = await sellerOrderApi.getOrderSummary();
 
       expect(apiClient.get).toHaveBeenCalledWith('/api/seller/orders/summary');
-      expect(result).toBe(mockSummaryResponse);
+      expect(mapSellerOrderSummary).toHaveBeenCalledWith(mockSummaryResponse);
+      expect(result).toBe(mockSummary);
     });
   });
 

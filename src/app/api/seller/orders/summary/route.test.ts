@@ -5,6 +5,7 @@ import { AppError } from '@/lib/errors/appError';
 import { ERROR_CODE } from '@/lib/errors/errorCodes';
 import { requireSellerStore } from '@/app/api/_lib/auth';
 import { isApiMockEnabled } from '@/app/api/_lib/mock';
+import { mockSellerOrders } from '@/mocks/seller';
 import { mockMyStore } from '@/mocks/stores';
 
 import { GET } from './route';
@@ -54,8 +55,19 @@ describe('GET /api/seller/orders/summary', () => {
     const body = (await res.json()) as { data: SellerOrderSummaryResponse };
 
     expect(res.status).toBe(200);
-    expect(body.data.totalCount).toBeGreaterThan(0);
-    expect(body.data.statusCounts.reserved).toBeGreaterThanOrEqual(0);
+    expect(body.data).toEqual({
+      totalCount: mockSellerOrders.length,
+      statusCounts: {
+        reserved: 1,
+        accepted: 0,
+        ready: 0,
+        completed: 1,
+        cancelling: 0,
+        cancelled: 0,
+        noShow: 1,
+        expired: 0,
+      },
+    });
     expect(requireSellerStore).not.toHaveBeenCalled();
   });
 

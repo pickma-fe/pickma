@@ -1,14 +1,19 @@
 import type { PaginatedResult } from '@/types/common';
 import type { Order, OrderStatus, SellerOrderListQuery } from '@/types/order';
+import type { SellerOrderSummary } from '@/types/seller-order';
 import type {
   OrderDetailResponse,
   OrderListResponse,
-  SellerOrderSummaryResponse,
   SellerOrderListParams,
+  SellerOrderSummaryResponse,
 } from '@/contracts/order';
 import { apiClient } from '@/api/apiClient';
 
-import { mapSellerOrder, mapSellerOrderListItem } from './sellerOrderMapper';
+import {
+  mapSellerOrder,
+  mapSellerOrderListItem,
+  mapSellerOrderSummary,
+} from './sellerOrderMapper';
 
 const ORDER_STATUS_TO_PARAM: Record<
   Exclude<OrderStatus, 'paymentPending' | 'processing'>,
@@ -52,10 +57,10 @@ export const sellerOrderApi = {
       }));
   },
 
-  getOrderSummary(): Promise<SellerOrderSummaryResponse> {
-    return apiClient.get<SellerOrderSummaryResponse>(
-      '/api/seller/orders/summary'
-    );
+  getOrderSummary(): Promise<SellerOrderSummary> {
+    return apiClient
+      .get<SellerOrderSummaryResponse>('/api/seller/orders/summary')
+      .then(mapSellerOrderSummary);
   },
 
   getOrder(id: string): Promise<Order> {
