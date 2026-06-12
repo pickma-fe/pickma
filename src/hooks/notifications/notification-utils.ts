@@ -20,6 +20,16 @@ export function resolveConsumerOrderToast(
   return STATUS_MESSAGES[`${oldStatus}->${newStatus}`] ?? null;
 }
 
+export const MAX_DEDUPE_SIZE = 200;
+
+export function addBounded(set: Set<string>, key: string) {
+  if (set.size >= MAX_DEDUPE_SIZE) {
+    const oldest = set.values().next().value;
+    if (oldest !== undefined) set.delete(oldest);
+  }
+  set.add(key);
+}
+
 export function isNewSellerOrder(
   oldStatus: string | null | undefined,
   newStatus: string | null | undefined

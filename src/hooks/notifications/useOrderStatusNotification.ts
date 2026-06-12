@@ -9,7 +9,7 @@ import { createClient } from '@/lib/supabase/client';
 import type { Database } from '@/lib/supabase/database';
 import { useToastStore } from '@/stores/useToastStore';
 
-import { resolveConsumerOrderToast } from './notification-utils';
+import { addBounded, resolveConsumerOrderToast } from './notification-utils';
 
 type OrderRow = Database['public']['Tables']['orders']['Row'];
 
@@ -55,7 +55,7 @@ export function useOrderStatusNotification(userId: string | null) {
 
           const dedupeKey = `${newRecord.id}-${oldStatus ?? 'null'}->${newStatus}`;
           if (receivedOrderUpdates.current.has(dedupeKey)) return;
-          receivedOrderUpdates.current.add(dedupeKey);
+          addBounded(receivedOrderUpdates.current, dedupeKey);
 
           const toastConfig = resolveConsumerOrderToast(
             oldStatus,
