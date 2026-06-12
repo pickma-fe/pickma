@@ -46,9 +46,4 @@ YYYYMMDDHHMMSS_<snake_case_name>.sql
 | `store_operation_status`       | T10       | **완료.** `store_status` enum rename (`approved`→`active`), `store_operation_status` enum (`open`\|`closed`) 신규 생성, `stores.operation_status` 컬럼 추가. 관련 RLS/index/RPC 갱신 포함. (`20260602112417_store_operation_status.sql`)                                                     |
 | `product_discount_sort_fields` | T05       | 결정: generated column + `original_price` 역정규화 (T05 완료). `products.original_price` snapshot 컬럼 추가 (INSERT 트리거로 `menu_items.original_price` 복사), `available_stock`/`discount_rate` STORED generated column 추가. `displayStatus`는 현재 시각 의존이므로 mapper에서 계속 계산. |
 | `store_location_strategy`      | T21       | `stores` 테이블에 위치 데이터 추가 및 거리 계산 전략 결정. `latitude`/`longitude` 컬럼, 외부 거리 API, PostGIS/RPC 등 방식은 T21에서 결정.                                                                                                                                                   |
-
-### 비차단 후보 (T11 이후 결정)
-
-| 후보 주제   | 관련 Task | 비고                                                                                                                                                                                                       |
-| ----------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 알림 스키마 | T22       | T22의 직접 선행 task는 T11(outbox/webhook/idempotency 설계)이며, 알림 저장 방식(`notifications` 테이블 또는 Realtime 채널)은 T11 이후 T22 계획 시점에 결정한다. T08 예정 migration 목록에 포함하지 않는다. |
+| 알림 스키마                    | T22       | **완료.** `notifications` 테이블 미생성. Realtime 채널 직접 구독 방식 채택. `payment_events` RLS/GRANT + `orders` REPLICA IDENTITY FULL 추가. (`20260611100000_realtime_notification_rls.sql`)                                                                                               |

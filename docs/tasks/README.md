@@ -47,7 +47,7 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 | T19 | 문서 baseline 정합성 및 지속 갱신 규칙 정리                  | P0       | 완료    | 169          | 없음                         | [T19_documentation_consistency_update.md](T19_documentation_consistency_update.md)                               |
 | T20 | Route Handler `_lib` 횡단 import 정리                        | P1       | 완료    | 221          | 없음                         | [T20_route_handler_lib_import_cleanup.md](T20_route_handler_lib_import_cleanup.md)                               |
 | T21 | 지도 기반 조회 및 거리순 정렬                                | P2       | 완료    | 260          | T08, T05                     | [T21_map_based_search_distance_sort.md](T21_map_based_search_distance_sort.md)                                   |
-| T22 | 실시간 알림 기반 설계 및 1차 구현                            | P2       | 진행 전 | 확인 필요    | T11, T62                     | [T22_realtime_notification_foundation.md](T22_realtime_notification_foundation.md)                               |
+| T22 | 실시간 알림 기반 설계 및 1차 구현                            | P2       | 완료    | 267          | T11, T62                     | [T22_realtime_notification_foundation.md](T22_realtime_notification_foundation.md)                               |
 | T23 | E2E 테스트 및 결제 팝업 모킹 전략                            | P2       | 진행 전 | 확인 필요    | T01, T02, T03, T04, T24      | [T23_e2e_payment_popup_mocking_strategy.md](T23_e2e_payment_popup_mocking_strategy.md)                           |
 | T24 | CI 기본 파이프라인 구축                                      | P1       | 완료    | 173          | 없음                         | [T24_ci_lint_test_pipeline.md](T24_ci_lint_test_pipeline.md)                                                     |
 | T25 | hook input Domain/UI 타입 분리                               | P2       | 완료    | 252          | T15                          | [T25_hook_input_domain_ui_type_split.md](T25_hook_input_domain_ui_type_split.md)                                 |
@@ -95,15 +95,15 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 | T67 | i18n 기본 설정 (next-intl, 한국어)                           | P2       | 진행 전 | 확인 필요    | T45                          | [T67_i18n_setup.md](T67_i18n_setup.md)                                                                           |
 | T68 | 지도 UI/UX 개선                                              | P2       | 진행 전 | 확인 필요    | T21                          | [T68_map_ui_ux_improvement.md](T68_map_ui_ux_improvement.md)                                                     |
 | T69 | 소비자 위치/검색 기능 확장                                   | P3       | 진행 전 | 확인 필요    | T21                          | [T69_consumer_location_search_extension.md](T69_consumer_location_search_extension.md)                           |
+| T70 | 알림 센터 UI 구현                                            | P3       | 진행 전 | 확인 필요    | T22                          | [T70_notification_center_ui.md](T70_notification_center_ui.md)                                                   |
+| T71 | 관리자 운영 알람 구현                                        | P3       | 진행 전 | 확인 필요    | T22, T63                     | [T71_admin_operation_alert.md](T71_admin_operation_alert.md)                                                     |
 
 ## 추천 진행 흐름
 
 완료 task는 제외하고, `진행 중`과 `진행 전` task만 기준으로 정렬한다.
 
-1. P1 기반/운영 차단 해소: T39
-2. P1/P2 독립 기반 작업: T26
-3. 기능 확장: T22, T59, T30, T23
-4. 공통 컴포넌트 접근성 및 폴더 통일 (T46~T49 선행 필수): T64, T65
-5. UI/UX 개선 묶음: T46, T47, T48, T49
-6. 독립 진행 (별도 일정): T66(모바일 앱 래핑), T67(i18n)
-7. 확장/운영 고도화: T32, T33, T34, T35, T36, T37
+1. P1/P2 독립 기반 작업: T26
+2. 기능 확장: T59, T30, T23
+3. UI/UX 개선 묶음: T46, T47, T48, T49
+4. 독립 진행 (별도 일정): T66(모바일 앱 래핑), T67(i18n)
+5. 확장/운영 고도화: T32, T33, T34, T35, T36, T37, T70, T71

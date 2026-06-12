@@ -10,7 +10,7 @@
   P3
 
 - 선행 조건:
-  - 선행 task: T45. UI/UX 및 접근성 baseline 기준 수립
+  - 선행 task: T45. UI/UX 및 접근성 baseline 기준 수립, T22. 실시간 알림 기반 설계 및 1차 구현
 
 - 분류:
   인프라
@@ -42,6 +42,7 @@
     - `next-pwa` 또는 Next.js 내장 서비스 워커로 PWA manifest를 구성한다.
     - `display: standalone` 모드에서 safe area inset이 적용되는지 확인한다.
   - 모바일 결제 방식 영향(T33)을 확인하고, 별도 결정이 필요한 사항은 T33과 연결한다.
+  - Push Notification 연동을 구현한다: Capacitor `@capacitor/push-notifications` 또는 PWA Web Push API를 사용해 T22에서 구축한 알림 인프라를 푸시 알림으로 확장한다.
 
 - 관련 파일/영역:
   - `capacitor.config.ts` (신규)
@@ -60,3 +61,8 @@
   - 상태 바 스타일이 앱 디자인과 일치한다.
   - 빌드 및 실행 흐름이 문서화된다.
   - 결제 방식에 영향이 있으면 T33과 연결해 후속 처리를 남긴다.
+  - 푸시 알림 권한 요청 흐름(허용/거부)이 동작한다.
+  - 디바이스 토큰 또는 PushSubscription이 정상 등록된다.
+  - 실기기 또는 실브라우저에서 푸시 수신 E2E가 확인된다.
+  - T22 알림 인프라에서 발생한 실제 비즈니스 이벤트(주문 상태 전이, 신규 주문)가 서버 → FCM/APNs/Web Push → 디바이스까지 전달되는 경로가 문서화된다.
+  - 클라이언트 토큰/PushSubscription 저장 위치와 서버 발송 연결 방식이 명시된다.

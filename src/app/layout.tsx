@@ -4,6 +4,7 @@ import { Suspense } from 'react';
 
 import { AuthModal } from '@/components/auth/AuthModal';
 import { AuthModalRouteSync } from '@/components/auth/AuthModalRouteSync';
+import { NotificationBridge } from '@/components/common/Toast/NotificationBridge';
 import { MockUserSwitcher } from '@/components/dev/MockUserSwitcher';
 
 import { Providers } from './providers';
@@ -45,6 +46,7 @@ export default function RootLayout({
           <Suspense fallback={null}>
             <AuthModalRouteSync />
           </Suspense>
+          <NotificationBridge />
           {process.env.NODE_ENV === 'development' && <MockUserSwitcher />}
         </Providers>
       </body>

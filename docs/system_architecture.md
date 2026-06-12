@@ -662,13 +662,13 @@ Branch protection은 `dev` 대상 PR에서 `CI / Lint, typecheck, and test` 통�
 
 ## 13. 확장 포인트
 
-| 기능        | 확장 방안                 |
-| ----------- | ------------------------- |
-| 지도        | Kakao Maps API 연동       |
-| 실시간 알림 | Supabase Realtime 구독    |
-| AI 추천     | OpenAI API 연동           |
-| Webhook     | Toss 결제 상태 동기화     |
-| CI/CD       | GitHub Actions 워크플로우 |
+| 기능        | 확장 방안                          |
+| ----------- | ---------------------------------- |
+| 지도        | Kakao Maps API 연동                |
+| 실시간 알림 | Supabase Realtime 구독 (18절 참고) |
+| AI 추천     | OpenAI API 연동                    |
+| Webhook     | Toss 결제 상태 동기화              |
+| CI/CD       | GitHub Actions 워크플로우          |
 
 ---
 
@@ -909,3 +909,74 @@ Vercel Cron은 **production 배포에서만 실행**된다. preview 환경에서
 3. **수동 트리거**: Vercel Dashboard → Settings → Cron Jobs → 해당 job → **Run Now**
 
 Hobby 플랜 제약: Cron은 하루 1회로 제한되며 실행 시각은 ±59분 오차가 발생할 수 있다.
+
+---
+
+## 18. 실시간 알림 (T22)
+
+### 18.1 설계 결정
+
+- `notifications` 테이블 미생성. Supabase Realtime 채널 직접 구독만 사용한다.
+- 알림 히스토리 저장이 필요해지는 경우 후속 task에서 별도 테이블을 추가한다.
+
+### 18.2 채널 구조
+
+| 구독자 | 테이블   | 이벤트               | 필터                    | 마운트 위치               |
+| ------ | -------- | -------------------- | ----------------------- | ------------------------- |
+| 소비자 | `orders` | UPDATE (status 변경) | `user_id=eq.{userId}`   | NotificationBridge (전역) |
+| 판매자 | `orders` | UPDATE (status 변경) | `store_id=eq.{storeId}` | NotificationBridge (전역) |
+
+- 소비자: `orders.status` UPDATE payload의 `old.status` → `new.status` 비교로 전이 감지
+- 판매자: `new.status === 'reserved'` 이고 `old.status !== 'reserved'`인 UPDATE 감지 (`confirm_payment` RPC가 결제 확인 시 `orders.status`를 `reserved`로 전환하므로 의미상 결제 완료와 동일)
+- `orders` 테이블은 `REPLICA IDENTITY FULL`로 설정해 UPDATE payload에 `old` 레코드가 포함된다.
+
+> **참고**: `supabase/migrations/20260611100000_realtime_notification_rls.sql`에서 `payment_events` SELECT GRANT, 판매자 RLS 정책(`seller_own_store_events`), Realtime publication 추가를 설정했지만 현재 Realtime 구독에는 사용하지 않는다. Supabase Realtime 이벤트 평가 컨텍스트에서 서브쿼리 기반 RLS(`store_id IN (SELECT id FROM stores WHERE user_id = auth.uid())`)의 `auth.uid()`가 null로 평가되어 이벤트가 전달되지 않는 문제로 `orders` 구독으로 전환했다. `payment_events` 설정은 향후 다른 목적(서버 사이드 조회 등)을 위해 유지한다.
+
+### 18.3 알림 메시지 매핑
+
+| 이벤트        | 조건                    | 메시지                   | 대상   |
+| ------------- | ----------------------- | ------------------------ | ------ |
+| orders UPDATE | `reserved` → `accepted` | 주문이 접수되었습니다    | 소비자 |
+| orders UPDATE | `accepted` → `ready`    | 준비가 완료되었습니다    | 소비자 |
+| orders UPDATE | `ready` → `completed`   | 픽업이 완료되었습니다    | 소비자 |
+| orders UPDATE | `* → reserved`          | 새 주문이 접수되었습니다 | 판매자 |
+
+### 18.4 Quota 분석 및 채널 최소화 전략
+
+- Supabase Free plan 동시 Realtime 연결 200개 제한
+- 로그인 소비자 1명 = 채널 1개(`orders` 구독), 판매자 1명 = 채널 1개(`orders` 구독)
+- 사용자당 최대 1채널로 최소화 → 100명 동시 사용 시 최대 100채널
+- 비로그인 또는 role 불일치 시 채널을 열지 않는다
+
+### 18.5 중복 방지 및 재시도 정책
+
+**중복 방지**:
+
+- 판매자 hook: `receivedOrderIds` Set으로 같은 `orders.id`의 재수신을 차단한다
+- 소비자 hook: `orders.id + new.status` 조합으로 동일 전이 재수신을 차단한다
+- 컴포넌트 unmount 시 `supabase.removeChannel(channel)` 호출로 채널을 정리한다
+
+**재시도 정책**:
+
+- Realtime 연결 끊김 시 Supabase 클라이언트 자동 재연결에 위임한다
+- 클라이언트에서 수동 재시도 로직을 구현하지 않는다
+
+### 18.6 Toast 표시 억제 조건
+
+- 소비자 채널: pathname이 `/mypage/orders` 또는 `/mypage/orders/` prefix이면 toast skip (구독은 유지)
+- 이유: 해당 페이지에서는 Query invalidation으로 화면이 자동 갱신되어 toast가 중복 안내가 된다
+
+### 18.7 NotificationBridge 마운트 구조
+
+```text
+RootLayout
+└── Providers (QueryClientProvider)
+    └── NotificationBridge ('use client')
+        ├── ToastContainer (toast 렌더링)
+        ├── useOrderStatusNotification(consumerUserId)  // role===customer일 때만 userId 전달
+        └── SellerNotificationProvider (role===seller일 때만 렌더링)
+            └── useMyStore() + useSellerNewOrderNotification(storeId)
+```
+
+- 비판매자/미로그인 화면에서는 `useMyStore()`를 호출하지 않아 `/api/stores/me` 불필요 요청을 만들지 않는다
+- `ToastContainer`는 `NotificationBridge` 내부에서 1회만 렌더링한다
