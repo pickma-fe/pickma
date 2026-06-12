@@ -95,6 +95,8 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 | T67 | i18n 기본 설정 (next-intl, 한국어)                           | P2       | 진행 전 | 확인 필요    | T45                          | [T67_i18n_setup.md](T67_i18n_setup.md)                                                                           |
 | T68 | 지도 UI/UX 개선                                              | P2       | 진행 전 | 확인 필요    | T21                          | [T68_map_ui_ux_improvement.md](T68_map_ui_ux_improvement.md)                                                     |
 | T69 | 소비자 위치/검색 기능 확장                                   | P3       | 진행 전 | 확인 필요    | T21                          | [T69_consumer_location_search_extension.md](T69_consumer_location_search_extension.md)                           |
+| T70 | 알림 센터 UI 구현                                            | P3       | 진행 전 | 확인 필요    | T22                          | [T70_notification_center_ui.md](T70_notification_center_ui.md)                                                   |
+| T71 | 관리자 운영 알람 구현                                        | P3       | 진행 전 | 확인 필요    | T22, T63                     | [T71_admin_operation_alert.md](T71_admin_operation_alert.md)                                                     |
 
 ## 추천 진행 흐름
 
@@ -102,8 +104,8 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 
 1. P1 기반/운영 차단 해소: T39
 2. P1/P2 독립 기반 작업: T26
-3. 기능 확장: T22, T59, T30, T23
+3. 기능 확장: T59, T30, T23
 4. 공통 컴포넌트 접근성 및 폴더 통일 (T46~T49 선행 필수): T64, T65
 5. UI/UX 개선 묶음: T46, T47, T48, T49
 6. 독립 진행 (별도 일정): T66(모바일 앱 래핑), T67(i18n)
-7. 확장/운영 고도화: T32, T33, T34, T35, T36, T37
+7. 확장/운영 고도화: T32, T33, T34, T35, T36, T37, T70, T71
