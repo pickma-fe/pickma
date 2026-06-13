@@ -54,7 +54,7 @@ export type {
   StoreStatus,
   UpdateStoreInput,
 } from './store';
-export type { PaginatedResult, SortOrder, ValidationIssue } from './common';
+export type { PaginatedResult, SortOrder } from './common';
 export type {
   SellerOrderActionStatus,
   SellerOrderDisplayStatus,

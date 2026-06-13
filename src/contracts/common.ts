@@ -12,9 +12,10 @@ export interface ApiSuccess<T> {
   message?: string;
 }
 
-import type { ValidationIssue } from '@/types/common';
-
-export type { ValidationIssue };
+export interface ValidationIssue {
+  path: string;
+  message: string;
+}
 
 export interface ApiErrorResponse {
   statusCode: number;
