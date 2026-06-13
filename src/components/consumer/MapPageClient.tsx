@@ -1,8 +1,9 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
+import type { UserLocation } from '@/hooks/consumer/useUserLocation';
 import { useUserLocation } from '@/hooks/consumer/useUserLocation';
 import { useProducts } from '@/hooks/products/useProducts';
 
@@ -26,6 +27,10 @@ const MAP_PRODUCT_PAGE_SIZE = 50;
 export function MapPageClient() {
   const { location, saveLocation } = useUserLocation();
   const geoAttempted = useRef(false);
+  const [mapOffset, setMapOffset] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
 
   useEffect(() => {
     if (location || geoAttempted.current || !navigator.geolocation) return;
@@ -45,28 +50,56 @@ export function MapPageClient() {
     );
   }, [location, saveLocation]);
 
+  const handleLocationChange = useCallback(
+    (newLocation: Omit<UserLocation, 'savedAt'>) => {
+      setMapOffset(null);
+      saveLocation(newLocation);
+    },
+    [saveLocation]
+  );
+
+  const queryLat = mapOffset?.lat ?? location?.lat;
+  const queryLng = mapOffset?.lng ?? location?.lng;
+
   const { data: productList } = useProducts(
     {
       sort: 'distance',
-      userLat: location?.lat,
-      userLng: location?.lng,
+      userLat: queryLat,
+      userLng: queryLng,
       page: 1,
       pageSize: MAP_PRODUCT_PAGE_SIZE,
     },
-    { enabled: !!location }
+    {
+      enabled: !!location,
+      keepPrevious: true,
+    }
   );
 
   const products = productList?.items ?? [];
 
+  const handleCenterChange = useCallback((lat: number, lng: number) => {
+    setMapOffset({ lat, lng });
+  }, []);
+
+  const locationKey = location ? `${location.lat},${location.lng}` : 'none';
+
   return (
     <div className="flex h-dvh flex-col">
-      <ConsumerMapHeader location={location} onLocationChange={saveLocation} />
+      <ConsumerMapHeader
+        location={location}
+        onLocationChange={handleLocationChange}
+      />
       <main className="min-h-0 flex-1">
         {location ? (
-          <StoreMapView location={location} products={products} />
+          <StoreMapView
+            key={locationKey}
+            location={location}
+            products={products}
+            onCenterChange={handleCenterChange}
+          />
         ) : (
           <div className="flex h-full items-center justify-center p-6">
-            <NoLocationView onLocationChange={saveLocation} />
+            <NoLocationView onLocationChange={handleLocationChange} />
           </div>
         )}
       </main>
