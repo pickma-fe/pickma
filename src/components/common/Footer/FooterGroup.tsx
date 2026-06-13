@@ -16,7 +16,7 @@ const footerNavSections: FooterNavSection[] = [
     id: 'service',
     title: '서비스',
     items: [
-      { label: '내 예약', href: '/bookings' },
+      { label: '내 예약', href: '/mypage/orders' },
       { label: '주문/픽업 관리', href: '/orders' },
       { label: '찜한 상품', href: '/wishlist' },
       { label: '리뷰 관리', href: '/reviews' },
