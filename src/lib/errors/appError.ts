@@ -1,4 +1,4 @@
-import type { ValidationIssue } from '@/contracts/common';
+import type { ValidationIssue } from '@/types/common';
 
 import type { ErrorCode } from './errorCodes';
 import { ERROR_MESSAGES } from './errorMessages';
