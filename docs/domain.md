@@ -146,6 +146,8 @@ export interface SellerApplication {
   businessCategory: string;
   rejectReason?: string;
   reviewedAt?: Date;
+  documentConsentAgreed: boolean;
+  documentConsentAgreedAt?: Date;
   documents: SellerApplicationDocument[];
   createdAt: Date;
   updatedAt: Date;
