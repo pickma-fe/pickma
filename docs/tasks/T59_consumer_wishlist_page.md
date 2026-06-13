@@ -7,7 +7,7 @@
   확인 필요
 
 - 우선순위:
-  P2
+  P3
 
 - 선행 조건:
   - 선행 task: T15 (TanStack Query key 및 invalidation factory 도입)

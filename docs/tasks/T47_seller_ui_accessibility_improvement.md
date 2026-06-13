@@ -35,6 +35,9 @@
   - form label, validation message, file upload, disabled state, focus 이동을 점검한다.
   - table/list의 정렬, 필터, 빈 상태, 행 action, 모바일 표시를 점검한다.
   - T29 판매자 제출 문서 확인 UX와 T38 판매자 랜딩/온보딩 CTA 흐름과 충돌하지 않게 개선 범위를 조정한다.
+  - 주문 처리 버튼(수락/완료) 확인 모달 노출 여부를 결정하고 구현한다 (T52 미결 UX 항목).
+  - 픽업번호 확인 방식(QR코드 스캔 vs 수동 입력)을 결정하고 구현한다 (T52 미결 UX 항목).
+  - `OrderManageContent.tsx`의 `case 'cancelled'` 빈 핸들러를 T31 API와 연결한다 (판매자 측 주문 취소 액션 처리).
   - 필요한 Storybook 상태 또는 Playwright 시나리오 보강 범위를 정리한다.
 
 - 관련 파일/영역:

@@ -7,7 +7,7 @@
   확인 필요
 
 - 우선순위:
-  P2
+  P3
 
 - 선행 조건:
   - 선행 task: T25. hook input Domain/UI 타입 분리, T05. 상품 목록 할인율 필터/정렬 DB pagination 복구
