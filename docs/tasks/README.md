@@ -61,7 +61,7 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 | T32 | 정산/수수료 시스템 설계                                      | P3       | 진행 전 | 확인 필요    | T31                          | [T32_settlement_fee_system_design.md](T32_settlement_fee_system_design.md)                                       |
 | T33 | 네이티브 앱 결제 방식 재검토                                 | P3       | 진행 전 | 확인 필요    | T01                          | [T33_native_app_payment_review.md](T33_native_app_payment_review.md)                                             |
 | T34 | 리뷰/평점 도메인 설계                                        | P3       | 진행 전 | 확인 필요    | 없음                         | [T34_review_rating_domain_design.md](T34_review_rating_domain_design.md)                                         |
-| T35 | AppError 객체 인수 리팩터링                                  | P3       | 진행 전 | 확인 필요    | 없음                         | [T35_apperror_object_argument_refactor.md](T35_apperror_object_argument_refactor.md)                             |
+| T35 | AppError 객체 인수 리팩터링                                  | P4       | 진행 전 | 확인 필요    | 없음                         | [T35_apperror_object_argument_refactor.md](T35_apperror_object_argument_refactor.md)                             |
 | T36 | 판매자 신청 서류 수정/재업로드 정책                          | P3       | 진행 전 | 확인 필요    | T06, T44, T61                | [T36_seller_application_document_reupload_policy.md](T36_seller_application_document_reupload_policy.md)         |
 | T37 | 운영 CS/모니터링/관리자 권한 정책 정리                       | P3       | 진행 전 | 확인 필요    | T01, T06                     | [T37_ops_cs_monitoring_admin_permission_policy.md](T37_ops_cs_monitoring_admin_permission_policy.md)             |
 | T38 | 판매자 랜딩/온보딩 CTA 정리                                  | P2       | 완료    | 244          | T10                          | [T38_seller_landing_onboarding_cta.md](T38_seller_landing_onboarding_cta.md)                                     |
@@ -113,7 +113,7 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 1. P2 진행 중: T26
 2. P2 UI/UX 개선 묶음: T46, T47, T49 (T26 무관, 즉시 가능) / T48 (T26 완료 후)
 3. P3 Backend/보안: T72, T73, T76
-4. P3 기능 확장: T59, T77, T78, T23, T30
-5. P3 확장/운영 고도화: T32, T33, T34, T35, T36, T37, T70, T71
+4. P3 기능 확장: T59, T69, T77, T78, T23, T30
+5. P3 확장/운영 고도화: T32, T33, T34, T36, T37, T70, T71
 6. P3 별도 일정: T66(모바일 앱 래핑), T67(i18n)
-7. P4 기술 부채: T74, T75
+7. P4 기술 부채: T35, T74, T75
