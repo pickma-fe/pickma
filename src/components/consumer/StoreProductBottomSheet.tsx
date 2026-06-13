@@ -70,12 +70,12 @@ export function StoreProductBottomSheet({
         containerClass="absolute inset-x-0 bottom-0 z-30 rounded-t-2xl bg-white shadow-2xl md:hidden"
         contentClass="max-h-72 overflow-y-auto px-4 py-3"
       />
-      {/* 데스크탑: 우측 사이드바 */}
+      {/* 데스크탑: 좌측 사이드바 */}
       <StorePanel
         storeName={storeName}
         products={products}
         onClose={onClose}
-        containerClass="absolute inset-y-0 right-0 z-30 hidden w-80 flex-col bg-white shadow-2xl md:flex"
+        containerClass="absolute inset-y-0 left-0 z-30 hidden w-80 flex-col bg-white shadow-2xl md:flex"
         contentClass="flex-1 overflow-y-auto px-4 py-3"
       />
     </>

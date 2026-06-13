@@ -52,7 +52,7 @@ export function StoreMapView({
     if (!containerRef.current) return;
     let mounted = true;
     let handleIdle: (() => void) | null = null;
-    let map: KakaoMapInstance | null = null;
+    let mapInstance: KakaoMapInstance | null = null;
 
     setMapReady(false);
     setMapError(false);
@@ -61,20 +61,22 @@ export function StoreMapView({
       .then(() => {
         if (!mounted || !containerRef.current) return;
 
-        map = initKakaoMap(containerRef.current, {
+        mapInstance = initKakaoMap(containerRef.current, {
           lat: location.lat,
           lng: location.lng,
         });
-        mapRef.current = map;
+        mapRef.current = mapInstance;
 
         const maps = getKakaoMaps();
+
+        const capturedMap = mapInstance;
         handleIdle = () => {
-          const center = map!.getCenter();
+          const center = capturedMap.getCenter();
           onCenterChangeRef.current?.(center.getLat(), center.getLng());
         };
-        maps.event.addListener(map, 'idle', handleIdle);
+        maps.event.addListener(capturedMap, 'idle', handleIdle);
 
-        clustererRef.current = createMarkerClusterer(map);
+        clustererRef.current = createMarkerClusterer(capturedMap);
         setMapReady(true);
       })
       .catch(() => {
@@ -84,19 +86,20 @@ export function StoreMapView({
     return () => {
       mounted = false;
 
-      // idle 리스너 제거
-      if (map && handleIdle) {
-        const maps = getKakaoMaps();
-        maps.event.removeListener(map, 'idle', handleIdle);
+      if (mapInstance && handleIdle) {
+        try {
+          const maps = getKakaoMaps();
+          maps.event.removeListener(mapInstance, 'idle', handleIdle);
+        } catch {
+          // SDK 언로드 상태에서 removeListener 실패 시 무시
+        }
       }
 
-      // 마커 detach
       for (const { marker } of markersRef.current) {
         marker.setMap(null);
       }
       markersRef.current = [];
 
-      // 클러스터러 clear
       if (clustererRef.current) {
         clustererRef.current.clear();
         clustererRef.current = null;
