@@ -516,7 +516,7 @@ function SignupForm({ next, onClose, onChangeView }: SignupFormProps) {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="이용약관 (새 탭에서 열림)"
-                className="rounded-sm font-medium underline underline-offset-2 focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:outline-none"
+                className="rounded-sm font-medium underline underline-offset-2 focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2 focus-visible:outline-none"
               >
                 이용약관
               </Link>
@@ -546,7 +546,7 @@ function SignupForm({ next, onClose, onChangeView }: SignupFormProps) {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="개인정보 수집·이용 (새 탭에서 열림)"
-                className="rounded-sm font-medium underline underline-offset-2 focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:outline-none"
+                className="rounded-sm font-medium underline underline-offset-2 focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2 focus-visible:outline-none"
               >
                 개인정보 수집·이용
               </Link>
