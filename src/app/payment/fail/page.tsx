@@ -47,7 +47,7 @@ export default function PaymentFailPage() {
             aria-live="polite"
             className="text-lg font-medium text-gray-500"
           >
-            결제가 취소되었습니다
+            결제 결과를 확인하는 중입니다.
           </p>
         </div>
       }
