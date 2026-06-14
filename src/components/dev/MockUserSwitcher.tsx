@@ -1,7 +1,7 @@
 'use client';
 
 import { useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useState, useSyncExternalStore } from 'react';
 
 import { useMe } from '@/hooks/users/useMe';
 
@@ -11,23 +11,26 @@ function getMockUserCookie(): string {
   return match ? (match[1] ?? '') : '';
 }
 
+const noop = () => () => {};
+
 export function MockUserSwitcher() {
   const queryClient = useQueryClient();
   const { data: user, isLoading } = useMe();
   const [isOpen, setIsOpen] = useState(true);
-  const [mockCookie, setMockCookie] = useState(() => getMockUserCookie());
+  const [, forceUpdate] = useState(0);
+  const mockCookie = useSyncExternalStore(noop, getMockUserCookie, () => '');
 
   if (process.env.NODE_ENV !== 'development') return null;
 
   function setMock(value: string) {
     document.cookie = `mock_user=${value}; path=/`;
-    setMockCookie(value);
+    forceUpdate((n) => n + 1);
     void queryClient.invalidateQueries({ queryKey: ['users', 'me'] });
   }
 
   function clearMockUser() {
     document.cookie = 'mock_user=; path=/; max-age=0';
-    setMockCookie('');
+    forceUpdate((n) => n + 1);
     void queryClient.invalidateQueries({ queryKey: ['users', 'me'] });
   }
 
