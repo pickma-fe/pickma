@@ -2,8 +2,8 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Eye, EyeOff } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
@@ -25,8 +25,21 @@ const resetPasswordSchema = z
 
 type ResetPasswordFields = z.infer<typeof resetPasswordSchema>;
 
-export default function ResetPasswordPage() {
+const loadingUI = (
+  <main className="flex min-h-screen items-center justify-center px-4 py-12">
+    <p
+      role="status"
+      aria-live="polite"
+      className="text-sm font-medium text-gray-500"
+    >
+      세션을 확인하는 중입니다.
+    </p>
+  </main>
+);
+
+function ResetPasswordContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { data: session, isLoading } = useAuthSession();
   const { mutateAsync: updatePassword } = useUpdatePassword();
   const [isSaved, setIsSaved] = useState(false);
@@ -42,15 +55,16 @@ export default function ResetPasswordPage() {
     resolver: zodResolver(resetPasswordSchema),
   });
 
+  const [hasRecoveryCode] = useState(() => searchParams.has('code'));
+
   const isSessionReady = !isLoading && !!session;
-  const isExpired = !isLoading && !session;
+  const isExpired = !isLoading && (!session || !hasRecoveryCode);
 
   useEffect(() => {
-    const code = new URLSearchParams(window.location.search).get('code');
-    if (isSessionReady && code) {
+    if (isSessionReady && hasRecoveryCode) {
       window.history.replaceState(null, '', '/auth/reset-password');
     }
-  }, [isSessionReady]);
+  }, [isSessionReady, hasRecoveryCode]);
 
   useEffect(() => {
     if (!isSaved) return;
@@ -72,17 +86,7 @@ export default function ResetPasswordPage() {
   }
 
   if (isLoading) {
-    return (
-      <main className="flex min-h-screen items-center justify-center px-4 py-12">
-        <p
-          role="status"
-          aria-live="polite"
-          className="text-sm font-medium text-gray-500"
-        >
-          세션을 확인하는 중입니다.
-        </p>
-      </main>
-    );
+    return loadingUI;
   }
 
   if (isSaved) {
@@ -208,5 +212,13 @@ export default function ResetPasswordPage() {
         </form>
       </section>
     </main>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={loadingUI}>
+      <ResetPasswordContent />
+    </Suspense>
   );
 }
