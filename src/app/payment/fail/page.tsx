@@ -22,7 +22,7 @@ function PaymentFailContent() {
       window.close();
     }, 1500);
     return () => clearTimeout(timer);
-  }, []);
+  }, [code]);
 
   return (
     <div className="flex min-h-screen items-center justify-center">
