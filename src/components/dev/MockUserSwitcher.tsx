@@ -3,6 +3,7 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useState, useSyncExternalStore } from 'react';
 
+import { queryKeys } from '@/lib/queryKeys';
 import { useMe } from '@/hooks/users/useMe';
 
 function getMockUserCookie(): string {
@@ -25,13 +26,19 @@ export function MockUserSwitcher() {
   function setMock(value: string) {
     document.cookie = `mock_user=${value}; path=/`;
     forceUpdate((n) => n + 1);
-    void queryClient.invalidateQueries({ queryKey: ['users', 'me'] });
+    void Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['users', 'me'] }),
+      queryClient.invalidateQueries({ queryKey: queryKeys.stores.my() }),
+    ]);
   }
 
   function clearMockUser() {
     document.cookie = 'mock_user=; path=/; max-age=0';
     forceUpdate((n) => n + 1);
-    void queryClient.invalidateQueries({ queryKey: ['users', 'me'] });
+    void Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['users', 'me'] }),
+      queryClient.invalidateQueries({ queryKey: queryKeys.stores.my() }),
+    ]);
   }
 
   function statusLabel() {
