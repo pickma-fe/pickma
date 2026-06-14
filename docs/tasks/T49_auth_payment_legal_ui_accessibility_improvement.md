@@ -1,10 +1,10 @@
 # T49. Auth/Payment/Legal UI/UX 및 접근성 개선
 
 - 상태:
-  진행 전
+  완료
 
 - GitHub Issue:
-  확인 필요
+  271
 
 - 우선순위:
   P2
