@@ -10,7 +10,7 @@
   P2
 
 - 선행 조건:
-  - 선행 task: T45. UI/UX 및 접근성 baseline 기준 수립, T64. 공통 컴포넌트 접근성 baseline 적용, T65. 도메인 컴포넌트 폴더 구조 통일, T28. 판매자 상품 수정 진입점 결정 및 구현, T29. 판매자 제출 문서 확인 UX 개선, T38. 판매자 랜딩/온보딩 CTA 정리
+  - 선행 task: T45. UI/UX 및 접근성 baseline 기준 수립, T64. 공통 컴포넌트 접근성 baseline 적용, T65. 도메인 컴포넌트 폴더 구조 통일, T28. 판매자 상품 수정 진입점 결정 및 구현, T29. 판매자 제출 문서 확인 UX 개선, T38. 판매자 랜딩/온보딩 CTA 정리, T52. 판매자 주문 상세 화면 구현 (미결 UX 항목 인수)
 
 - 분류:
   UI
@@ -35,6 +35,9 @@
   - form label, validation message, file upload, disabled state, focus 이동을 점검한다.
   - table/list의 정렬, 필터, 빈 상태, 행 action, 모바일 표시를 점검한다.
   - T29 판매자 제출 문서 확인 UX와 T38 판매자 랜딩/온보딩 CTA 흐름과 충돌하지 않게 개선 범위를 조정한다.
+  - 주문 처리 버튼(수락/완료) 확인 모달 노출 여부를 결정하고 구현한다 (T52 미결 UX 항목).
+  - 픽업번호 확인 방식(QR코드 스캔 vs 수동 입력)을 결정하고 구현한다 (T52 미결 UX 항목).
+  - `OrderManageContent.tsx`의 `case 'cancelled'` 빈 핸들러를 T31 API와 연결한다 (판매자 측 주문 취소 액션 처리).
   - 필요한 Storybook 상태 또는 Playwright 시나리오 보강 범위를 정리한다.
 
 - 관련 파일/영역:
@@ -54,4 +57,7 @@
   - 등록/운영 form의 label, validation, focus, error 상태가 접근성 기준을 만족한다.
   - 주문/상품/메뉴/가게 관리 화면의 list/table 상태가 일관된다.
   - desktop/tablet(768–1024px)/mobile(375–430px) viewport에서 주요 화면을 수동 검증한다.
+  - 주문 처리 버튼(수락/완료) 확인 모달 노출 여부가 결정되고 구현 완료된다.
+  - 픽업번호 확인 방식(QR코드 스캔 또는 수동 입력)이 선택되고 구현 완료된다.
+  - `OrderManageContent.tsx`의 `case 'cancelled'` 핸들러가 T31 API와 연동되어 동작 확인된다.
   - 필요한 후속 개선이 별도 task 또는 확인 필요 항목으로 분리된다.

@@ -7,9 +7,6 @@ import type { BusinessInfoData } from '@/types/store';
 import { useCreateSellerApplication } from '@/hooks/seller/applications/useCreateSellerApplication';
 import { useSellerOnboardingStatus } from '@/hooks/seller/onboarding/useSellerOnboardingStatus';
 
-// TODO(T29): API 확장 후 신청 데이터(businessInfo, termsAgreed, documentFiles) 복원 필요
-// 현재는 applicationStatus만 반환하므로 페이지 이동 후 로컬 state 초기화 불가
-
 export function useSellerAuth() {
   const [termsAgreed, setTermsAgreed] = useState<Record<
     string,

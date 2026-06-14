@@ -146,6 +146,8 @@ export interface SellerApplication {
   businessCategory: string;
   rejectReason?: string;
   reviewedAt?: Date;
+  documentConsentAgreed: boolean; // 판매자 신청 서류 동의 여부
+  documentConsentAgreedAt?: Date; // 동의 시각 (선택적)
   documents: SellerApplicationDocument[];
   createdAt: Date;
   updatedAt: Date;

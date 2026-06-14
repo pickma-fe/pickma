@@ -7,7 +7,7 @@
   확인 필요
 
 - 우선순위:
-  P2
+  P3
 
 - 선행 조건:
   - 선행 task: T15 (TanStack Query key 및 invalidation factory 도입)
@@ -48,6 +48,7 @@
   - 가게 찜 추가/삭제가 동작한다.
   - PRD C-MY-04 중 가게 찜 범위를 충족한다.
   - 상품 찜 ERD/API/화면 확장이 필요하면 T59 작업 중 후속 task를 생성한다.
+  - `docs/ia.md`의 `/mypage/wishlist` 항목 상태를 미구현 → 완료로 갱신한다.
 
 - 확인 필요 사항:
   - wishlist API 현재 구현 상태 (`api_spec` 11장 기준)
