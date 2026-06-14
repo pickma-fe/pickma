@@ -135,6 +135,7 @@ export default function PrivacyPolicyPage() {
         </div>
 
         <nav
+          id="toc"
           aria-label="목차"
           className="mb-10 rounded-lg border border-gray-200 bg-gray-50 px-5 py-4"
         >
@@ -160,7 +161,12 @@ export default function PrivacyPolicyPage() {
                 id={section.id}
                 className="text-lg font-semibold text-gray-900"
               >
-                {section.title}
+                <a
+                  href="#toc"
+                  className="hover:text-primary-600 rounded focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-1 focus-visible:outline-none"
+                >
+                  {section.title}
+                </a>
               </h2>
               <ul className="list-disc space-y-2 pl-5 text-base leading-7 text-gray-600">
                 {section.items.map((item) => (
