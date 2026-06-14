@@ -6,7 +6,6 @@ import { Suspense, useEffect } from 'react';
 
 function TossCheckoutContent() {
   const searchParams = useSearchParams();
-
   useEffect(() => {
     const orderNumber = searchParams.get('orderNumber');
     const rawAmount = searchParams.get('amount');
@@ -43,7 +42,17 @@ function TossCheckoutContent() {
       });
   }, [searchParams]);
 
-  return null;
+  return (
+    <main className="flex min-h-screen items-center justify-center bg-white px-6">
+      <p
+        role="status"
+        aria-live="polite"
+        className="text-lg font-medium text-gray-500"
+      >
+        결제창을 여는 중입니다.
+      </p>
+    </main>
+  );
 }
 
 export default function TossCheckoutPage() {
@@ -54,7 +63,7 @@ export default function TossCheckoutPage() {
           <p
             role="status"
             aria-live="polite"
-            className="text-sm font-medium text-gray-500"
+            className="text-lg font-medium text-gray-500"
           >
             결제창을 준비하는 중입니다.
           </p>
