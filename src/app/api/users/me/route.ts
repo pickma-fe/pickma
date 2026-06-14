@@ -15,7 +15,8 @@ import { deleteUser, updateUser } from './_lib/service';
 function getMockUser(req: NextRequest) {
   const cookie = req.cookies.get('mock_user')?.value;
   if (cookie === 'admin') return mockAdminUser;
-  if (cookie === 'seller') return mockSellerUser;
+  if (cookie === 'seller' || cookie === 'seller_no_store')
+    return mockSellerUser;
   return mockUser;
 }
 
