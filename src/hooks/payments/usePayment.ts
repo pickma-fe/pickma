@@ -66,9 +66,12 @@ export function usePayment() {
             );
             resolve({ orderNumber: msgOrderNumber });
           } else {
+            const data: unknown = event.data;
             const reason =
-              (event.data as { reason?: unknown }).reason ===
-              'payment_cancelled'
+              data !== null &&
+              typeof data === 'object' &&
+              'reason' in data &&
+              data.reason === 'payment_cancelled'
                 ? 'payment_cancelled'
                 : 'payment_failed';
             router.push(`/order/fail?reason=${reason}`);
