@@ -56,6 +56,7 @@ export function Input({
         )}
         <HeadlessInput
           {...props}
+          required={required}
           disabled={disabled}
           aria-required={required}
           invalid={Boolean(error)}
