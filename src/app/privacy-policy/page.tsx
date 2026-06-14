@@ -10,6 +10,7 @@ export const metadata: Metadata = {
 
 const privacySections = [
   {
+    id: 'section-1',
     title: '제1조 개인정보의 처리 목적',
     items: [
       'PickMa는 회원 가입 및 본인 확인, 상품 예약과 픽업, 결제 처리, 주문 관리, 고객 문의 대응을 위해 개인정보를 처리합니다.',
@@ -18,6 +19,7 @@ const privacySections = [
     ],
   },
   {
+    id: 'section-2',
     title: '제2조 처리하는 개인정보 항목',
     items: [
       '일반 회원 필수 항목: 이름, 이메일, 연락처, 로그인 식별 정보',
@@ -28,6 +30,7 @@ const privacySections = [
     ],
   },
   {
+    id: 'section-3',
     title: '제3조 개인정보의 처리 및 보유 기간',
     items: [
       '회원 정보는 회원 탈퇴 시까지 보관하며, 탈퇴 후에는 관계 법령에 따라 보관해야 하는 정보를 제외하고 지체 없이 파기합니다.',
@@ -38,6 +41,7 @@ const privacySections = [
     ],
   },
   {
+    id: 'section-4',
     title: '제4조 개인정보의 제3자 제공',
     items: [
       'PickMa는 이용자의 동의가 있거나 법령에 특별한 규정이 있는 경우를 제외하고 개인정보를 제3자에게 제공하지 않습니다.',
@@ -46,6 +50,7 @@ const privacySections = [
     ],
   },
   {
+    id: 'section-5',
     title: '제5조 개인정보 처리업무의 위탁',
     items: [
       'Supabase: 회원 인증, 데이터베이스, 파일 Storage 인프라 제공 및 운영',
@@ -55,6 +60,7 @@ const privacySections = [
     ],
   },
   {
+    id: 'section-6',
     title: '제6조 개인정보의 파기 절차 및 방법',
     items: [
       'PickMa는 개인정보 보유 기간이 경과하거나 처리 목적이 달성된 경우 해당 개인정보를 지체 없이 파기합니다.',
@@ -64,6 +70,7 @@ const privacySections = [
     ],
   },
   {
+    id: 'section-7',
     title: '제7조 정보주체와 법정대리인의 권리 및 행사 방법',
     items: [
       '이용자는 언제든지 본인의 개인정보에 대한 열람, 정정, 삭제, 처리 정지를 요청할 수 있습니다.',
@@ -73,6 +80,7 @@ const privacySections = [
     ],
   },
   {
+    id: 'section-8',
     title: '제8조 개인정보의 안전성 확보 조치',
     items: [
       'PickMa는 개인정보 접근 권한을 필요한 인원과 시스템으로 제한합니다.',
@@ -81,6 +89,7 @@ const privacySections = [
     ],
   },
   {
+    id: 'section-9',
     title: '제9조 개인정보 보호책임자 및 문의처',
     items: [
       '개인정보 보호책임자: PickMa 운영팀',
@@ -89,6 +98,7 @@ const privacySections = [
     ],
   },
   {
+    id: 'section-10',
     title: '제10조 개인정보처리방침의 변경',
     items: [
       'PickMa는 관계 법령 또는 서비스 정책 변경에 따라 본 개인정보처리방침을 변경할 수 있습니다.',
@@ -124,13 +134,35 @@ export default function PrivacyPolicyPage() {
           <p className="mt-2 text-sm text-gray-500">시행일: 2026년 6월 2일</p>
         </div>
 
+        <nav
+          aria-label="목차"
+          className="mb-10 rounded-lg border border-gray-200 bg-gray-50 px-5 py-4"
+        >
+          <p className="mb-3 text-sm font-semibold text-gray-700">목차</p>
+          <ol className="space-y-1.5">
+            {privacySections.map((section) => (
+              <li key={section.id}>
+                <a
+                  href={`#${section.id}`}
+                  className="rounded text-base text-gray-600 hover:text-gray-900 focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-1 focus-visible:outline-none"
+                >
+                  {section.title}
+                </a>
+              </li>
+            ))}
+          </ol>
+        </nav>
+
         <div className="space-y-8">
           {privacySections.map((section) => (
-            <section key={section.title} className="space-y-3">
-              <h2 className="text-lg font-semibold text-gray-900">
+            <section key={section.id} className="space-y-3">
+              <h2
+                id={section.id}
+                className="text-lg font-semibold text-gray-900"
+              >
                 {section.title}
               </h2>
-              <ul className="list-disc space-y-2 pl-5 text-sm leading-6 text-gray-600">
+              <ul className="list-disc space-y-2 pl-5 text-base leading-7 text-gray-600">
                 {section.items.map((item) => (
                   <li key={getPrivacyItemKey(section.title, item)}>{item}</li>
                 ))}
