@@ -12,7 +12,12 @@ function PaymentFailContent() {
       : '결제에 실패했습니다. 잠시 후 다시 시도해 주세요.';
 
   useEffect(() => {
-    window.opener?.postMessage({ success: false }, window.location.origin);
+    const reason =
+      code === 'PAY_PROCESS_CANCELED' ? 'payment_cancelled' : 'payment_failed';
+    window.opener?.postMessage(
+      { success: false, reason },
+      window.location.origin
+    );
     const timer = setTimeout(() => {
       window.close();
     }, 1500);

@@ -178,6 +178,36 @@ describe('usePayment', () => {
     );
   });
 
+  it('success:false + reason:payment_cancelled 수신 시 payment_cancelled reject', async () => {
+    const popup = makePopup();
+    vi.stubGlobal('open', vi.fn().mockReturnValue(popup));
+    const { result } = renderHook(() => usePayment(), {
+      wrapper: createWrapper(),
+    });
+
+    const promise = result.current.openPayment({
+      orderNumber: 'PM2026TEST',
+      orderName: '크루아상 2개',
+    });
+
+    await waitFor(() => expect(window.open).toHaveBeenCalled());
+
+    act(() => {
+      window.dispatchEvent(
+        new MessageEvent('message', {
+          origin: window.location.origin,
+          source: popup,
+          data: { success: false, reason: 'payment_cancelled' },
+        })
+      );
+    });
+
+    await expect(promise).rejects.toThrow('payment_cancelled');
+    expect(mockRouterPush).toHaveBeenCalledWith(
+      '/order/fail?reason=payment_cancelled'
+    );
+  });
+
   it('success:true 메시지에 orderNumber가 없으면 payment_failed reject', async () => {
     const popup = makePopup();
     vi.stubGlobal('open', vi.fn().mockReturnValue(popup));
