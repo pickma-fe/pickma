@@ -127,7 +127,7 @@ function ResetPasswordContent() {
           <Logo size="md" />
           <div className="space-y-2">
             <h1 className="text-2xl font-bold">비밀번호 재설정</h1>
-            <p className="text-base font-medium text-gray-600">
+            <p role="alert" className="text-base font-medium text-gray-600">
               링크가 만료되었거나 이미 사용되었습니다. 비밀번호 재설정을 다시
               요청해 주세요.
             </p>
