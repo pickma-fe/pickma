@@ -514,8 +514,9 @@ function SignupForm({ next, onClose, onChangeView }: SignupFormProps) {
               <Link
                 href="/terms"
                 target="_blank"
+                rel="noopener noreferrer"
                 aria-label="이용약관 (새 탭에서 열림)"
-                className="font-medium underline underline-offset-2"
+                className="rounded-sm font-medium underline underline-offset-2 focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:outline-none"
               >
                 이용약관
               </Link>
@@ -543,8 +544,9 @@ function SignupForm({ next, onClose, onChangeView }: SignupFormProps) {
               <Link
                 href="/privacy-policy"
                 target="_blank"
+                rel="noopener noreferrer"
                 aria-label="개인정보 수집·이용 (새 탭에서 열림)"
-                className="font-medium underline underline-offset-2"
+                className="rounded-sm font-medium underline underline-offset-2 focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:outline-none"
               >
                 개인정보 수집·이용
               </Link>
