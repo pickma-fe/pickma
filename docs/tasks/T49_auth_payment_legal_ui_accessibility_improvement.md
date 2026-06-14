@@ -57,3 +57,21 @@
   - 법적 고지 페이지가 heading 구조, link, 모바일 가독성 기준을 만족한다.
   - desktop/tablet(768–1024px)/mobile(375–430px) viewport에서 주요 화면을 수동 검증한다.
   - 필요한 후속 개선이 별도 task 또는 확인 필요 항목으로 분리된다.
+
+- 구현 결과:
+  - `Input`: `required` prop 추가 — label에 필수 `*` 표시, `aria-required` 자동 전달
+  - `AuthModal`: login/signup/reset form에 `autoComplete`, `aria-required`, `role="alert"/"status"` live region 적용
+  - `reset-password/page.tsx`: `?code=` 파라미터 없는 직접 접근 차단(만료 화면), `autoComplete` 추가
+  - `PaymentSuccessClient`, `toss-checkout/page.tsx`: `return null` → `role="status"` 로딩 UI
+  - `payment/fail/page.tsx`: Toss `code` 기반 취소/실패 문구 분기 + `reason` postMessage 전달로 `OrderFailPage` 연결
+  - `terms/page.tsx`, `privacy-policy/page.tsx`: 섹션 `id` + `<nav id="toc">` 목차 + `<h2>` → `<a href="#toc">` 링크
+  - `supabase/templates/reset-password.html`: 한국어 비밀번호 재설정 이메일 템플릿 (브랜드 그린 `#1e8e50`)
+  - `email-service.ts`: OTP 이메일 인라인 HTML 브랜드 테마 적용
+  - `Footer/BrandSection.tsx`: 앱스토어 뱃지 `next/image` 자연 치수로 비율 경고 수정
+  - `MockUserSwitcher`: 접기/펼치기, Seller 매장 유무 분기(`seller_no_store`), hydration 오류 수정(`useSyncExternalStore`)
+
+- 검증 결과:
+  - `npx tsc --noEmit` 통과
+  - `npm run lint` 통과
+  - `npx vitest run src/hooks/payments/usePayment.test.ts` 통과 (9 tests)
+  - `supabase config push` 완료 (원격 이메일 템플릿 반영)
