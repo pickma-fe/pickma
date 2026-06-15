@@ -366,6 +366,15 @@ src/hooks/admin/products/useAdminProducts.ts
 
 TanStack Query Provider는 `src/app/providers.tsx`에 둔다. `providers.tsx`는 `'use client'` 컴포넌트이며 `src/app/layout.tsx`에서 `<Providers>{children}</Providers>`로 감싼다.
 
+### 6.1 추천 정렬 정책
+
+- 메인페이지 `AI 추천`은 로그인 사용자 전용 개인화 정렬로 취급한다.
+- 비로그인 사용자, 추천 입력 부족, 추천 계산 실패 시에는 동일 endpoint에서 인기순 fallback을 사용한다.
+- 추천 입력은 공개 query param에 직접 추가하지 않고 서버가 내부 profile로 조합한다.
+- 1차 추천 점수는 주문 이력, 상품 상세 진입 기준 조회 이력, 거리, 할인율, 마감임박 신호를 조합하는 규칙 기반 점수화로 시작한다.
+- 조회 이력 수집 단위는 상품 상세 페이지 진입 1회이며, 목록 노출이나 hover는 추천 입력으로 사용하지 않는다.
+- 추천 정렬 구현은 `GET /api/products` 내부 정렬 전략과 route helper/service에 두고, 클라이언트 hook/UI는 `sort=aiRecommendation` 선택과 fallback 결과 표시만 담당한다.
+
 ---
 
 ## 7. 결제 흐름
@@ -662,13 +671,13 @@ Branch protection은 `dev` 대상 PR에서 `CI / Lint, typecheck, and test` 통�
 
 ## 13. 확장 포인트
 
-| 기능        | 확장 방안                          |
-| ----------- | ---------------------------------- |
-| 지도        | Kakao Maps API 연동                |
-| 실시간 알림 | Supabase Realtime 구독 (18절 참고) |
-| AI 추천     | OpenAI API 연동                    |
-| Webhook     | Toss 결제 상태 동기화              |
-| CI/CD       | GitHub Actions 워크플로우          |
+| 기능        | 확장 방안                                   |
+| ----------- | ------------------------------------------- |
+| 지도        | Kakao Maps API 연동                         |
+| 실시간 알림 | Supabase Realtime 구독 (18절 참고)          |
+| AI 추천     | 규칙 기반 점수화 후 필요 시 OpenAI API 연동 |
+| Webhook     | Toss 결제 상태 동기화                       |
+| CI/CD       | GitHub Actions 워크플로우                   |
 
 ---
 

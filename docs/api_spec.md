@@ -489,6 +489,7 @@ Behavior:
 | C-PROD-04 | 카테고리 필터  | GET    | `/api/products?categoryId=`            | public | P0       |
 | C-PROD-05 | 검색           | GET    | `/api/products?keyword=`               | public | P0       |
 | C-PROD-06 | 정렬           | GET    | `/api/products?sort=&order=`           | public | P2       |
+| C-PROD-07 | AI 추천 정렬   | GET    | `/api/products?sort=aiRecommendation`  | public | P3       |
 
 ### 4.1 `GET /api/products`
 
@@ -505,13 +506,19 @@ export interface ProductListParams {
   minPrice?: number;
   maxPrice?: number;
   discountOption?: ProductDiscountOption;
-  sort?: 'endAt' | 'discountRate' | 'discountPrice' | 'distance';
+  sort?:
+    | 'endAt'
+    | 'discountRate'
+    | 'discountPrice'
+    | 'distance'
+    | 'popular'
+    | 'aiRecommendation';
   order?: 'asc' | 'desc';
   availableOnly?: boolean;
 }
 ```
 
-기본 정렬은 `sort=endAt`, `order=asc`이다. `sort=distance`는 `userLat`/`userLng`가 필요하며, 두 값이 없으면 기본 쿼리로 폴백된다.
+기본 정렬은 `sort=endAt`, `order=asc`이다. `sort=distance`는 `userLat`/`userLng`가 필요하며, 두 값이 없으면 기본 쿼리로 폴백된다. `sort=aiRecommendation`은 로그인 사용자 전용 개인화 정렬이며 비로그인 사용자, 추천 입력 부족, 추천 실패 시 `popular` 정렬로 폴백된다.
 
 Response:
 
@@ -550,6 +557,8 @@ export interface ProductListItemResponse {
 DB source:
 
 - `sort=distance`: `get_products_near` RPC (Haversine 거리 계산, 3km 반경 고정)
+- `sort=aiRecommendation`: 공개 상품 후보 조회 후 서버 내부 추천 profile과 점수 helper를 적용
+- `sort=popular`: 공개 상품 후보 조회 후 인기 지표 기반 정렬 helper를 적용
 - 그 외: `products` + `menu_items` + `stores` + `categories` 직접 쿼리
 
 Mapping:
@@ -566,6 +575,11 @@ Mapping:
 Behavior:
 
 - `sort=distance`이고 `userLat`/`userLng`가 있으면 `get_products_near` RPC를 호출해 3km 반경 내 가게의 상품을 거리순으로 반환한다. 좌표 없는 가게의 상품은 제외된다.
+- `sort=aiRecommendation`은 메인페이지용 로그인 사용자 전용 개인화 정렬로 사용한다.
+- 추천 입력 신호는 주문 이력, 상품 상세 진입 기준 조회 이력, 거리, 할인율, 마감임박을 조합한다.
+- 추천 입력 신호는 query param으로 직접 노출하지 않고 서버 내부 profile 조합으로만 사용한다.
+- 비로그인 사용자, 추천 입력 부족, 추천 계산 실패 시에는 `popular` 정렬로 폴백한다.
+- 조회 이력 수집 기준은 상품 상세 페이지 진입이며 목록 노출/hover는 추천 입력에 포함하지 않는다.
 - `categoryId`는 `products.category_id` 기준으로 필터링한다.
 - `keyword`는 상품명(`menu_items.name`) ILIKE 기준으로 필터링한다. 가게명(`stores.name`) 검색은 지원하지 않는다.
 - `sort` 기본값은 `endAt`, `order` 기본값은 `asc`이다.
