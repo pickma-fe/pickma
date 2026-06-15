@@ -1,31 +1,22 @@
 'use client';
 
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
-import { ChevronDownIcon, ChevronUpIcon, UserIcon } from 'lucide-react';
+import {
+  ChevronDownIcon,
+  ChevronUpIcon,
+  Menu as HamburgerIcon,
+  UserIcon,
+} from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useState } from 'react';
 import type { ReactNode } from 'react';
 
 import type { User } from '@/types/user';
 
+import { HamburgerDrawer, type HeaderMenuItem } from './HamburgerDrawer';
 import { Button } from '../Button/Button';
 import Logo from '../Logo/Logo';
-
-type HeaderMenuItem =
-  | {
-      label: string;
-      type: 'link';
-      href: string;
-      icon?: ReactNode;
-      className?: string;
-    }
-  | {
-      label: string;
-      type: 'action';
-      onClick: () => void;
-      icon?: ReactNode;
-      className?: string;
-    };
 
 interface HeaderProps {
   user: User | null;
@@ -35,17 +26,47 @@ interface HeaderProps {
 }
 
 export function Header({ user, logoHref, menuItems, slot }: HeaderProps) {
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
   return (
-    <header className="grid w-full grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-4 border-b border-gray-200 px-4 py-4 sm:px-6 lg:px-12">
-      {logoHref ? (
-        <Link href={logoHref} aria-label="홈으로 이동" className="shrink-0">
-          <Logo />
-        </Link>
-      ) : (
-        <Logo />
-      )}
-      <div className="flex min-w-0 justify-center">{slot}</div>
-      <RightSection user={user} menuItems={menuItems} />
+    <header className="w-full border-b border-gray-200">
+      <div className="mx-auto grid max-w-360 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-4 px-4 py-4 sm:px-6 lg:px-12">
+        {logoHref ? (
+          <Link href={logoHref} aria-label="홈으로 이동" className="shrink-0">
+            <Logo
+              iconClassName="h-8 w-8 lg:h-12 lg:w-12"
+              textClassName="text-primary-600 text-xl font-bold lg:text-3xl"
+            />
+          </Link>
+        ) : (
+          <Logo
+            iconClassName="h-8 w-8 lg:h-12 lg:w-12"
+            textClassName="text-primary-600 text-xl font-bold lg:text-3xl"
+          />
+        )}
+        <div className="flex min-w-0 justify-center">{slot}</div>
+        <div className="shrink-0">
+          {/* 데스크탑 메뉴 */}
+          <div className="hidden lg:block">
+            <RightSection user={user} menuItems={menuItems} />
+          </div>
+          {/* 모바일 햄버거 */}
+          <button
+            type="button"
+            onClick={() => setIsDrawerOpen(true)}
+            aria-label="메뉴 열기"
+            className="focus-visible:ring-primary-500 flex h-11 w-11 items-center justify-center rounded-md text-gray-700 hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 lg:hidden"
+          >
+            <HamburgerIcon className="h-5 w-5" aria-hidden="true" />
+          </button>
+        </div>
+        <HamburgerDrawer
+          isOpen={isDrawerOpen}
+          onClose={() => setIsDrawerOpen(false)}
+          user={user}
+          menuItems={menuItems ?? []}
+        />
+      </div>
     </header>
   );
 }
