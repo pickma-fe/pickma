@@ -26,6 +26,25 @@ const DISCOUNT_OPTION_IDS = [
 export type ProductSortOptionId = (typeof SORT_OPTION_IDS)[number];
 export type ProductDiscountOptionId = (typeof DISCOUNT_OPTION_IDS)[number];
 
+export const SORT_OPTIONS: { id: ProductSortOptionId; label: string }[] = [
+  { id: 'ai-recommendation', label: '추천순' },
+  { id: 'deadline', label: '마감 임박순' },
+  { id: 'discount-rate', label: '할인율 높은순' },
+  { id: 'price-low', label: '가격 낮은순' },
+  { id: 'distance', label: '거리순' },
+];
+
+export const DISCOUNT_OPTIONS: {
+  id: ProductDiscountOptionId;
+  label: string;
+}[] = [
+  { id: 'all', label: '전체' },
+  { id: 'over-40', label: '40% 이상' },
+  { id: '30-to-40', label: '30% ~ 40%' },
+  { id: '20-to-30', label: '20% ~ 30%' },
+  { id: 'under-20', label: '20% 미만' },
+];
+
 export function normalizeSortOptionId(
   sortOptionId: string
 ): ProductSortOptionId {

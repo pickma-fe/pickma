@@ -24,7 +24,7 @@ import { Button } from '@/components/common';
 import { ConsumerProductList } from './ConsumerProductList';
 import { MapViewFab } from './MapViewFab';
 import { NoLocationView } from './NoLocationView';
-import { ProductFilterSidebar } from './ProductFilterSidebar';
+import { ProductFilterChips } from './ProductFilterChips';
 import { PromotionCarousel } from './PromotionCarousel';
 
 interface ConsumerPageClientProps {
@@ -56,7 +56,7 @@ export function ConsumerPageClient({
   });
   const productCategories = useMemo(
     () => [
-      { id: ALL_CATEGORY_ID, name: '전체', icon: '🔲' },
+      { id: ALL_CATEGORY_ID, name: '전체' },
       ...categories.map((category) => ({
         id: category.id,
         name: category.name,
@@ -165,6 +165,7 @@ export function ConsumerPageClient({
   };
 
   const handleResetFilters = () => {
+    setSelectedCategoryId(ALL_CATEGORY_ID);
     setSelectedSortOption(DEFAULT_SORT_OPTION_ID);
     setSelectedDiscountOption(DEFAULT_DISCOUNT_OPTION_ID);
     setCurrentPage(1);
@@ -174,17 +175,14 @@ export function ConsumerPageClient({
     void refetchProducts();
   };
 
+  const isFiltered =
+    selectedCategoryId !== ALL_CATEGORY_ID ||
+    selectedSortOption !== DEFAULT_SORT_OPTION_ID ||
+    selectedDiscountOption !== DEFAULT_DISCOUNT_OPTION_ID;
+
   const productListContent = (() => {
     if (!location) {
       return <NoLocationView onLocationChange={saveLocation} />;
-    }
-
-    if (isProductsLoading) {
-      return (
-        <div className="flex min-h-80 items-center justify-center rounded-lg border border-dashed border-gray-200 bg-gray-50 text-sm font-medium text-gray-500">
-          상품을 불러오는 중입니다.
-        </div>
-      );
     }
 
     if (isProductsError) {
@@ -217,6 +215,9 @@ export function ConsumerPageClient({
         totalPages={productList?.totalPages ?? 0}
         currentPage={currentPage}
         onPageChange={setCurrentPage}
+        onResetFilters={handleResetFilters}
+        isFiltered={isFiltered}
+        isLoading={isProductsLoading}
       />
     );
   })();
@@ -224,8 +225,10 @@ export function ConsumerPageClient({
   return (
     <>
       <main className="min-h-screen bg-white">
-        <div className="mx-auto grid max-w-450 grid-cols-1 lg:grid-cols-[220px_1fr]">
-          <ProductFilterSidebar
+        <div className="mx-auto max-w-360 px-4 py-6 sm:px-6 lg:px-12">
+          <PromotionCarousel />
+
+          <ProductFilterChips
             categories={productCategories}
             selectedCategoryId={selectedCategoryId}
             selectedSortOption={selectedSortOption}
@@ -234,13 +237,10 @@ export function ConsumerPageClient({
             onSortChange={handleSortChange}
             onDiscountChange={handleDiscountChange}
             onResetFilters={handleResetFilters}
+            isFiltered={isFiltered}
           />
 
-          <section className="px-5 py-6 lg:px-6">
-            <PromotionCarousel />
-
-            {productListContent}
-          </section>
+          <section aria-label="상품 목록">{productListContent}</section>
         </div>
       </main>
 

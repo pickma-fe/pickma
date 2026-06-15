@@ -13,7 +13,7 @@ export function BrandSection() {
       </p>
 
       {/* TODO: 실제 Store 링크 확정 시 각 Image를 <a href="..." target="_blank" rel="noopener noreferrer">로 감싸고 opacity-50 제거 */}
-      <div className="mt-12 flex flex-col items-start gap-2 opacity-50 sm:flex-row sm:items-center">
+      <div className="mt-6 flex flex-col items-start gap-2 opacity-50 sm:flex-row sm:items-center lg:flex-col lg:items-start">
         <Image
           src="/images/badges/google.svg"
           alt="Google Play (준비중)"
