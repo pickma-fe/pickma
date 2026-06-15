@@ -23,6 +23,8 @@ const QUALIFIED_ORDER_STATUSES = [
 const POPULARITY_LOOKBACK_DAYS = 30;
 const ORDER_HISTORY_LOOKBACK_DAYS = 90;
 const VIEW_HISTORY_LOOKBACK_DAYS = 30;
+const RECOMMENDATION_CANDIDATE_MULTIPLIER = 3;
+const RECOMMENDATION_MIN_CANDIDATES = 60;
 
 type UserOrderHistoryRow = {
   product_id: string;
@@ -82,7 +84,16 @@ export async function getRankedProducts(
     );
   }
 
-  const profile = await buildUserPreferenceProfile(viewerUserId);
+  let profile: UserPreferenceProfile;
+  try {
+    profile = await buildUserPreferenceProfile(viewerUserId);
+  } catch {
+    return paginateProducts(
+      sortByPopularity(products, popularityScores),
+      params,
+      totalCount
+    );
+  }
   const hasProfileSignals =
     profile.categoryScores.size > 0 || profile.storeScores.size > 0;
 
@@ -184,6 +195,11 @@ async function fetchCandidateProducts(
     } else if (params.discountOption === 'under-20') {
       query = query.lt('discount_rate', 20);
     }
+  }
+
+  if (params.sort === 'aiRecommendation') {
+    const candidateLimit = getRecommendationCandidateLimit(params);
+    query = query.range(0, candidateLimit - 1);
   }
 
   const { data, error, count } = await query;
@@ -498,4 +514,13 @@ function daysAgoToIsoString(days: number): string {
 
 function escapeILikePattern(pattern: string): string {
   return pattern.replace(/[%_]/g, '\\$&');
+}
+
+function getRecommendationCandidateLimit(params: ProductListParams): number {
+  const from = (params.page - 1) * params.pageSize;
+
+  return Math.max(
+    from + params.pageSize * RECOMMENDATION_CANDIDATE_MULTIPLIER,
+    RECOMMENDATION_MIN_CANDIDATES
+  );
 }

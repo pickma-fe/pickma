@@ -978,6 +978,10 @@ export type Database = {
           updated_at: string;
         }[];
       };
+      record_product_view: {
+        Args: { p_product_id: string; p_user_id: string };
+        Returns: boolean;
+      };
       haversine_km: {
         Args: { lat1: number; lat2: number; lng1: number; lng2: number };
         Returns: number;

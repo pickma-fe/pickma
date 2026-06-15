@@ -113,8 +113,11 @@ function buildCandidateSupabase(rows: ProductRow[], count = rows.length) {
 
 function buildServiceRoleClientMock(params: {
   popularityRows?: unknown[];
+  popularityError?: object | null;
   orderHistoryRows?: unknown[];
+  orderHistoryError?: object | null;
   viewHistoryRows?: unknown[];
+  viewHistoryError?: object | null;
 }) {
   let orderItemsCallCount = 0;
 
@@ -137,14 +140,17 @@ function buildServiceRoleClientMock(params: {
             (
               onFulfilled?: (value: {
                 data: unknown[];
-                error: null;
+                error: object | null;
               }) => unknown,
               onRejected?: (reason: unknown) => unknown
             ) =>
-              Promise.resolve({ data: rows, error: null }).then(
-                onFulfilled,
-                onRejected
-              )
+              Promise.resolve({
+                data: rows,
+                error:
+                  orderItemsCallCount === 1
+                    ? (params.popularityError ?? null)
+                    : (params.orderHistoryError ?? null),
+              }).then(onFulfilled, onRejected)
           ),
         };
         chain.select.mockReturnValue(chain);
@@ -166,13 +172,13 @@ function buildServiceRoleClientMock(params: {
             (
               onFulfilled?: (value: {
                 data: unknown[];
-                error: null;
+                error: object | null;
               }) => unknown,
               onRejected?: (reason: unknown) => unknown
             ) =>
               Promise.resolve({
                 data: params.viewHistoryRows ?? [],
-                error: null,
+                error: params.viewHistoryError ?? null,
               }).then(onFulfilled, onRejected)
           ),
         };
@@ -329,6 +335,46 @@ describe('getRankedProducts', () => {
     expect(result.items[0].id).toBe(productA.id);
   });
 
+  it('aiRecommendation 계산 중 프로필 조회가 실패하면 인기순으로 fallback한다', async () => {
+    vi.mocked(createServiceRoleClient).mockReturnValue(
+      buildServiceRoleClientMock({
+        popularityRows: [
+          {
+            product_id: productA.id,
+            quantity: 1,
+            orders: {
+              created_at: new Date().toISOString(),
+              status: 'reserved',
+            },
+          },
+          {
+            product_id: productB.id,
+            quantity: 3,
+            orders: {
+              created_at: new Date().toISOString(),
+              status: 'completed',
+            },
+          },
+        ],
+        orderHistoryError: { message: 'boom' },
+      }) as never
+    );
+
+    const result = await getRankedProducts(
+      buildCandidateSupabase([productA, productB]),
+      {
+        ...baseParams,
+        sort: 'aiRecommendation',
+      },
+      'user-1'
+    );
+
+    expect(result.items.map((item) => item.id)).toEqual([
+      productB.id,
+      productA.id,
+    ]);
+  });
+
   it('실제 매칭 count가 rows 길이보다 커도 totalCount와 totalPages는 실제 count를 유지한다', async () => {
     vi.mocked(createServiceRoleClient).mockReturnValue(
       buildServiceRoleClientMock({
@@ -382,5 +428,33 @@ describe('getRankedProducts', () => {
     expect(candidateSupabase._chain.order).toHaveBeenNthCalledWith(3, 'id', {
       ascending: true,
     });
+  });
+
+  it('aiRecommendation은 현재 페이지 기준 후보 window만 조회한다', async () => {
+    vi.mocked(createServiceRoleClient).mockReturnValue(
+      buildServiceRoleClientMock({
+        popularityRows: [],
+      }) as never
+    );
+    const candidateSupabase = buildCandidateSupabase([
+      productA,
+      productB,
+    ]) as never as {
+      from: ReturnType<typeof vi.fn>;
+      _chain: { range: ReturnType<typeof vi.fn> };
+    };
+
+    await getRankedProducts(
+      candidateSupabase as never,
+      {
+        ...baseParams,
+        page: 2,
+        pageSize: 20,
+        sort: 'aiRecommendation',
+      },
+      'user-1'
+    );
+
+    expect(candidateSupabase._chain.range).toHaveBeenCalledWith(0, 79);
   });
 });

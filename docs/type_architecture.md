@@ -323,7 +323,16 @@ Contract DTO -> Domain Type
 export const productListQuerySchema = z.object({
   page: z.coerce.number().int().positive().default(1),
   pageSize: z.coerce.number().int().min(1).max(100).default(20),
-  sort: z.enum(['endAt', 'discountRate', 'createdAt']).default('endAt'),
+  sort: z
+    .enum([
+      'endAt',
+      'discountRate',
+      'discountPrice',
+      'distance',
+      'popular',
+      'aiRecommendation',
+    ])
+    .default('endAt'),
   order: z.enum(['asc', 'desc']).default('asc'),
   categoryId: z.string().uuid().optional(),
 }) satisfies z.ZodType<ProductListParams>;

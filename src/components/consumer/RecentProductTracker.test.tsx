@@ -1,5 +1,5 @@
 import { render, waitFor } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { addRecentProduct } from '@/lib/recentProducts';
 
@@ -13,6 +13,10 @@ describe('RecentProductTracker', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true }));
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
   });
 
   it('상품 상세 진입 시 recent product를 저장하고 조회 이력 API를 호출한다', async () => {
