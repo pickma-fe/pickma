@@ -1,6 +1,6 @@
 'use client';
 
-import { Grid3X3Icon, ListIcon } from 'lucide-react';
+import { Grid2x2Icon, ListIcon } from 'lucide-react';
 
 export type ResultViewMode = 'grid' | 'list';
 
@@ -14,7 +14,7 @@ export function ResultViewToggle({
   onViewModeChange,
 }: ResultViewToggleProps) {
   return (
-    <div className="hidden overflow-hidden rounded-md border border-gray-200 sm:flex">
+    <div className="flex overflow-hidden rounded-md border border-gray-200">
       <button
         type="button"
         aria-label="그리드 보기"
@@ -27,7 +27,7 @@ export function ResultViewToggle({
         ].join(' ')}
         onClick={() => onViewModeChange('grid')}
       >
-        <Grid3X3Icon className="h-5 w-5" aria-hidden="true" />
+        <Grid2x2Icon className="h-5 w-5" aria-hidden="true" />
       </button>
       <button
         type="button"

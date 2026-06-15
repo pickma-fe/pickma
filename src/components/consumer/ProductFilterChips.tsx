@@ -154,7 +154,10 @@ function FilterDropdown({
         {label}
         <ChevronDownIcon className="h-3.5 w-3.5" aria-hidden="true" />
       </MenuButton>
-      <MenuItems className="absolute top-full left-0 z-20 mt-1 w-44 rounded-lg border border-gray-200 bg-white p-1 shadow-md focus:outline-none">
+      <MenuItems
+        anchor="bottom start"
+        className="z-20 mt-1 w-44 rounded-lg border border-gray-200 bg-white p-1 shadow-md focus:outline-none"
+      >
         {children}
       </MenuItems>
     </Menu>

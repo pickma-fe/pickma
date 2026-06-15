@@ -1,7 +1,8 @@
 'use client';
 
+import { SearchIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useMemo, useState } from 'react';
+import { type FormEvent, useMemo, useState } from 'react';
 
 import {
   CONSUMER_PRODUCTS_PER_PAGE,
@@ -16,6 +17,7 @@ import {
 import { useCategories } from '@/hooks/categories/useCategories';
 import { useUserLocation } from '@/hooks/consumer/useUserLocation';
 import { useProducts } from '@/hooks/products/useProducts';
+import { Input } from '@/components/common';
 
 import { ResultViewToggle, type ResultViewMode } from './ResultViewToggle';
 import { SearchFilterChips } from './SearchFilterChips';
@@ -50,6 +52,7 @@ export function SearchResultPageContent({
 }: SearchResultPageContentProps) {
   const router = useRouter();
   const { location } = useUserLocation();
+  const [keyword, setKeyword] = useState(initialKeyword);
   const [currentPage, setCurrentPage] = useState(initialPage);
   const [selectedSortOption, setSelectedSortOption] =
     useState<ProductSortOptionId>(
@@ -111,6 +114,16 @@ export function SearchResultPageContent({
     selectedCategoryId !== ALL_CATEGORY_ID ||
     selectedSortOption !== DEFAULT_SORT_OPTION_ID ||
     selectedPriceRangeId !== 'all';
+
+  function handleSearch(): void {
+    const q = keyword.trim();
+    router.push(q ? `/search?q=${encodeURIComponent(q)}` : '/search');
+  }
+
+  function handleSearchSubmit(event: FormEvent<HTMLFormElement>): void {
+    event.preventDefault();
+    handleSearch();
+  }
 
   function updateSearchUrl(next: {
     page?: number;
@@ -194,6 +207,20 @@ export function SearchResultPageContent({
   return (
     <div className="min-h-screen bg-white">
       <main className="mx-auto max-w-360 px-4 py-6 sm:px-6 lg:px-12">
+        <form className="mb-4" onSubmit={handleSearchSubmit}>
+          <Input
+            aria-label="상품 검색"
+            placeholder="상품명을 검색하세요"
+            value={keyword}
+            onChange={(e) => setKeyword(e.target.value)}
+            className="h-10 w-full"
+            endIcon={<SearchIcon className="h-4 w-4" />}
+            endIconLabel="검색"
+            onEndIconClick={handleSearch}
+            autoFocus
+          />
+        </form>
+
         <SearchFilterChips
           categories={productCategories}
           selectedCategoryId={selectedCategoryId}

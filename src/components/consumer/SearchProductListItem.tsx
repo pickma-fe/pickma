@@ -19,7 +19,7 @@ export function SearchProductListItem({ product }: { product: Product }) {
       />
 
       <div className="flex gap-4 p-4">
-        <div className="relative h-28 w-36 shrink-0 overflow-hidden rounded-lg bg-gray-100 sm:h-32 sm:w-44">
+        <div className="relative w-1/3 shrink-0 self-stretch overflow-hidden rounded-lg bg-gray-100 sm:w-40">
           <Image
             src={product.image || FALLBACK_PRODUCT_IMAGE}
             alt={product.name}

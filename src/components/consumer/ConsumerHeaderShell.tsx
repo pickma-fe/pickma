@@ -1,7 +1,6 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { Suspense } from 'react';
 import type { ReactNode } from 'react';
 
 import { useUserLocation } from '@/hooks/consumer/useUserLocation';
@@ -9,7 +8,6 @@ import { useUserLocation } from '@/hooks/consumer/useUserLocation';
 import { ConsumerHeader } from './ConsumerHeader';
 import { FakeSearchButton } from './FakeSearchButton';
 import { LocationPickerButton } from './LocationPickerButton';
-import { SearchHeaderSlot } from './SearchHeaderSlot';
 
 export function ConsumerHeaderShell() {
   const pathname = usePathname();
@@ -29,9 +27,12 @@ export function ConsumerHeaderShell() {
     );
   } else if (pathname === '/search') {
     slot = (
-      <Suspense>
-        <SearchHeaderSlot />
-      </Suspense>
+      <div className="flex w-full">
+        <LocationPickerButton
+          location={location}
+          onLocationChange={saveLocation}
+        />
+      </div>
     );
   }
 
