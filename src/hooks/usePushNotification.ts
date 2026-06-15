@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 type PushPermission = 'default' | 'granted' | 'denied';
 
@@ -16,6 +16,21 @@ export function usePushNotification() {
   const [subscription, setSubscription] = useState<PushSubscription | null>(
     null
   );
+
+  // 마운트 시 기존 구독 복원
+  useEffect(() => {
+    if (permission !== 'granted') return;
+    if (!('serviceWorker' in navigator)) return;
+
+    void navigator.serviceWorker.ready
+      .then((registration) => registration.pushManager.getSubscription())
+      .then((existingSubscription) => {
+        if (existingSubscription) setSubscription(existingSubscription);
+      })
+      .catch(() => {
+        // 초기 동기화 실패는 무시 (사용자 액션 시 재시도 가능)
+      });
+  }, [permission]);
 
   const requestPermission = async (): Promise<PushPermission> => {
     if (!('Notification' in window)) return 'denied';

@@ -74,8 +74,18 @@ npm run start
 
 ### VAPID 키
 
-- 환경변수: `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`
 - 키 생성: `npx web-push generate-vapid-keys`
+
+**클라이언트** (브라우저):
+
+- `NEXT_PUBLIC_VAPID_PUBLIC_KEY`: 공개 키 (`pushManager.subscribe()` 인자)
+
+**서버** (Route Handler / 발송 API):
+
+- `VAPID_PRIVATE_KEY`: 비공개 키 (푸시 메시지 서명)
+- `VAPID_SUBJECT`: 공급자 식별 (예: `mailto:admin@pickma.com`)
+- 필수 라이브러리: `npm install web-push`
+- 구현 위치: `src/app/api/push/send/route.ts`
 
 ### 서버 발송 연결 (후속 처리 필요)
 
@@ -97,9 +107,10 @@ Web Push API로 푸시 발송
 
 ## T33 결제 방식 영향
 
-- PWA standalone 모드에서 Toss 결제 팝업 동작은 현재 확인 필요
+- PWA standalone 모드에서 Toss 결제 팝업 동작을 실기기/실브라우저에서 검증해야 함
+- 팝업이 차단되거나 부분적으로 렌더링되면 결제 플로우 재설계 필요
 - Capacitor 전환 시 인앱 결제 방식 재검토 필요
-- → T33(네이티브 앱 결제 방식 재검토)에서 후속 처리
+- → T33(네이티브 앱 결제 방식 재검토)에서 위 검증 결과를 조건으로 Capacitor 전환 검토
 
 ---
 
