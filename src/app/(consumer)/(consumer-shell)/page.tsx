@@ -1,6 +1,6 @@
 import { ConsumerPageClient } from '@/components/consumer/ConsumerPageClient';
 
-import { getConsumerPageInitialData } from './_lib/getConsumerPageInitialData';
+import { getConsumerPageInitialData } from '../_lib/getConsumerPageInitialData';
 
 export const dynamic = 'force-dynamic';
 

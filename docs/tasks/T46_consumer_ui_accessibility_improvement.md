@@ -1,10 +1,10 @@
 # T46. Consumer UI/UX 및 접근성 개선
 
 - 상태:
-  진행 전
+  진행 중
 
 - GitHub Issue:
-  확인 필요
+  278
 
 - 우선순위:
   P2

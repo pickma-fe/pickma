@@ -15,9 +15,8 @@ import {
 } from '@/lib/consumerProductFilters';
 import { useCategories } from '@/hooks/categories/useCategories';
 import { useProducts } from '@/hooks/products/useProducts';
-import { Dropdown, Footer } from '@/components/common';
+import { Dropdown } from '@/components/common';
 
-import { ConsumerHeader } from './ConsumerHeader';
 import { ConsumerHeaderSearch } from './ConsumerHeaderSearch';
 import { ResultViewToggle, type ResultViewMode } from './ResultViewToggle';
 import { SearchFilterSidebar } from './SearchFilterSidebar';
@@ -204,78 +203,74 @@ export function SearchResultPageContent({
 
   return (
     <div className="flex min-h-screen flex-col bg-white">
-      <ConsumerHeader
-        slot={
-          <ConsumerHeaderSearch
-            keyword={keyword}
-            onKeywordChange={setKeyword}
-            onSearch={submitSearch}
-          />
-        }
-      />
-
-      <main className="flex w-full flex-1 flex-col gap-8 px-4 py-8 sm:px-6 lg:flex-row lg:px-8">
-        <SearchFilterSidebar
-          categories={productCategories}
-          selectedCategoryId={selectedCategoryId}
-          selectedPriceRangeId={selectedPriceRangeId}
-          onCategoryChange={handleCategoryChange}
-          onPriceRangeChange={handlePriceRangeChange}
-          onResetFilters={handleResetFilters}
+      <main className="flex w-full flex-1 flex-col gap-8 px-4 py-8 sm:px-6 lg:px-8">
+        <ConsumerHeaderSearch
+          keyword={keyword}
+          onKeywordChange={setKeyword}
+          onSearch={submitSearch}
         />
 
-        <section className="min-w-0 flex-1">
-          <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-            <div>
-              <p className="text-sm text-gray-500">검색 결과</p>
-              <h1 className="mt-2 text-2xl font-bold text-gray-900">
-                {hasKeyword ? (
-                  <>
-                    “{submittedKeyword}” 검색 결과{' '}
-                    <span className="text-primary-500">{totalCount}개</span>
-                  </>
-                ) : (
-                  '검색어를 입력해 주세요'
-                )}
-              </h1>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <Dropdown
-                type="select"
-                value={selectedSortOption}
-                onChange={(value) =>
-                  handleSortChange(normalizeSortOptionId(value))
-                }
-                items={sortOptions.map((option) => ({
-                  label: option.label,
-                  value: option.id,
-                }))}
-              />
-
-              <ResultViewToggle
-                viewMode={resultViewMode}
-                onViewModeChange={setResultViewMode}
-              />
-            </div>
-          </div>
-
-          <SearchResultContent
-            hasKeyword={hasKeyword}
-            isLoading={isLoading}
-            isError={isError}
-            isFetching={isFetching}
-            products={products}
-            totalPages={totalPages}
-            currentPage={currentPage}
-            viewMode={resultViewMode}
-            onRetry={() => void refetch()}
-            onPageChange={handlePageChange}
+        <div className="flex w-full flex-1 flex-col gap-8 lg:flex-row">
+          <SearchFilterSidebar
+            categories={productCategories}
+            selectedCategoryId={selectedCategoryId}
+            selectedPriceRangeId={selectedPriceRangeId}
+            onCategoryChange={handleCategoryChange}
+            onPriceRangeChange={handlePriceRangeChange}
+            onResetFilters={handleResetFilters}
           />
-        </section>
-      </main>
 
-      <Footer />
+          <section className="min-w-0 flex-1">
+            <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+              <div>
+                <p className="text-sm text-gray-500">검색 결과</p>
+                <h1 className="mt-2 text-2xl font-bold text-gray-900">
+                  {hasKeyword ? (
+                    <>
+                      “{submittedKeyword}” 검색 결과{' '}
+                      <span className="text-primary-500">{totalCount}개</span>
+                    </>
+                  ) : (
+                    '검색어를 입력해 주세요'
+                  )}
+                </h1>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <Dropdown
+                  type="select"
+                  value={selectedSortOption}
+                  onChange={(value) =>
+                    handleSortChange(normalizeSortOptionId(value))
+                  }
+                  items={sortOptions.map((option) => ({
+                    label: option.label,
+                    value: option.id,
+                  }))}
+                />
+
+                <ResultViewToggle
+                  viewMode={resultViewMode}
+                  onViewModeChange={setResultViewMode}
+                />
+              </div>
+            </div>
+
+            <SearchResultContent
+              hasKeyword={hasKeyword}
+              isLoading={isLoading}
+              isError={isError}
+              isFetching={isFetching}
+              products={products}
+              totalPages={totalPages}
+              currentPage={currentPage}
+              viewMode={resultViewMode}
+              onRetry={() => void refetch()}
+              onPageChange={handlePageChange}
+            />
+          </section>
+        </div>
+      </main>
     </div>
   );
 }

@@ -1,6 +1,5 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 
 import type { Category } from '@/types/category';
@@ -20,12 +19,9 @@ import {
 import { useCategories } from '@/hooks/categories/useCategories';
 import { useUserLocation } from '@/hooks/consumer/useUserLocation';
 import { useProducts } from '@/hooks/products/useProducts';
-import { Button, Footer } from '@/components/common';
+import { Button } from '@/components/common';
 
-import { ConsumerHeader } from './ConsumerHeader';
-import { ConsumerHeaderSearch } from './ConsumerHeaderSearch';
 import { ConsumerProductList } from './ConsumerProductList';
-import { LocationPickerButton } from './LocationPickerButton';
 import { MapViewFab } from './MapViewFab';
 import { NoLocationView } from './NoLocationView';
 import { ProductFilterSidebar } from './ProductFilterSidebar';
@@ -47,14 +43,12 @@ const categoryIconMap: Record<string, string> = {
 export function ConsumerPageClient({
   initialCategories,
 }: ConsumerPageClientProps) {
-  const router = useRouter();
   const { location, saveLocation } = useUserLocation();
   const [selectedCategoryId, setSelectedCategoryId] = useState(ALL_CATEGORY_ID);
   const [selectedSortOption, setSelectedSortOption] =
     useState<ProductSortOptionId>(DEFAULT_SORT_OPTION_ID);
   const [selectedDiscountOption, setSelectedDiscountOption] =
     useState<ProductDiscountOptionId>(DEFAULT_DISCOUNT_OPTION_ID);
-  const [keyword, setKeyword] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const productSortQuery = getProductSortQuery(selectedSortOption);
   const { data: categories = [] } = useCategories({
@@ -176,20 +170,6 @@ export function ConsumerPageClient({
     setCurrentPage(1);
   };
 
-  const handleKeywordChange = (nextKeyword: string) => {
-    setKeyword(nextKeyword);
-  };
-
-  const handleSearch = () => {
-    const trimmedKeyword = keyword.trim();
-
-    if (!trimmedKeyword) {
-      return;
-    }
-
-    router.push(`/search?keyword=${encodeURIComponent(trimmedKeyword)}`);
-  };
-
   const handleRetryProducts = () => {
     void refetchProducts();
   };
@@ -242,23 +222,7 @@ export function ConsumerPageClient({
   })();
 
   return (
-    <div className="bg-white">
-      <ConsumerHeader
-        slot={
-          <div className="flex w-full max-w-160 min-w-0 items-center gap-2">
-            <LocationPickerButton
-              location={location}
-              onLocationChange={saveLocation}
-            />
-            <ConsumerHeaderSearch
-              keyword={keyword}
-              onKeywordChange={handleKeywordChange}
-              onSearch={handleSearch}
-            />
-          </div>
-        }
-      />
-
+    <>
       <main className="min-h-screen bg-white">
         <div className="mx-auto grid max-w-450 grid-cols-1 lg:grid-cols-[220px_1fr]">
           <ProductFilterSidebar
@@ -281,7 +245,6 @@ export function ConsumerPageClient({
       </main>
 
       <MapViewFab />
-      <Footer />
-    </div>
+    </>
   );
 }

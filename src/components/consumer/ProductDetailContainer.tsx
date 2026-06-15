@@ -2,9 +2,7 @@
 
 import type { ProductDetail } from '@/types/product';
 import { useProduct } from '@/hooks/products/useProduct';
-import { Footer } from '@/components/common';
 
-import { ConsumerHeader } from './ConsumerHeader';
 import { ProductDetailInfo } from './ProductDetailInfo';
 import { ProductDetailTabs } from './ProductDetailTabs';
 import { ProductImageGallery } from './ProductImageGallery';
@@ -50,63 +48,49 @@ export function ProductDetailContainer({
 
   if (isLoading) {
     return (
-      <div className="bg-white">
-        <ConsumerHeader />
-        <main className="flex min-h-screen items-center justify-center bg-white">
-          <p
-            role="status"
-            aria-live="polite"
-            className="text-sm font-medium text-gray-500"
-          >
-            상품 정보를 불러오는 중입니다.
-          </p>
-        </main>
-        <Footer />
-      </div>
+      <main className="flex min-h-screen items-center justify-center bg-white">
+        <p
+          role="status"
+          aria-live="polite"
+          className="text-sm font-medium text-gray-500"
+        >
+          상품 정보를 불러오는 중입니다.
+        </p>
+      </main>
     );
   }
 
   if (isError && !product) {
     return (
-      <div className="bg-white">
-        <ConsumerHeader />
-        <main className="flex min-h-screen items-center justify-center bg-white">
-          <p
-            role="alert"
-            aria-live="assertive"
-            className="text-sm font-medium text-gray-500"
-          >
-            상품 정보를 불러오지 못했습니다.
-          </p>
-        </main>
-        <Footer />
-      </div>
+      <main className="flex min-h-screen items-center justify-center bg-white">
+        <p
+          role="alert"
+          aria-live="assertive"
+          className="text-sm font-medium text-gray-500"
+        >
+          상품 정보를 불러오지 못했습니다.
+        </p>
+      </main>
     );
   }
 
   if (!product) {
     return (
-      <div className="bg-white">
-        <ConsumerHeader />
-        <main className="flex min-h-screen items-center justify-center bg-white">
-          <p className="text-sm font-medium text-gray-500">
-            상품 정보를 확인할 수 없습니다.
-          </p>
-        </main>
-        <Footer />
-      </div>
+      <main className="flex min-h-screen items-center justify-center bg-white">
+        <p className="text-sm font-medium text-gray-500">
+          상품 정보를 확인할 수 없습니다.
+        </p>
+      </main>
     );
   }
 
   return (
-    <div className="bg-white">
+    <>
       <RecentProductTracker
         id={product.id}
         name={product.name}
         imageUrl={product.image}
       />
-
-      <ConsumerHeader />
 
       <main className="min-h-screen bg-white">
         {statusMessage ? (
@@ -149,8 +133,6 @@ export function ProductDetailContainer({
 
         <ProductDetailTabs product={product} />
       </main>
-
-      <Footer />
-    </div>
+    </>
   );
 }
