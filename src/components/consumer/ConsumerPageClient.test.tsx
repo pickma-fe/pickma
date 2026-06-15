@@ -116,6 +116,7 @@ describe('ConsumerPageClient', () => {
       expect.objectContaining({ page: 1, pageSize: 10 }),
       { enabled: false }
     );
+    expect(screen.queryByRole('button', { name: '반경 3' })).toBeNull();
   });
 
   it('위치 설정 시 useProducts에 위치 파라미터를 전달한다', () => {
@@ -142,6 +143,7 @@ describe('ConsumerPageClient', () => {
       }),
       { enabled: true }
     );
+    expect(screen.getByRole('button', { name: '반경 3' })).toBeInTheDocument();
   });
 
   it('반경 변경 시 useProducts에 새 radiusKm를 전달한다', () => {

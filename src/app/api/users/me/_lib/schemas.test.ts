@@ -68,8 +68,12 @@ describe('updateMeSchema', () => {
     }
   });
 
-  it('locationAddress 공백 문자열은 null로 정규화한다', () => {
-    const result = updateMeSchema.safeParse({ locationAddress: '   ' });
+  it('위치 필드 3개가 함께 오면 locationAddress 공백 문자열을 null로 정규화한다', () => {
+    const result = updateMeSchema.safeParse({
+      locationLat: null,
+      locationLng: null,
+      locationAddress: '   ',
+    });
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data.locationAddress).toBeNull();
@@ -81,6 +85,32 @@ describe('updateMeSchema', () => {
       locationLat: 37.5665,
       locationLng: 126.978,
       locationAddress: '서울시 중구 세종대로',
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it('위치 필드를 일부만 전달하면 실패한다', () => {
+    expect(
+      updateMeSchema.safeParse({
+        locationLat: 37.5665,
+      }).success
+    ).toBe(false);
+
+    expect(
+      updateMeSchema.safeParse({
+        locationLat: null,
+        locationLng: null,
+        locationAddress: '서울시 중구 세종대로',
+      }).success
+    ).toBe(false);
+  });
+
+  it('위치 필드 3개를 모두 null로 전달하면 통과한다', () => {
+    const result = updateMeSchema.safeParse({
+      locationLat: null,
+      locationLng: null,
+      locationAddress: null,
     });
 
     expect(result.success).toBe(true);

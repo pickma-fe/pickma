@@ -19,10 +19,19 @@ describe('productListSchema', () => {
     const result = productListSchema.safeParse({
       userLat: '37.5654',
       userLng: '126.9031',
+      radiusKm: '3',
     });
     expect(result.success).toBe(true);
     expect(result.data?.userLat).toBe(37.5654);
     expect(result.data?.userLng).toBe(126.9031);
+    expect(result.data?.radiusKm).toBe(3);
+  });
+
+  it('radiusKm가 0 이하이거나 5를 초과하면 실패한다', () => {
+    expect(productListSchema.safeParse({ radiusKm: '0' }).success).toBe(false);
+    expect(productListSchema.safeParse({ radiusKm: '5.1' }).success).toBe(
+      false
+    );
   });
 
   it('userLat 범위 초과 시 실패한다', () => {

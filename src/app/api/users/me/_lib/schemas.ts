@@ -21,6 +21,32 @@ export const updateMeSchema = z
       )
       .optional(),
   })
+  .refine(
+    (data) => {
+      const locationFields = [
+        data.locationLat,
+        data.locationLng,
+        data.locationAddress,
+      ];
+      const definedFields = locationFields.filter(
+        (value) => value !== undefined
+      ).length;
+
+      if (definedFields === 0) {
+        return true;
+      }
+
+      return (
+        definedFields === 3 &&
+        (locationFields.every((value) => value === null) ||
+          locationFields.every((value) => value !== null))
+      );
+    },
+    {
+      message: '위치 필드는 모두 함께 전달하거나 모두 null이어야 합니다.',
+      path: ['locationLat'],
+    }
+  )
   .refine((data) => Object.values(data).some((v) => v !== undefined), {
     message: '수정할 필드가 하나 이상 있어야 합니다.',
   });

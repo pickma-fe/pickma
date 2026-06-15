@@ -285,12 +285,14 @@ export function ConsumerPageClient({
 
           <section className="px-5 py-6 lg:px-6">
             <PromotionCarousel />
-            <div className="mb-4">
-              <SearchRadiusSelector
-                radiusKm={searchRadiusKm}
-                onRadiusChange={handleSearchRadiusChange}
-              />
-            </div>
+            {location ? (
+              <div className="mb-4">
+                <SearchRadiusSelector
+                  radiusKm={searchRadiusKm}
+                  onRadiusChange={handleSearchRadiusChange}
+                />
+              </div>
+            ) : null}
 
             {productListContent}
           </section>

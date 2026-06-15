@@ -33,8 +33,8 @@ export const productListSchema = z
       { message: 'userLng는 -180에서 180 사이여야 합니다.' }
     ),
     radiusKm: optionalFloatQuerySchema.refine(
-      (value) => value === undefined || value > 0,
-      { message: 'radiusKm는 0보다 커야 합니다.' }
+      (value) => value === undefined || (value > 0 && value <= 5),
+      { message: 'radiusKm는 0보다 크고 5 이하여야 합니다.' }
     ),
     categoryId: z.string().trim().min(1).optional(),
     keyword: z.string().trim().min(1).optional(),

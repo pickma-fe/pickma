@@ -67,12 +67,14 @@ export function MapPageClient() {
   return (
     <div className="flex h-dvh flex-col">
       <ConsumerMapHeader location={location} onLocationChange={saveLocation} />
-      <div className="border-b border-gray-100 px-4 py-3">
-        <SearchRadiusSelector
-          radiusKm={searchRadiusKm}
-          onRadiusChange={setSearchRadiusKm}
-        />
-      </div>
+      {location ? (
+        <div className="border-b border-gray-100 px-4 py-3">
+          <SearchRadiusSelector
+            radiusKm={searchRadiusKm}
+            onRadiusChange={setSearchRadiusKm}
+          />
+        </div>
+      ) : null}
       <main className="min-h-0 flex-1">
         {location ? (
           <StoreMapView location={location} products={products} />
