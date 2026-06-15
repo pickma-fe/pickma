@@ -23,9 +23,6 @@ const QUALIFIED_ORDER_STATUSES = [
 const POPULARITY_LOOKBACK_DAYS = 30;
 const ORDER_HISTORY_LOOKBACK_DAYS = 90;
 const VIEW_HISTORY_LOOKBACK_DAYS = 30;
-const MIN_RECOMMENDATION_CANDIDATES = 100;
-const RECOMMENDATION_CANDIDATE_MULTIPLIER = 5;
-const MAX_RECOMMENDATION_CANDIDATES = 500;
 
 type UserOrderHistoryRow = {
   product_id: string;
@@ -34,18 +31,16 @@ type UserOrderHistoryRow = {
     created_at: string;
     status: string;
   } | null;
+  products: {
+    store_id: string;
+    category_id: string | null;
+  } | null;
 };
 
 type UserViewHistoryRow = {
   store_id: string;
   category_id: string | null;
   viewed_at: string;
-};
-
-type ProductMetaRow = {
-  id: string;
-  store_id: string;
-  category_id: string | null;
 };
 
 type UserPreferenceProfile = {
@@ -126,13 +121,6 @@ async function fetchCandidateProducts(
   params: ProductListParams
 ): Promise<{ rows: ProductRow[]; totalCount: number }> {
   const { categoryId, keyword } = params;
-  const candidateLimit = Math.min(
-    Math.max(
-      params.page * params.pageSize * RECOMMENDATION_CANDIDATE_MULTIPLIER,
-      MIN_RECOMMENDATION_CANDIDATES
-    ),
-    MAX_RECOMMENDATION_CANDIDATES
-  );
 
   let query = supabase
     .from('products')
@@ -162,7 +150,9 @@ async function fetchCandidateProducts(
     .eq('status', 'active')
     .eq('stores.status', 'active')
     .eq('stores.operation_status', 'open')
-    .range(0, candidateLimit - 1);
+    .order('end_at', { ascending: true })
+    .order('discount_rate', { ascending: false })
+    .order('id', { ascending: true });
 
   if (categoryId) {
     query = query.eq('category_id', categoryId);
@@ -204,7 +194,7 @@ async function fetchCandidateProducts(
 
   return {
     rows: (data ?? []) as unknown as ProductRow[],
-    totalCount: Math.min(count ?? 0, candidateLimit),
+    totalCount: count ?? 0,
   };
 }
 
@@ -251,7 +241,9 @@ async function buildUserPreferenceProfile(
 
   const { data: orderHistory, error: orderHistoryError } = await supabase
     .from('order_items')
-    .select('product_id, quantity, orders!inner(created_at, status, user_id)')
+    .select(
+      'product_id, quantity, orders!inner(created_at, status, user_id), products!inner(store_id, category_id)'
+    )
     .eq('orders.user_id', viewerUserId)
     .gte('orders.created_at', orderCutoffIso)
     .in('orders.status', QUALIFIED_ORDER_STATUSES);
@@ -260,36 +252,25 @@ async function buildUserPreferenceProfile(
     throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
   }
 
-  const orderedProductIds = Array.from(
-    new Set(
-      ((orderHistory ?? []) as unknown as UserOrderHistoryRow[]).map(
-        (row) => row.product_id
-      )
-    )
-  );
-  const productMetaMap = await getProductMetaMap(orderedProductIds);
-
   for (const row of (orderHistory ?? []) as unknown as UserOrderHistoryRow[]) {
-    const meta = productMetaMap.get(row.product_id);
-
-    if (!meta || !row.orders) {
+    if (!row.products || !row.orders) {
       continue;
     }
 
     const recencyWeight = getOrderRecencyWeight(row.orders.created_at);
     const quantityWeight = Math.max(1, Math.min(row.quantity, 3));
 
-    if (meta.category_id) {
+    if (row.products.category_id) {
       categoryScores.set(
-        meta.category_id,
-        (categoryScores.get(meta.category_id) ?? 0) +
+        row.products.category_id,
+        (categoryScores.get(row.products.category_id) ?? 0) +
           40 * recencyWeight * quantityWeight
       );
     }
 
     storeScores.set(
-      meta.store_id,
-      (storeScores.get(meta.store_id) ?? 0) +
+      row.products.store_id,
+      (storeScores.get(row.products.store_id) ?? 0) +
         15 * recencyWeight * quantityWeight
     );
   }
@@ -326,32 +307,6 @@ async function buildUserPreferenceProfile(
     categoryScores,
     storeScores,
   };
-}
-
-async function getProductMetaMap(
-  productIds: string[]
-): Promise<Map<string, ProductMetaRow>> {
-  const productMetaMap = new Map<string, ProductMetaRow>();
-
-  if (productIds.length === 0) {
-    return productMetaMap;
-  }
-
-  const supabase = createServiceRoleClient();
-  const { data, error } = await supabase
-    .from('products')
-    .select('id, store_id, category_id')
-    .in('id', productIds);
-
-  if (error) {
-    throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
-  }
-
-  for (const row of (data ?? []) as ProductMetaRow[]) {
-    productMetaMap.set(row.id, row);
-  }
-
-  return productMetaMap;
 }
 
 function attachDistance(

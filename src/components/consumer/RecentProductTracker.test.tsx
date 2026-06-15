@@ -27,6 +27,8 @@ describe('RecentProductTracker', () => {
     await waitFor(() => {
       expect(fetch).toHaveBeenCalledWith('/api/products/product-1/view', {
         method: 'POST',
+        credentials: 'same-origin',
+        keepalive: true,
       });
     });
 

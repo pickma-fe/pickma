@@ -13,3 +13,7 @@ CREATE INDEX idx_product_view_events_user_viewed_at
 
 CREATE INDEX idx_product_view_events_user_product_viewed_at
   ON product_view_events(user_id, product_id, viewed_at DESC);
+
+GRANT ALL ON public.product_view_events TO service_role;
+
+ALTER TABLE product_view_events ENABLE ROW LEVEL SECURITY;

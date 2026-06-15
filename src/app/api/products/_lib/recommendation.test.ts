@@ -71,7 +71,7 @@ const productB: ProductRow = {
   },
 };
 
-function buildCandidateSupabase(rows: ProductRow[]) {
+function buildCandidateSupabase(rows: ProductRow[], count = rows.length) {
   const chain = {
     select: vi.fn(),
     eq: vi.fn(),
@@ -79,6 +79,7 @@ function buildCandidateSupabase(rows: ProductRow[]) {
     gte: vi.fn(),
     lt: vi.fn(),
     ilike: vi.fn(),
+    order: vi.fn(),
     range: vi.fn(),
     then: vi.fn(
       (
@@ -89,7 +90,7 @@ function buildCandidateSupabase(rows: ProductRow[]) {
         }) => unknown,
         onRejected?: (reason: unknown) => unknown
       ) =>
-        Promise.resolve({ data: rows, error: null, count: rows.length }).then(
+        Promise.resolve({ data: rows, error: null, count }).then(
           onFulfilled,
           onRejected
         )
@@ -101,10 +102,12 @@ function buildCandidateSupabase(rows: ProductRow[]) {
   chain.gte.mockReturnValue(chain);
   chain.lt.mockReturnValue(chain);
   chain.ilike.mockReturnValue(chain);
+  chain.order.mockReturnValue(chain);
   chain.range.mockReturnValue(chain);
 
   return {
     from: vi.fn().mockReturnValue(chain),
+    _chain: chain,
   } as unknown as SupabaseClient<Database>;
 }
 
@@ -112,7 +115,6 @@ function buildServiceRoleClientMock(params: {
   popularityRows?: unknown[];
   orderHistoryRows?: unknown[];
   viewHistoryRows?: unknown[];
-  productMetaRows?: unknown[];
 }) {
   let orderItemsCallCount = 0;
 
@@ -179,30 +181,6 @@ function buildServiceRoleClientMock(params: {
         chain.gte.mockReturnValue(chain);
         chain.order.mockReturnValue(chain);
         chain.limit.mockReturnValue(chain);
-
-        return chain;
-      }
-
-      if (table === 'products') {
-        const chain = {
-          select: vi.fn(),
-          in: vi.fn(),
-          then: vi.fn(
-            (
-              onFulfilled?: (value: {
-                data: unknown[];
-                error: null;
-              }) => unknown,
-              onRejected?: (reason: unknown) => unknown
-            ) =>
-              Promise.resolve({
-                data: params.productMetaRows ?? [],
-                error: null,
-              }).then(onFulfilled, onRejected)
-          ),
-        };
-        chain.select.mockReturnValue(chain);
-        chain.in.mockReturnValue(chain);
 
         return chain;
       }
@@ -321,6 +299,10 @@ describe('getRankedProducts', () => {
                 created_at: new Date().toISOString(),
                 status: 'completed',
               },
+              products: {
+                store_id: productA.store_id,
+                category_id: productA.category_id,
+              },
             },
           ],
           viewHistoryRows: [
@@ -328,13 +310,6 @@ describe('getRankedProducts', () => {
               store_id: productA.store_id,
               category_id: productA.category_id,
               viewed_at: new Date().toISOString(),
-            },
-          ],
-          productMetaRows: [
-            {
-              id: 'ordered-product-1',
-              store_id: productA.store_id,
-              category_id: productA.category_id,
             },
           ],
         }) as never
@@ -352,5 +327,60 @@ describe('getRankedProducts', () => {
     );
 
     expect(result.items[0].id).toBe(productA.id);
+  });
+
+  it('실제 매칭 count가 rows 길이보다 커도 totalCount와 totalPages는 실제 count를 유지한다', async () => {
+    vi.mocked(createServiceRoleClient).mockReturnValue(
+      buildServiceRoleClientMock({
+        popularityRows: [],
+      }) as never
+    );
+
+    const result = await getRankedProducts(
+      buildCandidateSupabase([productA, productB], 1000),
+      {
+        ...baseParams,
+        sort: 'popular',
+      }
+    );
+
+    expect(result.totalCount).toBe(1000);
+    expect(result.totalPages).toBe(50);
+  });
+
+  it('후보 조회에 stable order를 적용한다', async () => {
+    vi.mocked(createServiceRoleClient).mockReturnValue(
+      buildServiceRoleClientMock({
+        popularityRows: [],
+      }) as never
+    );
+    const candidateSupabase = buildCandidateSupabase([
+      productA,
+      productB,
+    ]) as never as {
+      from: ReturnType<typeof vi.fn>;
+      _chain: { order: ReturnType<typeof vi.fn> };
+    };
+
+    await getRankedProducts(candidateSupabase as never, {
+      ...baseParams,
+      sort: 'popular',
+    });
+
+    expect(candidateSupabase._chain.order).toHaveBeenNthCalledWith(
+      1,
+      'end_at',
+      {
+        ascending: true,
+      }
+    );
+    expect(candidateSupabase._chain.order).toHaveBeenNthCalledWith(
+      2,
+      'discount_rate',
+      { ascending: false }
+    );
+    expect(candidateSupabase._chain.order).toHaveBeenNthCalledWith(3, 'id', {
+      ascending: true,
+    });
   });
 });
