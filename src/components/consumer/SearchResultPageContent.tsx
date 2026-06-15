@@ -35,6 +35,7 @@ interface SearchResultPageContentProps {
 }
 
 const sortOptions = [
+  { id: 'ai-recommendation', label: '추천순' },
   { id: 'deadline', label: '마감 임박순' },
   { id: 'discount-rate', label: '할인율 높은순' },
   { id: 'price-low', label: '가격 낮은순' },

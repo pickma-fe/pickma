@@ -5,7 +5,7 @@ export type ProductFilterCategory = {
 };
 
 export const ALL_CATEGORY_ID = 'category-all';
-export const DEFAULT_SORT_OPTION_ID = 'deadline';
+export const DEFAULT_SORT_OPTION_ID = 'ai-recommendation';
 export const DEFAULT_DISCOUNT_OPTION_ID = 'all';
 
 const SORT_OPTION_IDS = [
@@ -13,6 +13,7 @@ const SORT_OPTION_IDS = [
   'discount-rate',
   'price-low',
   'distance',
+  'ai-recommendation',
 ] as const;
 const DISCOUNT_OPTION_IDS = [
   'all',

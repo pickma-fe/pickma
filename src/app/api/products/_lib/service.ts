@@ -16,6 +16,7 @@ import {
   type ProductRow,
   type RpcProductRow,
 } from './mapper';
+import { getRankedProducts } from './recommendation';
 
 const PRODUCT_SELECT = [
   'id',
@@ -40,8 +41,13 @@ const PRODUCT_SELECT = [
 
 export async function getProducts(
   supabase: SupabaseClient<Database>,
-  params: ProductListParams
+  params: ProductListParams,
+  viewerUserId?: string
 ): Promise<ProductListResponse> {
+  if (params.sort === 'popular' || params.sort === 'aiRecommendation') {
+    return getRankedProducts(supabase, params, viewerUserId);
+  }
+
   if (
     params.sort === 'distance' &&
     params.userLat !== undefined &&

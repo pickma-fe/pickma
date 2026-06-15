@@ -19,7 +19,13 @@ export interface ProductListQuery {
   minPrice?: number;
   maxPrice?: number;
   discountOption?: ProductDiscountOption;
-  sort?: 'endAt' | 'discountRate' | 'discountPrice' | 'distance';
+  sort?:
+    | 'endAt'
+    | 'discountRate'
+    | 'discountPrice'
+    | 'distance'
+    | 'popular'
+    | 'aiRecommendation';
   order?: 'asc' | 'desc';
   availableOnly?: boolean;
 }

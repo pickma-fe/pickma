@@ -472,6 +472,65 @@ export type Database = {
           },
         ];
       };
+      product_view_events: {
+        Row: {
+          category_id: string | null;
+          created_at: string;
+          id: string;
+          product_id: string;
+          store_id: string;
+          user_id: string;
+          viewed_at: string;
+        };
+        Insert: {
+          category_id?: string | null;
+          created_at?: string;
+          id?: string;
+          product_id: string;
+          store_id: string;
+          user_id: string;
+          viewed_at?: string;
+        };
+        Update: {
+          category_id?: string | null;
+          created_at?: string;
+          id?: string;
+          product_id?: string;
+          store_id?: string;
+          user_id?: string;
+          viewed_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'product_view_events_category_id_fkey';
+            columns: ['category_id'];
+            isOneToOne: false;
+            referencedRelation: 'categories';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'product_view_events_product_id_fkey';
+            columns: ['product_id'];
+            isOneToOne: false;
+            referencedRelation: 'products';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'product_view_events_store_id_fkey';
+            columns: ['store_id'];
+            isOneToOne: false;
+            referencedRelation: 'stores';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'product_view_events_user_id_fkey';
+            columns: ['user_id'];
+            isOneToOne: false;
+            referencedRelation: 'users';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       seller_application_documents: {
         Row: {
           application_id: string;
