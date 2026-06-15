@@ -30,7 +30,7 @@
 - 위치: `public/sw.js`
 - 등록: `src/components/common/ServiceWorkerRegister.tsx`
 - 전략: 네트워크 우선, 실패 시 캐시 fallback
-- API 요청(`/api/*`)은 캐싱하지 않음
+- GET 요청만 캐싱, API 요청(`/api/*`) 및 외부 요청은 캐싱하지 않음
 - Push 이벤트 수신 및 알림 표시 처리 포함
 
 ### 3. Safe Area
@@ -49,7 +49,7 @@
 ## 빌드 및 실행 흐름
 
 ```bash
-# 개발 서버 (서비스 워커 비활성)
+# 개발 서버 (서비스 워커 비활성 - NODE_ENV=development)
 npm run dev
 
 # 프로덕션 빌드
@@ -59,8 +59,9 @@ npm run build
 npm run start
 ```
 
-> 서비스 워커는 프로덕션 빌드에서만 활성화된다.
+> 서비스 워커는 `NODE_ENV === 'production'` 환경에서만 등록된다.
 > 로컬에서 테스트하려면 `npm run build && npm run start` 후 확인한다.
+> 개발 서버(`npm run dev`)에서는 서비스 워커가 등록되지 않으므로 이전 캐시가 개발 화면에 개입하지 않는다.
 
 ---
 
@@ -116,8 +117,10 @@ Web Push API로 푸시 발송
 
 ## 후속 과제
 
-| 항목                                                  | 관련 Task      |
-| ----------------------------------------------------- | -------------- |
-| `push_subscriptions` DB 테이블 생성 및 서버 발송 연결 | 후속 task 필요 |
-| Capacitor 전환 검토                                   | T33 완료 후    |
-| 앱스토어 배포                                         | T33 완료 후    |
+| 항목                                                  | 관련 Task           |
+| ----------------------------------------------------- | ------------------- |
+| `push_subscriptions` DB 테이블 생성 및 서버 발송 연결 | 후속 task 필요      |
+| 실기기 PWA 설치 및 standalone safe area 검증          | Vercel 배포 후 확인 |
+| Toss 결제 팝업 standalone 동작 검증                   | T33 연계            |
+| Capacitor 전환 검토                                   | T33 완료 후         |
+| 앱스토어 배포                                         | T33 완료 후         |
