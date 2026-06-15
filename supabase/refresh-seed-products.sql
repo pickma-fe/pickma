@@ -5,7 +5,8 @@
 
 BEGIN;
 
--- 1. Clear test data (payments first due to RESTRICT FK, order_items cascade with orders)
+-- 1. Clear test data (FK order: payment_events → payments → orders, order_items cascade with orders)
+DELETE FROM public.payment_events;
 DELETE FROM public.payments;
 DELETE FROM public.orders;
 
