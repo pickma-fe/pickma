@@ -17,15 +17,15 @@ export function BrandSection() {
         <Image
           src="/images/badges/google.svg"
           alt="Google Play (준비중)"
-          height={40}
-          width={0}
+          width={239}
+          height={71}
           className="h-10 w-auto"
         />
         <Image
           src="/images/badges/apple.svg"
           alt="App Store (준비중)"
+          width={130}
           height={40}
-          width={0}
           className="h-10 w-auto"
         />
       </div>

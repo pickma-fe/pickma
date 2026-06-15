@@ -8,7 +8,6 @@ import { useConfirmPayment } from '@/hooks/payments/useConfirmPayment';
 export function PaymentSuccessClient() {
   const searchParams = useSearchParams();
   const { mutateAsync } = useConfirmPayment();
-
   useEffect(() => {
     const paymentKey = searchParams.get('paymentKey');
     const orderId = searchParams.get('orderId');
@@ -41,5 +40,15 @@ export function PaymentSuccessClient() {
       });
   }, [searchParams, mutateAsync]);
 
-  return null;
+  return (
+    <main className="flex min-h-screen items-center justify-center bg-white px-6">
+      <p
+        role="status"
+        aria-live="polite"
+        className="text-lg font-medium text-gray-500"
+      >
+        결제를 처리하는 중입니다.
+      </p>
+    </main>
+  );
 }

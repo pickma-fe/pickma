@@ -66,8 +66,16 @@ export function usePayment() {
             );
             resolve({ orderNumber: msgOrderNumber });
           } else {
-            router.push('/order/fail?reason=payment_failed');
-            reject(new Error('payment_failed'));
+            const data: unknown = event.data;
+            const reason =
+              data !== null &&
+              typeof data === 'object' &&
+              'reason' in data &&
+              data.reason === 'payment_cancelled'
+                ? 'payment_cancelled'
+                : 'payment_failed';
+            router.push(`/order/fail?reason=${reason}`);
+            reject(new Error(reason));
           }
         };
 

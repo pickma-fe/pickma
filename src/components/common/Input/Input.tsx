@@ -30,11 +30,21 @@ export function Input({
   endIconLabel,
   onEndIconClick,
   disabled,
+  required,
   ...props
 }: InputProps) {
   return (
     <Field className="flex flex-col gap-1">
-      {label && <Label className="text-sm text-gray-500">{label}</Label>}
+      {label && (
+        <Label className="text-sm text-gray-500">
+          {label}
+          {required && (
+            <span aria-hidden="true" className="ml-0.5 text-red-500">
+              *
+            </span>
+          )}
+        </Label>
+      )}
       <div className="relative">
         {startIcon && (
           <div
@@ -46,7 +56,9 @@ export function Input({
         )}
         <HeadlessInput
           {...props}
+          required={required}
           disabled={disabled}
+          aria-required={required}
           invalid={Boolean(error)}
           className={cn(
             'focus:border-primary-500 focus:ring-primary-300 w-full rounded-md border py-2 text-sm outline-none placeholder:text-gray-300 focus:ring-2',

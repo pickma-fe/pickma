@@ -74,6 +74,23 @@ export const WithPasswordToggle: Story = {
   },
 };
 
+export const Required: Story = {
+  args: {
+    label: '이메일 주소',
+    placeholder: '이메일을 입력하세요.',
+    required: true,
+  },
+};
+
+export const RequiredWithError: Story = {
+  args: {
+    label: '이메일 주소',
+    placeholder: '이메일을 입력하세요.',
+    required: true,
+    error: '이메일 형식이 올바르지 않습니다.',
+  },
+};
+
 export const Disabled: Story = {
   args: {
     label: '이메일 주소',
