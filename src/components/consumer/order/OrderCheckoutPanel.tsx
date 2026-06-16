@@ -266,7 +266,7 @@ function OrderInfoBlock({
           <button
             type="button"
             onClick={onAction}
-            className="rounded-md border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700"
+            className="focus-visible:ring-primary-500 rounded-md border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
           >
             {actionLabel}
           </button>

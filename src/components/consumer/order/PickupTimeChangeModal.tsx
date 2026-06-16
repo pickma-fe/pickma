@@ -1,4 +1,3 @@
-import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useState } from 'react';
 
 import {
@@ -81,28 +80,10 @@ export function PickupTimeChangeModal({
             픽업 날짜
           </h3>
 
-          <div className="flex items-center justify-between rounded-md border border-gray-200 px-4 py-3">
-            <button
-              type="button"
-              aria-label="이전 날짜"
-              disabled
-              className="text-gray-300 disabled:cursor-not-allowed"
-            >
-              <ChevronLeft className="size-5" aria-hidden="true" />
-            </button>
-
+          <div className="flex items-center justify-center rounded-md border border-gray-200 px-4 py-3">
             <span className="text-base font-semibold text-gray-900">
               {pickupDateLabel ?? '-'}
             </span>
-
-            <button
-              type="button"
-              aria-label="다음 날짜"
-              disabled
-              className="text-gray-300 disabled:cursor-not-allowed"
-            >
-              <ChevronRight className="size-5" aria-hidden="true" />
-            </button>
           </div>
         </div>
 
@@ -111,7 +92,7 @@ export function PickupTimeChangeModal({
             시간 선택
           </h3>
 
-          <div className="grid max-h-42 grid-cols-3 gap-2 overflow-y-auto pr-1">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
             {pickupTimeOptions.map((option) => {
               const isSelected = option.startAt === draftPickupTime?.startAt;
               const isDisabled = isPastPickupTimeSlot(
