@@ -1,12 +1,6 @@
 'use client';
 
-import {
-  ChevronLeft,
-  ChevronRight,
-  Minus,
-  Plus,
-  ShieldCheck,
-} from 'lucide-react';
+import { Minus, Plus, ShieldCheck } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
 
@@ -83,34 +77,14 @@ export function ProductReservationPanel({
 
   return (
     <div className="rounded-lg border border-gray-200 bg-white p-6">
-      <h2 className="mb-4 text-lg font-bold text-gray-900">
-        픽업 날짜 및 시간 선택
-      </h2>
-      <div className="flex items-center justify-between rounded-md border border-gray-200 px-4 py-3">
-        <button
-          type="button"
-          aria-label="이전 날짜"
-          disabled
-          className="text-gray-300 disabled:cursor-not-allowed"
-        >
-          <ChevronLeft />
-        </button>
-
+      <h2 className="mb-4 text-lg font-bold text-gray-900">픽업 시간 선택</h2>
+      <div className="flex items-center justify-center rounded-md border border-gray-200 px-4 py-3">
         <span className="text-base font-semibold text-gray-900">
           {formatPickupDateLabel(pickupStartTime, now) ?? '-'}
         </span>
-
-        <button
-          type="button"
-          aria-label="다음 날짜"
-          disabled
-          className="text-gray-300 disabled:cursor-not-allowed"
-        >
-          <ChevronRight />
-        </button>
       </div>
 
-      <div className="mt-3 mb-6 grid max-h-42 grid-cols-3 gap-2 overflow-y-auto pr-1">
+      <div className="mt-3 mb-6 grid grid-cols-2 gap-2 sm:grid-cols-3">
         {timeSlots.map((slot) => {
           const isSelected = activeTimeSlot?.startAt === slot.startAt;
           const isDisabled = isPastPickupTimeSlot(
@@ -153,7 +127,7 @@ export function ProductReservationPanel({
             type="button"
             aria-label="수량 감소"
             disabled={isDecreaseDisabled}
-            className="px-4 py-2 text-gray-600 disabled:text-gray-300"
+            className="focus-visible:ring-primary-500 px-4 py-2 text-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:text-gray-300"
             onClick={handleDecreaseQuantity}
           >
             <Minus className="size-4" aria-hidden="true" />
@@ -165,7 +139,7 @@ export function ProductReservationPanel({
             type="button"
             aria-label="수량 증가"
             disabled={isIncreaseDisabled}
-            className="px-4 py-2 text-gray-600 disabled:text-gray-300"
+            className="focus-visible:ring-primary-500 px-4 py-2 text-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:text-gray-300"
             onClick={handleIncreaseQuantity}
           >
             <Plus className="size-4" aria-hidden="true" />

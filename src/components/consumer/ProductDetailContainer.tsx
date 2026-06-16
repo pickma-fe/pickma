@@ -1,5 +1,7 @@
 'use client';
 
+import Link from 'next/link';
+
 import type { ProductDetail } from '@/types/product';
 import { useProduct } from '@/hooks/products/useProduct';
 
@@ -43,6 +45,7 @@ export function ProductDetailContainer({
     isError,
     isFetching,
     isLoading,
+    refetch,
   } = useProduct(productId, { initialData: initialProduct });
   const statusMessage = getStatusMessage({ isFetching, isError });
 
@@ -62,24 +65,45 @@ export function ProductDetailContainer({
 
   if (isError && !product) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-white">
+      <main className="flex min-h-screen flex-col items-center justify-center gap-4 bg-white px-6">
         <p
           role="alert"
           aria-live="assertive"
-          className="text-sm font-medium text-gray-500"
+          className="text-center text-sm font-medium text-gray-500"
         >
           상품 정보를 불러오지 못했습니다.
         </p>
+        <div className="flex gap-3">
+          <button
+            type="button"
+            onClick={() => void refetch()}
+            className="focus-visible:ring-primary-500 rounded-md border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+          >
+            다시 시도
+          </button>
+          <Link
+            href="/"
+            className="bg-primary-500 hover:bg-primary-600 focus-visible:ring-primary-500 rounded-md px-4 py-2 text-sm text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+          >
+            홈으로
+          </Link>
+        </div>
       </main>
     );
   }
 
   if (!product) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-white">
-        <p className="text-sm font-medium text-gray-500">
+      <main className="flex min-h-screen flex-col items-center justify-center gap-4 bg-white px-6">
+        <p className="text-center text-sm font-medium text-gray-500">
           상품 정보를 확인할 수 없습니다.
         </p>
+        <Link
+          href="/"
+          className="bg-primary-500 hover:bg-primary-600 focus-visible:ring-primary-500 rounded-md px-4 py-2 text-sm text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+        >
+          홈으로
+        </Link>
       </main>
     );
   }
@@ -111,13 +135,17 @@ export function ProductDetailContainer({
         ) : null}
 
         <section className="mx-auto grid max-w-450 gap-8 px-6 py-10 lg:grid-cols-[minmax(0,1fr)_400px] xl:grid-cols-[minmax(0,1fr)_460px]">
-          <div className="grid gap-8 xl:grid-cols-[560px_minmax(0,1fr)]">
-            <ProductImageGallery
-              productName={product.name}
-              imageUrl={product.image}
-            />
+          <div className="flex flex-col gap-8">
+            <div className="grid gap-8 xl:grid-cols-[560px_minmax(0,1fr)]">
+              <ProductImageGallery
+                productName={product.name}
+                imageUrl={product.image}
+              />
 
-            <ProductDetailInfo product={product} />
+              <ProductDetailInfo product={product} />
+            </div>
+
+            <ProductDetailTabs product={product} />
           </div>
 
           <aside className="lg:sticky lg:top-24 lg:self-start">
@@ -130,8 +158,6 @@ export function ProductDetailContainer({
             />
           </aside>
         </section>
-
-        <ProductDetailTabs product={product} />
       </main>
     </>
   );
