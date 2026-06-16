@@ -205,7 +205,7 @@ export function SearchResultPageContent({
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="flex-1 bg-white">
       <main className="mx-auto max-w-360 px-4 py-6 sm:px-6 lg:px-12">
         <form className="mb-4" onSubmit={handleSearchSubmit}>
           <Input

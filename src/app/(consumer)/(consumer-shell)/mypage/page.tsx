@@ -5,7 +5,7 @@ import {
 
 export default function MypagePage() {
   return (
-    <main className="min-h-screen bg-white">
+    <main className="flex-1 bg-white">
       <div className="mx-auto grid max-w-450 grid-cols-1 lg:grid-cols-[270px_minmax(0,1fr)]">
         <MypageSidebar activeView="profile" />
 

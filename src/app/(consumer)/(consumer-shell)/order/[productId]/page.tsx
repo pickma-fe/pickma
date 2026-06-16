@@ -17,7 +17,7 @@ export default async function OrderPage({
   const resolvedSearchParams = await searchParams;
 
   return (
-    <main className="min-h-screen bg-white">
+    <main className="flex-1 bg-white">
       <section className="mx-auto max-w-450 px-6 py-10">
         <h1 className="text-3xl font-bold text-gray-900">주문/결제</h1>
 

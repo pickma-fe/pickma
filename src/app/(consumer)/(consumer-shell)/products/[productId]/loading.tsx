@@ -1,6 +1,6 @@
 export default function ProductDetailLoading() {
   return (
-    <main className="min-h-screen animate-pulse bg-white">
+    <main className="flex-1 animate-pulse bg-white">
       <section className="mx-auto grid max-w-450 gap-8 px-6 py-10 lg:grid-cols-[minmax(0,1fr)_400px] xl:grid-cols-[minmax(0,1fr)_460px]">
         <div className="flex flex-col gap-8">
           <div className="grid gap-8 xl:grid-cols-[560px_minmax(0,1fr)]">

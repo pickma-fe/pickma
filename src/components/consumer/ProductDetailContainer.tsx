@@ -51,7 +51,7 @@ export function ProductDetailContainer({
 
   if (isLoading) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-white">
+      <main className="flex flex-1 items-center justify-center bg-white">
         <p
           role="status"
           aria-live="polite"
@@ -65,7 +65,7 @@ export function ProductDetailContainer({
 
   if (isError && !product) {
     return (
-      <main className="flex min-h-screen flex-col items-center justify-center gap-4 bg-white px-6">
+      <main className="flex flex-1 flex-col items-center justify-center gap-4 bg-white px-6">
         <p
           role="alert"
           aria-live="assertive"
@@ -94,7 +94,7 @@ export function ProductDetailContainer({
 
   if (!product) {
     return (
-      <main className="flex min-h-screen flex-col items-center justify-center gap-4 bg-white px-6">
+      <main className="flex flex-1 flex-col items-center justify-center gap-4 bg-white px-6">
         <p className="text-center text-sm font-medium text-gray-500">
           상품 정보를 확인할 수 없습니다.
         </p>
@@ -116,7 +116,7 @@ export function ProductDetailContainer({
         imageUrl={product.image}
       />
 
-      <main className="min-h-screen bg-white">
+      <main className="flex-1 bg-white">
         {statusMessage ? (
           <div className="mx-auto max-w-450 px-6 pt-4">
             <p

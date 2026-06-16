@@ -1,6 +1,6 @@
 export default function OrderLoading() {
   return (
-    <main className="min-h-screen animate-pulse bg-white">
+    <main className="flex-1 animate-pulse bg-white">
       <section className="mx-auto max-w-450 px-6 py-10">
         <div className="h-9 w-28 rounded bg-gray-200" />
         <div className="mt-10 grid gap-10 lg:grid-cols-[minmax(0,1fr)_440px]">

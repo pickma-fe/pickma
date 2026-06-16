@@ -224,7 +224,7 @@ export function ConsumerPageClient({
 
   return (
     <>
-      <main className="min-h-screen bg-white">
+      <main className="flex-1 bg-white">
         <div className="mx-auto max-w-360 px-4 py-6 sm:px-6 lg:px-12">
           <PromotionCarousel />
 
