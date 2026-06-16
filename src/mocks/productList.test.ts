@@ -44,6 +44,27 @@ describe('buildMockProductListResponse', () => {
     expect(result.totalPages).toBeGreaterThan(1);
   });
 
+  it('추천순과 인기순도 mock 환경에서 정렬을 지원한다', () => {
+    const aiResult = buildMockProductListResponse({
+      page: 1,
+      pageSize: 3,
+      sort: 'aiRecommendation',
+      availableOnly: true,
+    });
+    const popularResult = buildMockProductListResponse({
+      page: 1,
+      pageSize: 3,
+      sort: 'popular',
+      availableOnly: true,
+    });
+
+    expect(aiResult.items).toHaveLength(3);
+    expect(popularResult.items).toHaveLength(3);
+    expect(aiResult.items.map((item) => item.id)).toEqual(
+      popularResult.items.map((item) => item.id)
+    );
+  });
+
   it('가격대 필터는 단일 조건과 최대 가격 미만 조건을 반영한다', () => {
     const baseProduct = {
       id: 'product-1',

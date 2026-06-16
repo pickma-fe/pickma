@@ -17,6 +17,12 @@ export function RecentProductTracker({
   imageUrl,
 }: RecentProductTrackerProps) {
   useEffect(() => {
+    void fetch(`/api/products/${id}/view`, {
+      method: 'POST',
+      credentials: 'same-origin',
+      keepalive: true,
+    }).catch(() => undefined);
+
     const product: RecentProductInput = {
       id,
       name,

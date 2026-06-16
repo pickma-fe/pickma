@@ -56,7 +56,7 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 | T27 | Auth 이메일/Supabase SMTP/rate limit 정책 정리               | P0       | 완료    | 186          | 없음                              | [T27_auth_email_smtp_rate_limit_policy.md](T27_auth_email_smtp_rate_limit_policy.md)                             |
 | T28 | 판매자 상품 수정 진입점 결정 및 구현                         | P2       | 완료    | 229          | T15                               | [T28_seller_product_edit_entrypoint.md](T28_seller_product_edit_entrypoint.md)                                   |
 | T29 | 판매자 제출 문서 확인 UX 개선                                | P2       | 완료    | 236          | T06, T44, T61                     | [T29_seller_document_review_ux.md](T29_seller_document_review_ux.md)                                             |
-| T30 | AI 추천 1차 설계                                             | P3       | 진행 전 | 확인 필요    | T25, T05                          | [T30_ai_recommendation_first_design.md](T30_ai_recommendation_first_design.md)                                   |
+| T30 | AI 추천 1차 설계                                             | P3       | 완료    | 276          | T25, T05                          | [T30_ai_recommendation_first_design.md](T30_ai_recommendation_first_design.md)                                   |
 | T31 | 주문 취소/환불 API 구현                                      | P1       | 완료    | 246          | T11, T02, T62                     | [T31_order_cancel_refund_api.md](T31_order_cancel_refund_api.md)                                                 |
 | T32 | 정산/수수료 시스템 설계                                      | P3       | 진행 전 | 확인 필요    | T31                               | [T32_settlement_fee_system_design.md](T32_settlement_fee_system_design.md)                                       |
 | T33 | 네이티브 앱 결제 방식 재검토                                 | P3       | 완료    | 281          | T01                               | [T33_native_app_payment_review.md](T33_native_app_payment_review.md)                                             |
@@ -92,7 +92,7 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 | T63 | POST /api/payments/webhook Route Handler 구현                | P1       | 완료    | 231          | T62                               | [T63_payment_webhook_route_handler.md](T63_payment_webhook_route_handler.md)                                     |
 | T64 | 공통 컴포넌트 접근성 baseline 적용                           | P1       | 완료    | 250          | T45                               | [T64_shared_component_accessibility_baseline.md](T64_shared_component_accessibility_baseline.md)                 |
 | T65 | 도메인 컴포넌트 폴더 구조 통일                               | P1       | 완료    | 253          | T64                               | [T65_domain_component_folder_unification.md](T65_domain_component_folder_unification.md)                         |
-| T66 | 모바일 앱 래핑 (Capacitor / PWA)                             | P3       | 진행 전 | 확인 필요    | T45                               | [T66_mobile_app_capacitor_pwa.md](T66_mobile_app_capacitor_pwa.md)                                               |
+| T66 | 모바일 앱 래핑 (Capacitor / PWA)                             | P3       | 진행 중 | 277          | T45                               | [T66_mobile_app_capacitor_pwa.md](T66_mobile_app_capacitor_pwa.md)                                               |
 | T67 | i18n 기본 설정 (next-intl, 한국어)                           | P3       | 진행 전 | 확인 필요    | T45                               | [T67_i18n_setup.md](T67_i18n_setup.md)                                                                           |
 | T68 | 지도 UI/UX 개선                                              | P2       | 완료    | 266          | T21                               | [T68_map_ui_ux_improvement.md](T68_map_ui_ux_improvement.md)                                                     |
 | T69 | 소비자 위치/검색 기능 확장                                   | P3       | 진행 전 | 확인 필요    | T21                               | [T69_consumer_location_search_extension.md](T69_consumer_location_search_extension.md)                           |
@@ -115,6 +115,6 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
    - T48: T26 완료 후 착수
 3. P3 Backend/보안: T72, T73, T76
 4. P3 기능 확장: T59, T69, T77, T78, T23, T30
-5. P3 확장/운영 고도화: T32, T34, T36, T37, T70, T71
+5. P3 확장/운영 고도화: T32, T33, T34, T36, T37, T70, T71
 6. P3 별도 일정: T66(모바일 앱 래핑), T67(i18n)
 7. P4 기술 부채: T35, T74, T75

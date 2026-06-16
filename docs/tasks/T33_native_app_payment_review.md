@@ -46,3 +46,7 @@
 - 완료 기준:
   - 네이티브 앱 전환 시 결제 변경 범위가 문서화된다.
   - web 결제 adapter와 mobile 결제 adapter 분리 방향이 정해진다.
+
+- 참고:
+  - `docs/mobile_app_build_guide.md` T33 결제 방식 영향 섹션 참조
+  - PWA standalone 모드에서 Toss 결제 팝업 동작 검증 결과에 따라 Capacitor 전환 여부 결정

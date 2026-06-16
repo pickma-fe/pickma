@@ -114,13 +114,13 @@ describe('productListSchema', () => {
 
   it('정렬/할인 파라미터를 허용한다', () => {
     const result = productListSchema.safeParse({
-      sort: 'discountPrice',
+      sort: 'aiRecommendation',
       order: 'asc',
       discountOption: 'over-40',
       availableOnly: 'true',
     });
     expect(result.success).toBe(true);
-    expect(result.data?.sort).toBe('discountPrice');
+    expect(result.data?.sort).toBe('aiRecommendation');
     expect(result.data?.order).toBe('asc');
     expect(result.data?.discountOption).toBe('over-40');
     expect(result.data?.availableOnly).toBe(true);

@@ -44,7 +44,14 @@ export const productListSchema = z
       .enum(['all', 'over-40', '30-to-40', '20-to-30', 'under-20'])
       .optional(),
     sort: z
-      .enum(['endAt', 'discountRate', 'discountPrice', 'distance'])
+      .enum([
+        'endAt',
+        'discountRate',
+        'discountPrice',
+        'distance',
+        'popular',
+        'aiRecommendation',
+      ])
       .optional(),
     order: z.enum(['asc', 'desc']).optional(),
     availableOnly: booleanQuerySchema.optional(),
