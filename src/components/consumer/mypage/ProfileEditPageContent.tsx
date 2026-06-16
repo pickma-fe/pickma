@@ -138,20 +138,20 @@ export function ProfileEditPageContent() {
 
       <div className="space-y-6">
         <section className="rounded-lg border border-gray-200 bg-white p-7">
-          <div className="flex items-start justify-between gap-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
             <div>
               <h2 className="text-lg font-bold text-gray-900">계정 정보</h2>
               <p className="mt-2 text-sm text-gray-500">
                 로그인 계정 정보를 확인할 수 있습니다.
               </p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex shrink-0 gap-2">
               <button
                 type="button"
                 aria-controls="profile-edit-actions"
                 aria-expanded={isEditOpen}
                 onClick={handleEditToggle}
-                className="inline-flex items-center gap-2 rounded-md border border-gray-200 px-5 py-3 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
+                className="inline-flex items-center gap-2 rounded-md border border-gray-200 px-3 py-2 text-sm font-medium whitespace-nowrap text-gray-700 transition hover:bg-gray-50 sm:px-5 sm:py-3"
               >
                 <Pencil className="size-4" aria-hidden="true" />
                 {isEditOpen ? '수정 닫기' : '정보 수정'}
@@ -160,7 +160,7 @@ export function ProfileEditPageContent() {
                 type="button"
                 disabled={isSignOutPending}
                 onClick={() => void handleSignOut()}
-                className="inline-flex items-center gap-2 rounded-md border border-gray-200 px-5 py-3 text-sm font-medium text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-400"
+                className="inline-flex items-center gap-2 rounded-md border border-gray-200 px-3 py-2 text-sm font-medium whitespace-nowrap text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-400 sm:px-5 sm:py-3"
               >
                 <LogOut className="size-4" aria-hidden="true" />
                 로그아웃
@@ -173,7 +173,7 @@ export function ProfileEditPageContent() {
             aria-label="프로필 정보 수정"
             onSubmit={handleProfileSubmit}
           >
-            <div className="mt-7 flex items-center gap-8">
+            <div className="mt-7 flex flex-col items-center gap-4 sm:flex-row sm:items-start sm:gap-8">
               <div className="bg-primary-50 text-primary-600 flex size-32 shrink-0 items-center justify-center rounded-full">
                 <User className="size-16" aria-hidden="true" />
               </div>
@@ -181,7 +181,7 @@ export function ProfileEditPageContent() {
               <div className="w-full max-w-80">
                 <div className="flex items-center gap-2">
                   {isEditOpen ? (
-                    <div className="w-52 sm:w-64">
+                    <div className="w-full sm:w-52 sm:max-w-64">
                       <input
                         type="text"
                         aria-label="닉네임"

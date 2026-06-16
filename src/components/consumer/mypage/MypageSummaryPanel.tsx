@@ -29,7 +29,7 @@ export function MypageSummaryPanel() {
   const profileImage = getSafeProfileImage(user?.profileImage);
 
   return (
-    <aside className="space-y-12">
+    <aside className="hidden space-y-12 xl:block">
       <section className="rounded-lg border border-gray-200 bg-white">
         <div className="flex items-center justify-between px-6 pt-6">
           <h2 className="text-lg font-bold text-gray-900">내 정보</h2>
