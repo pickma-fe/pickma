@@ -8,6 +8,7 @@ import {
   createPickupTimeOptions,
   formatPickupDateLabel,
   isPastPickupTimeSlot,
+  type PickupTimeOption,
 } from '@/lib/formatPickupTime';
 import { Button } from '@/components/common';
 
@@ -17,6 +18,22 @@ interface ProductReservationPanelProps {
   availableStock: number;
   pickupStartTime: string;
   pickupEndTime: string;
+}
+
+function getAddDisabledReason(
+  activeTimeSlot: PickupTimeOption | null,
+  availableStock: number,
+  quantity: number
+): string | null {
+  if (availableStock <= 0 || quantity <= 0) {
+    return '재고가 없어 예약할 수 없습니다.';
+  }
+
+  if (activeTimeSlot === null) {
+    return '픽업 시간을 선택해 주세요.';
+  }
+
+  return null;
 }
 
 export function ProductReservationPanel({
@@ -72,8 +89,12 @@ export function ProductReservationPanel({
   };
   const isDecreaseDisabled = quantity <= 1;
   const isIncreaseDisabled = quantity >= availableStock;
-  const isAddButtonDisabled =
-    activeTimeSlot === null || availableStock <= 0 || quantity <= 0;
+  const addDisabledReason = getAddDisabledReason(
+    activeTimeSlot,
+    availableStock,
+    quantity
+  );
+  const isAddButtonDisabled = addDisabledReason !== null;
 
   return (
     <div className="rounded-lg border border-gray-200 bg-white p-6">
@@ -149,6 +170,7 @@ export function ProductReservationPanel({
 
       <Button
         disabled={isAddButtonDisabled}
+        aria-describedby={addDisabledReason ? 'add-disabled-reason' : undefined}
         className="w-full py-3 text-xl font-extrabold"
         onClick={handleAddButtonClick}
       >
@@ -156,6 +178,15 @@ export function ProductReservationPanel({
           ? '예약 불가'
           : `${(price * quantity).toLocaleString()}원 담기`}
       </Button>
+
+      {addDisabledReason ? (
+        <p
+          id="add-disabled-reason"
+          className="mt-3 text-center text-sm text-red-500"
+        >
+          {addDisabledReason}
+        </p>
+      ) : null}
 
       <div className="mt-7 flex gap-3 rounded-md bg-gray-50 p-4">
         <div className="bg-primary-100 text-primary-500 flex size-9 shrink-0 items-center justify-center rounded-full">
