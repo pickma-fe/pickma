@@ -1,10 +1,10 @@
 # T66. 모바일 앱 래핑 (Capacitor / PWA)
 
 - 상태:
-  진행 전
+  진행 중
 
 - GitHub Issue:
-  확인 필요
+  277
 
 - 우선순위:
   P3
@@ -66,3 +66,43 @@
   - 실기기 또는 실브라우저에서 푸시 수신 E2E가 확인된다.
   - T22 알림 인프라에서 발생한 실제 비즈니스 이벤트(주문 상태 전이, 신규 주문)가 서버 → FCM/APNs/Web Push → 디바이스까지 전달되는 경로가 문서화된다.
   - 클라이언트 토큰/PushSubscription 저장 위치와 서버 발송 연결 방식이 명시된다.
+
+- 구현 결과:
+
+## 래핑 방식
+
+- Capacitor는 Next.js App Router + Route Handler 구조와 호환성 문제(static export 필요)로 적용 불가
+- PWA 방식으로 확정
+
+## 완료된 작업
+
+- `public/manifest.json`: PWA manifest 구성 (display: standalone, 아이콘, theme_color)
+- `public/icons/icon-192x192.png`, `public/icons/icon-512x512.png`: 앱 아이콘 추가 (정사각형 패딩 처리)
+- `public/sw.js`: 서비스 워커 직접 구현 (GET 요청만 캐싱, event.waitUntil 캐시 분리, Push JSON fallback 처리)
+- `src/components/common/ServiceWorkerRegister.tsx`: production 환경에서만 서비스 워커 등록
+- `src/hooks/usePushNotification.ts`: 푸시 알림 권한 요청, PushSubscription 생성, 마운트 시 기존 구독 복원
+- `src/app/layout.tsx`: manifest 링크, themeColor, appleWebApp 설정 추가
+- `docs/mobile_app_build_guide.md`: 빌드/배포 흐름 및 Push Notification 구조 문서화
+
+## 검증 결과
+
+- Chrome DevTools Application → Manifest 탭: manifest 정상 인식 확인
+- Chrome DevTools Application → Service Workers 탭: sw.js 활성화 확인
+- DevTools 푸시 테스트: 브라우저 푸시 알림 수신 E2E 확인
+- 실기기 PWA 설치 및 standalone 모드 검증: 미완료 → Vercel 배포 후 확인 필요
+- standalone safe area(pb-safe) 실기기 검증: 미완료 → Vercel 배포 후 확인 필요
+- Toss 결제 팝업 standalone 동작 검증: 미완료 → T33 연계
+
+## 이번 PR 완료 범위
+
+- PWA 기반 설정 (manifest, 서비스 워커, 푸시 알림 훅)
+- 브라우저 환경 푸시 알림 E2E 확인
+- 빌드 및 배포 흐름 문서화
+
+## 후속 처리
+
+- `push_subscriptions` DB 테이블 생성 및 서버 발송 연결: Supabase 권한 문제로 후속 task 분리
+- T22 알림 인프라 → Web Push 서버 발송 연결: 후속 task 필요
+- 실기기 PWA 설치 및 standalone safe area 검증: Vercel 배포 후 확인
+- Toss 결제 팝업 standalone 동작 검증: T33 연계
+- Capacitor 전환 및 앱스토어 배포: T33 완료 후 재검토
