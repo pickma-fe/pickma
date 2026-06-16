@@ -110,7 +110,9 @@ Web Push API로 푸시 발송
 
 - T33 완료: Capacitor 대신 PWA 방식 확정, web/mobile adapter 분리 방향 결정됨
 - PWA standalone 모드에서 Toss 결제 팝업(`window.open`) 동작 검증은 Vercel 배포 후 실기기 확인 필요
-- 팝업이 차단되거나 동작하지 않으면 `useMobilePayment`(location.href 리다이렉트) 적용
+- 팝업이 차단되거나 동작하지 않으면 `useMobilePayment` 적용
+  (현재 탭에서 `location.href = redirectUrl`로 리다이렉트 → `/payment/success`에서 자체 라우팅)
+  - 구체적인 UX 구현 방향은 `docs/tasks/T33_native_app_payment_review.md` 참조
 - Capacitor 전환은 앱스토어 배포가 필요하다고 판단될 때 별도 재검토
 - → T33 결정 결과 상세는 `docs/tasks/T33_native_app_payment_review.md` 참조
 
@@ -118,10 +120,10 @@ Web Push API로 푸시 발송
 
 ## 후속 과제
 
-| 항목                                                  | 관련 Task                         |
-| ----------------------------------------------------- | --------------------------------- |
-| `push_subscriptions` DB 테이블 생성 및 서버 발송 연결 | 후속 task 필요                    |
-| 실기기 PWA 설치 및 standalone safe area 검증          | Vercel 배포 후 확인               |
-| Toss 결제 팝업 standalone 동작 검증                   | Vercel 배포 후 실기기 확인        |
-| Capacitor 전환 검토                                   | 앱스토어 배포 필요 시 별도 재검토 |
-| 앱스토어 배포                                         | Capacitor 전환 검토 후            |
+| 항목                                                      | 관련 Task                             |
+| --------------------------------------------------------- | ------------------------------------- |
+| `push_subscriptions` DB 테이블 생성 및 T22 서버 발송 연결 | T22 알림 인프라 → 서버 발송 로직 연결 |
+| 실기기 PWA 설치 및 standalone safe area 검증              | Vercel 배포 후 확인                   |
+| Toss 결제 팝업 standalone 동작 검증                       | Vercel 배포 후 실기기 확인            |
+| Capacitor 전환 검토                                       | 앱스토어 배포 필요 시 별도 재검토     |
+| 앱스토어 배포                                             | Capacitor 전환 검토 후                |
