@@ -49,7 +49,8 @@
 
 - 참고:
   - `docs/mobile_app_build_guide.md` T33 결제 방식 영향 섹션 참조
-  - PWA standalone 모드에서 Toss 결제 팝업 동작 검증 결과에 따라 Capacitor 전환 여부 결정
+  - T66에서 Capacitor 적용 불가(Next.js App Router + Route Handler 호환성 문제)로 PWA 방식 확정
+  - PWA standalone 모드에서 Toss 결제 팝업 동작 검증은 Vercel 배포 후 실기기 확인 필요 (T66 후속)
 
 - 구현 결과:
 
@@ -80,17 +81,19 @@
   - **클라이언트 레이어만 교체**:
     - `useWebPayment`: 현재 팝업 방식 유지 (web 전용)
     - `useMobilePayment`: `location.href` 리다이렉트 방식 신규 구현 (mobile 전용)
-    - `usePayment` (facade): `Capacitor.isNativePlatform()` 분기로 adapter 선택 (T66 완료 후 활성화)
+    - `usePayment` (facade): PWA standalone 모드 감지
+      (`window.matchMedia('(display-mode: standalone)')`) 분기로 adapter 선택
+      (Vercel 배포 후 실기기 검증 완료 시 활성화)
   - **`/payment/success` 페이지 역할 확장 필요**:
     - 현재: 팝업 내부에서 `postMessage` 전송 후 닫힘
     - mobile 전환 후: URL params(`paymentKey / orderId / amount`) 수신 → `confirm API` 직접 호출
 
-  ### 네이티브 앱 전환 시 결제 변경 범위 (T66 착수 기준)
+  ### PWA standalone 전환 시 결제 변경 범위 (Vercel 배포 후 실기기 검증 기준)
 
-  | 파일                                     | 변경 유형 | 내용                                              |
-  | ---------------------------------------- | --------- | ------------------------------------------------- |
-  | `src/hooks/payments/usePayment.ts`       | 수정      | Capacitor 분기 추가 (facade 역할)                 |
-  | `src/hooks/payments/useWebPayment.ts`    | 신규      | 현재 팝업 방식 분리                               |
-  | `src/hooks/payments/useMobilePayment.ts` | 신규      | 리다이렉트 방식 구현                              |
-  | `src/app/(payment)/success/page.tsx`     | 수정      | URL params 수신 + confirm API 직접 호출 로직 추가 |
-  | `src/app/api/payments/*`                 | 변경 없음 | 공통 재사용                                       |
+| 파일                                     | 변경 유형 | 내용                                              |
+| ---------------------------------------- | --------- | ------------------------------------------------- |
+| `src/hooks/payments/usePayment.ts`       | 수정      | PWA standalone 모드 분기 추가 (facade 역할)       |
+| `src/hooks/payments/useWebPayment.ts`    | 신규      | 현재 팝업 방식 분리                               |
+| `src/hooks/payments/useMobilePayment.ts` | 신규      | 리다이렉트 방식 구현                              |
+| `src/app/(payment)/success/page.tsx`     | 수정      | URL params 수신 + confirm API 직접 호출 로직 추가 |
+| `src/app/api/payments/*`                 | 변경 없음 | 공통 재사용                                       |
