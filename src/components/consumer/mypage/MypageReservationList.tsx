@@ -1,6 +1,7 @@
 'use client';
 
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
+import Link from 'next/link';
 import { useState } from 'react';
 
 import type { OrderStatus } from '@/types/order';
@@ -55,6 +56,29 @@ export function MypageReservationList({
   const handleChangeTab = (index: number) => {
     setActiveTabId(reservationTabs[index]?.id ?? 'all');
   };
+  const emptyStateNode =
+    activeTabId === 'all' ? (
+      <div className="flex min-h-60 flex-col items-center justify-center gap-4 rounded-lg border border-dashed border-gray-200 bg-gray-50 px-4 text-center">
+        <div>
+          <p className="text-sm font-semibold text-gray-700">
+            아직 예약이 없습니다
+          </p>
+          <p className="mt-1 text-sm text-gray-500">
+            마감 임박 할인 상품을 둘러보고 첫 예약을 해보세요.
+          </p>
+        </div>
+        <Link
+          href="/"
+          className="focus-visible:ring-primary-500 bg-primary-500 hover:bg-primary-600 rounded-md px-4 py-2 text-sm font-semibold text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+        >
+          상품 둘러보기
+        </Link>
+      </div>
+    ) : (
+      <div className="flex min-h-60 items-center justify-center rounded-lg border border-dashed border-gray-200 bg-gray-50 text-sm font-medium text-gray-500">
+        해당 상태의 예약이 없습니다.
+      </div>
+    );
 
   return (
     <section aria-labelledby="mypage-reservation-title">
@@ -68,14 +92,14 @@ export function MypageReservationList({
       <TabGroup onChange={handleChangeTab}>
         <TabList
           aria-label="예약 상태 필터"
-          className="mt-8 flex gap-8 border-b border-gray-200"
+          className="mt-6 flex border-b border-gray-200 sm:gap-6"
         >
           {reservationTabs.map((tab) => (
             <Tab
               key={tab.id}
               className={({ selected }) =>
                 [
-                  'focus-visible:ring-primary-500 rounded-sm border-b-2 px-3 py-4 text-base font-bold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
+                  'focus-visible:ring-primary-500 flex-1 border-b-2 px-1 py-3 text-center text-sm font-bold whitespace-nowrap transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 sm:flex-none sm:px-3 sm:text-base',
                   selected
                     ? 'border-primary-500 text-primary-500'
                     : 'border-transparent text-gray-600 hover:text-gray-900',
@@ -131,11 +155,9 @@ export function MypageReservationList({
                   ))
                 : null}
 
-              {!isLoading && !isError && filteredReservations.length === 0 ? (
-                <div className="flex min-h-60 items-center justify-center rounded-lg border border-dashed border-gray-200 bg-gray-50 text-sm font-medium text-gray-500">
-                  해당 상태의 예약이 없습니다.
-                </div>
-              ) : null}
+              {!isLoading && !isError && filteredReservations.length === 0
+                ? emptyStateNode
+                : null}
             </TabPanel>
           ))}
         </TabPanels>

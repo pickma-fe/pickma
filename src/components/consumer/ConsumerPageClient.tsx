@@ -1,6 +1,5 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 
 import type { Category } from '@/types/category';
@@ -20,15 +19,12 @@ import {
 import { useCategories } from '@/hooks/categories/useCategories';
 import { useUserLocation } from '@/hooks/consumer/useUserLocation';
 import { useProducts } from '@/hooks/products/useProducts';
-import { Button, Footer } from '@/components/common';
+import { Button } from '@/components/common';
 
-import { ConsumerHeader } from './ConsumerHeader';
-import { ConsumerHeaderSearch } from './ConsumerHeaderSearch';
 import { ConsumerProductList } from './ConsumerProductList';
-import { LocationPickerButton } from './LocationPickerButton';
 import { MapViewFab } from './MapViewFab';
 import { NoLocationView } from './NoLocationView';
-import { ProductFilterSidebar } from './ProductFilterSidebar';
+import { ProductFilterChips } from './ProductFilterChips';
 import { PromotionCarousel } from './PromotionCarousel';
 
 interface ConsumerPageClientProps {
@@ -47,14 +43,12 @@ const categoryIconMap: Record<string, string> = {
 export function ConsumerPageClient({
   initialCategories,
 }: ConsumerPageClientProps) {
-  const router = useRouter();
   const { location, saveLocation } = useUserLocation();
   const [selectedCategoryId, setSelectedCategoryId] = useState(ALL_CATEGORY_ID);
   const [selectedSortOption, setSelectedSortOption] =
     useState<ProductSortOptionId>(DEFAULT_SORT_OPTION_ID);
   const [selectedDiscountOption, setSelectedDiscountOption] =
     useState<ProductDiscountOptionId>(DEFAULT_DISCOUNT_OPTION_ID);
-  const [keyword, setKeyword] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const productSortQuery = getProductSortQuery(selectedSortOption);
   const { data: categories = [] } = useCategories({
@@ -62,7 +56,7 @@ export function ConsumerPageClient({
   });
   const productCategories = useMemo(
     () => [
-      { id: ALL_CATEGORY_ID, name: '전체', icon: '🔲' },
+      { id: ALL_CATEGORY_ID, name: '전체' },
       ...categories.map((category) => ({
         id: category.id,
         name: category.name,
@@ -171,40 +165,24 @@ export function ConsumerPageClient({
   };
 
   const handleResetFilters = () => {
+    setSelectedCategoryId(ALL_CATEGORY_ID);
     setSelectedSortOption(DEFAULT_SORT_OPTION_ID);
     setSelectedDiscountOption(DEFAULT_DISCOUNT_OPTION_ID);
     setCurrentPage(1);
-  };
-
-  const handleKeywordChange = (nextKeyword: string) => {
-    setKeyword(nextKeyword);
-  };
-
-  const handleSearch = () => {
-    const trimmedKeyword = keyword.trim();
-
-    if (!trimmedKeyword) {
-      return;
-    }
-
-    router.push(`/search?keyword=${encodeURIComponent(trimmedKeyword)}`);
   };
 
   const handleRetryProducts = () => {
     void refetchProducts();
   };
 
+  const isFiltered =
+    selectedCategoryId !== ALL_CATEGORY_ID ||
+    selectedSortOption !== DEFAULT_SORT_OPTION_ID ||
+    selectedDiscountOption !== DEFAULT_DISCOUNT_OPTION_ID;
+
   const productListContent = (() => {
     if (!location) {
       return <NoLocationView onLocationChange={saveLocation} />;
-    }
-
-    if (isProductsLoading) {
-      return (
-        <div className="flex min-h-80 items-center justify-center rounded-lg border border-dashed border-gray-200 bg-gray-50 text-sm font-medium text-gray-500">
-          상품을 불러오는 중입니다.
-        </div>
-      );
     }
 
     if (isProductsError) {
@@ -237,31 +215,20 @@ export function ConsumerPageClient({
         totalPages={productList?.totalPages ?? 0}
         currentPage={currentPage}
         onPageChange={setCurrentPage}
+        onResetFilters={handleResetFilters}
+        isFiltered={isFiltered}
+        isLoading={isProductsLoading}
       />
     );
   })();
 
   return (
-    <div className="bg-white">
-      <ConsumerHeader
-        slot={
-          <div className="flex w-full max-w-160 min-w-0 items-center gap-2">
-            <LocationPickerButton
-              location={location}
-              onLocationChange={saveLocation}
-            />
-            <ConsumerHeaderSearch
-              keyword={keyword}
-              onKeywordChange={handleKeywordChange}
-              onSearch={handleSearch}
-            />
-          </div>
-        }
-      />
+    <>
+      <main className="flex-1 bg-white">
+        <div className="mx-auto max-w-360 px-4 py-6 sm:px-6 lg:px-12">
+          <PromotionCarousel />
 
-      <main className="min-h-screen bg-white">
-        <div className="mx-auto grid max-w-450 grid-cols-1 lg:grid-cols-[220px_1fr]">
-          <ProductFilterSidebar
+          <ProductFilterChips
             categories={productCategories}
             selectedCategoryId={selectedCategoryId}
             selectedSortOption={selectedSortOption}
@@ -270,18 +237,14 @@ export function ConsumerPageClient({
             onSortChange={handleSortChange}
             onDiscountChange={handleDiscountChange}
             onResetFilters={handleResetFilters}
+            isFiltered={isFiltered}
           />
 
-          <section className="px-5 py-6 lg:px-6">
-            <PromotionCarousel />
-
-            {productListContent}
-          </section>
+          <section aria-label="상품 목록">{productListContent}</section>
         </div>
       </main>
 
       <MapViewFab />
-      <Footer />
-    </div>
+    </>
   );
 }

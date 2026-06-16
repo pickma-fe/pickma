@@ -34,20 +34,8 @@ vi.mock('@/components/common', () => ({
   Footer: () => <footer />,
 }));
 
-vi.mock('./ConsumerHeader', () => ({
-  ConsumerHeader: () => <header />,
-}));
-
-vi.mock('./ConsumerHeaderSearch', () => ({
-  ConsumerHeaderSearch: () => <div />,
-}));
-
 vi.mock('./ConsumerProductList', () => ({
   ConsumerProductList: () => <div />,
-}));
-
-vi.mock('./LocationPickerButton', () => ({
-  LocationPickerButton: () => <div />,
 }));
 
 vi.mock('./MapViewFab', () => ({
@@ -58,8 +46,8 @@ vi.mock('./NoLocationView', () => ({
   NoLocationView: () => <div data-testid="no-location-view" />,
 }));
 
-vi.mock('./ProductFilterSidebar', () => ({
-  ProductFilterSidebar: () => <aside />,
+vi.mock('./ProductFilterChips', () => ({
+  ProductFilterChips: () => <div />,
 }));
 
 vi.mock('./PromotionCarousel', () => ({

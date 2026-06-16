@@ -38,6 +38,21 @@ type OrderInfoBlockProps =
       children: ReactNode;
     };
 
+function getPaymentDisabledReason(
+  quantity: number,
+  pickupTime: PickupTimeOption | null
+): string | null {
+  if (quantity <= 0) {
+    return '결제 가능한 수량이 없습니다.';
+  }
+
+  if (pickupTime === null) {
+    return '픽업 시간을 선택해 주세요.';
+  }
+
+  return null;
+}
+
 function getPickupPlace(product: ProductDetail) {
   return product.store.addressDetail
     ? `${product.store.address} ${product.store.addressDetail}`
@@ -158,12 +173,13 @@ export function OrderCheckoutPanel({
     }
   };
   const isSubmitting = createOrderMutation.isPending || isPaymentPending;
-  const isPaymentButtonDisabled =
-    isSubmitting || quantity <= 0 || pickupTime === null;
+  const disabledReason = getPaymentDisabledReason(quantity, pickupTime);
+  const isPaymentButtonDisabled = isSubmitting || disabledReason !== null;
   const paymentErrorMessage =
     validationErrorMessage ||
     createOrderMutation.error?.message ||
     paymentError?.message;
+  const paymentReasonMessage = paymentErrorMessage || disabledReason;
 
   return (
     <>
@@ -215,6 +231,9 @@ export function OrderCheckoutPanel({
 
           <Button
             disabled={isPaymentButtonDisabled}
+            aria-describedby={
+              paymentReasonMessage ? 'payment-reason-message' : undefined
+            }
             className="w-full py-4 text-lg font-bold"
             onClick={handlePaymentButtonClick}
           >
@@ -223,9 +242,13 @@ export function OrderCheckoutPanel({
               : `${finalPaymentPrice.toLocaleString()}원 결제하기`}
           </Button>
 
-          {paymentErrorMessage ? (
-            <p role="alert" className="mt-3 text-center text-sm text-red-500">
-              {paymentErrorMessage}
+          {paymentReasonMessage ? (
+            <p
+              id="payment-reason-message"
+              role={paymentErrorMessage ? 'alert' : undefined}
+              className="mt-3 text-center text-sm text-red-500"
+            >
+              {paymentReasonMessage}
             </p>
           ) : null}
 
@@ -266,7 +289,7 @@ function OrderInfoBlock({
           <button
             type="button"
             onClick={onAction}
-            className="rounded-md border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700"
+            className="focus-visible:ring-primary-500 rounded-md border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
           >
             {actionLabel}
           </button>

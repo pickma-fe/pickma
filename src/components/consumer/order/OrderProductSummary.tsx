@@ -71,7 +71,7 @@ export function OrderProductSummary({
             aria-label="수량 감소"
             disabled={quantity <= 1}
             onClick={() => onQuantityChange(quantity - 1)}
-            className="flex size-10 items-center justify-center text-gray-600 disabled:cursor-not-allowed disabled:text-gray-300"
+            className="focus-visible:ring-primary-500 flex size-10 items-center justify-center text-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:text-gray-300"
           >
             <Minus className="size-4" aria-hidden="true" />
           </button>
@@ -86,7 +86,7 @@ export function OrderProductSummary({
             aria-label="수량 증가"
             disabled={quantity >= product.availableStock}
             onClick={() => onQuantityChange(quantity + 1)}
-            className="flex size-10 items-center justify-center text-gray-600 disabled:cursor-not-allowed disabled:text-gray-300"
+            className="focus-visible:ring-primary-500 flex size-10 items-center justify-center text-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:text-gray-300"
           >
             <Plus className="size-4" aria-hidden="true" />
           </button>

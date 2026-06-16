@@ -24,8 +24,6 @@ const promotionBanners: PromotionBanner[] = [
   {
     id: 1,
     imageUrl: '/images/banners/pickma-banner2.png',
-    ctaLabel: '픽마 서비스 소개',
-    ctaHref: '/',
   },
   {
     id: 2,
@@ -55,6 +53,10 @@ export function PromotionCarousel() {
   };
 
   useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return;
+    }
+
     const timerId = window.setInterval(() => {
       setCurrentIndex((prevIndex) =>
         prevIndex === promotionBanners.length - 1 ? 0 : prevIndex + 1
@@ -65,34 +67,40 @@ export function PromotionCarousel() {
   }, []);
 
   return (
-    <section className="relative mb-8 h-80 overflow-hidden rounded-lg bg-[#f5fbf8]">
-      <div
-        className={[
-          'flex h-full transition-transform duration-700 ease-in-out',
-          slideTranslateClasses[currentIndex],
-        ].join(' ')}
-      >
-        {promotionBanners.map((banner) => (
-          <div key={banner.id} className="relative h-full w-full shrink-0">
-            <Image
-              src={banner.imageUrl}
-              alt=""
-              fill
-              sizes="(min-width: 1024px) calc(100vw - 220px), 100vw"
-              className="object-contain"
-              priority={banner.id === 1}
-            />
+    <section
+      aria-label="프로모션 배너"
+      className="relative mb-8 overflow-hidden rounded-lg bg-[#f5fbf8]"
+    >
+      {/* 비율 제어: aspect-ratio + max-h를 w-full과 함께 분리된 div에서 적용 */}
+      <div className="aspect-24/7 max-h-72 w-full">
+        <div
+          className={[
+            'flex h-full transition-transform duration-700 ease-in-out motion-reduce:transition-none',
+            slideTranslateClasses[currentIndex],
+          ].join(' ')}
+        >
+          {promotionBanners.map((banner) => (
+            <div key={banner.id} className="relative h-full w-full shrink-0">
+              <Image
+                src={banner.imageUrl}
+                alt=""
+                fill
+                sizes="(min-width: 1024px) calc(100vw - 96px), calc(100vw - 32px)"
+                className="object-contain"
+                priority={banner.id === 1}
+              />
 
-            {banner.ctaLabel && banner.ctaHref && (
-              <Link
-                href={banner.ctaHref}
-                className="bg-primary-500 hover:bg-primary-600 absolute bottom-[20%] left-[20%] inline-flex items-center justify-center rounded-sm border border-transparent px-4 py-2 font-medium text-white transition focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
-              >
-                {banner.ctaLabel}
-              </Link>
-            )}
-          </div>
-        ))}
+              {banner.ctaLabel && banner.ctaHref && (
+                <Link
+                  href={banner.ctaHref}
+                  className="bg-primary-500 hover:bg-primary-600 absolute bottom-[20%] left-[20%] inline-flex items-center justify-center rounded-sm border border-transparent px-4 py-2 font-medium text-white transition focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+                >
+                  {banner.ctaLabel}
+                </Link>
+              )}
+            </div>
+          ))}
+        </div>
       </div>
 
       <div className="absolute right-4 bottom-2 flex items-center gap-3 text-sm font-medium text-gray-700">
@@ -100,7 +108,7 @@ export function PromotionCarousel() {
           type="button"
           aria-label="이전 배너"
           onClick={handlePrevious}
-          className="flex h-7 w-7 items-center justify-center rounded-full text-gray-500 hover:bg-white/70"
+          className="focus-visible:ring-primary-500 flex h-7 w-7 items-center justify-center rounded-full text-gray-500 hover:bg-white/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
         >
           <ChevronLeftIcon className="h-4 w-4" />
         </button>
@@ -113,7 +121,7 @@ export function PromotionCarousel() {
           type="button"
           aria-label="다음 배너"
           onClick={handleNext}
-          className="flex h-7 w-7 items-center justify-center rounded-full text-gray-500 hover:bg-white/70"
+          className="focus-visible:ring-primary-500 flex h-7 w-7 items-center justify-center rounded-full text-gray-500 hover:bg-white/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
         >
           <ChevronRightIcon className="h-4 w-4" />
         </button>

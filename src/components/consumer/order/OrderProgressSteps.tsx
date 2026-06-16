@@ -8,10 +8,10 @@ const ORDER_STEPS = [
 ] as const;
 
 const PROGRESS_WIDTH_CLASS_NAMES = {
-  cart: 'w-[12.5%]',
-  order: 'w-[37.5%]',
-  payment: 'w-[62.5%]',
-  complete: 'w-[87.5%]',
+  cart: 'w-0',
+  order: 'w-[25%]',
+  payment: 'w-[50%]',
+  complete: 'w-[75%]',
 } satisfies Record<OrderStepId, string>;
 
 export type OrderStepId = (typeof ORDER_STEPS)[number]['id'];
@@ -30,12 +30,12 @@ export function OrderProgressSteps({
   return (
     <div className="relative">
       <span
-        className="absolute top-5 right-[12.5%] left-0 h-px bg-gray-200"
+        className="absolute top-5 right-[12.5%] left-[12.5%] h-px bg-gray-200"
         aria-hidden="true"
       />
       <span
         className={[
-          'bg-primary-500 absolute top-5 left-0 h-px',
+          'bg-primary-500 absolute top-5 left-[12.5%] h-px',
           PROGRESS_WIDTH_CLASS_NAMES[currentStep],
         ].join(' ')}
         aria-hidden="true"

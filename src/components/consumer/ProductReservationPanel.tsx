@@ -1,12 +1,6 @@
 'use client';
 
-import {
-  ChevronLeft,
-  ChevronRight,
-  Minus,
-  Plus,
-  ShieldCheck,
-} from 'lucide-react';
+import { Minus, Plus, ShieldCheck } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
 
@@ -14,6 +8,7 @@ import {
   createPickupTimeOptions,
   formatPickupDateLabel,
   isPastPickupTimeSlot,
+  type PickupTimeOption,
 } from '@/lib/formatPickupTime';
 import { Button } from '@/components/common';
 
@@ -23,6 +18,22 @@ interface ProductReservationPanelProps {
   availableStock: number;
   pickupStartTime: string;
   pickupEndTime: string;
+}
+
+function getAddDisabledReason(
+  activeTimeSlot: PickupTimeOption | null,
+  availableStock: number,
+  quantity: number
+): string | null {
+  if (availableStock <= 0 || quantity <= 0) {
+    return '재고가 없어 예약할 수 없습니다.';
+  }
+
+  if (activeTimeSlot === null) {
+    return '픽업 시간을 선택해 주세요.';
+  }
+
+  return null;
 }
 
 export function ProductReservationPanel({
@@ -78,39 +89,23 @@ export function ProductReservationPanel({
   };
   const isDecreaseDisabled = quantity <= 1;
   const isIncreaseDisabled = quantity >= availableStock;
-  const isAddButtonDisabled =
-    activeTimeSlot === null || availableStock <= 0 || quantity <= 0;
+  const addDisabledReason = getAddDisabledReason(
+    activeTimeSlot,
+    availableStock,
+    quantity
+  );
+  const isAddButtonDisabled = addDisabledReason !== null;
 
   return (
     <div className="rounded-lg border border-gray-200 bg-white p-6">
-      <h2 className="mb-4 text-lg font-bold text-gray-900">
-        픽업 날짜 및 시간 선택
-      </h2>
-      <div className="flex items-center justify-between rounded-md border border-gray-200 px-4 py-3">
-        <button
-          type="button"
-          aria-label="이전 날짜"
-          disabled
-          className="text-gray-300 disabled:cursor-not-allowed"
-        >
-          <ChevronLeft />
-        </button>
-
+      <h2 className="mb-4 text-lg font-bold text-gray-900">픽업 시간 선택</h2>
+      <div className="flex items-center justify-center rounded-md border border-gray-200 px-4 py-3">
         <span className="text-base font-semibold text-gray-900">
           {formatPickupDateLabel(pickupStartTime, now) ?? '-'}
         </span>
-
-        <button
-          type="button"
-          aria-label="다음 날짜"
-          disabled
-          className="text-gray-300 disabled:cursor-not-allowed"
-        >
-          <ChevronRight />
-        </button>
       </div>
 
-      <div className="mt-3 mb-6 grid max-h-42 grid-cols-3 gap-2 overflow-y-auto pr-1">
+      <div className="mt-3 mb-6 grid grid-cols-2 gap-2 sm:grid-cols-3">
         {timeSlots.map((slot) => {
           const isSelected = activeTimeSlot?.startAt === slot.startAt;
           const isDisabled = isPastPickupTimeSlot(
@@ -153,7 +148,7 @@ export function ProductReservationPanel({
             type="button"
             aria-label="수량 감소"
             disabled={isDecreaseDisabled}
-            className="px-4 py-2 text-gray-600 disabled:text-gray-300"
+            className="focus-visible:ring-primary-500 px-4 py-2 text-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:text-gray-300"
             onClick={handleDecreaseQuantity}
           >
             <Minus className="size-4" aria-hidden="true" />
@@ -165,7 +160,7 @@ export function ProductReservationPanel({
             type="button"
             aria-label="수량 증가"
             disabled={isIncreaseDisabled}
-            className="px-4 py-2 text-gray-600 disabled:text-gray-300"
+            className="focus-visible:ring-primary-500 px-4 py-2 text-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:text-gray-300"
             onClick={handleIncreaseQuantity}
           >
             <Plus className="size-4" aria-hidden="true" />
@@ -175,6 +170,7 @@ export function ProductReservationPanel({
 
       <Button
         disabled={isAddButtonDisabled}
+        aria-describedby={addDisabledReason ? 'add-disabled-reason' : undefined}
         className="w-full py-3 text-xl font-extrabold"
         onClick={handleAddButtonClick}
       >
@@ -182,6 +178,15 @@ export function ProductReservationPanel({
           ? '예약 불가'
           : `${(price * quantity).toLocaleString()}원 담기`}
       </Button>
+
+      {addDisabledReason ? (
+        <p
+          id="add-disabled-reason"
+          className="mt-3 text-center text-sm text-red-500"
+        >
+          {addDisabledReason}
+        </p>
+      ) : null}
 
       <div className="mt-7 flex gap-3 rounded-md bg-gray-50 p-4">
         <div className="bg-primary-100 text-primary-500 flex size-9 shrink-0 items-center justify-center rounded-full">

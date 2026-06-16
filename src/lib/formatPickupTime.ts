@@ -28,22 +28,6 @@ function formatPickupDate(value: Date) {
   }).format(value);
 }
 
-function isSameDate(a: Date, b: Date) {
-  return (
-    a.getFullYear() === b.getFullYear() &&
-    a.getMonth() === b.getMonth() &&
-    a.getDate() === b.getDate()
-  );
-}
-
-function addDays(value: Date, days: number) {
-  return new Date(
-    value.getFullYear(),
-    value.getMonth(),
-    value.getDate() + days
-  );
-}
-
 export function formatPickupDateLabel(value: string, now = new Date()) {
   const pickupDate = getPickupDate(value, now);
 
@@ -51,19 +35,7 @@ export function formatPickupDateLabel(value: string, now = new Date()) {
     return null;
   }
 
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const tomorrow = addDays(today, 1);
-  const formattedDate = formatPickupDate(pickupDate);
-
-  if (isSameDate(pickupDate, today)) {
-    return `오늘 ${formattedDate}`;
-  }
-
-  if (isSameDate(pickupDate, tomorrow)) {
-    return `내일 ${formattedDate}`;
-  }
-
-  return formattedDate;
+  return formatPickupDate(pickupDate);
 }
 
 export function parsePickupTimeToMinutes(value: string) {

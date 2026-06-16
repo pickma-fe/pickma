@@ -12,6 +12,16 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
 
+const MOBILE_NAV_ITEMS = [
+  { href: '/mypage', label: '내 정보', view: 'profile' as const, icon: User },
+  {
+    href: '/mypage/orders',
+    label: '내 예약',
+    view: 'reservations' as const,
+    icon: CalendarCheck,
+  },
+];
+
 type MypageSidebarView = 'profile' | 'reservations';
 
 interface SidebarItem {
@@ -122,23 +132,34 @@ interface MypageSidebarProps {
 
 export function MypageSidebar({ activeView = 'profile' }: MypageSidebarProps) {
   return (
-    <aside className="hidden border-r border-gray-200 px-10 py-10 lg:block">
-      <h2 className="text-lg font-bold text-gray-900">마이페이지</h2>
-
-      <nav className="mt-6 space-y-2" aria-label="마이페이지 메뉴">
-        {menuItems.map((item) => (
-          <SidebarMenuItem
-            key={item.label}
-            item={item}
-            activeView={activeView}
-          />
+    <>
+      <nav
+        className="flex border-b border-gray-200 px-2 lg:hidden"
+        aria-label="마이페이지 메뉴"
+      >
+        {MOBILE_NAV_ITEMS.map(({ href, label, view, icon: Icon }) => (
+          <Link
+            key={href}
+            href={href}
+            aria-current={activeView === view ? 'page' : undefined}
+            className={[
+              'focus-visible:ring-primary-500 flex items-center gap-2 border-b-2 px-4 py-4 text-sm font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
+              activeView === view
+                ? 'border-primary-500 text-primary-500'
+                : 'border-transparent text-gray-600 hover:text-gray-900',
+            ].join(' ')}
+          >
+            <Icon className="size-4" aria-hidden="true" />
+            {label}
+          </Link>
         ))}
       </nav>
 
-      <div className="mt-8 border-t border-gray-200 pt-8">
-        <p className="text-base font-bold text-gray-900">고객센터</p>
-        <nav className="mt-4 space-y-2" aria-label="고객센터 메뉴">
-          {supportItems.map((item) => (
+      <aside className="hidden border-r border-gray-200 px-10 py-10 lg:block">
+        <h2 className="text-lg font-bold text-gray-900">마이페이지</h2>
+
+        <nav className="mt-6 space-y-2" aria-label="마이페이지 메뉴">
+          {menuItems.map((item) => (
             <SidebarMenuItem
               key={item.label}
               item={item}
@@ -146,7 +167,20 @@ export function MypageSidebar({ activeView = 'profile' }: MypageSidebarProps) {
             />
           ))}
         </nav>
-      </div>
-    </aside>
+
+        <div className="mt-8 border-t border-gray-200 pt-8">
+          <p className="text-base font-bold text-gray-900">고객센터</p>
+          <nav className="mt-4 space-y-2" aria-label="고객센터 메뉴">
+            {supportItems.map((item) => (
+              <SidebarMenuItem
+                key={item.label}
+                item={item}
+                activeView={activeView}
+              />
+            ))}
+          </nav>
+        </div>
+      </aside>
+    </>
   );
 }

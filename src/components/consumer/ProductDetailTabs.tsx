@@ -27,7 +27,7 @@ export function ProductDetailTabs({ product }: ProductDetailTabsProps) {
     : product.store.address;
 
   return (
-    <section className="mx-auto max-w-450 px-6">
+    <section>
       <TabGroup>
         <TabList
           aria-label="상품 상세 정보"
@@ -38,7 +38,7 @@ export function ProductDetailTabs({ product }: ProductDetailTabsProps) {
               key={tab.id}
               className={({ selected }) =>
                 [
-                  'focus-visible:ring-primary-500 rounded-sm border-b-2 px-2 py-4 text-base font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
+                  'focus-visible:ring-primary-500 border-b-2 px-2 py-3 text-base font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
                   selected
                     ? 'border-primary-500 text-primary-500'
                     : 'border-transparent text-gray-600 hover:text-gray-900',
@@ -51,28 +51,26 @@ export function ProductDetailTabs({ product }: ProductDetailTabsProps) {
         </TabList>
 
         <TabPanels>
-          <TabPanel className="focus-visible:ring-primary-500 grid gap-10 rounded-sm py-8 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 lg:grid-cols-[minmax(0,1fr)_minmax(280px,660px)_minmax(0,1fr)]">
-            <div className="space-y-8">
-              <section>
-                <h2 className="mb-4 text-lg font-bold text-gray-900">
-                  상품 안내
-                </h2>
-                <p className="text-sm leading-6 text-gray-700">
-                  {product.description ?? '등록된 상품 설명이 없습니다.'}
-                </p>
-              </section>
+          <TabPanel className="focus-visible:ring-primary-500 space-y-8 rounded-sm py-8 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2">
+            <section>
+              <h2 className="mb-4 text-lg font-bold text-gray-900">
+                상품 안내
+              </h2>
+              <p className="text-sm leading-6 text-gray-700">
+                {product.description ?? '등록된 상품 설명이 없습니다.'}
+              </p>
+            </section>
 
-              <section>
-                <h2 className="mb-4 text-lg font-bold text-gray-900">
-                  상품 구성
-                </h2>
-                <ul className="list-inside list-disc space-y-2 text-sm text-gray-700">
-                  <li>{product.name}</li>
-                </ul>
-              </section>
-            </div>
+            <section>
+              <h2 className="mb-4 text-lg font-bold text-gray-900">
+                상품 구성
+              </h2>
+              <ul className="list-inside list-disc space-y-2 text-sm text-gray-700">
+                <li>{product.name}</li>
+              </ul>
+            </section>
 
-            <section className="w-full lg:col-start-2">
+            <section>
               <h2 className="mb-4 text-lg font-bold text-gray-900">
                 영양 정보
               </h2>

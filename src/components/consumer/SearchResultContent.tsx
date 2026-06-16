@@ -1,13 +1,17 @@
 'use client';
 
 import type { Product } from '@/types/product';
+import type { UserLocation } from '@/hooks/consumer/useUserLocation';
 import { Button, Pagination } from '@/components/common';
 
+import { NoLocationView } from './NoLocationView';
 import { ProductCard } from './ProductCard';
 import type { ResultViewMode } from './ResultViewToggle';
 import { SearchProductListItem } from './SearchProductListItem';
 
 interface SearchResultContentProps {
+  hasLocation: boolean;
+  onLocationChange: (location: Omit<UserLocation, 'savedAt'>) => void;
   hasKeyword: boolean;
   isLoading: boolean;
   isError: boolean;
@@ -21,6 +25,8 @@ interface SearchResultContentProps {
 }
 
 export function SearchResultContent({
+  hasLocation,
+  onLocationChange,
   hasKeyword,
   isLoading,
   isError,
@@ -32,6 +38,10 @@ export function SearchResultContent({
   onRetry,
   onPageChange,
 }: SearchResultContentProps) {
+  if (!hasLocation) {
+    return <NoLocationView onLocationChange={onLocationChange} />;
+  }
+
   if (!hasKeyword) {
     return (
       <div className="flex min-h-96 items-center justify-center rounded-lg border border-dashed border-gray-200 bg-gray-50 px-4 text-center">
