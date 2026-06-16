@@ -151,6 +151,8 @@ export function toProduct(response: ProductResponse): Product {
 GET /api/products?categoryId=...&sort=endAt&order=asc
 ```
 
+추천 관련 query surface는 `sort=aiRecommendation`처럼 정렬 전략만 노출한다. 주문 이력, 상품 상세 진입 기준 조회 이력, 거리, 할인율 같은 개인화 입력 신호는 별도 query parameter로 펼치지 않고 서버 내부 profile 조합으로 다룬다.
+
 ```text
 categoryId -> category_id
 endAt -> end_at
@@ -321,7 +323,16 @@ Contract DTO -> Domain Type
 export const productListQuerySchema = z.object({
   page: z.coerce.number().int().positive().default(1),
   pageSize: z.coerce.number().int().min(1).max(100).default(20),
-  sort: z.enum(['endAt', 'discountRate', 'createdAt']).default('endAt'),
+  sort: z
+    .enum([
+      'endAt',
+      'discountRate',
+      'discountPrice',
+      'distance',
+      'popular',
+      'aiRecommendation',
+    ])
+    .default('endAt'),
   order: z.enum(['asc', 'desc']).default('asc'),
   categoryId: z.string().uuid().optional(),
 }) satisfies z.ZodType<ProductListParams>;

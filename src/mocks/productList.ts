@@ -7,6 +7,13 @@ import type {
 
 import { mockProductList } from './products';
 
+const MOCK_POPULARITY_SCORES = new Map(
+  mockProductList.items.map((product, index, items) => [
+    product.id,
+    items.length - index,
+  ])
+);
+
 export function buildMockProductListResponse(
   params: ProductListParams,
   products: ProductListItemResponse[] = mockProductList.items
@@ -106,6 +113,16 @@ function compareProducts(
 
   if (sort === 'discountPrice') {
     return (a.discountPrice - b.discountPrice) * direction;
+  }
+
+  if (sort === 'popular' || sort === 'aiRecommendation') {
+    const popularityDiff =
+      (MOCK_POPULARITY_SCORES.get(b.id) ?? 0) -
+      (MOCK_POPULARITY_SCORES.get(a.id) ?? 0);
+
+    if (popularityDiff !== 0) {
+      return popularityDiff;
+    }
   }
 
   return (

@@ -21,7 +21,11 @@ export async function GET(request: NextRequest): Promise<Response> {
     }
 
     const supabase = await createServerClient();
-    const data = await getProducts(supabase, params);
+    const viewerUserId =
+      params.sort === 'aiRecommendation'
+        ? (await supabase.auth.getUser()).data.user?.id
+        : undefined;
+    const data = await getProducts(supabase, params, viewerUserId);
     return success(data);
   } catch (error) {
     return routeError(error);
