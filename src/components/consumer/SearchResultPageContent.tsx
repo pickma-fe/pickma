@@ -81,6 +81,11 @@ export function SearchResultPageContent({
     [categories]
   );
   const productSortQuery = getProductSortQuery(selectedSortOption);
+  const isDistanceSortWithoutLocation =
+    productSortQuery.sort === 'distance' && !location;
+  const effectiveSortQuery = isDistanceSortWithoutLocation
+    ? getProductSortQuery(DEFAULT_SORT_OPTION_ID)
+    : productSortQuery;
   const selectedPriceRange = getPriceRange(selectedPriceRangeId);
   const hasKeyword = initialKeyword.length > 0;
   const {
@@ -98,13 +103,14 @@ export function SearchResultPageContent({
         selectedCategoryId === ALL_CATEGORY_ID ? undefined : selectedCategoryId,
       minPrice: selectedPriceRange.minPrice,
       maxPrice: selectedPriceRange.maxPrice,
-      sort: productSortQuery.sort,
-      order: 'order' in productSortQuery ? productSortQuery.order : undefined,
+      sort: effectiveSortQuery.sort,
+      order:
+        'order' in effectiveSortQuery ? effectiveSortQuery.order : undefined,
       userLat: location?.lat,
       userLng: location?.lng,
       availableOnly: true,
     },
-    { enabled: hasKeyword && Boolean(location) }
+    { enabled: hasKeyword && !isDistanceSortWithoutLocation }
   );
   const products = productList?.items ?? [];
   const totalCount = productList?.totalCount ?? 0;
@@ -256,7 +262,7 @@ export function SearchResultPageContent({
           </div>
 
           <SearchResultContent
-            hasLocation={Boolean(location)}
+            hasLocation={!isDistanceSortWithoutLocation}
             onLocationChange={saveLocation}
             hasKeyword={hasKeyword}
             isLoading={isLoading}
