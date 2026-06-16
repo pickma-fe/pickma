@@ -9,7 +9,7 @@
 - Next.js App Router + Route Handler 구조로 `output: 'export'` 전환 비용이 큼
 - Capacitor는 static export 필요 → 기존 API Route 전체 영향
 - 현재 목표는 홈 화면 설치 + 푸시 알림
-- T33(네이티브 결제 재검토) 완료 후 Capacitor 재검토 예정
+- T33 완료: PWA redirect adapter 방향 확정, Capacitor 재검토는 앱스토어 배포 필요 시로 조건 변경
 
 ### Capacitor 재검토 조건
 
@@ -108,19 +108,20 @@ Web Push API로 푸시 발송
 
 ## T33 결제 방식 영향
 
-- PWA standalone 모드에서 Toss 결제 팝업 동작을 실기기/실브라우저에서 검증해야 함
-- 팝업이 차단되거나 부분적으로 렌더링되면 결제 플로우 재설계 필요
-- Capacitor 전환 시 인앱 결제 방식 재검토 필요
-- → T33(네이티브 앱 결제 방식 재검토)에서 위 검증 결과를 조건으로 Capacitor 전환 검토
+- T33 완료: Capacitor 대신 PWA 방식 확정, web/mobile adapter 분리 방향 결정됨
+- PWA standalone 모드에서 Toss 결제 팝업(`window.open`) 동작 검증은 Vercel 배포 후 실기기 확인 필요
+- 팝업이 차단되거나 동작하지 않으면 `useMobilePayment`(location.href 리다이렉트) 적용
+- Capacitor 전환은 앱스토어 배포가 필요하다고 판단될 때 별도 재검토
+- → T33 결정 결과 상세는 `docs/tasks/T33_native_app_payment_review.md` 참조
 
 ---
 
 ## 후속 과제
 
-| 항목                                                  | 관련 Task           |
-| ----------------------------------------------------- | ------------------- |
-| `push_subscriptions` DB 테이블 생성 및 서버 발송 연결 | 후속 task 필요      |
-| 실기기 PWA 설치 및 standalone safe area 검증          | Vercel 배포 후 확인 |
-| Toss 결제 팝업 standalone 동작 검증                   | T33 연계            |
-| Capacitor 전환 검토                                   | T33 완료 후         |
-| 앱스토어 배포                                         | T33 완료 후         |
+| 항목                                                  | 관련 Task                         |
+| ----------------------------------------------------- | --------------------------------- |
+| `push_subscriptions` DB 테이블 생성 및 서버 발송 연결 | 후속 task 필요                    |
+| 실기기 PWA 설치 및 standalone safe area 검증          | Vercel 배포 후 확인               |
+| Toss 결제 팝업 standalone 동작 검증                   | Vercel 배포 후 실기기 확인        |
+| Capacitor 전환 검토                                   | 앱스토어 배포 필요 시 별도 재검토 |
+| 앱스토어 배포                                         | Capacitor 전환 검토 후            |

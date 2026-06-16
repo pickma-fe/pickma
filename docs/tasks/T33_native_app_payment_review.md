@@ -85,15 +85,18 @@
       (`window.matchMedia('(display-mode: standalone)')`) 분기로 adapter 선택
       (Vercel 배포 후 실기기 검증 완료 시 활성화)
   - **`/payment/success` 페이지 역할 확장 필요**:
-    - 현재: 팝업 내부에서 `postMessage` 전송 후 닫힘
-    - mobile 전환 후: URL params(`paymentKey / orderId / amount`) 수신 → `confirm API` 직접 호출
+    - 현재: `PaymentSuccessClient`가 URL params(`paymentKey / orderId / amount`) 수신 →
+      `useConfirmPayment`로 `POST /api/payments/confirm` 호출 → `postMessage` + `window.close()`
+    - mobile 전환 후 추가 필요: `window.opener`가 없는 standalone/PWA redirect 환경에서
+      confirm 성공 시 `/order/complete`, 실패 시 `/order/fail`로 자체 라우팅 처리 +
+      query invalidation 및 중복 confirm 처리 정책 정리
 
   ## PWA standalone 전환 시 결제 변경 범위 (Vercel 배포 후 실기기 검증 기준)
 
-  | 파일                                     | 변경 유형 | 내용                                              |
-  | ---------------------------------------- | --------- | ------------------------------------------------- |
-  | `src/hooks/payments/usePayment.ts`       | 수정      | PWA standalone 모드 분기 추가 (facade 역할)       |
-  | `src/hooks/payments/useWebPayment.ts`    | 신규      | 현재 팝업 방식 분리                               |
-  | `src/hooks/payments/useMobilePayment.ts` | 신규      | 리다이렉트 방식 구현                              |
-  | `src/app/(payment)/success/page.tsx`     | 수정      | URL params 수신 + confirm API 직접 호출 로직 추가 |
-  | `src/app/api/payments/*`                 | 변경 없음 | 공통 재사용                                       |
+  | 파일                                     | 변경 유형 | 내용                                                                                                                        |
+  | ---------------------------------------- | --------- | --------------------------------------------------------------------------------------------------------------------------- |
+  | `src/hooks/payments/usePayment.ts`       | 수정      | PWA standalone 모드 분기 추가 (facade 역할)                                                                                 |
+  | `src/hooks/payments/useWebPayment.ts`    | 신규      | 현재 팝업 방식 분리                                                                                                         |
+  | `src/hooks/payments/useMobilePayment.ts` | 신규      | 리다이렉트 방식 구현                                                                                                        |
+  | `src/app/(payment)/success/page.tsx`     | 수정      | opener 없는 standalone/PWA redirect 환경에서 confirm 성공·실패 자체 라우팅 + query invalidation·중복 confirm 처리 정책 정리 |
+  | `src/app/api/payments/*`                 | 변경 없음 | 공통 재사용                                                                                                                 |

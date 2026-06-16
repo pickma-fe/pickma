@@ -784,8 +784,9 @@ Behavior:
 - 주문 상태가 `payment_pending`인지, 만료되지 않았는지 검증한다.
 - `PAYMENT_MOCK=true`: `redirectUrl = /payment/success?paymentKey=mock_pk_...&orderId={orderNumber}&amount={amount}`
 - `PAYMENT_MOCK` 미설정/`false`: `redirectUrl = /payment/toss-checkout?orderNumber=...&amount=...&orderName=...`
-- 클라이언트는 `redirectUrl`을 팝업 창(`window.open`)으로 열어 결제 흐름을 진행한다.
-- 향후 provider adapter로 확장해도 클라이언트 소비 방식(팝업)은 동일하게 유지한다.
+- 클라이언트는 `redirectUrl`을 팝업 창(`window.open`)으로 열어 결제 흐름을 진행한다. (현재 web 방식)
+- PWA standalone/mobile redirect 방식으로의 전환은 T33 결정 결과를 따르며,
+  adapter 분리 구현 완료 후 이 문서를 갱신한다.
 
 ### 6.2 `POST /api/payments/confirm`
 
