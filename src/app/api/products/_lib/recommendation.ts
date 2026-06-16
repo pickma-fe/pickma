@@ -55,9 +55,31 @@ export async function getRankedProducts(
   params: ProductListParams,
   viewerUserId?: string
 ): Promise<ProductListResponse> {
+  if (params.sort === 'popular') {
+    return getPopularResult(supabase, params);
+  }
+
+  if (!viewerUserId) {
+    return getPopularResult(supabase, params);
+  }
+
+  let profile: UserPreferenceProfile;
+  try {
+    profile = await buildUserPreferenceProfile(viewerUserId);
+  } catch {
+    return getPopularResult(supabase, params);
+  }
+  const hasProfileSignals =
+    profile.categoryScores.size > 0 || profile.storeScores.size > 0;
+
+  if (!hasProfileSignals) {
+    return getPopularResult(supabase, params);
+  }
+
   const { rows: candidateRows, totalCount } = await fetchCandidateProducts(
     supabase,
-    params
+    params,
+    { useRecommendationWindow: true }
   );
   const products = attachDistance(
     candidateRows.map(mapProductRow),
@@ -67,43 +89,6 @@ export async function getRankedProducts(
   const popularityScores = await getPopularityScores(
     products.map((product) => product.id)
   );
-
-  if (params.sort === 'popular') {
-    return paginateProducts(
-      sortByPopularity(products, popularityScores),
-      params,
-      totalCount
-    );
-  }
-
-  if (!viewerUserId) {
-    return paginateProducts(
-      sortByPopularity(products, popularityScores),
-      params,
-      totalCount
-    );
-  }
-
-  let profile: UserPreferenceProfile;
-  try {
-    profile = await buildUserPreferenceProfile(viewerUserId);
-  } catch {
-    return paginateProducts(
-      sortByPopularity(products, popularityScores),
-      params,
-      totalCount
-    );
-  }
-  const hasProfileSignals =
-    profile.categoryScores.size > 0 || profile.storeScores.size > 0;
-
-  if (!hasProfileSignals) {
-    return paginateProducts(
-      sortByPopularity(products, popularityScores),
-      params,
-      totalCount
-    );
-  }
 
   const rankedProducts = [...products].sort((left, right) => {
     const rightScore = calculateRecommendationScore(
@@ -129,7 +114,8 @@ export async function getRankedProducts(
 
 async function fetchCandidateProducts(
   supabase: SupabaseClient<Database>,
-  params: ProductListParams
+  params: ProductListParams,
+  options?: { useRecommendationWindow?: boolean }
 ): Promise<{ rows: ProductRow[]; totalCount: number }> {
   const { categoryId, keyword } = params;
 
@@ -197,7 +183,7 @@ async function fetchCandidateProducts(
     }
   }
 
-  if (params.sort === 'aiRecommendation') {
+  if (options?.useRecommendationWindow) {
     const candidateLimit = getRecommendationCandidateLimit(params);
     query = query.range(0, candidateLimit - 1);
   }
@@ -212,6 +198,30 @@ async function fetchCandidateProducts(
     rows: (data ?? []) as unknown as ProductRow[],
     totalCount: count ?? 0,
   };
+}
+
+async function getPopularResult(
+  supabase: SupabaseClient<Database>,
+  params: ProductListParams
+): Promise<ProductListResponse> {
+  const { rows: candidateRows, totalCount } = await fetchCandidateProducts(
+    supabase,
+    params
+  );
+  const products = attachDistance(
+    candidateRows.map(mapProductRow),
+    params.userLat,
+    params.userLng
+  );
+  const popularityScores = await getPopularityScores(
+    products.map((product) => product.id)
+  );
+
+  return paginateProducts(
+    sortByPopularity(products, popularityScores),
+    params,
+    totalCount
+  );
 }
 
 async function getPopularityScores(

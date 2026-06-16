@@ -119,17 +119,10 @@ function buildServiceRoleClientMock(params: {
   viewHistoryRows?: unknown[];
   viewHistoryError?: object | null;
 }) {
-  let orderItemsCallCount = 0;
-
   return {
     from: vi.fn((table: string) => {
       if (table === 'order_items') {
-        orderItemsCallCount += 1;
-
-        const rows =
-          orderItemsCallCount === 1
-            ? (params.popularityRows ?? [])
-            : (params.orderHistoryRows ?? []);
+        let isOrderHistoryQuery = false;
 
         const chain = {
           select: vi.fn(),
@@ -145,18 +138,22 @@ function buildServiceRoleClientMock(params: {
               onRejected?: (reason: unknown) => unknown
             ) =>
               Promise.resolve({
-                data: rows,
-                error:
-                  orderItemsCallCount === 1
-                    ? (params.popularityError ?? null)
-                    : (params.orderHistoryError ?? null),
+                data: isOrderHistoryQuery
+                  ? (params.orderHistoryRows ?? [])
+                  : (params.popularityRows ?? []),
+                error: isOrderHistoryQuery
+                  ? (params.orderHistoryError ?? null)
+                  : (params.popularityError ?? null),
               }).then(onFulfilled, onRejected)
           ),
         };
         chain.select.mockReturnValue(chain);
         chain.in.mockReturnValue(chain);
         chain.gte.mockReturnValue(chain);
-        chain.eq.mockReturnValue(chain);
+        chain.eq.mockImplementation(() => {
+          isOrderHistoryQuery = true;
+          return chain;
+        });
 
         return chain;
       }
@@ -356,7 +353,7 @@ describe('getRankedProducts', () => {
             },
           },
         ],
-        orderHistoryError: { message: 'boom' },
+        viewHistoryError: { message: 'boom' },
       }) as never
     );
 
@@ -373,6 +370,59 @@ describe('getRankedProducts', () => {
       productB.id,
       productA.id,
     ]);
+  });
+
+  it('aiRecommendation 비로그인 fallback 시 후보 window를 적용하지 않는다', async () => {
+    vi.mocked(createServiceRoleClient).mockReturnValue(
+      buildServiceRoleClientMock({
+        popularityRows: [],
+      }) as never
+    );
+    const candidateSupabase = buildCandidateSupabase([
+      productA,
+      productB,
+    ]) as never as {
+      from: ReturnType<typeof vi.fn>;
+      _chain: { range: ReturnType<typeof vi.fn> };
+    };
+
+    await getRankedProducts(candidateSupabase as never, {
+      ...baseParams,
+      page: 2,
+      pageSize: 20,
+      sort: 'aiRecommendation',
+    });
+
+    expect(candidateSupabase._chain.range).not.toHaveBeenCalled();
+  });
+
+  it('aiRecommendation 프로필 실패 fallback 시 후보 window를 적용하지 않는다', async () => {
+    vi.mocked(createServiceRoleClient).mockReturnValue(
+      buildServiceRoleClientMock({
+        popularityRows: [],
+        viewHistoryError: { message: 'boom' },
+      }) as never
+    );
+    const candidateSupabase = buildCandidateSupabase([
+      productA,
+      productB,
+    ]) as never as {
+      from: ReturnType<typeof vi.fn>;
+      _chain: { range: ReturnType<typeof vi.fn> };
+    };
+
+    await getRankedProducts(
+      candidateSupabase as never,
+      {
+        ...baseParams,
+        page: 2,
+        pageSize: 20,
+        sort: 'aiRecommendation',
+      },
+      'user-1'
+    );
+
+    expect(candidateSupabase._chain.range).not.toHaveBeenCalled();
   });
 
   it('실제 매칭 count가 rows 길이보다 커도 totalCount와 totalPages는 실제 count를 유지한다', async () => {
@@ -434,6 +484,20 @@ describe('getRankedProducts', () => {
     vi.mocked(createServiceRoleClient).mockReturnValue(
       buildServiceRoleClientMock({
         popularityRows: [],
+        orderHistoryRows: [
+          {
+            product_id: 'ordered-product-1',
+            quantity: 2,
+            orders: {
+              created_at: new Date().toISOString(),
+              status: 'completed',
+            },
+            products: {
+              store_id: productA.store_id,
+              category_id: productA.category_id,
+            },
+          },
+        ],
       }) as never
     );
     const candidateSupabase = buildCandidateSupabase([
