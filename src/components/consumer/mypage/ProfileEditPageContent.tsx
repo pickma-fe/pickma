@@ -128,7 +128,7 @@ export function ProfileEditPageContent() {
   }
 
   return (
-    <section className="max-w-320">
+    <section className="max-w-7xl">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">내 정보</h1>
         <p className="mt-2 text-sm text-gray-500">
@@ -241,7 +241,7 @@ export function ProfileEditPageContent() {
               </p>
             ) : null}
 
-            <div className="mt-4 flex min-h-[42px] justify-end">
+            <div className="mt-4 flex min-h-10.5 justify-end">
               {isEditOpen ? (
                 <Button type="submit" disabled={isUpdatePending}>
                   {isUpdatePending ? '저장 중...' : '저장하기'}

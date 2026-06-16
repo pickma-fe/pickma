@@ -28,7 +28,7 @@ export default function MypageLoading() {
 
         {/* Content skeleton */}
         <section className="px-5 py-10 lg:px-10">
-          <div className="max-w-320 space-y-6">
+          <div className="max-w-7xl space-y-6">
             {/* Header */}
             <div className="mb-8">
               <div className="h-9 w-24 rounded bg-gray-200" />
