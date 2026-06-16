@@ -51,7 +51,7 @@ export function SearchResultPageContent({
   initialMaxPrice,
 }: SearchResultPageContentProps) {
   const router = useRouter();
-  const { location } = useUserLocation();
+  const { location, saveLocation } = useUserLocation();
   const [keyword, setKeyword] = useState(initialKeyword);
   const [currentPage, setCurrentPage] = useState(initialPage);
   const [selectedSortOption, setSelectedSortOption] =
@@ -104,7 +104,7 @@ export function SearchResultPageContent({
       userLng: location?.lng,
       availableOnly: true,
     },
-    { enabled: hasKeyword }
+    { enabled: hasKeyword && Boolean(location) }
   );
   const products = productList?.items ?? [];
   const totalCount = productList?.totalCount ?? 0;
@@ -256,6 +256,8 @@ export function SearchResultPageContent({
           </div>
 
           <SearchResultContent
+            hasLocation={Boolean(location)}
+            onLocationChange={saveLocation}
             hasKeyword={hasKeyword}
             isLoading={isLoading}
             isError={isError}
