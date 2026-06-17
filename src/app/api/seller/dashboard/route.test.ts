@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { SellerDashboardStatsResponse } from '@/contracts/seller';
 import { AppError } from '@/lib/errors/appError';
 import { ERROR_CODE } from '@/lib/errors/errorCodes';
+import { createServerClient } from '@/lib/supabase/server';
 import { requireSellerStore } from '@/app/api/_lib/auth';
 import { isApiMockEnabled } from '@/app/api/_lib/mock';
 import { mockSellerDashboardStats } from '@/mocks/seller';
@@ -18,6 +19,10 @@ vi.mock('@/app/api/_lib/mock', () => ({
   isApiMockEnabled: vi.fn(),
 }));
 
+vi.mock('@/lib/supabase/server', () => ({
+  createServerClient: vi.fn(),
+}));
+
 vi.mock('./_lib/service', () => ({
   getSellerDashboardStats: vi.fn(),
 }));
@@ -27,6 +32,8 @@ const mockStoreResult = {
   serviceUser: {},
   store: { id: 'store-1' },
 } as Awaited<ReturnType<typeof requireSellerStore>>;
+
+const mockSupabaseClient = {} as Awaited<ReturnType<typeof createServerClient>>;
 
 const mockStats: SellerDashboardStatsResponse = {
   totalSalesAmount: 100000,
@@ -54,9 +61,10 @@ describe('GET /api/seller/dashboard', () => {
     expect(body.data).toEqual(mockSellerDashboardStats);
   });
 
-  it('real 모드에서 storeId를 service에 전달하고 결과를 반환한다', async () => {
+  it('real 모드에서 supabase client와 storeId를 service에 전달하고 결과를 반환한다', async () => {
     vi.mocked(isApiMockEnabled).mockReturnValue(false);
     vi.mocked(requireSellerStore).mockResolvedValue(mockStoreResult);
+    vi.mocked(createServerClient).mockResolvedValue(mockSupabaseClient);
     vi.mocked(getSellerDashboardStats).mockResolvedValue(mockStats);
 
     const res = await GET();
@@ -67,7 +75,11 @@ describe('GET /api/seller/dashboard', () => {
 
     expect(res.status).toBe(200);
     expect(requireSellerStore).toHaveBeenCalledOnce();
-    expect(getSellerDashboardStats).toHaveBeenCalledWith('store-1');
+    expect(createServerClient).toHaveBeenCalledOnce();
+    expect(getSellerDashboardStats).toHaveBeenCalledWith(
+      mockSupabaseClient,
+      'store-1'
+    );
     expect(body.statusCode).toBe(200);
     expect(body.data.totalSalesAmount).toBe(100000);
   });

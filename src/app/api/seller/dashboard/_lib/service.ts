@@ -1,9 +1,8 @@
+import type { SupabaseClient } from '@supabase/supabase-js';
+
 import type { SellerDashboardStatsResponse } from '@/contracts/seller';
 import { AppError } from '@/lib/errors/appError';
 import { ERROR_CODE } from '@/lib/errors/errorCodes';
-import { createServiceRoleClient } from '@/lib/supabase/service';
-
-type ServiceRoleClient = ReturnType<typeof createServiceRoleClient>;
 
 type DailyOrderRow = {
   created_at: string;
@@ -65,7 +64,7 @@ function getDailyMetricRange(now = new Date()): {
 }
 
 async function getDailyMetrics(
-  supabase: ServiceRoleClient,
+  supabase: SupabaseClient,
   storeId: string
 ): Promise<SellerDashboardStatsResponse['dailyMetrics']> {
   const { start, end, dates } = getDailyMetricRange();
@@ -106,7 +105,7 @@ async function getDailyMetrics(
 }
 
 async function getTotalStats(
-  supabase: ServiceRoleClient,
+  supabase: SupabaseClient,
   storeId: string
 ): Promise<{ totalSalesAmount: number; totalOrderCount: number }> {
   const { data, error } = await supabase
@@ -128,7 +127,7 @@ async function getTotalStats(
 }
 
 async function getRecentOrders(
-  supabase: ServiceRoleClient,
+  supabase: SupabaseClient,
   storeId: string
 ): Promise<SellerDashboardStatsResponse['recentOrders']> {
   const { data, error } = await supabase
@@ -155,10 +154,9 @@ async function getRecentOrders(
 }
 
 export async function getSellerDashboardStats(
+  supabase: SupabaseClient,
   storeId: string
 ): Promise<SellerDashboardStatsResponse> {
-  const supabase = createServiceRoleClient();
-
   const [{ totalSalesAmount, totalOrderCount }, dailyMetrics, recentOrders] =
     await Promise.all([
       getTotalStats(supabase, storeId),

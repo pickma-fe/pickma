@@ -1,14 +1,10 @@
+import type { SupabaseClient } from '@supabase/supabase-js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { AppError } from '@/lib/errors/appError';
 import { ERROR_CODE } from '@/lib/errors/errorCodes';
-import { createServiceRoleClient } from '@/lib/supabase/service';
 
 import { getSellerDashboardStats } from './service';
-
-vi.mock('@/lib/supabase/service', () => ({
-  createServiceRoleClient: vi.fn(),
-}));
 
 const STORE_ID = 'store-1';
 
@@ -24,7 +20,7 @@ function buildClient(options: {
     order_items: { product_name: string }[];
   }[];
   errorOn?: 'total' | 'daily' | 'recent';
-}): ReturnType<typeof createServiceRoleClient> {
+}): SupabaseClient {
   const now = new Date().toISOString();
 
   const totalRows = options.totalRows ?? [{ payment_amount: 12000 }];
@@ -42,11 +38,6 @@ function buildClient(options: {
     },
   ];
 
-  // Promise.all 순서: [getTotalStats, getDailyMetrics, getRecentOrders]
-  // getTotalStats: from → select → eq → in → resolve
-  // getDailyMetrics: from → select → eq → in → gte → lt → resolve
-  // getRecentOrders: from → select → eq → order → limit → resolve
-
   let callIndex = 0;
 
   const client = {
@@ -60,7 +51,6 @@ function buildClient(options: {
       const makeError = () => ({ data: null, error: { message: 'db error' } });
 
       if (currentIndex === 0) {
-        // getTotalStats: select → eq → in
         return {
           select: vi.fn().mockReturnValue({
             eq: vi.fn().mockReturnValue({
@@ -75,7 +65,6 @@ function buildClient(options: {
       }
 
       if (currentIndex === 1) {
-        // getDailyMetrics: select → eq → in → gte → lt
         const chain = {
           eq: vi.fn().mockReturnThis(),
           in: vi.fn().mockReturnThis(),
@@ -91,7 +80,6 @@ function buildClient(options: {
         };
       }
 
-      // getRecentOrders: select → eq → order → limit
       return {
         select: vi.fn().mockReturnValue({
           eq: vi.fn().mockReturnValue({
@@ -106,7 +94,7 @@ function buildClient(options: {
         }),
       };
     }),
-  } as unknown as ReturnType<typeof createServiceRoleClient>;
+  } as unknown as SupabaseClient;
 
   return client;
 }
@@ -118,9 +106,8 @@ describe('getSellerDashboardStats', () => {
 
   it('storeId 기준으로 매출 통계를 반환한다', async () => {
     const client = buildClient({});
-    vi.mocked(createServiceRoleClient).mockReturnValue(client);
 
-    const result = await getSellerDashboardStats(STORE_ID);
+    const result = await getSellerDashboardStats(client, STORE_ID);
 
     expect(result.totalSalesAmount).toBe(12000);
     expect(result.totalOrderCount).toBe(1);
@@ -148,18 +135,16 @@ describe('getSellerDashboardStats', () => {
         },
       ],
     });
-    vi.mocked(createServiceRoleClient).mockReturnValue(client);
 
-    const result = await getSellerDashboardStats(STORE_ID);
+    const result = await getSellerDashboardStats(client, STORE_ID);
 
     expect(result.recentOrders[0].productName).toBe('주문 상품');
   });
 
   it('totalStats DB 오류 시 INTERNAL_SERVER_ERROR를 던진다', async () => {
     const client = buildClient({ errorOn: 'total' });
-    vi.mocked(createServiceRoleClient).mockReturnValue(client);
 
-    await expect(getSellerDashboardStats(STORE_ID)).rejects.toSatisfy(
+    await expect(getSellerDashboardStats(client, STORE_ID)).rejects.toSatisfy(
       (error: unknown) =>
         error instanceof AppError &&
         error.code === ERROR_CODE.INTERNAL_SERVER_ERROR
@@ -168,9 +153,8 @@ describe('getSellerDashboardStats', () => {
 
   it('dailyMetrics DB 오류 시 INTERNAL_SERVER_ERROR를 던진다', async () => {
     const client = buildClient({ errorOn: 'daily' });
-    vi.mocked(createServiceRoleClient).mockReturnValue(client);
 
-    await expect(getSellerDashboardStats(STORE_ID)).rejects.toSatisfy(
+    await expect(getSellerDashboardStats(client, STORE_ID)).rejects.toSatisfy(
       (error: unknown) =>
         error instanceof AppError &&
         error.code === ERROR_CODE.INTERNAL_SERVER_ERROR
@@ -179,9 +163,8 @@ describe('getSellerDashboardStats', () => {
 
   it('recentOrders DB 오류 시 INTERNAL_SERVER_ERROR를 던진다', async () => {
     const client = buildClient({ errorOn: 'recent' });
-    vi.mocked(createServiceRoleClient).mockReturnValue(client);
 
-    await expect(getSellerDashboardStats(STORE_ID)).rejects.toSatisfy(
+    await expect(getSellerDashboardStats(client, STORE_ID)).rejects.toSatisfy(
       (error: unknown) =>
         error instanceof AppError &&
         error.code === ERROR_CODE.INTERNAL_SERVER_ERROR

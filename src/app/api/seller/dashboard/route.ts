@@ -1,3 +1,4 @@
+import { createServerClient } from '@/lib/supabase/server';
 import { requireSellerStore } from '@/app/api/_lib/auth';
 import { isApiMockEnabled } from '@/app/api/_lib/mock';
 import { routeError, success } from '@/app/api/_lib/response';
@@ -12,7 +13,8 @@ export async function GET(): Promise<Response> {
     }
 
     const { store } = await requireSellerStore();
-    const data = await getSellerDashboardStats(store.id);
+    const supabase = await createServerClient();
+    const data = await getSellerDashboardStats(supabase, store.id);
     return success(data);
   } catch (error) {
     return routeError(error);
