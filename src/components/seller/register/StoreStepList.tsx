@@ -11,8 +11,6 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/common/Button/Button';
 
 import {
-  REVIEW_STATUS_COLOR,
-  REVIEW_STATUS_TEXT,
   CERTIFICATION_STATUS_COLOR,
   CERTIFICATION_STATUS_TEXT,
 } from './constants';
@@ -42,11 +40,7 @@ function getStoreStepStatus(
     case 1:
       return storeState.storeInfoSubmitted ? 'done' : 'active';
     case 2:
-      if (!storeState.storeInfoSubmitted) return 'pending';
-      return storeState.reviewStatus === 'completed' ? 'done' : 'active';
-    case 3:
-      if (storeState.reviewStatus !== 'completed') return 'pending';
-      return storeState.storeStatus === 'approved' ? 'done' : 'active';
+      return storeState.storeInfoSubmitted ? 'done' : 'pending';
     default:
       return 'pending';
   }
@@ -95,13 +89,6 @@ export function StoreStepList({
 
             <div className="flex items-center gap-2 self-end sm:self-auto">
               {step.id === 2 && status !== 'pending' && (
-                <StatusBadge
-                  text={REVIEW_STATUS_TEXT[storeState.reviewStatus]}
-                  colorClass={REVIEW_STATUS_COLOR[storeState.reviewStatus]}
-                />
-              )}
-
-              {step.id === 3 && status !== 'pending' && (
                 <StatusBadge
                   text={CERTIFICATION_STATUS_TEXT[storeState.storeStatus]}
                   colorClass={

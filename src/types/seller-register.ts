@@ -11,12 +11,10 @@ export interface AuthStepState {
   rejectionReason?: string;
 }
 
-export type StoreRegisterReviewStatus = 'pending' | 'reviewing' | 'completed';
 export type StoreRegisterApprovalStatus = 'waiting' | 'approved' | 'rejected';
 
 export interface StoreStepState {
   storeInfoSubmitted: boolean;
-  reviewStatus: StoreRegisterReviewStatus;
   storeStatus: StoreRegisterApprovalStatus;
 }
 

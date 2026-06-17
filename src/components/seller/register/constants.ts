@@ -39,14 +39,6 @@ export const STORE_STEPS: StoreStep[] = [
   },
   {
     id: 2,
-    title: '가게 심사',
-    description: '등록하신 가게 정보를 검토합니다.',
-    status: 'pending',
-    action: '심사 대기',
-    modal: null,
-  },
-  {
-    id: 3,
     title: '등록 완료',
     description: '픽마에서 가게를 운영하고 고객을 만나 보세요!',
     status: 'pending',

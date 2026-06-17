@@ -8,7 +8,6 @@ import { useCreateStore } from '@/hooks/stores/useCreateStore';
 
 const INITIAL_STORE_STATE: StoreStepState = {
   storeInfoSubmitted: false,
-  reviewStatus: 'pending',
   storeStatus: 'waiting',
 };
 
@@ -39,7 +38,6 @@ export function useStoreRegister(businessNumber: string) {
         onSuccess: () => {
           setStoreState({
             storeInfoSubmitted: true,
-            reviewStatus: 'completed',
             storeStatus: 'approved',
           });
         },

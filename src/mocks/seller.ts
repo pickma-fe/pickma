@@ -204,7 +204,6 @@ export const mockSellerOrderDetail: OrderDetailResponse = {
 
 type ReviewStatus = 'pending' | 'reviewing' | 'completed';
 type CertificationStatus = 'waiting' | 'approved' | 'rejected';
-type StoreReviewStatus = 'pending' | 'reviewing' | 'completed';
 type StoreStatus = 'waiting' | 'approved' | 'rejected';
 
 export interface MockAuthStepState {
@@ -218,7 +217,6 @@ export interface MockAuthStepState {
 
 export interface MockStoreStepState {
   storeInfoSubmitted: boolean;
-  reviewStatus: StoreReviewStatus;
   storeStatus: StoreStatus;
 }
 
@@ -233,7 +231,6 @@ export const mockSellerAuthState: MockAuthStepState = {
 
 export const mockStoreRegisterState: MockStoreStepState = {
   storeInfoSubmitted: false,
-  reviewStatus: 'pending',
   storeStatus: 'waiting',
 };
 
@@ -266,7 +263,6 @@ export const mockSellerAuthReviewing: MockAuthStepState = {
 
 export const mockStoreRegisterCompleted: MockStoreStepState = {
   storeInfoSubmitted: true,
-  reviewStatus: 'completed',
   storeStatus: 'approved',
 };
 
