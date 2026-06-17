@@ -114,14 +114,16 @@ export function ProductRegistrationModal({
 
         <div className="grid grid-cols-2 gap-4">
           <Input
-            label="판매가 (원) *"
+            label="판매가 (원)"
+            required
             type="number"
             placeholder="0"
             {...register('discountPrice')}
             error={errors.discountPrice?.message}
           />
           <Input
-            label="재고 (개) *"
+            label="재고 (개)"
+            required
             type="number"
             placeholder="0"
             {...register('stock')}

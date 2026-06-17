@@ -120,7 +120,8 @@ export function ProductEditForm({
 
         <div className="grid grid-cols-2 gap-4 pt-2">
           <Input
-            label="판매가 (원) *"
+            label="판매가 (원)"
+            required
             type="number"
             placeholder="0"
             {...register('discountPrice')}
@@ -128,7 +129,8 @@ export function ProductEditForm({
             disabled={isPending}
           />
           <Input
-            label="재고 (개) *"
+            label="재고 (개)"
+            required
             type="number"
             placeholder="0"
             {...register('stock')}

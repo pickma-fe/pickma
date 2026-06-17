@@ -135,7 +135,8 @@ export function MenuForm({ initialData, isEdit = false }: MenuFormProps) {
           </h2>
           <div className="flex flex-col gap-4">
             <Input
-              label="메뉴명 *"
+              label="메뉴명"
+              required
               placeholder="메뉴명을 입력해주세요"
               {...register('name')}
               error={errors.name?.message}
@@ -173,7 +174,8 @@ export function MenuForm({ initialData, isEdit = false }: MenuFormProps) {
             </div>
 
             <Input
-              label="가격 *"
+              label="가격"
+              required
               type="number"
               placeholder="가격을 입력해주세요"
               {...register('originalPrice')}

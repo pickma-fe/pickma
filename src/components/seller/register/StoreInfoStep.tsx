@@ -194,7 +194,8 @@ export function StoreInfoStep({
         {fields.map((field) => (
           <Input
             key={field.key}
-            label={`${field.label}${field.required ? ' *' : ''}`}
+            label={field.label}
+            required={field.required}
             value={info[field.key]}
             onChange={handleChange(field.key)}
             placeholder={`${field.label}을 입력해주세요`}
@@ -206,7 +207,8 @@ export function StoreInfoStep({
           <div className="flex items-start gap-2">
             <div className="flex-1">
               <Input
-                label="가게 주소 *"
+                label="가게 주소"
+                required
                 value={info.address}
                 readOnly
                 placeholder="주소 검색 버튼을 눌러주세요"
