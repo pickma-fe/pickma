@@ -68,8 +68,11 @@ describe('AdminTable', () => {
       />
     );
 
-    expect(
-      screen.getByText('표가 길면 좌우로 스크롤해서 내용을 확인할 수 있습니다.')
-    ).toBeInTheDocument();
+    const mobileHint = screen.getByText(
+      '표가 길면 좌우로 스크롤해서 내용을 확인할 수 있습니다.'
+    );
+
+    expect(mobileHint).toBeInTheDocument();
+    expect(mobileHint).toHaveClass('sm:hidden');
   });
 });
