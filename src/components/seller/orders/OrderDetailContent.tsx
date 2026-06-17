@@ -14,6 +14,7 @@ import { useState } from 'react';
 
 import type { Order, OrderStatus } from '@/types/order';
 import { useAcceptSellerOrder } from '@/hooks/seller/orders/useAcceptSellerOrder';
+import { useCancelSellerOrder } from '@/hooks/seller/orders/useCancelSellerOrder';
 import { useCompleteSellerOrder } from '@/hooks/seller/orders/useCompleteSellerOrder';
 import { useMarkSellerOrderReady } from '@/hooks/seller/orders/useMarkSellerOrderReady';
 import { useNoShowSellerOrder } from '@/hooks/seller/orders/useNoShowSellerOrder';
@@ -21,6 +22,9 @@ import { useSellerOrder } from '@/hooks/seller/orders/useSellerOrder';
 import { Badge } from '@/components/common/Badge/Badge';
 import { Button } from '@/components/common/Button/Button';
 import { Section } from '@/components/common/Section/Section';
+
+import { OrderCancelModal } from './OrderCancelModal';
+import { OrderCompleteConfirmModal } from './OrderCompleteConfirmModal';
 
 interface OrderDetailContentProps {
   orderId: string;
@@ -85,6 +89,7 @@ interface ActionButtonsProps {
   onAccept: () => void;
   onReady: () => void;
   onComplete: () => void;
+  onCancel: () => void;
   onNoShow: () => void;
 }
 
@@ -94,6 +99,7 @@ function ActionButtons({
   onAccept,
   onReady,
   onComplete,
+  onCancel,
   onNoShow,
 }: ActionButtonsProps) {
   switch (order.status) {
@@ -106,8 +112,8 @@ function ActionButtons({
           <Button
             variant="outline"
             color="danger"
-            disabled
-            title="주문 취소 기능은 준비 중입니다."
+            onClick={onCancel}
+            disabled={isPending}
             className="flex-1"
           >
             주문 취소
@@ -123,8 +129,8 @@ function ActionButtons({
           <Button
             variant="outline"
             color="danger"
-            disabled
-            title="주문 취소 기능은 준비 중입니다."
+            onClick={onCancel}
+            disabled={isPending}
             className="flex-1"
           >
             주문 취소
@@ -194,16 +200,23 @@ export function OrderDetailContent({ orderId }: OrderDetailContentProps) {
 
   const [actionError, setActionError] = useState<string | null>(null);
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
+  const [cancelModalOpen, setCancelModalOpen] = useState(false);
+  const [cancelErrorMessage, setCancelErrorMessage] = useState<string | null>(
+    null
+  );
+  const [completeModalOpen, setCompleteModalOpen] = useState(false);
 
   const acceptOrder = useAcceptSellerOrder();
   const markOrderReady = useMarkSellerOrderReady();
   const completeOrder = useCompleteSellerOrder();
+  const cancelOrder = useCancelSellerOrder();
   const noShowOrder = useNoShowSellerOrder();
 
   const isPending =
     acceptOrder.isPending ||
     markOrderReady.isPending ||
     completeOrder.isPending ||
+    cancelOrder.isPending ||
     noShowOrder.isPending;
 
   const handleAction = (
@@ -221,6 +234,37 @@ export function OrderDetailContent({ orderId }: OrderDetailContentProps) {
         setActionSuccess(`${successLabel} 처리가 완료되었습니다.`),
       onError: () =>
         setActionError(`${errorLabel} 처리에 실패했습니다. 다시 시도해주세요.`),
+    });
+  };
+
+  const handleCancelConfirm = (reason: string) => {
+    cancelOrder.mutate(
+      { id: orderId, reason },
+      {
+        onSuccess: () => {
+          setCancelModalOpen(false);
+          setCancelErrorMessage(null);
+          setActionSuccess('주문 취소 처리가 완료되었습니다.');
+        },
+        onError: () => {
+          setCancelErrorMessage(
+            '주문 취소 처리에 실패했습니다. 다시 시도해주세요.'
+          );
+        },
+      }
+    );
+  };
+
+  const handleCompleteConfirm = () => {
+    completeOrder.mutate(orderId, {
+      onSuccess: () => {
+        setCompleteModalOpen(false);
+        setActionSuccess('픽업 완료 처리가 완료되었습니다.');
+      },
+      onError: () => {
+        setCompleteModalOpen(false);
+        setActionError('픽업 완료 처리에 실패했습니다. 다시 시도해주세요.');
+      },
     });
   };
 
@@ -323,13 +367,11 @@ export function OrderDetailContent({ orderId }: OrderDetailContentProps) {
                     '준비 완료'
                   )
                 }
-                onComplete={() =>
-                  handleAction(
-                    (id, cb) => completeOrder.mutate(id, cb),
-                    '픽업 완료',
-                    '픽업 완료'
-                  )
-                }
+                onComplete={() => setCompleteModalOpen(true)}
+                onCancel={() => {
+                  setCancelErrorMessage(null);
+                  setCancelModalOpen(true);
+                }}
                 onNoShow={() =>
                   handleAction(
                     (id, cb) => noShowOrder.mutate(id, cb),
@@ -473,6 +515,27 @@ export function OrderDetailContent({ orderId }: OrderDetailContentProps) {
           </Section>
         </div>
       </div>
+
+      <OrderCancelModal
+        isOpen={cancelModalOpen}
+        isSubmitting={cancelOrder.isPending}
+        errorMessage={cancelErrorMessage}
+        onClose={() => {
+          setCancelModalOpen(false);
+          setCancelErrorMessage(null);
+        }}
+        onConfirm={handleCancelConfirm}
+      />
+
+      <OrderCompleteConfirmModal
+        isOpen={completeModalOpen}
+        isSubmitting={completeOrder.isPending}
+        orderNumber={order.orderNumber}
+        pickupNumber={order.pickupNumber ?? null}
+        storeOrderNumber={order.storeOrderNumber ?? null}
+        onClose={() => setCompleteModalOpen(false)}
+        onConfirm={handleCompleteConfirm}
+      />
     </div>
   );
 }

@@ -19,6 +19,7 @@ interface OrderTableProps {
   totalPages: number;
   onPageChange: (page: number) => void;
   onOrderAction: (orderId: string, newStatus: SellerOrderActionStatus) => void;
+  onCancelRequest: (orderId: string) => void;
   isLoading?: boolean;
   isError?: boolean;
   isActionPending?: boolean;
@@ -69,11 +70,13 @@ function isSellerDisplayStatus(
 function OrderActionButtons({
   order,
   onOrderAction,
+  onCancelRequest,
   onDetail,
   isActionPending,
 }: {
   order: SellerOrderListItem;
   onOrderAction: (orderId: string, newStatus: SellerOrderActionStatus) => void;
+  onCancelRequest: (orderId: string) => void;
   onDetail: () => void;
   isActionPending: boolean;
 }) {
@@ -92,8 +95,8 @@ function OrderActionButtons({
             className="w-fit px-2 py-0.5 text-sm"
             variant="outline"
             color="danger"
-            disabled
-            title="주문 취소 기능은 준비 중입니다."
+            onClick={() => onCancelRequest(order.id)}
+            disabled={isActionPending}
           >
             주문 취소
           </Button>
@@ -120,8 +123,8 @@ function OrderActionButtons({
             className="w-fit px-2 py-0.5 text-sm"
             variant="outline"
             color="danger"
-            disabled
-            title="주문 취소 기능은 준비 중입니다."
+            onClick={() => onCancelRequest(order.id)}
+            disabled={isActionPending}
           >
             주문 취소
           </Button>
@@ -177,6 +180,7 @@ export function OrderTable({
   totalPages,
   onPageChange,
   onOrderAction,
+  onCancelRequest,
   isLoading = false,
   isError = false,
   isActionPending = false,
@@ -340,6 +344,7 @@ export function OrderTable({
                       <OrderActionButtons
                         order={order}
                         onOrderAction={onOrderAction}
+                        onCancelRequest={onCancelRequest}
                         onDetail={() =>
                           router.push(`/seller/orders/${order.id}`)
                         }

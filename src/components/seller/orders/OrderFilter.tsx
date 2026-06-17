@@ -40,6 +40,7 @@ export function OrderFilter({
       />
       <div className="min-w-[200px] flex-1">
         <Input
+          aria-label="주문번호 검색"
           placeholder="주문번호를 검색하세요"
           value={searchKeyword}
           onChange={(e) => onSearchChange(e.target.value)}
