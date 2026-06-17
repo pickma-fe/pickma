@@ -111,7 +111,7 @@ export function AdminStoresPageContent() {
       ) : (
         <AdminStoreTable
           stores={stores}
-          isLoading={isLoading}
+          isLoading={isLoading || isFetching}
           currentPage={data?.page ?? page}
           totalPages={data?.totalPages ?? 0}
           onPageChange={setPage}

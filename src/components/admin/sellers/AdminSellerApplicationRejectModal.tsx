@@ -59,6 +59,10 @@ export function AdminSellerApplicationRejectModal({
           </div>
           <label htmlFor="reject-reason" className="block">
             <span className="text-sm font-medium text-gray-700">거절 사유</span>
+            <span className="mt-1 block text-xs text-gray-500">
+              판매자에게 전달될 안내 문구입니다. 사유와 다음 조치가 드러나게
+              작성해 주세요.
+            </span>
             <textarea
               id="reject-reason"
               value={reason}
@@ -69,6 +73,8 @@ export function AdminSellerApplicationRejectModal({
               rows={5}
               className="focus:border-primary-500 focus:ring-primary-300 mt-2 w-full resize-none rounded-md border border-gray-200 px-3 py-2 text-sm outline-none focus:ring-2"
               placeholder="판매자에게 안내할 거절 사유를 입력해주세요."
+              required
+              minLength={5}
               aria-invalid={Boolean(error)}
               aria-describedby={error ? 'reject-reason-error' : undefined}
             />
@@ -82,17 +88,23 @@ export function AdminSellerApplicationRejectModal({
               {error}
             </p>
           )}
-          <div className="flex justify-end gap-2">
+          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
             <Button
               type="button"
               variant="outline"
               color="gray"
+              className="h-11 px-4"
               onClick={handleClose}
               disabled={isSubmitting}
             >
               취소
             </Button>
-            <Button type="submit" color="danger" disabled={isSubmitting}>
+            <Button
+              type="submit"
+              color="danger"
+              className="h-11 px-4"
+              disabled={isSubmitting}
+            >
               거절 확정
             </Button>
           </div>
