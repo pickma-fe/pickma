@@ -280,7 +280,7 @@ export function OrderManageContent() {
         </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-7">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7">
         {STAT_CARDS.map((card) => {
           const Icon = card.icon;
           const isSelected = selectedStatus === card.value;
@@ -316,6 +316,7 @@ export function OrderManageContent() {
                         <>
                           {count}
                           <span className="text-base font-normal text-gray-500">
+                            {' '}
                             건
                           </span>
                         </>
@@ -354,9 +355,7 @@ export function OrderManageContent() {
       )}
 
       <OrderFilter
-        selectedStatus={selectedStatus}
         searchKeyword={searchKeyword}
-        onStatusChange={handleStatusChange}
         onSearchChange={handleSearchChange}
       />
 
