@@ -157,7 +157,8 @@ export function BusinessInfoStep({
         {fields.map((field) => (
           <Input
             key={field.key}
-            label={`${field.label}${field.required ? ' *' : ''}`}
+            label={field.label}
+            required={field.required}
             value={info[field.key]}
             onChange={handleChange(field.key)}
             placeholder={`${field.label}을 입력해주세요`}
