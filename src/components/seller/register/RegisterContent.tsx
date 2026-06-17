@@ -143,23 +143,17 @@ export function RegisterContent() {
             픽마 파트너센터 이용 가이드를 확인해보세요.
           </p>
         </div>
-        <div className="flex w-full gap-2 sm:w-auto">
+        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
           <Link
             href="/support/inquiry"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex-1 sm:flex-none"
           >
             <Button variant="outline" color="gray" className="w-full sm:w-auto">
               1:1 문의하기
             </Button>
           </Link>
-          <Link
-            href="/support"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex-1 sm:flex-none"
-          >
+          <Link href="/support" target="_blank" rel="noopener noreferrer">
             <Button className="w-full sm:w-auto">고객센터</Button>
           </Link>
         </div>
