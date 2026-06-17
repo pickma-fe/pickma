@@ -38,7 +38,7 @@ export function OrderFilter({
         onChange={onStatusChange}
         placeholder="전체"
       />
-      <div className="min-w-[200px] flex-1">
+      <div className="min-w-50 flex-1">
         <Input
           aria-label="주문번호 검색"
           placeholder="주문번호를 검색하세요"

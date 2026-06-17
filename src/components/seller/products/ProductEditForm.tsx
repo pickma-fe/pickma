@@ -91,7 +91,7 @@ export function ProductEditForm({
         </legend>
         <div className="flex items-center gap-4 pt-2">
           {product.image && (
-            <div className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100">
+            <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-gray-100">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={product.image}

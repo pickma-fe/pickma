@@ -189,7 +189,7 @@ export function OrderTable({
 
   if (isLoading) {
     return (
-      <div className="flex min-h-[300px] items-center justify-center rounded-lg border border-gray-200 bg-white">
+      <div className="flex min-h-75 items-center justify-center rounded-lg border border-gray-200 bg-white">
         <p className="text-sm text-gray-500">주문 목록을 불러오는 중...</p>
       </div>
     );
@@ -197,7 +197,7 @@ export function OrderTable({
 
   if (isError) {
     return (
-      <div className="flex min-h-[300px] items-center justify-center rounded-lg border border-gray-200 bg-white">
+      <div className="flex min-h-75 items-center justify-center rounded-lg border border-gray-200 bg-white">
         <div className="text-center">
           <p className="text-sm text-gray-500">
             주문 목록을 불러오지 못했습니다.
@@ -210,7 +210,7 @@ export function OrderTable({
 
   if (orders.length === 0 && totalPages === 0) {
     return (
-      <div className="flex min-h-[300px] items-center justify-center rounded-lg border border-gray-200 bg-white">
+      <div className="flex min-h-75 items-center justify-center rounded-lg border border-gray-200 bg-white">
         <div className="text-center">
           <p className="text-sm text-gray-500">주문 내역이 없습니다.</p>
           <p className="text-xs text-gray-400">아직 접수된 주문이 없습니다.</p>
@@ -286,7 +286,7 @@ export function OrderTable({
                   >
                     <td className="px-4 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100">
+                        <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-gray-100">
                           <div className="flex h-full w-full items-center justify-center text-gray-400">
                             🛍️
                           </div>

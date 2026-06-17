@@ -174,7 +174,7 @@ interface InfoRowProps {
 function InfoRow({ icon, label, value }: InfoRowProps) {
   return (
     <div className="flex items-start gap-2">
-      <dt className="mt-0.5 flex min-w-[90px] items-center gap-1.5 text-xs text-gray-400">
+      <dt className="mt-0.5 flex min-w-22.5 items-center gap-1.5 text-xs text-gray-400">
         <span className="text-gray-400">{icon}</span>
         {label}
       </dt>
@@ -270,7 +270,7 @@ export function OrderDetailContent({ orderId }: OrderDetailContentProps) {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-[400px] items-center justify-center">
+      <div className="flex min-h-100 items-center justify-center">
         <p className="text-sm text-gray-500">주문 정보를 불러오는 중...</p>
       </div>
     );
@@ -280,7 +280,7 @@ export function OrderDetailContent({ orderId }: OrderDetailContentProps) {
     return (
       <div className="flex flex-col gap-6">
         <BackButton />
-        <div className="flex min-h-[400px] flex-col items-center justify-center gap-2">
+        <div className="flex min-h-100 flex-col items-center justify-center gap-2">
           <AlertCircle className="h-8 w-8 text-gray-400" />
           <p className="text-sm text-gray-500">
             주문 정보를 불러오지 못했습니다.
@@ -318,7 +318,7 @@ export function OrderDetailContent({ orderId }: OrderDetailContentProps) {
           aria-live="polite"
           className="flex items-center gap-2 rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700"
         >
-          <CheckCircle className="h-4 w-4 flex-shrink-0" />
+          <CheckCircle className="h-4 w-4 shrink-0" />
           {actionSuccess}
         </div>
       )}
@@ -328,7 +328,7 @@ export function OrderDetailContent({ orderId }: OrderDetailContentProps) {
           aria-live="assertive"
           className="flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
         >
-          <AlertCircle className="h-4 w-4 flex-shrink-0" />
+          <AlertCircle className="h-4 w-4 shrink-0" />
           {actionError}
         </div>
       )}
@@ -398,7 +398,7 @@ export function OrderDetailContent({ orderId }: OrderDetailContentProps) {
                       className="flex items-center justify-between gap-4 py-3 first:pt-0 last:pb-0"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg bg-gray-100 text-xl">
+                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-xl">
                           🛍️
                         </div>
                         <div>

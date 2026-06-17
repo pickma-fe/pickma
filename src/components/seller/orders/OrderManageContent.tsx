@@ -338,7 +338,7 @@ export function OrderManageContent() {
           aria-live="polite"
           className="flex items-center gap-2 rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700"
         >
-          <CheckCircle className="h-4 w-4 flex-shrink-0" />
+          <CheckCircle className="h-4 w-4 shrink-0" />
           {actionSuccess}
         </div>
       )}
@@ -348,7 +348,7 @@ export function OrderManageContent() {
           aria-live="assertive"
           className="flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
         >
-          <AlertCircle className="h-4 w-4 flex-shrink-0" />
+          <AlertCircle className="h-4 w-4 shrink-0" />
           {actionError}
         </div>
       )}

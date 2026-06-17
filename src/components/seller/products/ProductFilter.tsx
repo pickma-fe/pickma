@@ -78,7 +78,7 @@ export function ProductFilter({
           placeholder="전체 카테고리"
         />
 
-        <div className="min-w-[200px] flex-1">
+        <div className="min-w-50 flex-1">
           <Input
             aria-label="상품명 검색"
             placeholder="상품명을 검색하세요"

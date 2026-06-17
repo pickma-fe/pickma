@@ -84,7 +84,7 @@ export function AuthStepList({ state, onActionClick }: AuthStepListProps) {
             <div className="flex items-center gap-3">
               <div
                 className={cn(
-                  'flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-xs font-semibold',
+                  'flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold',
                   getStepCircleClass(status)
                 )}
               >
@@ -100,7 +100,7 @@ export function AuthStepList({ state, onActionClick }: AuthStepListProps) {
                 </p>
                 <p
                   className={cn(
-                    'text-xs break-words',
+                    'text-xs wrap-break-word',
                     step.id === 5 && state.certificationStatus === 'rejected'
                       ? 'text-red-500'
                       : 'text-gray-400'

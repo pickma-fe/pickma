@@ -74,7 +74,7 @@ export function MenuTable({
 
   if (menus.length === 0) {
     return (
-      <div className="flex min-h-[300px] items-center justify-center rounded-lg border border-gray-200 bg-white">
+      <div className="flex min-h-75 items-center justify-center rounded-lg border border-gray-200 bg-white">
         <div className="text-center">
           <p className="text-sm text-gray-500">등록된 메뉴가 없습니다.</p>
           <p className="text-xs text-gray-400">

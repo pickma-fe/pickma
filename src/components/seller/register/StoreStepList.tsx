@@ -73,7 +73,7 @@ export function StoreStepList({
             <div className="flex items-center gap-3">
               <div
                 className={cn(
-                  'flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-xs font-semibold',
+                  'flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold',
                   getStepCircleClass(status)
                 )}
               >
@@ -87,7 +87,7 @@ export function StoreStepList({
                 <p className="text-sm font-medium text-gray-900">
                   {step.title}
                 </p>
-                <p className="text-xs break-words text-gray-400">
+                <p className="text-xs wrap-break-word text-gray-400">
                   {step.description}
                 </p>
               </div>
