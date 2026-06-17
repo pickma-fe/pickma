@@ -102,7 +102,10 @@ export default function SellerLayout({
                 {
                   label: '로그아웃',
                   type: 'action',
-                  onClick: () => signOut(),
+                  onClick: () =>
+                    signOut(undefined, {
+                      onSuccess: () => router.push('/seller'),
+                    }),
                   className: 'text-red-500',
                 },
               ]
