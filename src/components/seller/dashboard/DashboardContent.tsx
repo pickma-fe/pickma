@@ -13,6 +13,8 @@ import Link from 'next/link';
 import { useSellerOrders } from '@/hooks/seller/orders/useSellerOrders';
 import { Section } from '@/components/common/Section/Section';
 
+import { SalesDashboard } from './SalesDashboard';
+
 const TODAY_PAGE_SIZE = 100;
 
 function getTodayRange(): { start: Date; end: Date } {
@@ -204,6 +206,11 @@ export function DashboardContent() {
           ))}
         </div>
       </Section>
+
+      <div className="flex flex-col gap-2">
+        <h2 className="text-base font-semibold text-gray-900">매출 통계</h2>
+        <SalesDashboard />
+      </div>
     </div>
   );
 }
