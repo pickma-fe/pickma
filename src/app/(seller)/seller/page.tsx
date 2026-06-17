@@ -254,7 +254,7 @@ function ApprovedNoStoreCTA() {
         </div>
       </div>
       <div className="space-y-3">
-        <Link href="/seller/store" className="block">
+        <Link href="/seller/store/edit" className="block">
           <Button className="w-full" variant="filled" color="primary">
             가게 등록하러 가기
             <ChevronRight className="ml-1 h-4 w-4" />

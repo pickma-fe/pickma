@@ -8,7 +8,8 @@ import { Button } from '@/components/common/Button/Button';
 import { Input } from '@/components/common/Input/Input';
 
 interface StoreEditFormProps {
-  storeInfo: MyStore;
+  storeInfo?: MyStore;
+  businessNumber?: string;
   onSubmit: (data: StoreEditData) => void;
   onCancel: () => void;
   isPending?: boolean;
@@ -29,21 +30,22 @@ export interface StoreEditData {
 
 export function StoreEditForm({
   storeInfo,
+  businessNumber,
   onSubmit,
   onCancel,
   isPending = false,
 }: StoreEditFormProps) {
   const [formData, setFormData] = useState<StoreEditData>({
-    name: storeInfo.name,
-    phone: storeInfo.phone,
-    address: storeInfo.address,
-    addressDetail: storeInfo.addressDetail ?? '',
-    region: storeInfo.region,
-    latitude: storeInfo.latitude,
-    longitude: storeInfo.longitude,
-    description: storeInfo.description ?? '',
-    openTime: storeInfo.openTime?.slice(0, 5) ?? '09:00',
-    closeTime: storeInfo.closeTime?.slice(0, 5) ?? '22:00',
+    name: storeInfo?.name ?? '',
+    phone: storeInfo?.phone ?? '',
+    address: storeInfo?.address ?? '',
+    addressDetail: storeInfo?.addressDetail ?? '',
+    region: storeInfo?.region ?? '',
+    latitude: storeInfo?.latitude,
+    longitude: storeInfo?.longitude,
+    description: storeInfo?.description ?? '',
+    openTime: storeInfo?.openTime?.slice(0, 5) ?? '09:00',
+    closeTime: storeInfo?.closeTime?.slice(0, 5) ?? '22:00',
   });
   const [error, setError] = useState<string | null>(null);
 
@@ -105,7 +107,7 @@ export function StoreEditForm({
 
         <Input
           label="사업자등록번호"
-          value={storeInfo.businessNumber}
+          value={storeInfo?.businessNumber ?? businessNumber ?? ''}
           disabled
         />
 

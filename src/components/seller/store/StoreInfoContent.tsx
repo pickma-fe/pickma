@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 import type { SellerApplicationDocument } from '@/types/seller-application';
 import { useMySellerApplication } from '@/hooks/seller/applications/useMySellerApplication';
@@ -24,8 +25,15 @@ import { StoreImageSection } from './StoreImageSection';
 type ModalType = 'editStore' | 'editImage' | 'viewCertification' | null;
 
 export function StoreInfoContent() {
+  const router = useRouter();
   const { data: storeInfo, isLoading, isError } = useMyStore();
   const { mutate: updateStore, isPending: isUpdating } = useUpdateStore();
+
+  useEffect(() => {
+    if (!isLoading && !storeInfo) {
+      router.replace('/seller/store/edit');
+    }
+  }, [isLoading, storeInfo, router]);
   const {
     data: application,
     isLoading: isApplicationLoading,

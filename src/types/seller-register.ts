@@ -18,13 +18,4 @@ export interface StoreStepState {
   storeStatus: StoreRegisterApprovalStatus;
 }
 
-export type ModalType = 'terms' | 'business' | 'document' | 'storeInfo' | null;
-
-export interface StoreStep {
-  id: number;
-  title: string;
-  description: string;
-  status: 'done' | 'active' | 'pending';
-  action: string;
-  modal: ModalType;
-}
+export type ModalType = 'terms' | 'business' | 'document' | null;

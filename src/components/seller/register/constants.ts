@@ -1,7 +1,6 @@
 import type {
   ReviewStatus,
   CertificationStatus,
-  StoreStep,
 } from '@/types/seller-register';
 
 export const REVIEW_STATUS_TEXT: Record<ReviewStatus, string> = {
@@ -27,22 +26,3 @@ export const CERTIFICATION_STATUS_COLOR: Record<CertificationStatus, string> = {
   approved: 'bg-green-100 text-green-700',
   rejected: 'bg-red-100 text-red-700',
 };
-
-export const STORE_STEPS: StoreStep[] = [
-  {
-    id: 1,
-    title: '기본 정보 입력',
-    description: '가게 기본 정보를 입력해주세요.',
-    status: 'pending',
-    action: '입력하기',
-    modal: 'storeInfo',
-  },
-  {
-    id: 2,
-    title: '등록 완료',
-    description: '픽마에서 가게를 운영하고 고객을 만나 보세요!',
-    status: 'pending',
-    action: '대기',
-    modal: null,
-  },
-];
