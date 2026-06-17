@@ -320,7 +320,8 @@ export default function SellerPage() {
     );
   }
 
-  const { applicationStatus, hasStore, latestRejectReason } = onboardingStatus;
+  const { role, applicationStatus, hasStore, latestRejectReason } =
+    onboardingStatus;
 
   if (applicationStatus === 'approved' && hasStore) {
     return <ApprovedWithStoreCTA />;
@@ -336,6 +337,10 @@ export default function SellerPage() {
 
   if (applicationStatus === 'rejected') {
     return <RejectedCTA rejectReason={latestRejectReason} />;
+  }
+
+  if (role === 'seller') {
+    return hasStore ? <ApprovedWithStoreCTA /> : <ApprovedNoStoreCTA />;
   }
 
   return <NotAppliedCTA />;
