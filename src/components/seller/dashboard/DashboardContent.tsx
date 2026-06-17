@@ -169,6 +169,7 @@ export function DashboardContent() {
                           <>
                             {count}
                             <span className="text-base font-normal text-gray-500">
+                              {' '}
                               건
                             </span>
                           </>
