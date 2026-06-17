@@ -1,11 +1,13 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ERROR_CODE } from '@/lib/errors/errorCodes';
 import { createServerClient } from '@/lib/supabase/server';
 import { createServiceRoleClient } from '@/lib/supabase/service';
+import { callTossCancel } from '@/app/api/_lib/toss-cancel';
 
 import {
   acceptSellerOrder,
+  cancelSellerOrder,
   completeSellerOrder,
   getSellerOrder,
   getSellerOrderSummary,
@@ -15,6 +17,9 @@ import {
 
 vi.mock('@/lib/supabase/service');
 vi.mock('@/lib/supabase/server');
+vi.mock('@/app/api/_lib/toss-cancel', () => ({
+  callTossCancel: vi.fn(),
+}));
 
 const STORE_ID = '00000000-0000-4000-8000-000000000031';
 const ORDER_ID = '00000000-0000-4000-8000-000000000051';
@@ -370,5 +375,180 @@ describe('completeSellerOrder', () => {
         code: ERROR_CODE.INVALID_ORDER_STATUS,
       }
     );
+  });
+});
+
+const PAYMENT_ID = '00000000-0000-4000-8000-000000000061';
+const PAYMENT_KEY = 'test-payment-key';
+const CANCEL_REASON = '판매자 사정으로 취소합니다';
+
+const cancelOrderRow = {
+  id: ORDER_ID,
+  order_number: 'PM20260519AAAA',
+  store_id: STORE_ID,
+  status: 'reserved',
+  payment_amount: 8000,
+  cancel_claimed_status: null,
+  payments: [{ id: PAYMENT_ID, payment_key: PAYMENT_KEY, status: 'paid' }],
+};
+
+function buildCancelChain(
+  results: Array<{ data?: unknown; error?: object | null }>
+) {
+  const chains = results.map((result) => {
+    const chain: Record<string, ReturnType<typeof vi.fn>> = {
+      select: vi.fn(),
+      update: vi.fn(),
+      insert: vi.fn().mockResolvedValue({ error: null }),
+      eq: vi.fn(),
+      maybeSingle: vi.fn().mockResolvedValue(result),
+      then: vi.fn(
+        (
+          onFulfilled?: (v: typeof result) => unknown,
+          onRejected?: (r: unknown) => unknown
+        ) => Promise.resolve(result).then(onFulfilled, onRejected)
+      ),
+    };
+    chain.select.mockReturnValue(chain);
+    chain.update.mockReturnValue(chain);
+    chain.eq.mockReturnValue(chain);
+    return chain;
+  });
+
+  let callIndex = 0;
+  const client = {
+    from: vi.fn(() => chains[callIndex++] ?? chains[chains.length - 1]),
+    rpc: vi.fn(),
+  };
+  return { client, chains };
+}
+
+describe('cancelSellerOrder', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.stubEnv('PAYMENT_MOCK', 'true');
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it('PAYMENT_MOCK=true에서 reserved → cancelling claim 후 cancel_order RPC를 호출한다', async () => {
+    const { client, chains } = buildCancelChain([
+      { data: cancelOrderRow, error: null },
+      { data: [{ id: ORDER_ID }], error: null },
+    ]);
+    client.rpc.mockResolvedValue({ error: null });
+    mockServiceClient(client);
+
+    await expect(
+      cancelSellerOrder(STORE_ID, ORDER_ID, CANCEL_REASON)
+    ).resolves.toBeUndefined();
+
+    expect(chains[1].update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        status: 'cancelling',
+        cancel_claimed_status: 'reserved',
+      })
+    );
+    expect(chains[1].eq).toHaveBeenCalledWith('status', 'reserved');
+    expect(client.rpc).toHaveBeenCalledWith('cancel_order', {
+      p_order_id: ORDER_ID,
+      p_reason: CANCEL_REASON,
+    });
+  });
+
+  it('accepted 상태에서도 정상 취소된다', async () => {
+    const acceptedRow = { ...cancelOrderRow, status: 'accepted' };
+    const { client, chains } = buildCancelChain([
+      { data: acceptedRow, error: null },
+      { data: [{ id: ORDER_ID }], error: null },
+    ]);
+    client.rpc.mockResolvedValue({ error: null });
+    mockServiceClient(client);
+
+    await expect(
+      cancelSellerOrder(STORE_ID, ORDER_ID, CANCEL_REASON)
+    ).resolves.toBeUndefined();
+
+    expect(chains[1].eq).toHaveBeenCalledWith('status', 'accepted');
+  });
+
+  it('주문이 없으면 ORDER_NOT_FOUND를 던진다', async () => {
+    const { client } = buildCancelChain([{ data: null, error: null }]);
+    mockServiceClient(client);
+
+    await expect(
+      cancelSellerOrder(STORE_ID, ORDER_ID, CANCEL_REASON)
+    ).rejects.toMatchObject({ code: ERROR_CODE.ORDER_NOT_FOUND });
+  });
+
+  it('payment row가 없으면 INVALID_ORDER_STATUS를 던진다', async () => {
+    const noPaymentRow = { ...cancelOrderRow, payments: [] };
+    const { client } = buildCancelChain([{ data: noPaymentRow, error: null }]);
+    mockServiceClient(client);
+
+    await expect(
+      cancelSellerOrder(STORE_ID, ORDER_ID, CANCEL_REASON)
+    ).rejects.toMatchObject({ code: ERROR_CODE.INVALID_ORDER_STATUS });
+  });
+
+  it('payment.status가 paid가 아니면 INVALID_ORDER_STATUS를 던진다', async () => {
+    const refundedPaymentRow = {
+      ...cancelOrderRow,
+      payments: [
+        { id: PAYMENT_ID, payment_key: PAYMENT_KEY, status: 'cancelled' },
+      ],
+    };
+    const { client } = buildCancelChain([
+      { data: refundedPaymentRow, error: null },
+    ]);
+    mockServiceClient(client);
+
+    await expect(
+      cancelSellerOrder(STORE_ID, ORDER_ID, CANCEL_REASON)
+    ).rejects.toMatchObject({ code: ERROR_CODE.INVALID_ORDER_STATUS });
+  });
+
+  it('ready 상태이면 INVALID_ORDER_STATUS를 던진다', async () => {
+    const readyRow = { ...cancelOrderRow, status: 'ready' };
+    const { client } = buildCancelChain([{ data: readyRow, error: null }]);
+    mockServiceClient(client);
+
+    await expect(
+      cancelSellerOrder(STORE_ID, ORDER_ID, CANCEL_REASON)
+    ).rejects.toMatchObject({ code: ERROR_CODE.INVALID_ORDER_STATUS });
+  });
+
+  it('claim update 0건이고 주문이 없으면 ORDER_NOT_FOUND를 던진다', async () => {
+    const { client } = buildCancelChain([
+      { data: cancelOrderRow, error: null },
+      { data: [], error: null },
+      { data: null, error: null },
+    ]);
+    client.rpc.mockResolvedValue({ error: null });
+    mockServiceClient(client);
+
+    await expect(
+      cancelSellerOrder(STORE_ID, ORDER_ID, CANCEL_REASON)
+    ).rejects.toMatchObject({ code: ERROR_CODE.ORDER_NOT_FOUND });
+  });
+
+  it('Toss cancel 실패 시 PAYMENT_CANCEL_FAILED를 던진다', async () => {
+    vi.unstubAllEnvs();
+    vi.stubEnv('PAYMENT_MOCK', 'false');
+
+    const { client } = buildCancelChain([
+      { data: cancelOrderRow, error: null },
+      { data: [{ id: ORDER_ID }], error: null },
+      { data: [{ id: ORDER_ID }], error: null },
+    ]);
+    client.rpc.mockResolvedValue({ error: null });
+    mockServiceClient(client);
+    vi.mocked(callTossCancel).mockRejectedValue(new Error('toss error'));
+
+    await expect(
+      cancelSellerOrder(STORE_ID, ORDER_ID, CANCEL_REASON)
+    ).rejects.toMatchObject({ code: ERROR_CODE.PAYMENT_CANCEL_FAILED });
   });
 });
