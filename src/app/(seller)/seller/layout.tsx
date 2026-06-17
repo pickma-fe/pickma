@@ -90,6 +90,7 @@ export default function SellerLayout({
       <Header
         user={user ?? null}
         logoHref="/seller"
+        sidebarSections={sellerUser ? sellerSidebarSections : undefined}
         menuItems={
           user
             ? [

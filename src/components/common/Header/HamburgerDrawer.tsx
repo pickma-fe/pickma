@@ -9,9 +9,15 @@ import {
 import { UserIcon, X } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
 
 import type { User } from '@/types/user';
+import type {
+  SidebarSection,
+  SidebarItem,
+  SidebarChildItem,
+} from '@/components/common/Sidebar/Sidebar.types';
 
 export type HeaderMenuItem =
   | {
@@ -34,6 +40,7 @@ interface HamburgerDrawerProps {
   onClose: () => void;
   user: User | null;
   menuItems: HeaderMenuItem[];
+  sidebarSections?: SidebarSection[];
 }
 
 export function HamburgerDrawer({
@@ -41,7 +48,10 @@ export function HamburgerDrawer({
   onClose,
   user,
   menuItems,
+  sidebarSections,
 }: HamburgerDrawerProps) {
+  const pathname = usePathname() ?? '';
+
   return (
     <Dialog open={isOpen} onClose={onClose} className="relative z-50">
       <DialogBackdrop
@@ -73,6 +83,25 @@ export function HamburgerDrawer({
             <X className="h-5 w-5" aria-hidden="true" />
           </button>
         </div>
+        {sidebarSections && sidebarSections.length > 0 && (
+          <>
+            <nav aria-label="판매자 내비게이션">
+              <ul className="py-2">
+                {sidebarSections.flatMap((section) =>
+                  section.items.map((item) => (
+                    <SidebarNavItem
+                      key={item.id}
+                      item={item}
+                      pathname={pathname}
+                      onClose={onClose}
+                    />
+                  ))
+                )}
+              </ul>
+            </nav>
+            <hr className="border-gray-200" />
+          </>
+        )}
         <nav aria-label="메뉴">
           <ul className="py-2">
             {menuItems.map((item) =>
@@ -107,6 +136,105 @@ export function HamburgerDrawer({
         </nav>
       </DialogPanel>
     </Dialog>
+  );
+}
+
+function SidebarNavItem({
+  item,
+  pathname,
+  onClose,
+}: {
+  item: SidebarItem;
+  pathname: string;
+  onClose: () => void;
+}) {
+  const Icon = item.icon;
+
+  if (item.children) {
+    return (
+      <li>
+        <div className="flex items-center gap-3 px-4 py-2 text-xs font-semibold tracking-wide text-gray-400 uppercase">
+          {Icon && <Icon className="h-4 w-4" aria-hidden="true" />}
+          {item.label}
+        </div>
+        <ul>
+          {item.children.map((child) => (
+            <SidebarChildNavItem
+              key={child.id}
+              item={child}
+              pathname={pathname}
+              onClose={onClose}
+            />
+          ))}
+        </ul>
+      </li>
+    );
+  }
+
+  const isActive = item.activeMatch
+    ? item.activeMatch(pathname)
+    : pathname === item.href || pathname.startsWith(`${item.href}/`);
+
+  return (
+    <li>
+      {item.href && !item.disabled ? (
+        <Link
+          href={item.href}
+          onClick={onClose}
+          aria-current={isActive ? 'page' : undefined}
+          className={`focus-visible:ring-primary-500 flex min-h-11 items-center gap-3 px-4 py-3 text-sm font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-inset ${
+            isActive
+              ? 'bg-primary-50 text-primary-700'
+              : 'text-gray-700 hover:bg-gray-50'
+          }`}
+        >
+          {Icon && <Icon className="h-4 w-4" aria-hidden="true" />}
+          {item.label}
+        </Link>
+      ) : (
+        <span className="flex min-h-11 cursor-not-allowed items-center gap-3 px-4 py-3 text-sm font-medium text-gray-400 opacity-50">
+          {Icon && <Icon className="h-4 w-4" aria-hidden="true" />}
+          {item.label}
+        </span>
+      )}
+    </li>
+  );
+}
+
+function SidebarChildNavItem({
+  item,
+  pathname,
+  onClose,
+}: {
+  item: SidebarChildItem;
+  pathname: string;
+  onClose: () => void;
+}) {
+  const isActive = item.activeMatch
+    ? item.activeMatch(pathname)
+    : pathname === item.href || pathname.startsWith(`${item.href}/`);
+
+  return (
+    <li>
+      {item.href && !item.disabled ? (
+        <Link
+          href={item.href}
+          onClick={onClose}
+          aria-current={isActive ? 'page' : undefined}
+          className={`focus-visible:ring-primary-500 flex min-h-11 items-center gap-3 py-3 pr-4 pl-10 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-inset ${
+            isActive
+              ? 'bg-primary-50 text-primary-700 font-semibold'
+              : 'font-medium text-gray-600 hover:bg-gray-50'
+          }`}
+        >
+          {item.label}
+        </Link>
+      ) : (
+        <span className="flex min-h-11 cursor-not-allowed items-center gap-3 py-3 pr-4 pl-10 text-sm font-medium text-gray-400 opacity-50">
+          {item.label}
+        </span>
+      )}
+    </li>
   );
 }
 
