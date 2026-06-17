@@ -111,7 +111,8 @@ Web Push API로 푸시 발송
 - T33 완료: Capacitor 대신 PWA 방식 확정, web/mobile adapter 분리 방향 결정됨
 - PWA standalone 모드에서 Toss 결제 팝업(`window.open`) 동작 검증은 Vercel 배포 후 실기기 확인 필요
 - 팝업이 차단되거나 동작하지 않으면 `useMobilePayment` 적용
-  (현재 탭에서 `location.href = redirectUrl`로 리다이렉트 → `/payment/success`에서 자체 라우팅)
+  (현재 탭에서 `location.href = redirectUrl`로 리다이렉트
+  → `/payment/success` 또는 `/payment/fail` 결과 페이지에서 자체 라우팅)
   - 구체적인 UX 구현 방향은 `docs/tasks/T33_native_app_payment_review.md` 참조
 - Capacitor 전환은 앱스토어 배포가 필요하다고 판단될 때 별도 재검토
 - → T33 결정 결과 상세는 `docs/tasks/T33_native_app_payment_review.md` 참조

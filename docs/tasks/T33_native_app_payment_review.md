@@ -89,14 +89,20 @@
       `PaymentSuccessClient`가 URL params(`paymentKey / orderId / amount`) 수신
       → `useConfirmPayment`로 `POST /api/payments/confirm` 호출
       → `postMessage` + `window.close()` 실행
-    - **모바일 전환 시 추가 필요 (`success/page.tsx` 변경 범위)**:
-      - `window.opener`가 없는 standalone/PWA redirect 환경에서
-        confirm 성공 시 `/order/complete`, 실패 시 `/order/fail`로 자체 라우팅 처리
-      - query invalidation: `PaymentSuccessClient` 내 TanStack Query cache invalidation
-        (`invalidateTargets.afterPaymentSuccess`) 호출 경로 보장
-      - 중복 confirm 처리: 동일 `orderNumber`로 페이지 재진입 시 중복 confirm 요청 방지
-        (서버 idempotency는 `PAYMENT_ALREADY_CONFIRMED` 409로 처리되나
-        클라이언트 레벨 guard 추가 검토 필요)
+    - **모바일 전환 시 추가 필요**:
+      - **`success/page.tsx` 변경 범위**:
+        - `window.opener`가 없는 standalone/PWA redirect 환경에서
+          confirm 성공 시 `/order/complete`, 실패 시 `/order/fail`로 자체 라우팅 처리
+        - query invalidation: `PaymentSuccessClient` 내 TanStack Query cache invalidation
+          (`invalidateTargets.afterPaymentSuccess`) 호출 경로 보장
+        - 중복 confirm 처리: 동일 `orderNumber`로 페이지 재진입 시 중복 confirm 요청 방지
+          (서버 idempotency는 `PAYMENT_ALREADY_CONFIRMED` 409로 처리되나
+          클라이언트 레벨 guard 추가 검토 필요)
+      - **`fail/page.tsx` 변경 범위**:
+        - 현재: `window.opener?.postMessage(...)` 후 `window.close()` 만 수행
+        - `window.opener`가 없는 standalone/PWA redirect 환경에서
+          `/order/fail?reason=payment_cancelled|payment_failed`로 자체 라우팅 처리 필요
+        - Toss SDK `failUrl: /payment/fail` 진입 시 opener 유무를 감지해 분기
 
   ## PWA standalone 전환 시 결제 변경 범위 (Vercel 배포 후 실기기 검증 기준)
 
@@ -106,4 +112,5 @@
   | `src/hooks/payments/useWebPayment.ts`    | 신규      | 현재 팝업 방식 분리                                                                                                               |
   | `src/hooks/payments/useMobilePayment.ts` | 신규      | 리다이렉트 방식 구현                                                                                                              |
   | `src/app/(payment)/success/page.tsx`     | 수정      | opener 없는 standalone/PWA redirect 환경 자체 라우팅 + TanStack Query invalidation 경로 보장 + 중복 confirm 클라이언트 guard 검토 |
+  | `src/app/(payment)/fail/page.tsx`        | 수정      | opener 없는 standalone/PWA redirect 환경에서 `/order/fail?reason=...`으로 자체 라우팅 처리                                        |
   | `src/app/api/payments/*`                 | 변경 없음 | 공통 재사용                                                                                                                       |
