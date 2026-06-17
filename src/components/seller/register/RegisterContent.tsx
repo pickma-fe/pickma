@@ -1,7 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 import type { ModalType } from '@/types/seller-register';
 import type { BusinessInfoData, StoreInfoData } from '@/types/store';
@@ -20,6 +21,7 @@ import { StoreStepList } from './StoreStepList';
 import { TermsStep } from './TermsStep';
 
 export function RegisterContent() {
+  const router = useRouter();
   const [activeModal, setActiveModal] = useState<ModalType>(null);
   const [isViewMode, setIsViewMode] = useState(false);
 
@@ -29,12 +31,19 @@ export function RegisterContent() {
     documentFiles,
     termsAgreed,
     isAuthCompleted,
+    hasStore,
     isApplicationPending,
     applicationError,
     handleTermsComplete,
     handleBusinessInfoComplete,
     handleDocumentComplete,
   } = useSellerAuth();
+
+  useEffect(() => {
+    if (hasStore) {
+      router.replace('/seller/dashboard');
+    }
+  }, [hasStore, router]);
 
   const { storeState, storeInfo, handleStoreInfoComplete } = useStoreRegister(
     businessInfo?.businessNumber ?? ''

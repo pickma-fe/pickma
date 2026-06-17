@@ -127,6 +127,7 @@ export function useSellerAuth() {
     documentFiles,
     termsAgreed,
     isAuthCompleted,
+    hasStore: onboardingStatus?.hasStore ?? false,
     isApplicationPending,
     applicationError,
     handleTermsComplete,
