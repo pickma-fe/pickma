@@ -118,14 +118,16 @@ export function AuthStepList({ state, onActionClick }: AuthStepListProps) {
                     text={REVIEW_STATUS_TEXT[state.reviewStatus]}
                     colorClass={REVIEW_STATUS_COLOR[state.reviewStatus]}
                   />
-                  <Button
-                    variant="outline"
-                    color="gray"
-                    className="text-xs whitespace-nowrap"
-                    onClick={() => router.push('/seller/pending')}
-                  >
-                    상세 확인
-                  </Button>
+                  {state.certificationStatus !== 'approved' && (
+                    <Button
+                      variant="outline"
+                      color="gray"
+                      className="text-xs whitespace-nowrap"
+                      onClick={() => router.push('/seller/pending')}
+                    >
+                      상세 확인
+                    </Button>
+                  )}
                 </>
               )}
 
