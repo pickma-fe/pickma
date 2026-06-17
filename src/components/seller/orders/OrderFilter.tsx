@@ -30,7 +30,7 @@ export function OrderFilter({
   onSearchChange,
 }: OrderFilterProps) {
   return (
-    <div className="flex flex-wrap items-center gap-3">
+    <div className="flex flex-col gap-3 sm:flex-row lg:flex-col xl:flex-row xl:items-center">
       <Dropdown
         type="select"
         items={STATUS_OPTIONS}
@@ -38,7 +38,7 @@ export function OrderFilter({
         onChange={onStatusChange}
         placeholder="전체"
       />
-      <div className="min-w-50 flex-1">
+      <div className="flex-1">
         <Input
           aria-label="주문번호 검색"
           placeholder="주문번호를 검색하세요"
