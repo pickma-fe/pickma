@@ -110,7 +110,11 @@ export default function SellerLayout({
                 {
                   label: '로그인',
                   type: 'action',
-                  onClick: () => openAuthModal('login'),
+                  onClick: () =>
+                    openAuthModal(
+                      'login',
+                      window.location.pathname + window.location.search
+                    ),
                 },
               ]
         }
