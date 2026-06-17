@@ -121,6 +121,7 @@ export function HamburgerDrawer({
                   <button
                     type="button"
                     onClick={() => {
+                      (document.activeElement as HTMLElement)?.blur();
                       item.onClick();
                       onClose();
                     }}
