@@ -1,5 +1,6 @@
 'use client';
 
+import { Check } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 import type { AuthStepState, ModalType } from '@/types/seller-register';
@@ -17,7 +18,7 @@ import {
   getButtonColor,
   getButtonVariant,
   getStepCircleClass,
-  getStepLabel,
+  isStepDone,
   getStepStatus,
 } from './utils';
 
@@ -87,7 +88,11 @@ export function AuthStepList({ state, onActionClick }: AuthStepListProps) {
                   getStepCircleClass(status)
                 )}
               >
-                {getStepLabel(status, step.id)}
+                {isStepDone(status) ? (
+                  <Check className="h-3.5 w-3.5" aria-hidden="true" />
+                ) : (
+                  step.id
+                )}
               </div>
               <div className="min-w-0">
                 <p className="text-sm font-medium text-gray-900">
