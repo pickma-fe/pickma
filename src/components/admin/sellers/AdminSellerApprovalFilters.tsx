@@ -35,11 +35,10 @@ export function AdminSellerApprovalFilters({
       }}
     >
       <Input
-        label="검색어"
+        label="판매자 신청 검색"
         value={searchKeyword}
         onChange={(event) => onSearchKeywordChange(event.target.value)}
         placeholder="상호명, 대표자명, 이메일, 전화번호 검색"
-        aria-label="판매자 신청 검색"
         startIcon={<Search className="h-4 w-4" />}
       />
       <Input
@@ -47,7 +46,6 @@ export function AdminSellerApprovalFilters({
         type="date"
         value={selectedDate}
         onChange={(event) => onSelectedDateChange(event.target.value)}
-        aria-label="신청일 선택"
         endIcon={<CalendarDays className="h-4 w-4" />}
       />
       <Input
@@ -55,7 +53,6 @@ export function AdminSellerApprovalFilters({
         value={businessCategory}
         onChange={(event) => onBusinessCategoryChange(event.target.value)}
         placeholder="업종 검색"
-        aria-label="업종 검색"
         startIcon={<Tags className="h-4 w-4" />}
       />
       <button

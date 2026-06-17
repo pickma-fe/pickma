@@ -24,7 +24,7 @@ describe('AdminTable', () => {
     expect(
       screen.getByRole('table', { name: '테스트 테이블' })
     ).toHaveAttribute('aria-busy', 'true');
-    expect(screen.getByRole('status', { name: '' })).toHaveTextContent(
+    expect(screen.getByRole('status')).toHaveTextContent(
       '관리자 데이터를 불러오는 중입니다.'
     );
   });

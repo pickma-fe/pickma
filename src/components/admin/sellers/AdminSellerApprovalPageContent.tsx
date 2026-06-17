@@ -54,7 +54,7 @@ export function AdminSellerApprovalPageContent() {
     [page, submittedSearchKeyword, submittedDate, submittedBusinessCategory]
   );
 
-  const { data, isLoading, isError, refetch, isFetching } =
+  const { data, isLoading, isError, refetch } =
     useAdminPendingSellerApplications(query);
   const approveMutation = useApproveSellerApplication();
   const rejectMutation = useRejectSellerApplication();
@@ -204,7 +204,7 @@ export function AdminSellerApprovalPageContent() {
 
       <AdminSellerApprovalTable
         applications={applications}
-        isLoading={isLoading || isFetching}
+        isLoading={isLoading}
         currentPage={page}
         totalPages={data?.totalPages ?? 1}
         isActionPending={isMutatingAction}

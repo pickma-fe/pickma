@@ -38,11 +38,10 @@ export function AdminStoreFilters({
       }}
     >
       <Input
-        label="검색어"
+        label="가게 검색"
         value={keyword}
         onChange={(event) => onKeywordChange(event.target.value)}
         placeholder="가게명, 사업자번호, 연락처, 주소 검색"
-        aria-label="가게 검색"
         startIcon={<Search className="h-4 w-4" />}
       />
       <label className="flex flex-col gap-1">
@@ -52,7 +51,6 @@ export function AdminStoreFilters({
           onChange={(event) =>
             onStatusChange(event.target.value as '' | StoreStatus)
           }
-          aria-label="가게 상태 선택"
           className="focus:border-primary-500 focus:ring-primary-300 h-11 rounded-md border border-gray-200 bg-white px-3 text-sm text-gray-700 outline-none focus:ring-2"
         >
           <option value="">전체 가게 상태</option>
@@ -68,7 +66,6 @@ export function AdminStoreFilters({
         value={region}
         onChange={(event) => onRegionChange(event.target.value)}
         placeholder="지역 검색"
-        aria-label="지역 검색"
       />
       <button
         type="submit"

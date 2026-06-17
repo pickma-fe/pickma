@@ -48,11 +48,7 @@ function TableBody<T>({
     return (
       <tr>
         <td colSpan={columns.length} className="px-4 py-8 sm:px-6 sm:py-10">
-          <div
-            role="status"
-            aria-live="polite"
-            className="rounded-lg bg-gray-50 px-4 py-5 text-center text-sm text-gray-600"
-          >
+          <div className="rounded-lg bg-gray-50 px-4 py-5 text-center text-sm text-gray-600">
             관리자 데이터를 불러오는 중입니다.
           </div>
         </td>
@@ -100,6 +96,14 @@ export function AdminTable<T>({
 }: AdminTableProps<T>) {
   return (
     <div className="space-y-3">
+      {isLoading && (
+        <div
+          role="status"
+          className="rounded-lg bg-gray-50 px-4 py-3 text-sm text-gray-600"
+        >
+          관리자 데이터를 불러오는 중입니다.
+        </div>
+      )}
       <p className="text-xs text-gray-500 sm:hidden">
         표가 길면 좌우로 스크롤해서 내용을 확인할 수 있습니다.
       </p>

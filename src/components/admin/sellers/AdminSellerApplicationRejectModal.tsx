@@ -73,8 +73,6 @@ export function AdminSellerApplicationRejectModal({
               rows={5}
               className="focus:border-primary-500 focus:ring-primary-300 mt-2 w-full resize-none rounded-md border border-gray-200 px-3 py-2 text-sm outline-none focus:ring-2"
               placeholder="판매자에게 안내할 거절 사유를 입력해주세요."
-              required
-              minLength={5}
               aria-invalid={Boolean(error)}
               aria-describedby={error ? 'reject-reason-error' : undefined}
             />

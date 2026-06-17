@@ -74,7 +74,7 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 | T45 | UI/UX 및 접근성 baseline 기준 수립                           | P1       | 완료    | 238          | T09                               | [T45_ui_accessibility_baseline_policy.md](T45_ui_accessibility_baseline_policy.md)                               |
 | T46 | Consumer UI/UX 및 접근성 개선                                | P2       | 완료    | 278          | T45, T64, T65, T12, T13           | [T46_consumer_ui_accessibility_improvement.md](T46_consumer_ui_accessibility_improvement.md)                     |
 | T47 | Seller UI/UX 및 접근성 개선                                  | P2       | 진행 전 | 확인 필요    | T45, T64, T65, T28, T29, T38, T52 | [T47_seller_ui_accessibility_improvement.md](T47_seller_ui_accessibility_improvement.md)                         |
-| T48 | Admin UI/UX 및 접근성 개선                                   | P2       | 진행 전 | 확인 필요    | T45, T64, T65, T03, T04, T26      | [T48_admin_ui_accessibility_improvement.md](T48_admin_ui_accessibility_improvement.md)                           |
+| T48 | Admin UI/UX 및 접근성 개선                                   | P2       | 완료    | 282          | T45, T64, T65, T03, T04, T26      | [T48_admin_ui_accessibility_improvement.md](T48_admin_ui_accessibility_improvement.md)                           |
 | T49 | Auth/Payment/Legal UI/UX 및 접근성 개선                      | P2       | 완료    | 271          | T45, T64, T65, T27, T42           | [T49_auth_payment_legal_ui_accessibility_improvement.md](T49_auth_payment_legal_ui_accessibility_improvement.md) |
 | T50 | 판매자 심사 대기 화면 구현                                   | P1       | 완료    | 180          | 없음                              | [T50_seller_pending_page.md](T50_seller_pending_page.md)                                                         |
 | T51 | 판매자 대시보드 메인 화면 구현                               | P1       | 완료    | 202          | T10, T15                          | [T51_seller_dashboard_page.md](T51_seller_dashboard_page.md)                                                     |
@@ -115,7 +115,6 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 
 1. P2 진행 중: T26
 2. P2 UI/UX 개선 묶음: T47
-   - T48: T26 완료 후 착수
 3. P3 Backend/보안: T72, T73, T76
 4. P3 기능 확장: T59, T69, T77, T78, T23
 5. P3 확장/운영 고도화: T32, T33, T34, T36, T37, T70, T71

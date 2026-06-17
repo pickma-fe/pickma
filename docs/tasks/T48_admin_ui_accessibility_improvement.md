@@ -1,7 +1,7 @@
 # T48. Admin UI/UX 및 접근성 개선
 
 - 상태:
-  진행 중
+  완료
 
 - GitHub Issue:
   282
