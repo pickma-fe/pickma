@@ -9,6 +9,8 @@ import {
   XCircle,
 } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 import { useSellerOnboardingStatus } from '@/hooks/seller/onboarding/useSellerOnboardingStatus';
 import { useMe } from '@/hooks/users/useMe';
@@ -270,32 +272,8 @@ function ApprovedNoStoreCTA() {
   );
 }
 
-function ApprovedWithStoreCTA() {
-  return (
-    <CTACard
-      icon={<Store className="text-primary-500 h-8 w-8" />}
-      iconBgClassName="bg-primary-50"
-      title="이미 운영 중인 가게가 있어요"
-      description="대시보드에서 오늘의 주문 현황을 확인해보세요."
-    >
-      <div className="space-y-3">
-        <Link href="/seller/dashboard" className="block">
-          <Button className="w-full" variant="filled" color="primary">
-            대시보드로 이동
-            <ChevronRight className="ml-1 h-4 w-4" />
-          </Button>
-        </Link>
-        <Link href="/" className="block">
-          <Button className="w-full" variant="ghost" color="gray">
-            소비자 홈으로 돌아가기
-          </Button>
-        </Link>
-      </div>
-    </CTACard>
-  );
-}
-
 export default function SellerPage() {
+  const router = useRouter();
   const { data: user, isLoading: isUserLoading } = useMe();
   const {
     data: onboardingStatus,
@@ -306,7 +284,20 @@ export default function SellerPage() {
 
   const isLoading = isUserLoading || (Boolean(user) && isOnboardingLoading);
 
-  if (isLoading) {
+  const shouldRedirectToDashboard =
+    !isLoading &&
+    !!onboardingStatus &&
+    onboardingStatus.hasStore &&
+    (onboardingStatus.applicationStatus === 'approved' ||
+      onboardingStatus.role === 'seller');
+
+  useEffect(() => {
+    if (shouldRedirectToDashboard) {
+      router.replace('/seller/dashboard');
+    }
+  }, [shouldRedirectToDashboard, router]);
+
+  if (isLoading || shouldRedirectToDashboard) {
     return <LoadingSpinner />;
   }
 
@@ -323,10 +314,6 @@ export default function SellerPage() {
   const { role, applicationStatus, hasStore, latestRejectReason } =
     onboardingStatus;
 
-  if (applicationStatus === 'approved' && hasStore) {
-    return <ApprovedWithStoreCTA />;
-  }
-
   if (applicationStatus === 'approved' && !hasStore) {
     return <ApprovedNoStoreCTA />;
   }
@@ -340,7 +327,7 @@ export default function SellerPage() {
   }
 
   if (role === 'seller') {
-    return hasStore ? <ApprovedWithStoreCTA /> : <ApprovedNoStoreCTA />;
+    return <ApprovedNoStoreCTA />;
   }
 
   return <NotAppliedCTA />;
