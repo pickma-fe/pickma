@@ -114,22 +114,25 @@ export function StoreEditForm({
           value={formData.phone}
           onChange={(e) => handleChange('phone', e.target.value)}
           placeholder="02-1234-5678"
+          autoComplete="tel"
         />
 
         <div className="flex flex-col gap-1">
-          <span className="text-sm text-gray-500">가게 주소</span>
           <div className="flex items-start gap-2">
             <div className="flex-1">
               <Input
+                label="가게 주소"
                 value={formData.address}
                 readOnly
                 placeholder="주소 검색 버튼을 눌러주세요"
+                autoComplete="street-address"
               />
             </div>
             <Button
               type="button"
               variant="outline"
               color="gray"
+              className="mt-6"
               onClick={() => void handleAddressSearch()}
             >
               주소 검색

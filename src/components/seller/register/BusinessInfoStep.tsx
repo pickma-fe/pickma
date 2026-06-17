@@ -83,12 +83,42 @@ export function BusinessInfoStep({
   };
 
   const fields = [
-    { key: 'businessNumber' as const, label: '사업자등록번호', required: true },
-    { key: 'companyName' as const, label: '상호명', required: true },
-    { key: 'representativeName' as const, label: '대표자명', required: true },
-    { key: 'businessAddress' as const, label: '사업장 주소', required: true },
-    { key: 'businessType' as const, label: '업태', required: true },
-    { key: 'businessCategory' as const, label: '종목', required: true },
+    {
+      key: 'businessNumber' as const,
+      label: '사업자등록번호',
+      required: true,
+      autoComplete: undefined,
+    },
+    {
+      key: 'companyName' as const,
+      label: '상호명',
+      required: true,
+      autoComplete: undefined,
+    },
+    {
+      key: 'representativeName' as const,
+      label: '대표자명',
+      required: true,
+      autoComplete: 'name',
+    },
+    {
+      key: 'businessAddress' as const,
+      label: '사업장 주소',
+      required: true,
+      autoComplete: 'street-address',
+    },
+    {
+      key: 'businessType' as const,
+      label: '업태',
+      required: true,
+      autoComplete: undefined,
+    },
+    {
+      key: 'businessCategory' as const,
+      label: '종목',
+      required: true,
+      autoComplete: undefined,
+    },
   ];
 
   if (isViewMode && !isEditing) {
@@ -132,6 +162,7 @@ export function BusinessInfoStep({
             onChange={handleChange(field.key)}
             placeholder={`${field.label}을 입력해주세요`}
             error={errors[field.key]}
+            autoComplete={field.autoComplete}
           />
         ))}
       </div>

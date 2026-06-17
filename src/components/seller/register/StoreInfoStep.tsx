@@ -136,9 +136,24 @@ export function StoreInfoStep({
   };
 
   const fields = [
-    { key: 'storeName' as const, label: '가게명', required: true },
-    { key: 'category' as const, label: '카테고리', required: true },
-    { key: 'phone' as const, label: '가게 전화번호', required: true },
+    {
+      key: 'storeName' as const,
+      label: '가게명',
+      required: true,
+      autoComplete: undefined,
+    },
+    {
+      key: 'category' as const,
+      label: '카테고리',
+      required: true,
+      autoComplete: undefined,
+    },
+    {
+      key: 'phone' as const,
+      label: '가게 전화번호',
+      required: true,
+      autoComplete: 'tel',
+    },
   ];
 
   if (isViewMode && !isEditing) {
@@ -184,23 +199,26 @@ export function StoreInfoStep({
             onChange={handleChange(field.key)}
             placeholder={`${field.label}을 입력해주세요`}
             error={errors[field.key]}
+            autoComplete={field.autoComplete}
           />
         ))}
         <div className="flex flex-col gap-1">
-          <span className="text-sm text-gray-500">가게 주소 *</span>
           <div className="flex items-start gap-2">
             <div className="flex-1">
               <Input
+                label="가게 주소 *"
                 value={info.address}
                 readOnly
                 placeholder="주소 검색 버튼을 눌러주세요"
                 error={errors.address}
+                autoComplete="street-address"
               />
             </div>
             <Button
               type="button"
               variant="outline"
               color="gray"
+              className="mt-6"
               onClick={() => void handleAddressSearch()}
             >
               주소 검색
