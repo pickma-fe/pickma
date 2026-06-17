@@ -80,6 +80,7 @@ export function ProductFilter({
 
         <div className="min-w-[200px] flex-1">
           <Input
+            aria-label="상품명 검색"
             placeholder="상품명을 검색하세요"
             value={searchKeyword}
             onChange={(e) => onSearchChange(e.target.value)}
