@@ -95,7 +95,7 @@ export function TermsStep({
                 >
                   {isAgreed ? '✓' : '✗'} {term.title}
                 </p>
-                <div className="h-24 overflow-y-auto rounded-md border border-gray-200 bg-gray-50 p-3 text-xs whitespace-pre-line text-gray-500">
+                <div className="max-h-24 overflow-y-auto rounded-md border border-gray-200 bg-gray-50 p-3 text-xs whitespace-pre-line text-gray-500">
                   {term.content}
                 </div>
               </div>
@@ -136,7 +136,7 @@ export function TermsStep({
                 {term.title}
               </label>
             </div>
-            <div className="h-32 overflow-y-auto rounded-md border border-gray-200 p-3 text-xs whitespace-pre-line text-gray-500">
+            <div className="max-h-32 overflow-y-auto rounded-md border border-gray-200 p-3 text-xs whitespace-pre-line text-gray-500">
               {term.content}
             </div>
           </div>
