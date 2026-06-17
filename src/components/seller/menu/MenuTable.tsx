@@ -99,6 +99,7 @@ export function MenuTable({
                 <div className="flex items-center gap-4">
                   <input
                     type="checkbox"
+                    aria-label="전체 메뉴 선택"
                     checked={isAllSelected}
                     onChange={handleSelectAll}
                     className="text-primary-600 focus:ring-primary-500 h-4 w-4 rounded border-gray-300"
@@ -146,6 +147,7 @@ export function MenuTable({
                   <div className="flex items-center gap-7">
                     <input
                       type="checkbox"
+                      aria-label={`${menu.name} 선택`}
                       checked={selectedIds.has(menu.id)}
                       onChange={() => handleSelectOne(menu.id)}
                       className="text-primary-600 focus:ring-primary-500 h-4 w-4 rounded border-gray-300"
