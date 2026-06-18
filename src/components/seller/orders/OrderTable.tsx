@@ -293,26 +293,24 @@ export function OrderTable({
                           {formatTime(order.pickupAt)}
                         </p>
                         {order.pickupNumber && (
-                          <div className="flex items-center gap-1">
-                            <p className="text-xs text-gray-400">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const pickupNumber = order.pickupNumber;
+                              if (pickupNumber)
+                                setPickupModal({
+                                  pickupNumber,
+                                  orderNumber: order.orderNumber,
+                                });
+                            }}
+                            aria-label={`픽업 번호 ${order.pickupNumber} 크게 보기`}
+                            className="-mx-1 flex items-center gap-1 rounded px-1 py-0.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 focus-visible:ring-2 focus-visible:ring-gray-300 focus-visible:outline-none"
+                          >
+                            <span className="text-xs">
                               픽업 번호 {order.pickupNumber}
-                            </p>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                const pickupNumber = order.pickupNumber;
-                                if (pickupNumber)
-                                  setPickupModal({
-                                    pickupNumber,
-                                    orderNumber: order.orderNumber,
-                                  });
-                              }}
-                              aria-label={`픽업 번호 ${order.pickupNumber} 크게 보기`}
-                              className="rounded p-0.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 focus-visible:ring-2 focus-visible:ring-gray-300 focus-visible:outline-none"
-                            >
-                              <Maximize2 className="h-3 w-3" />
-                            </button>
-                          </div>
+                            </span>
+                            <Maximize2 className="h-3 w-3 shrink-0" />
+                          </button>
                         )}
                       </div>
                     </td>
