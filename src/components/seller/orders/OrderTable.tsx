@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
 import type { Order } from '@/types/order';
@@ -288,9 +289,19 @@ export function OrderTable({
                     <td className="px-4 py-4">
                       <div className="flex items-center gap-3">
                         <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-gray-100">
-                          <div className="flex h-full w-full items-center justify-center text-gray-400">
-                            🛍️
-                          </div>
+                          {order.image ? (
+                            <Image
+                              src={order.image}
+                              alt=""
+                              fill
+                              sizes="56px"
+                              className="object-cover"
+                            />
+                          ) : (
+                            <div className="flex h-full w-full items-center justify-center text-gray-400">
+                              🛍️
+                            </div>
+                          )}
                         </div>
                         <div className="flex flex-col gap-1">
                           <p className="text-sm font-medium text-gray-900">

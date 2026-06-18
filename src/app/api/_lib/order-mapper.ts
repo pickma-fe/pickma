@@ -23,6 +23,9 @@ export interface OrderListRow {
   created_at: string;
   updated_at: string;
   stores: { name: string };
+  order_items?: Array<{
+    products: { menu_items: { image: string | null } | null } | null;
+  }>;
 }
 
 export interface OrderItemRow {
@@ -37,7 +40,7 @@ export interface OrderItemRow {
   created_at: string;
 }
 
-export interface OrderDetailRow extends OrderListRow {
+export interface OrderDetailRow extends Omit<OrderListRow, 'order_items'> {
   cancel_reason: string | null;
   cancelled_at: string | null;
   picked_up_at: string | null;
@@ -46,6 +49,8 @@ export interface OrderDetailRow extends OrderListRow {
 }
 
 export function mapOrderListRow(row: OrderListRow): OrderListItemResponse {
+  const image = row.order_items?.[0]?.products?.menu_items?.image ?? undefined;
+
   return {
     id: row.id,
     orderNumber: row.order_number,
@@ -60,6 +65,7 @@ export function mapOrderListRow(row: OrderListRow): OrderListItemResponse {
     storeOrderNumber: row.store_order_number ?? undefined,
     pickupNumber: row.pickup_number ?? undefined,
     expiresAt: row.expires_at ?? undefined,
+    image,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -81,7 +87,7 @@ export function mapOrderItemRow(row: OrderItemRow): OrderItemResponse {
 
 export function mapOrderDetailRow(row: OrderDetailRow): OrderDetailResponse {
   return {
-    ...mapOrderListRow(row),
+    ...mapOrderListRow({ ...row, order_items: undefined }),
     cancelledAt: row.cancelled_at ?? undefined,
     cancelReason: row.cancel_reason ?? undefined,
     pickedUpAt: row.picked_up_at ?? undefined,

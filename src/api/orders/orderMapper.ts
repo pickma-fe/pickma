@@ -93,6 +93,7 @@ export function mapOrderListItem(
     storeOrderNumber: dto.storeOrderNumber,
     pickupNumber: dto.pickupNumber,
     expiresAt: dto.expiresAt ? new Date(dto.expiresAt) : undefined,
+    image: dto.image,
     createdAt: new Date(dto.createdAt),
     updatedAt: new Date(dto.updatedAt),
   };

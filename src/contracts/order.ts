@@ -61,6 +61,7 @@ export interface OrderListItemResponse {
   storeOrderNumber?: string;
   pickupNumber?: string;
   expiresAt?: string;
+  image?: string;
   createdAt: string;
   updatedAt: string;
 }
