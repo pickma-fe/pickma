@@ -9,6 +9,7 @@ import {
   Package,
   ShoppingBag,
 } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
 
@@ -398,8 +399,20 @@ export function OrderDetailContent({ orderId }: OrderDetailContentProps) {
                       className="flex items-center justify-between gap-4 py-3 first:pt-0 last:pb-0"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-xl">
-                          🛍️
+                        <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-gray-100">
+                          {item.image ? (
+                            <Image
+                              src={item.image}
+                              alt=""
+                              fill
+                              sizes="48px"
+                              className="object-cover"
+                            />
+                          ) : (
+                            <div className="flex h-full w-full items-center justify-center text-xl">
+                              🛍️
+                            </div>
+                          )}
                         </div>
                         <div>
                           <p className="text-sm font-medium text-gray-900">

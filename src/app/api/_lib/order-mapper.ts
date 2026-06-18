@@ -38,6 +38,7 @@ export interface OrderItemRow {
   quantity: number;
   subtotal: number;
   created_at: string;
+  products?: { menu_items: { image: string | null } | null } | null;
 }
 
 export interface OrderDetailRow extends Omit<OrderListRow, 'order_items'> {
@@ -81,6 +82,7 @@ export function mapOrderItemRow(row: OrderItemRow): OrderItemResponse {
     discountPrice: row.discount_price,
     quantity: row.quantity,
     subtotal: row.subtotal,
+    image: row.products?.menu_items?.image ?? undefined,
     createdAt: row.created_at,
   };
 }

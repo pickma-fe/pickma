@@ -91,6 +91,7 @@ export interface OrderItemResponse {
   discountPrice: number;
   quantity: number;
   subtotal: number;
+  image?: string;
   createdAt: string;
 }
 

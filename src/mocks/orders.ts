@@ -30,6 +30,7 @@ export const mockOrderItems = [
     discountPrice: 7200,
     quantity: 1,
     subtotal: 7200,
+    image: '/images/mock/menus/menu-sandwich.jpg',
     createdAt: '2026-04-29T10:00:00.000Z',
   },
   {
@@ -41,6 +42,7 @@ export const mockOrderItems = [
     discountPrice: 5900,
     quantity: 1,
     subtotal: 5900,
+    image: '/images/mock/menus/menu-cheesecake.jpg',
     createdAt: '2026-04-29T10:10:00.000Z',
   },
   {
@@ -52,6 +54,7 @@ export const mockOrderItems = [
     discountPrice: 7700,
     quantity: 1,
     subtotal: 7700,
+    image: '/images/mock/menus/menu-coffee.jpg',
     createdAt: '2026-04-28T10:30:00.000Z',
   },
 ];
