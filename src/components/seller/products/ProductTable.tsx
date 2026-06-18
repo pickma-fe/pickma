@@ -1,13 +1,14 @@
 'use client';
 
-import { Pencil } from 'lucide-react';
 import Image from 'next/image';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 import type { Product } from '@/types/product';
 import { useUpdateSellerProduct } from '@/hooks/seller/products/useUpdateSellerProduct';
 import { Badge } from '@/components/common/Badge/Badge';
+import type { ActionMenuItem } from '@/components/common/Dropdown/ActionsMenu';
+import { ActionsMenu } from '@/components/common/Dropdown/ActionsMenu';
 import { Dropdown } from '@/components/common/Dropdown/Dropdown';
 import { Pagination } from '@/components/common/Pagination/Pagination';
 
@@ -53,6 +54,7 @@ export function ProductTable({
   currentPage,
   onPageChange,
 }: ProductTableProps) {
+  const router = useRouter();
   const [pageSize, setPageSize] = useState(10);
   const { mutate: updateProduct } = useUpdateSellerProduct();
 
@@ -93,7 +95,7 @@ export function ProductTable({
               </th>
               <th
                 scope="col"
-                className="px-4 py-3 text-left text-sm font-medium whitespace-nowrap text-gray-500"
+                className="hidden px-4 py-3 text-left text-sm font-medium whitespace-nowrap text-gray-500 lg:table-cell"
               >
                 카테고리
               </th>
@@ -117,7 +119,7 @@ export function ProductTable({
               </th>
               <th
                 scope="col"
-                className="px-4 py-3 text-left text-sm font-medium whitespace-nowrap text-gray-500"
+                className="hidden px-4 py-3 text-left text-sm font-medium whitespace-nowrap text-gray-500 xl:table-cell"
               >
                 등록일
               </th>
@@ -172,7 +174,7 @@ export function ProductTable({
                       </div>
                     </div>
                   </td>
-                  <td className="px-4 py-4 whitespace-nowrap">
+                  <td className="hidden px-4 py-4 whitespace-nowrap lg:table-cell">
                     <Badge variant="soft" color="gray">
                       {product.categoryName}
                     </Badge>
@@ -202,34 +204,44 @@ export function ProductTable({
                       </span>
                     </div>
                   </td>
-                  <td className="px-4 py-4 text-sm whitespace-nowrap text-gray-500">
+                  <td className="hidden px-4 py-4 text-sm whitespace-nowrap text-gray-500 xl:table-cell">
                     {formatDate(product.updatedAt)}
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap">
-                    <div className="flex items-center gap-2">
-                      <Dropdown
-                        type="select"
-                        items={[
-                          { label: '판매중', value: 'active' },
-                          { label: '판매중지', value: 'closed' },
-                        ]}
-                        value={product.status}
-                        onChange={(value) =>
-                          updateProduct({
-                            id: product.id,
-                            body: { status: value as 'active' | 'closed' },
-                          })
-                        }
-                        placeholder="관리"
-                      />
-                      <Link
-                        href={`/seller/products/${product.id}/edit`}
-                        className="hover:border-primary-300 hover:bg-primary-50 hover:text-primary-600 flex h-8 w-8 items-center justify-center rounded-md border border-gray-200 bg-white text-gray-500 transition-colors"
-                        aria-label={`${product.name} 상품 수정`}
-                      >
-                        <Pencil className="h-4 w-4" aria-hidden="true" />
-                      </Link>
-                    </div>
+                    <ActionsMenu
+                      aria-label={`${product.name} 관리 메뉴`}
+                      items={
+                        [
+                          product.status === 'active'
+                            ? {
+                                id: 'close',
+                                label: '판매중지',
+                                onClick: () =>
+                                  updateProduct({
+                                    id: product.id,
+                                    body: { status: 'closed' },
+                                  }),
+                              }
+                            : {
+                                id: 'activate',
+                                label: '판매중으로 변경',
+                                onClick: () =>
+                                  updateProduct({
+                                    id: product.id,
+                                    body: { status: 'active' },
+                                  }),
+                              },
+                          {
+                            id: 'edit',
+                            label: '상품 수정',
+                            onClick: () =>
+                              router.push(
+                                `/seller/products/${product.id}/edit`
+                              ),
+                          },
+                        ] satisfies ActionMenuItem[]
+                      }
+                    />
                   </td>
                 </tr>
               );
