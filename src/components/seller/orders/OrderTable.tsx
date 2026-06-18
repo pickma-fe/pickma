@@ -330,7 +330,7 @@ export function OrderTable({
                     </td>
                     <td className="w-40 px-4 py-4">
                       <div className="flex flex-col gap-1">
-                        <div className="w-fit">
+                        <div className="w-fit whitespace-nowrap">
                           <Badge variant="soft" color={badge.color}>
                             {badge.label}
                           </Badge>
