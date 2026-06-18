@@ -123,4 +123,15 @@ describe('sellerApplicationApi', () => {
       '/api/seller-applications/me/documents/doc%2Fspecial%20id'
     );
   });
+
+  it('cancelMyApplication은 DELETE /api/seller-applications/me를 호출하고 undefined를 반환한다', async () => {
+    vi.mocked(apiClient.delete).mockResolvedValue(null);
+
+    const result = await sellerApplicationApi.cancelMyApplication();
+
+    expect(apiClient.delete).toHaveBeenCalledWith(
+      '/api/seller-applications/me'
+    );
+    expect(result).toBeUndefined();
+  });
 });

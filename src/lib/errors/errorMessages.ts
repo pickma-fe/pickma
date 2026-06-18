@@ -31,6 +31,7 @@ export const ERROR_MESSAGES: Record<ErrorCode, string> = {
   APPLICATION_ALREADY_SUBMITTED: '진행 중이거나 승인된 판매자 신청이 있습니다.',
   SELLER_ALREADY_REGISTERED: '이미 판매자로 등록되어 있습니다.',
   APPLICATION_DOCUMENT_NOT_FOUND: '신청 서류를 찾을 수 없습니다.',
+  APPLICATION_CANCEL_NOT_ALLOWED: 'pending 상태의 신청만 취소할 수 있습니다.',
   FILE_UPLOAD_NOT_ALLOWED: '파일 업로드 권한이 없습니다.',
   FILE_TYPE_NOT_ALLOWED: '허용되지 않는 파일 형식입니다.',
   FILE_TOO_LARGE: '파일 크기가 허용 한도를 초과했습니다.',

@@ -4,7 +4,11 @@ import { AppError } from '@/lib/errors/appError';
 import { ERROR_CODE } from '@/lib/errors/errorCodes';
 import { createServiceRoleClient } from '@/lib/supabase/service';
 
-import { getDocumentSignedUrl, getMySellerApplication } from './service';
+import {
+  cancelMySellerApplication,
+  getDocumentSignedUrl,
+  getMySellerApplication,
+} from './service';
 
 vi.mock('@/lib/supabase/service', () => ({
   createServiceRoleClient: vi.fn(),
@@ -56,8 +60,9 @@ function buildSupabaseMock({
   ownerError = null,
   signedUrl = 'https://example.com/signed',
   signedError = null,
+  deleteError = null,
 }: {
-  appData?: typeof MOCK_APP | null;
+  appData?: typeof MOCK_APP | { id: string; status: string } | null;
   appError?: unknown;
   docsData?: (typeof MOCK_DOC)[];
   docsError?: unknown;
@@ -67,7 +72,14 @@ function buildSupabaseMock({
   ownerError?: unknown;
   signedUrl?: string;
   signedError?: unknown;
+  deleteError?: unknown;
 } = {}) {
+  const deleteMock = vi.fn().mockReturnValue({
+    eq: vi.fn().mockReturnValue({
+      eq: vi.fn().mockResolvedValue({ error: deleteError }),
+    }),
+  });
+
   const fromMock = vi.fn().mockImplementation((table: string) => {
     if (table === 'seller_applications') {
       return {
@@ -85,6 +97,7 @@ function buildSupabaseMock({
               .mockResolvedValue({ data: ownerData, error: ownerError }),
           }),
         }),
+        delete: deleteMock,
       };
     }
     return {
@@ -218,6 +231,91 @@ describe('getDocumentSignedUrl', () => {
     );
 
     await expect(getDocumentSignedUrl(USER_ID, DOC_ID)).rejects.toSatisfy(
+      (e: unknown) =>
+        e instanceof AppError && e.code === ERROR_CODE.INTERNAL_SERVER_ERROR
+    );
+  });
+});
+
+describe('cancelMySellerApplication', () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it('pending 신청이 있으면 삭제 후 정상 반환한다', async () => {
+    const mock = buildSupabaseMock({
+      appData: { id: APP_ID, status: 'pending' },
+    });
+    vi.mocked(createServiceRoleClient).mockReturnValue(
+      mock as unknown as ReturnType<typeof createServiceRoleClient>
+    );
+
+    await expect(cancelMySellerApplication(USER_ID)).resolves.toBeUndefined();
+  });
+
+  it('신청이 없으면 SELLER_APPLICATION_NOT_FOUND를 던진다', async () => {
+    const mock = buildSupabaseMock({ appData: null });
+    vi.mocked(createServiceRoleClient).mockReturnValue(
+      mock as unknown as ReturnType<typeof createServiceRoleClient>
+    );
+
+    await expect(cancelMySellerApplication(USER_ID)).rejects.toSatisfy(
+      (e: unknown) =>
+        e instanceof AppError &&
+        e.code === ERROR_CODE.SELLER_APPLICATION_NOT_FOUND
+    );
+  });
+
+  it('status가 approved이면 APPLICATION_CANCEL_NOT_ALLOWED를 던진다', async () => {
+    const mock = buildSupabaseMock({
+      appData: { id: APP_ID, status: 'approved' },
+    });
+    vi.mocked(createServiceRoleClient).mockReturnValue(
+      mock as unknown as ReturnType<typeof createServiceRoleClient>
+    );
+
+    await expect(cancelMySellerApplication(USER_ID)).rejects.toSatisfy(
+      (e: unknown) =>
+        e instanceof AppError &&
+        e.code === ERROR_CODE.APPLICATION_CANCEL_NOT_ALLOWED
+    );
+  });
+
+  it('status가 rejected이면 APPLICATION_CANCEL_NOT_ALLOWED를 던진다', async () => {
+    const mock = buildSupabaseMock({
+      appData: { id: APP_ID, status: 'rejected' },
+    });
+    vi.mocked(createServiceRoleClient).mockReturnValue(
+      mock as unknown as ReturnType<typeof createServiceRoleClient>
+    );
+
+    await expect(cancelMySellerApplication(USER_ID)).rejects.toSatisfy(
+      (e: unknown) =>
+        e instanceof AppError &&
+        e.code === ERROR_CODE.APPLICATION_CANCEL_NOT_ALLOWED
+    );
+  });
+
+  it('DB 조회 에러 시 INTERNAL_SERVER_ERROR를 던진다', async () => {
+    const mock = buildSupabaseMock({ appError: { message: 'db error' } });
+    vi.mocked(createServiceRoleClient).mockReturnValue(
+      mock as unknown as ReturnType<typeof createServiceRoleClient>
+    );
+
+    await expect(cancelMySellerApplication(USER_ID)).rejects.toSatisfy(
+      (e: unknown) =>
+        e instanceof AppError && e.code === ERROR_CODE.INTERNAL_SERVER_ERROR
+    );
+  });
+
+  it('삭제 쿼리 에러 시 INTERNAL_SERVER_ERROR를 던진다', async () => {
+    const mock = buildSupabaseMock({
+      appData: { id: APP_ID, status: 'pending' },
+      deleteError: { message: 'delete failed' },
+    });
+    vi.mocked(createServiceRoleClient).mockReturnValue(
+      mock as unknown as ReturnType<typeof createServiceRoleClient>
+    );
+
+    await expect(cancelMySellerApplication(USER_ID)).rejects.toSatisfy(
       (e: unknown) =>
         e instanceof AppError && e.code === ERROR_CODE.INTERNAL_SERVER_ERROR
     );

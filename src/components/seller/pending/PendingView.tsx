@@ -1,10 +1,28 @@
+'use client';
+
 import { ClockIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
+import { useCancelSellerApplication } from '@/hooks/seller/applications/useCancelSellerApplication';
 import { Button } from '@/components/common/Button/Button';
 
 export function PendingView() {
   const router = useRouter();
+  const [showConfirm, setShowConfirm] = useState(false);
+  const { mutate: cancelApplication, isPending: isCancelling } =
+    useCancelSellerApplication();
+
+  function handleCancelConfirm() {
+    cancelApplication(undefined, {
+      onSuccess: () => {
+        router.replace('/seller/register');
+      },
+      onError: () => {
+        setShowConfirm(false);
+      },
+    });
+  }
 
   return (
     <div className="flex flex-col items-center justify-center gap-6 py-20 text-center">
@@ -27,10 +45,41 @@ export function PendingView() {
         <p className="text-xs font-medium text-yellow-700">📋 안내사항</p>
         <ul className="mt-2 list-inside list-disc space-y-1 text-xs text-yellow-600">
           <li>심사 결과는 이메일로 안내드립니다.</li>
-          <li>심사 중에는 서류 수정이 불가합니다.</li>
+          <li>서류를 잘못 제출한 경우 신청을 취소하고 재신청할 수 있습니다.</li>
           <li>문의사항은 고객센터를 이용해주세요.</li>
         </ul>
       </div>
+
+      {/* 취소 확인 다이얼로그 */}
+      {showConfirm && (
+        <div className="w-full max-w-sm rounded-lg border border-red-200 bg-red-50 p-4 text-left">
+          <p className="text-sm font-medium text-red-700">신청을 취소할까요?</p>
+          <p className="mt-1 text-xs text-red-600">
+            취소 후에는 서류를 다시 제출하고 재신청해야 합니다.
+            <br />
+            제출된 파일은 보관 정책에 따라 자동으로 정리됩니다.
+          </p>
+          <div className="mt-3 flex gap-2">
+            <Button
+              color="danger"
+              className="flex-1 text-xs"
+              disabled={isCancelling}
+              onClick={handleCancelConfirm}
+            >
+              {isCancelling ? '취소 중...' : '신청 취소 확정'}
+            </Button>
+            <Button
+              variant="outline"
+              color="gray"
+              className="flex-1 text-xs"
+              disabled={isCancelling}
+              onClick={() => setShowConfirm(false)}
+            >
+              돌아가기
+            </Button>
+          </div>
+        </div>
+      )}
 
       <div className="flex gap-3">
         <Button
@@ -40,6 +89,15 @@ export function PendingView() {
         >
           신청 내역 확인
         </Button>
+        {!showConfirm && (
+          <Button
+            variant="outline"
+            color="danger"
+            onClick={() => setShowConfirm(true)}
+          >
+            신청 취소
+          </Button>
+        )}
         <Button
           variant="outline"
           color="gray"

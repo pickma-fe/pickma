@@ -79,3 +79,39 @@ export async function getDocumentSignedUrl(
 
   return signedData.signedUrl;
 }
+
+export async function cancelMySellerApplication(userId: string): Promise<void> {
+  const supabase = createServiceRoleClient();
+
+  // 본인의 최신 신청 조회
+  const { data: appData, error: appError } = await supabase
+    .from('seller_applications')
+    .select('id, status')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (appError) {
+    throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
+  }
+
+  if (!appData) {
+    throw new AppError(ERROR_CODE.SELLER_APPLICATION_NOT_FOUND, 404);
+  }
+
+  // pending 상태가 아니면 취소 불가
+  if (appData.status !== 'pending') {
+    throw new AppError(ERROR_CODE.APPLICATION_CANCEL_NOT_ALLOWED, 409);
+  }
+
+  const { error: deleteError } = await supabase
+    .from('seller_applications')
+    .delete()
+    .eq('id', appData.id)
+    .eq('user_id', userId); // 소유권 이중 확인
+
+  if (deleteError) {
+    throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
+  }
+}
