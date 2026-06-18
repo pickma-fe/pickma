@@ -10,6 +10,7 @@ import type {
 import { Badge } from '@/components/common/Badge/Badge';
 import { Button } from '@/components/common/Button/Button';
 import { Pagination } from '@/components/common/Pagination/Pagination';
+import { Tooltip } from '@/components/common/Tooltip/Tooltip';
 
 type SellerOrderListItem = Omit<Order, 'items' | 'payment'>;
 
@@ -329,16 +330,11 @@ export function OrderTable({
                       </div>
                     </td>
                     <td className="w-40 px-4 py-4">
-                      <div className="flex flex-col gap-1">
-                        <div className="w-fit whitespace-nowrap">
-                          <Badge variant="soft" color={badge.color}>
-                            {badge.label}
-                          </Badge>
-                        </div>
-                        {description && (
-                          <p className="text-xs text-gray-400">{description}</p>
-                        )}
-                      </div>
+                      <Tooltip content={description}>
+                        <Badge variant="soft" color={badge.color}>
+                          {badge.label}
+                        </Badge>
+                      </Tooltip>
                     </td>
                     <td className="px-4 py-4 whitespace-nowrap">
                       <OrderActionButtons
