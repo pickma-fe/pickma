@@ -333,8 +333,8 @@ export function OrderDetailContent({ orderId }: OrderDetailContentProps) {
         </div>
       )}
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <div className="flex flex-col gap-6 lg:col-span-2">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+        <div className="flex flex-col gap-6 xl:col-span-2">
           <Section variant="card">
             <div className="flex flex-col gap-4">
               <div className="flex items-center justify-between">
