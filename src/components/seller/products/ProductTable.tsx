@@ -24,6 +24,27 @@ const PAGE_SIZE_OPTIONS = [
   { label: '20개씩 보기', value: '20' },
 ];
 
+function ProductImageCell({ src, alt }: { src?: string; alt: string }) {
+  const [error, setError] = useState(false);
+  if (!src || error) {
+    return (
+      <div className="flex h-full w-full items-center justify-center text-gray-400">
+        🛍️
+      </div>
+    );
+  }
+  return (
+    <Image
+      src={src}
+      alt={alt}
+      fill
+      sizes="56px"
+      className="object-cover"
+      onError={() => setError(true)}
+    />
+  );
+}
+
 const formatPrice = (price: number) => price.toLocaleString('ko-KR') + '원';
 const formatDate = (date: Date | undefined) =>
   (date ?? new Date()).toLocaleDateString('ko-KR');
@@ -147,19 +168,10 @@ export function ProductTable({
                   <td className="px-4 py-4">
                     <div className="flex items-center gap-3">
                       <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-gray-100">
-                        {product.image ? (
-                          <Image
-                            src={product.image}
-                            alt={product.name}
-                            fill
-                            sizes="56px"
-                            className="object-cover"
-                          />
-                        ) : (
-                          <div className="flex h-full w-full items-center justify-center text-gray-400">
-                            🛍️
-                          </div>
-                        )}
+                        <ProductImageCell
+                          src={product.image}
+                          alt={product.name}
+                        />
                       </div>
                       <div className="min-w-0">
                         <p className="truncate text-sm font-medium text-gray-900">
