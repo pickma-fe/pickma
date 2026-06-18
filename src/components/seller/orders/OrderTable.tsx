@@ -9,7 +9,8 @@ import type {
   SellerOrderDisplayStatus,
 } from '@/types/seller-order';
 import { Badge } from '@/components/common/Badge/Badge';
-import { Button } from '@/components/common/Button/Button';
+import type { ActionMenuItem } from '@/components/common/Dropdown/ActionsMenu';
+import { ActionsMenu } from '@/components/common/Dropdown/ActionsMenu';
 import { Pagination } from '@/components/common/Pagination/Pagination';
 import { Tooltip } from '@/components/common/Tooltip/Tooltip';
 
@@ -69,111 +70,62 @@ function isSellerDisplayStatus(
   return status in STATUS_BADGE;
 }
 
-function OrderActionButtons({
-  order,
-  onOrderAction,
-  onCancelRequest,
-  onDetail,
-  isActionPending,
-}: {
-  order: SellerOrderListItem;
-  onOrderAction: (orderId: string, newStatus: SellerOrderActionStatus) => void;
-  onCancelRequest: (orderId: string) => void;
-  onDetail: () => void;
-  isActionPending: boolean;
-}) {
+function buildOrderActionItems(
+  order: SellerOrderListItem,
+  onOrderAction: (orderId: string, newStatus: SellerOrderActionStatus) => void,
+  onCancelRequest: (orderId: string) => void,
+  onDetail: () => void,
+  isActionPending: boolean
+): ActionMenuItem[] {
+  const items: ActionMenuItem[] = [];
+
   switch (order.status) {
     case 'reserved':
-      return (
-        <div className="flex w-fit flex-col gap-2">
-          <Button
-            className="w-fit px-2 py-0.5 text-sm"
-            onClick={() => onOrderAction(order.id, 'accepted')}
-            disabled={isActionPending}
-          >
-            {isActionPending ? '처리 중...' : '주문 접수'}
-          </Button>
-          <Button
-            className="w-fit px-2 py-0.5 text-sm"
-            variant="outline"
-            color="danger"
-            onClick={() => onCancelRequest(order.id)}
-            disabled={isActionPending}
-          >
-            주문 취소
-          </Button>
-          <Button
-            className="w-fit px-2 py-0.5 text-sm"
-            variant="outline"
-            onClick={onDetail}
-          >
-            상세 보기
-          </Button>
-        </div>
+      items.push(
+        {
+          id: 'accept',
+          label: '주문 접수',
+          onClick: () => onOrderAction(order.id, 'accepted'),
+          disabled: isActionPending,
+        },
+        {
+          id: 'cancel',
+          label: '주문 취소',
+          onClick: () => onCancelRequest(order.id),
+          disabled: isActionPending,
+          variant: 'danger',
+        }
       );
+      break;
     case 'accepted':
-      return (
-        <div className="flex w-fit flex-col gap-2">
-          <Button
-            className="w-fit px-2 py-0.5 text-sm"
-            onClick={() => onOrderAction(order.id, 'ready')}
-            disabled={isActionPending}
-          >
-            {isActionPending ? '처리 중...' : '준비 완료'}
-          </Button>
-          <Button
-            className="w-fit px-2 py-0.5 text-sm"
-            variant="outline"
-            color="danger"
-            onClick={() => onCancelRequest(order.id)}
-            disabled={isActionPending}
-          >
-            주문 취소
-          </Button>
-          <Button
-            className="w-fit px-2 py-0.5 text-sm"
-            variant="outline"
-            onClick={onDetail}
-          >
-            상세 보기
-          </Button>
-        </div>
+      items.push(
+        {
+          id: 'ready',
+          label: '준비 완료',
+          onClick: () => onOrderAction(order.id, 'ready'),
+          disabled: isActionPending,
+        },
+        {
+          id: 'cancel',
+          label: '주문 취소',
+          onClick: () => onCancelRequest(order.id),
+          disabled: isActionPending,
+          variant: 'danger',
+        }
       );
+      break;
     case 'ready':
-      return (
-        <div className="flex w-fit flex-col gap-2">
-          <Button
-            className="w-fit px-2 py-0.5 text-sm"
-            onClick={() => onOrderAction(order.id, 'completed')}
-            disabled={isActionPending}
-          >
-            {isActionPending ? '처리 중...' : '픽업 완료'}
-          </Button>
-          <Button
-            className="w-fit px-2 py-0.5 text-sm"
-            variant="outline"
-            onClick={onDetail}
-          >
-            상세 보기
-          </Button>
-        </div>
-      );
-    case 'cancelling':
-    case 'completed':
-    case 'cancelled':
-    case 'noShow':
-      return (
-        <Button
-          className="w-fit px-2 py-0.5 text-sm"
-          variant="outline"
-          onClick={onDetail}
-        >
-          상세 보기
-        </Button>
-      );
-    default:
-      return null;
+      items.push({
+        id: 'complete',
+        label: '픽업 완료',
+        onClick: () => onOrderAction(order.id, 'completed'),
+        disabled: isActionPending,
+      });
+      break;
   }
+
+  items.push({ id: 'detail', label: '상세 보기', onClick: onDetail });
+  return items;
 }
 
 export function OrderTable({
@@ -347,15 +299,15 @@ export function OrderTable({
                         </Badge>
                       </Tooltip>
                     </td>
-                    <td className="px-4 py-4 whitespace-nowrap">
-                      <OrderActionButtons
-                        order={order}
-                        onOrderAction={onOrderAction}
-                        onCancelRequest={onCancelRequest}
-                        onDetail={() =>
-                          router.push(`/seller/orders/${order.id}`)
-                        }
-                        isActionPending={isActionPending}
+                    <td className="px-4 py-4">
+                      <ActionsMenu
+                        items={buildOrderActionItems(
+                          order,
+                          onOrderAction,
+                          onCancelRequest,
+                          () => router.push(`/seller/orders/${order.id}`),
+                          isActionPending
+                        )}
                       />
                     </td>
                   </tr>
