@@ -47,6 +47,7 @@ function mapOrderItem(dto: OrderItemResponse): OrderItem {
     discountPrice: dto.discountPrice,
     quantity: dto.quantity,
     subtotal: dto.subtotal,
+    image: dto.image,
     createdAt: new Date(dto.createdAt),
   };
 }
