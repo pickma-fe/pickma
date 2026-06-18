@@ -458,18 +458,18 @@ export function OrderDetailContent({ orderId }: OrderDetailContentProps) {
               <h2 className="text-base font-semibold text-gray-900">
                 픽업 정보
               </h2>
+              {order.pickupNumber && (
+                <div className="flex flex-col items-center gap-1 rounded-lg bg-gray-50 py-4">
+                  <p className="flex items-center gap-1 text-xs text-gray-400">
+                    <Hash className="h-3 w-3" />
+                    픽업 번호
+                  </p>
+                  <p className="text-4xl font-bold tracking-widest text-gray-900">
+                    {order.pickupNumber}
+                  </p>
+                </div>
+              )}
               <dl className="flex flex-col gap-3">
-                {order.pickupNumber && (
-                  <InfoRow
-                    icon={<Hash className="h-4 w-4" />}
-                    label="픽업 번호"
-                    value={
-                      <span className="text-2xl font-bold text-gray-900">
-                        {order.pickupNumber}
-                      </span>
-                    }
-                  />
-                )}
                 <InfoRow
                   icon={<Clock className="h-4 w-4" />}
                   label="픽업 시간"
