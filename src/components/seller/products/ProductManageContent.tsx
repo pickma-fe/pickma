@@ -165,7 +165,7 @@ export function ProductManageContent() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Section variant="card" className="bg-white">
+        <Section variant="card">
           <div className="flex items-center gap-4">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100">
               <Package className="h-6 w-6 text-gray-600" />
@@ -180,7 +180,7 @@ export function ProductManageContent() {
           </div>
         </Section>
 
-        <Section variant="card" className="bg-white">
+        <Section variant="card">
           <div className="flex items-center gap-4">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
               <ShoppingBag className="h-6 w-6 text-green-600" />
@@ -195,7 +195,7 @@ export function ProductManageContent() {
           </div>
         </Section>
 
-        <Section variant="card" className="bg-white">
+        <Section variant="card">
           <div className="flex items-center gap-4">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
               <PackageX className="h-6 w-6 text-red-600" />
@@ -210,7 +210,7 @@ export function ProductManageContent() {
           </div>
         </Section>
 
-        <Section variant="card" className="bg-white">
+        <Section variant="card">
           <div className="flex items-center gap-4">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100">
               <EyeOff className="h-6 w-6 text-gray-600" />

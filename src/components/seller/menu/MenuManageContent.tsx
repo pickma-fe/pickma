@@ -110,7 +110,7 @@ export function MenuManageContent() {
           등록한 메뉴를 확인하고 관리할 수 있습니다.
         </p>
       </div>
-      <Section variant="card" className="bg-white">
+      <Section variant="card">
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
           <div className="flex items-center gap-4">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100">

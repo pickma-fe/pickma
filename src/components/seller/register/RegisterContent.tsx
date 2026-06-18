@@ -86,7 +86,7 @@ export function RegisterContent() {
         </p>
       </div>
 
-      <Section variant="card" className="flex flex-col gap-4 bg-white">
+      <Section variant="card" className="flex flex-col gap-4">
         <h2 className="text-base font-semibold text-gray-900">판매자 인증</h2>
         <p className="text-xs text-gray-400">
           가게를 열기 전에 판매자 인증을 진행해주세요.
@@ -99,7 +99,7 @@ export function RegisterContent() {
       </Section>
 
       {isAuthCompleted && (
-        <Section variant="card" className="flex flex-col gap-4 bg-white">
+        <Section variant="card" className="flex flex-col gap-4">
           <h2 className="text-base font-semibold text-gray-900">가게 등록</h2>
           <p className="text-sm text-gray-500">
             판매자 인증이 완료되었습니다. 가게 정보를 등록하고 픽마에서 판매를
@@ -115,7 +115,7 @@ export function RegisterContent() {
 
       <Section
         variant="card"
-        className="flex flex-col items-start justify-between gap-4 bg-white sm:flex-row sm:items-center"
+        className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center"
       >
         <div>
           <p className="text-sm font-medium text-gray-900">

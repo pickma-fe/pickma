@@ -81,7 +81,7 @@ export function StoreEditContent() {
             : '가게 기본 정보를 입력해주세요.'}
         </p>
       </div>
-      <Section variant="card" className="bg-white">
+      <Section variant="card">
         <StoreEditForm
           storeInfo={storeInfo ?? undefined}
           businessNumber={application?.businessNumber}

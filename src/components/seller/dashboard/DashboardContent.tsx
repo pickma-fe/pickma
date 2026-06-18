@@ -109,7 +109,7 @@ export function DashboardContent() {
         <p className="mt-1 text-sm text-gray-500">{formattedDate}</p>
       </div>
 
-      <Section variant="card" className="bg-white">
+      <Section variant="card">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-base font-semibold text-gray-900">
             오늘의 주문 현황
@@ -152,7 +152,7 @@ export function DashboardContent() {
               >
                 <Section
                   variant="card"
-                  className="bg-white transition-all hover:ring-1 hover:ring-gray-300"
+                  className="transition-all hover:ring-1 hover:ring-gray-300"
                 >
                   <div className="flex flex-col gap-3">
                     <div
@@ -184,7 +184,7 @@ export function DashboardContent() {
         </div>
       </Section>
 
-      <Section variant="card" className="bg-white">
+      <Section variant="card">
         <h2 className="mb-4 text-base font-semibold text-gray-900">
           빠른 이동
         </h2>

@@ -162,7 +162,7 @@ export function StoreInfoContent() {
         </p>
       </div>
 
-      <Section variant="card" className="bg-white">
+      <Section variant="card">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
@@ -210,7 +210,7 @@ export function StoreInfoContent() {
           onEditImage={() => handleOpenModal('editImage')}
         />
         {isApplicationError ? (
-          <Section variant="card" className="bg-white">
+          <Section variant="card">
             <p className="text-sm text-red-500">
               제출 서류 정보를 불러오지 못했습니다.
             </p>
