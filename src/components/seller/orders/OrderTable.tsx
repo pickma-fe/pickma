@@ -1,7 +1,9 @@
 'use client';
 
+import { Maximize2 } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 import type { Order } from '@/types/order';
 import type {
@@ -11,6 +13,7 @@ import type {
 import { Badge } from '@/components/common/Badge/Badge';
 import type { ActionMenuItem } from '@/components/common/Dropdown/ActionsMenu';
 import { ActionsMenu } from '@/components/common/Dropdown/ActionsMenu';
+import { Modal } from '@/components/common/Modal/Modal';
 import { Pagination } from '@/components/common/Pagination/Pagination';
 import { Tooltip } from '@/components/common/Tooltip/Tooltip';
 
@@ -140,6 +143,10 @@ export function OrderTable({
   isActionPending = false,
 }: OrderTableProps) {
   const router = useRouter();
+  const [pickupModal, setPickupModal] = useState<{
+    pickupNumber: string;
+    orderNumber: string;
+  } | null>(null);
 
   if (isLoading) {
     return (
@@ -286,9 +293,26 @@ export function OrderTable({
                           {formatTime(order.pickupAt)}
                         </p>
                         {order.pickupNumber && (
-                          <p className="text-xs text-gray-400">
-                            픽업 번호 {order.pickupNumber}
-                          </p>
+                          <div className="flex items-center gap-1">
+                            <p className="text-xs text-gray-400">
+                              픽업 번호 {order.pickupNumber}
+                            </p>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const pickupNumber = order.pickupNumber;
+                                if (pickupNumber)
+                                  setPickupModal({
+                                    pickupNumber,
+                                    orderNumber: order.orderNumber,
+                                  });
+                              }}
+                              aria-label={`픽업 번호 ${order.pickupNumber} 크게 보기`}
+                              className="rounded p-0.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 focus-visible:ring-2 focus-visible:ring-gray-300 focus-visible:outline-none"
+                            >
+                              <Maximize2 className="h-3 w-3" />
+                            </button>
+                          </div>
                         )}
                       </div>
                     </td>
@@ -325,6 +349,22 @@ export function OrderTable({
           onPageChange={onPageChange}
         />
       </div>
+
+      {pickupModal && (
+        <Modal
+          isOpen
+          onClose={() => setPickupModal(null)}
+          title="픽업 번호"
+          size="sm"
+        >
+          <div className="flex flex-col items-center gap-2 py-4">
+            <p className="text-8xl font-bold tracking-widest text-gray-900">
+              {pickupModal.pickupNumber}
+            </p>
+            <p className="text-sm text-gray-400">{pickupModal.orderNumber}</p>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }
