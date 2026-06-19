@@ -157,6 +157,7 @@ export function ProductEditForm({
                   id="pickupStartTime"
                   value={field.value}
                   onChange={field.onChange}
+                  onBlur={field.onBlur}
                   disabled={isPending}
                   invalid={!!fieldState.error}
                   describedBy={
@@ -193,6 +194,7 @@ export function ProductEditForm({
                   id="pickupEndTime"
                   value={field.value}
                   onChange={field.onChange}
+                  onBlur={field.onBlur}
                   disabled={isPending}
                   invalid={!!fieldState.error}
                   describedBy={

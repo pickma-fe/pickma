@@ -8,6 +8,7 @@ interface TimePickerProps {
   id?: string;
   value: string;
   onChange: (value: string) => void;
+  onBlur?: () => void;
   disabled?: boolean;
   invalid?: boolean;
   describedBy?: string;
@@ -36,6 +37,7 @@ export function TimePicker({
   id,
   value,
   onChange,
+  onBlur,
   disabled,
   invalid,
   describedBy,
@@ -65,6 +67,7 @@ export function TimePicker({
           id={id}
           value={hh}
           onChange={(e) => onChange(`${e.target.value}:${mm}`)}
+          onBlur={onBlur}
           disabled={disabled}
           aria-label="시"
           className={selectClass}
@@ -84,6 +87,7 @@ export function TimePicker({
         <select
           value={mm}
           onChange={(e) => onChange(`${hh}:${e.target.value}`)}
+          onBlur={onBlur}
           disabled={disabled}
           aria-label="분"
           className={selectClass}
