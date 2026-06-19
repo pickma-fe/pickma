@@ -112,6 +112,24 @@ describe('createLogger', () => {
       expect(parsed.reqId).toBe(reqId);
     });
 
+    it('meta의 예약 키(level/ts/reqId/event)는 핵심 필드를 덮어쓰지 않는다', () => {
+      const logger = createLogger(reqId, { silent: false });
+      logger.info('ORIGINAL_EVENT', {
+        level: 'error',
+        ts: '2000-01-01T00:00:00.000Z',
+        reqId: 'fake-req-id',
+        event: 'INJECTED_EVENT',
+        safeField: 'ok',
+      });
+
+      const raw = consoleSpy.info.mock.calls[0][0] as string;
+      const parsed = JSON.parse(raw) as Record<string, unknown>;
+      expect(parsed.level).toBe('info');
+      expect(parsed.reqId).toBe(reqId);
+      expect(parsed.event).toBe('ORIGINAL_EVENT');
+      expect(parsed.safeField).toBe('ok');
+    });
+
     it('순환 참조 meta는 serializationError를 포함한 fallback JSON을 출력한다', () => {
       const circular: Record<string, unknown> = {};
       circular['self'] = circular;

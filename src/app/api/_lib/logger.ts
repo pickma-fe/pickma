@@ -22,6 +22,8 @@ export function generateReqId(): string {
   return crypto.randomUUID();
 }
 
+const RESERVED_KEYS = new Set(['level', 'ts', 'reqId', 'event']);
+
 function buildEntry(
   level: LogLevel,
   reqId: string,
@@ -37,7 +39,7 @@ function buildEntry(
 
   if (meta) {
     for (const [key, value] of Object.entries(meta)) {
-      if (value !== undefined) {
+      if (value !== undefined && !RESERVED_KEYS.has(key)) {
         base[key] = value;
       }
     }
