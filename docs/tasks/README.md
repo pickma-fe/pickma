@@ -103,7 +103,7 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 | T74 | Supabase select 쿼리 반환 타입 안전성 개선                   | P4       | 진행 전 | 확인 필요    | 없음                              | [T74_supabase_select_type_safety.md](T74_supabase_select_type_safety.md)                                         |
 | T75 | 백엔드 전용 lib을 app/api/\_lib으로 분리                     | P4       | 진행 전 | 확인 필요    | 없음                              | [T75_backend_lib_separation.md](T75_backend_lib_separation.md)                                                   |
 | T76 | Route Handler·Hook 테스트 보강                               | P3       | 진행 전 | 확인 필요    | T24                               | [T76_route_handler_hook_test_coverage.md](T76_route_handler_hook_test_coverage.md)                               |
-| T77 | 판매자 대시보드 매출 통계 구현 (S-DASH-02)                   | P3       | 진행 전 | 확인 필요    | T58                               | [T77_seller_dashboard_sales_stats.md](T77_seller_dashboard_sales_stats.md)                                       |
+| T77 | 판매자 대시보드 매출 통계 구현 (S-DASH-02)                   | P3       | 완료    | 285          | T58                               | [T77_seller_dashboard_sales_stats.md](T77_seller_dashboard_sales_stats.md)                                       |
 | T78 | 공지사항 도메인/API 구현                                     | P3       | 진행 전 | 확인 필요    | T58                               | [T78_notice_domain_api.md](T78_notice_domain_api.md)                                                             |
 | T79 | seed 상품 image_url 경로 수정                                | P4       | 진행 전 | 확인 필요    | T39                               | [T79_seed_product_image_url_fix.md](T79_seed_product_image_url_fix.md)                                           |
 | T80 | 프로모션 배너 DB/Storage 기반 관리 구조 전환                 | P3       | 진행 전 | 확인 필요    | T46, T41                          | [T80_promotion_banner_management.md](T80_promotion_banner_management.md)                                         |
@@ -113,8 +113,20 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 
 완료 task는 제외하고, `진행 중`과 `진행 전` task만 기준으로 정렬한다.
 
+## 추천 진행 흐름
+
+완료 task는 제외하고, `진행 중`과 `진행 전` task만 기준으로 정렬한다.
+
 1. P3 Backend/보안: T72, T73, T76
-2. P3 기능 확장: T59, T69, T77, T78, T23
+2. P3 기능 확장: T59, T69, T78, T23
 3. P3 확장/운영 고도화: T32, T33, T34, T36, T37, T70, T71
 4. P3 별도 일정: T66(모바일 앱 래핑), T67(i18n)
 5. P4 기술 부채: T35, T74, T75
+6. P2 진행 중: T26
+7. P2 UI/UX 개선 묶음: T47
+   - T48: T26 완료 후 착수
+8. P3 Backend/보안: T72, T73, T76
+9. P3 기능 확장: T59, T69, T78, T23
+10. P3 확장/운영 고도화: T32, T33, T34, T36, T37, T70, T71
+11. P3 별도 일정: T66(모바일 앱 래핑), T67(i18n)
+12. P4 기술 부채: T35, T74, T75
