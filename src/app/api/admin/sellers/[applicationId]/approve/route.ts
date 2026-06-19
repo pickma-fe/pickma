@@ -14,10 +14,14 @@ export async function POST(
   _request: NextRequest,
   { params }: { params: Promise<{ applicationId: string }> }
 ): Promise<Response> {
-  if (isApiMockEnabled()) return success(null);
-
   const reqId = generateReqId();
   const logger = createLogger(reqId);
+
+  if (isApiMockEnabled()) {
+    const res = success(null);
+    res.headers.set('X-Request-Id', reqId);
+    return res;
+  }
 
   try {
     const { authUser } = await requireAdmin();

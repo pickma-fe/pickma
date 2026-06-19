@@ -28,7 +28,11 @@ export async function PATCH(
   try {
     const body = await validateBody(cancelSellerOrderSchema, request);
 
-    if (isApiMockEnabled()) return success(undefined);
+    if (isApiMockEnabled()) {
+      const res = success(undefined);
+      res.headers.set('X-Request-Id', reqId);
+      return res;
+    }
 
     const { store } = await requireSellerStore();
     await cancelSellerOrder(store.id, parsed.data, body.reason, logger);
