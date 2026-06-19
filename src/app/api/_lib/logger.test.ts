@@ -111,6 +111,22 @@ describe('createLogger', () => {
       expect(parsed.event).toBe('BARE_EVENT');
       expect(parsed.reqId).toBe(reqId);
     });
+
+    it('순환 참조 meta는 serializationError를 포함한 fallback JSON을 출력한다', () => {
+      const circular: Record<string, unknown> = {};
+      circular['self'] = circular;
+
+      const logger = createLogger(reqId, { silent: false });
+      logger.error('CIRCULAR_EVENT', circular);
+
+      expect(consoleSpy.error).toHaveBeenCalledOnce();
+      const raw = consoleSpy.error.mock.calls[0][0] as string;
+      const parsed = JSON.parse(raw) as Record<string, unknown>;
+      expect(parsed.event).toBe('CIRCULAR_EVENT');
+      expect(parsed.reqId).toBe(reqId);
+      expect(typeof parsed.serializationError).toBe('string');
+      expect('self' in parsed).toBe(false);
+    });
   });
 
   describe('{ silent: true } 옵션으로 명시적 silence', () => {
