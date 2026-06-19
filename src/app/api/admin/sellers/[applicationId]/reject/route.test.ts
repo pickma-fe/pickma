@@ -103,6 +103,7 @@ describe('POST /api/admin/sellers/[applicationId]/reject', () => {
         applicationId: APPLICATION_ID,
       })
     );
+    expect(res.headers.get('X-Request-Id')).toBe('test-req-id');
   });
 
   it('잘못된 UUID params는 400을 반환하고 service를 호출하지 않는다', async () => {
