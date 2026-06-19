@@ -17,12 +17,10 @@ import { DOC_TYPE_LABEL } from './certificationConstants';
 import { CertificationDetailModal } from './CertificationDetailModal';
 import { CertificationSection } from './CertificationSection';
 import { OperationInfoSection } from './OperationInfoSection';
-import { StoreEditForm } from './StoreEditForm';
-import type { StoreEditData } from './StoreEditForm';
 import { StoreImageEditForm } from './StoreImageEditForm';
 import { StoreImageSection } from './StoreImageSection';
 
-type ModalType = 'editStore' | 'editImage' | 'viewCertification' | null;
+type ModalType = 'editImage' | 'viewCertification' | null;
 
 export function StoreInfoContent() {
   const router = useRouter();
@@ -83,32 +81,6 @@ export function StoreInfoContent() {
         },
         onError: () => {
           showToast('운영 상태 변경에 실패했습니다.');
-        },
-      }
-    );
-  };
-
-  const handleStoreEdit = (data: StoreEditData) => {
-    updateStore(
-      {
-        name: data.name,
-        phone: data.phone,
-        address: data.address,
-        addressDetail: data.addressDetail || undefined,
-        region: data.region,
-        latitude: data.latitude,
-        longitude: data.longitude,
-        description: data.description || undefined,
-        openTime: `${data.openTime}:00`,
-        closeTime: `${data.closeTime}:00`,
-      },
-      {
-        onSuccess: () => {
-          showToast('가게 정보가 저장되었습니다.');
-          handleCloseModal();
-        },
-        onError: () => {
-          showToast('가게 정보 저장에 실패했습니다.');
         },
       }
     );
@@ -188,7 +160,7 @@ export function StoreInfoContent() {
           <Button
             variant="outline"
             color="gray"
-            onClick={() => handleOpenModal('editStore')}
+            onClick={() => router.push('/seller/store/edit')}
           >
             가게 정보 수정
           </Button>
@@ -224,20 +196,6 @@ export function StoreInfoContent() {
           />
         )}
       </div>
-
-      <Modal
-        isOpen={activeModal === 'editStore'}
-        onClose={handleCloseModal}
-        title="가게 정보 수정"
-        size="lg"
-      >
-        <StoreEditForm
-          storeInfo={storeInfo}
-          onSubmit={handleStoreEdit}
-          onCancel={handleCloseModal}
-          isPending={isUpdating}
-        />
-      </Modal>
 
       <Modal
         isOpen={activeModal === 'editImage'}
