@@ -133,6 +133,7 @@ describe('completeEmailSignup', () => {
   });
 
   it('users insert 실패 후 deleteUser 실패 시 token을 소비한다', async () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     mockInsert.mockResolvedValue({ error: new Error('Insert failed') });
     mockDeleteUser.mockResolvedValue({ error: new Error('Delete failed') });
 
@@ -142,6 +143,13 @@ describe('completeEmailSignup', () => {
       code: ERROR_CODE.INTERNAL_SERVER_ERROR,
     });
     expect(mockStore.completeSignupWithVerificationToken).toHaveBeenCalled();
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining('AUTH_SIGNUP_AUTH_USER_ORPHANED')
+    );
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringContaining(AUTH_USER_ID)
+    );
+    consoleSpy.mockRestore();
   });
 
   it('성공 시 token을 소비한다', async () => {

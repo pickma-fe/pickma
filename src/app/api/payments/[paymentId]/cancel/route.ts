@@ -1,5 +1,6 @@
 import { ERROR_CODE } from '@/lib/errors/errorCodes';
 import { requireAdmin } from '@/app/api/_lib/auth';
+import { createLogger, generateReqId } from '@/app/api/_lib/logger';
 import { fail, routeError, success } from '@/app/api/_lib/response';
 
 import { cancelPaymentSchema, paymentIdSchema } from '../../_lib/schemas';
@@ -9,6 +10,8 @@ export async function POST(
   request: Request,
   { params }: { params: Promise<{ paymentId: string }> }
 ): Promise<Response> {
+  const reqId = generateReqId();
+  const logger = createLogger(reqId);
   const { paymentId } = await params;
 
   try {
@@ -35,8 +38,10 @@ export async function POST(
       ]);
     }
 
-    await cancelPaymentById(idParsed.data, bodyParsed.data.reason);
-    return success(undefined);
+    await cancelPaymentById(idParsed.data, bodyParsed.data.reason, logger);
+    const res = success(undefined);
+    res.headers.set('X-Request-Id', reqId);
+    return res;
   } catch (error) {
     return routeError(error);
   }

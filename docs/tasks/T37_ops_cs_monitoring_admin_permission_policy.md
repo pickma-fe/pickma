@@ -1,7 +1,7 @@
 # T37. 운영 CS/모니터링/관리자 권한 정책 정리
 
 - 상태:
-  진행 전
+  완료
 
 - GitHub Issue:
   확인 필요
@@ -67,3 +67,14 @@
   - 사용자 계정 정지/활성화 정책이 문서화되고, 후속 구현 task가 생성된다.
   - 실서비스 운영 전 체크리스트가 있다.
   - 최소 구조화 로그 형식이 정의된다.
+
+- 구현 결과:
+  - `docs/ops_policy.md`: MVP 운영 정책 8절 (CS 절차, Admin 계정, 장애 공지, 계정 정지, 신고/제재, 데이터 보존, 모니터링 지표, 실서비스 체크리스트)
+  - `src/app/api/_lib/logger.ts`: Route Handler 전용 구조화 로거 구현 (Logger 인터페이스, generateReqId, createLogger, test env silence)
+  - `src/app/api/_lib/logger.test.ts`: logger 단위 테스트 (10 cases)
+  - 결제/주문 취소 핸들러(payments/confirm, payments/cancel, orders/cancel, seller/orders/cancel) 로거 연동 — 7개 error 이벤트
+  - Admin 판매자 승인/거절 핸들러 감사 로그 연동 — ADMIN_APPROVE_SELLER_SUCCEEDED, ADMIN_REJECT_SELLER_SUCCEEDED
+  - Storage cleanup 로거 연동 — 4개 이벤트 (LIST_FAILED, DB_QUERY_FAILED, REMOVE_FAILED, COMPLETED)
+  - Auth signup 보상 실패 직접 로그 — AUTH_SIGNUP_AUTH_USER_ORPHANED (console.error + incidentId)
+  - `docs/system_architecture.md` 섹션 19 추가 (구조화 로그), 15.3 T37 범위 외 P4 유보 표기
+  - RLS 전환은 T37 범위 외로 15.3에 P4 유보 표기 후 별도 task에서 처리

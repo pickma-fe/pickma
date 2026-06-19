@@ -114,6 +114,15 @@ describe('PATCH /api/orders/[orderId]/cancel', () => {
     });
     const res = await PATCH(request, { params });
     expect(res.status).toBe(200);
-    expect(cancelOrder).toHaveBeenCalledWith('user-1', VALID_UUID, '단순 변심');
+    expect(cancelOrder).toHaveBeenCalledWith(
+      'user-1',
+      VALID_UUID,
+      '단순 변심',
+      expect.objectContaining({
+        info: expect.any(Function),
+        warn: expect.any(Function),
+        error: expect.any(Function),
+      })
+    );
   });
 });

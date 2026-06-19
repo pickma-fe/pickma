@@ -1,5 +1,6 @@
 import { ERROR_CODE } from '@/lib/errors/errorCodes';
 import { requireActiveUser } from '@/app/api/_lib/auth';
+import { createLogger, generateReqId } from '@/app/api/_lib/logger';
 import { fail, routeError, success } from '@/app/api/_lib/response';
 
 import { cancelOrderSchema, orderIdSchema } from '../../_lib/schemas';
@@ -9,6 +10,8 @@ export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ orderId: string }> }
 ): Promise<Response> {
+  const reqId = generateReqId();
+  const logger = createLogger(reqId);
   const { orderId } = await params;
 
   try {
@@ -35,8 +38,10 @@ export async function PATCH(
       ]);
     }
 
-    await cancelOrder(user.id, idParsed.data, bodyParsed.data.reason);
-    return success(undefined);
+    await cancelOrder(user.id, idParsed.data, bodyParsed.data.reason, logger);
+    const res = success(undefined);
+    res.headers.set('X-Request-Id', reqId);
+    return res;
   } catch (error) {
     return routeError(error);
   }

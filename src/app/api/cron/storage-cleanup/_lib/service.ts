@@ -1,6 +1,7 @@
 import { AppError } from '@/lib/errors/appError';
 import { ERROR_CODE } from '@/lib/errors/errorCodes';
 import { createServiceRoleClient } from '@/lib/supabase/service';
+import type { Logger } from '@/app/api/_lib/logger';
 
 const BUCKET = 'seller-application-documents';
 const ORPHAN_DAYS = 30;
@@ -14,7 +15,8 @@ interface StorageFile {
 
 async function listAllFiles(
   supabase: ReturnType<typeof createServiceRoleClient>,
-  parentPath: string
+  parentPath: string,
+  logger: Logger
 ): Promise<StorageFile[]> {
   const files: StorageFile[] = [];
   let offset = 0;
@@ -25,7 +27,11 @@ async function listAllFiles(
       .list(parentPath, { limit: LIST_LIMIT, offset });
 
     if (error) {
-      // TODO: logger 추가 후 error 원본 로깅
+      logger.error('STORAGE_CLEANUP_LIST_FAILED', {
+        bucket: BUCKET,
+        parentPath,
+        message: error.message,
+      });
       throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
     }
 
@@ -35,7 +41,7 @@ async function listAllFiles(
       const fullPath = parentPath ? `${parentPath}/${item.name}` : item.name;
 
       if (item.id === null) {
-        const nested = await listAllFiles(supabase, fullPath);
+        const nested = await listAllFiles(supabase, fullPath, logger);
         files.push(...nested);
       } else {
         files.push({
@@ -57,7 +63,9 @@ function daysSince(isoString: string): number {
   return ms / (1000 * 60 * 60 * 24);
 }
 
-export async function runStorageCleanup(): Promise<{ deletedCount: number }> {
+export async function runStorageCleanup(
+  logger: Logger
+): Promise<{ deletedCount: number }> {
   const supabase = createServiceRoleClient();
 
   const dbPaths = new Set<string>();
@@ -70,7 +78,9 @@ export async function runStorageCleanup(): Promise<{ deletedCount: number }> {
       .range(dbOffset, dbOffset + DB_PAGE_SIZE - 1);
 
     if (dbError) {
-      // TODO: logger 추가 후 dbError 원본 로깅
+      logger.error('STORAGE_CLEANUP_DB_QUERY_FAILED', {
+        message: dbError.message,
+      });
       throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
     }
 
@@ -82,7 +92,7 @@ export async function runStorageCleanup(): Promise<{ deletedCount: number }> {
     dbOffset += DB_PAGE_SIZE;
   }
 
-  const allFiles = await listAllFiles(supabase, '');
+  const allFiles = await listAllFiles(supabase, '', logger);
 
   const orphanPaths = allFiles
     .filter(
@@ -94,6 +104,7 @@ export async function runStorageCleanup(): Promise<{ deletedCount: number }> {
     .map((f) => f.path);
 
   if (orphanPaths.length === 0) {
+    logger.info('STORAGE_CLEANUP_COMPLETED', { deletedCount: 0 });
     return { deletedCount: 0 };
   }
 
@@ -102,9 +113,16 @@ export async function runStorageCleanup(): Promise<{ deletedCount: number }> {
     .remove(orphanPaths);
 
   if (removeError) {
-    // TODO: logger 추가 후 removeError 원본 로깅
+    logger.error('STORAGE_CLEANUP_REMOVE_FAILED', {
+      bucket: BUCKET,
+      count: orphanPaths.length,
+      message: removeError.message,
+    });
     throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
   }
 
+  logger.info('STORAGE_CLEANUP_COMPLETED', {
+    deletedCount: orphanPaths.length,
+  });
   return { deletedCount: orphanPaths.length };
 }

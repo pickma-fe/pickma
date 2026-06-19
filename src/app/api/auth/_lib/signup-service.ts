@@ -84,6 +84,15 @@ export async function completeEmailSignup(
     if (!deleteError) {
       await store.releaseSignupVerificationToken(tokenHash).catch(() => {});
     } else {
+      console.error(
+        JSON.stringify({
+          level: 'error',
+          ts: new Date().toISOString(),
+          incidentId: crypto.randomUUID(),
+          event: 'AUTH_SIGNUP_AUTH_USER_ORPHANED',
+          userId: authUserId,
+        })
+      );
       await store
         .completeSignupWithVerificationToken(tokenHash)
         .catch(() => {});
