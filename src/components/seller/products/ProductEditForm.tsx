@@ -117,7 +117,7 @@ export function ProductEditForm({
       <fieldset className="flex flex-col gap-4">
         <legend className="text-sm font-medium text-gray-700">판매 정보</legend>
 
-        <div className="grid grid-cols-2 gap-4 pt-2">
+        <div className="grid grid-cols-1 gap-4 pt-2 sm:grid-cols-2">
           <Input
             label="판매가 (원)"
             required
@@ -138,7 +138,7 @@ export function ProductEditForm({
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Controller
             name="pickupStartTime"
             control={control}
