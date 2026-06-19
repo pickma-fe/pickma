@@ -153,6 +153,10 @@ describe('runStorageCleanup', () => {
     expect(mockRemove).toHaveBeenCalledWith([
       'user-1/upload-1/business_license/file.pdf',
     ]);
+    expect(mockLogger.info).toHaveBeenCalledWith(
+      'STORAGE_CLEANUP_COMPLETED',
+      expect.objectContaining({ deletedCount: 1 })
+    );
   });
 
   it('created_at이 null인 파일은 삭제하지 않는다', async () => {
@@ -215,6 +219,10 @@ describe('runStorageCleanup', () => {
       statusCode: 500,
     });
     expect(mockRemove).not.toHaveBeenCalled();
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      'STORAGE_CLEANUP_DB_QUERY_FAILED',
+      expect.objectContaining({ message: 'db error' })
+    );
   });
 
   it('storage.list() 오류 시 AppError(500)을 throw하고 remove 미호출', async () => {
@@ -226,6 +234,14 @@ describe('runStorageCleanup', () => {
       statusCode: 500,
     });
     expect(mockRemove).not.toHaveBeenCalled();
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      'STORAGE_CLEANUP_LIST_FAILED',
+      expect.objectContaining({
+        bucket: 'seller-application-documents',
+        parentPath: '',
+        message: 'storage error',
+      })
+    );
   });
 
   it('삭제 실패 시 AppError(500)을 throw한다', async () => {
@@ -239,5 +255,13 @@ describe('runStorageCleanup', () => {
     await expect(runStorageCleanup(mockLogger)).rejects.toMatchObject({
       statusCode: 500,
     });
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      'STORAGE_CLEANUP_REMOVE_FAILED',
+      expect.objectContaining({
+        bucket: 'seller-application-documents',
+        count: 1,
+        message: 'remove error',
+      })
+    );
   });
 });

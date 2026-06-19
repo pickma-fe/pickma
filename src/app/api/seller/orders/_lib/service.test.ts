@@ -577,5 +577,36 @@ describe('cancelSellerOrder', () => {
     await expect(
       cancelSellerOrder(STORE_ID, ORDER_ID, CANCEL_REASON, mockLogger)
     ).rejects.toMatchObject({ code: ERROR_CODE.PAYMENT_CANCEL_FAILED });
+
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      'SELLER_ORDER_CANCEL_RESTORE_FAILED',
+      expect.objectContaining({
+        orderId: ORDER_ID,
+        orderNumber: 'PM20260519AAAA',
+        paymentKey: PAYMENT_KEY,
+      })
+    );
+  });
+
+  it('cancel_order RPC 실패 시 SELLER_ORDER_CANCEL_FINALIZE_FAILED를 로그하고 PAYMENT_CANCEL_FAILED를 던진다', async () => {
+    const { client } = buildCancelChain([
+      { data: cancelOrderRow, error: null },
+      { data: [{ id: ORDER_ID }], error: null },
+    ]);
+    client.rpc.mockResolvedValue({ error: { message: 'db error' } });
+    mockServiceClient(client);
+
+    await expect(
+      cancelSellerOrder(STORE_ID, ORDER_ID, CANCEL_REASON, mockLogger)
+    ).rejects.toMatchObject({ code: ERROR_CODE.PAYMENT_CANCEL_FAILED });
+
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      'SELLER_ORDER_CANCEL_FINALIZE_FAILED',
+      expect.objectContaining({
+        orderId: ORDER_ID,
+        orderNumber: 'PM20260519AAAA',
+        paymentKey: PAYMENT_KEY,
+      })
+    );
   });
 });

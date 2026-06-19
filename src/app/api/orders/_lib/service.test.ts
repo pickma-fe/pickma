@@ -687,6 +687,14 @@ describe('cancelOrder', () => {
         payload: expect.objectContaining({ failureStage: 'cancel_finalize' }),
       })
     );
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      'CONSUMER_ORDER_CANCEL_FINALIZE_FAILED',
+      expect.objectContaining({
+        orderId: 'order-uuid-1',
+        orderNumber: 'PM2026TEST',
+        paymentKey: 'toss_ppk_test',
+      })
+    );
   });
 
   it('PAYMENT_MOCK=false + paymentKey 없음 → revert_order_cancel_claim 호출 후 PAYMENT_CANCEL_FAILED', async () => {
@@ -738,6 +746,14 @@ describe('cancelOrder', () => {
       expect.objectContaining({
         event_type: 'payment_compensation_failed',
         payload: expect.objectContaining({ failureStage: 'revert_processing' }),
+      })
+    );
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      'CONSUMER_ORDER_CANCEL_REVERT_FAILED',
+      expect.objectContaining({
+        orderId: 'order-uuid-1',
+        orderNumber: 'PM2026TEST',
+        paymentKey: 'toss_ppk_test',
       })
     );
   });

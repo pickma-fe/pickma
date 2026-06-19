@@ -684,6 +684,13 @@ describe('confirmPayment', () => {
           payload: expect.objectContaining({ failureStage: 'toss_cancel' }),
         })
       );
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'PAYMENT_CONFIRM_OPTION_B_TOSS_CANCEL_FAILED',
+        expect.objectContaining({
+          orderNumber: 'PM2026TEST',
+          paymentKey: 'toss_ppk_PM2026TEST',
+        })
+      );
     });
 
     it('PAYMENT_MOCK=false + cancel 성공 + revert 실패 → PAYMENT_CONFIRM_FAILED', async () => {
@@ -723,6 +730,13 @@ describe('confirmPayment', () => {
           payload: expect.objectContaining({
             failureStage: 'revert_processing',
           }),
+        })
+      );
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'PAYMENT_CONFIRM_OPTION_B_REVERT_FAILED',
+        expect.objectContaining({
+          orderNumber: 'PM2026TEST',
+          paymentKey: 'toss_ppk_PM2026TEST',
         })
       );
     });
@@ -986,6 +1000,13 @@ describe('cancelPaymentById', () => {
       expect.objectContaining({
         event_type: 'payment_compensation_failed',
         payload: expect.objectContaining({ failureStage: 'cancel_finalize' }),
+      })
+    );
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      'PAYMENT_CANCEL_FAILED',
+      expect.objectContaining({
+        orderNumber: 'PM2026TEST',
+        paymentKey: 'toss_ppk_test',
       })
     );
   });
