@@ -68,7 +68,7 @@ MVP 실서비스 기준 운영 절차와 정책을 정의한다.
 ### 3.2 판매자 승인 지연
 
 - `seller_applications.status = 'pending'` 인 신청이 72시간 이상 미처리 시 운영팀에서 수동 확인
-- `GET /api/admin/sellers/applications?status=pending` 으로 조회
+- `GET /api/admin/sellers/pending` 으로 조회
 
 ### 3.3 특정 가게 운영 중단
 
@@ -142,7 +142,7 @@ MVP 실서비스 기준 운영 절차와 정책을 정의한다.
 | ----------------------------------------- | ----------------------------------------------------------------------------------------------- |
 | `processing` 30분 이상 잔류 주문          | `GET /api/admin/orders?status=processing` 수동 조회                                             |
 | `payment_compensation_failed` 이벤트 건수 | Supabase Dashboard → `payment_events` 테이블 직접 조회                                          |
-| 판매자 승인 처리 현황                     | `GET /api/admin/sellers/applications?status=pending` 수동 조회                                  |
+| 판매자 승인 처리 현황                     | `GET /api/admin/sellers/pending` 수동 조회                                                      |
 | Admin 판매자 승인/거절 이력               | Vercel Function Logs에서 `ADMIN_APPROVE_SELLER_SUCCEEDED`, `ADMIN_REJECT_SELLER_SUCCEEDED` 검색 |
 | Storage cleanup 결과                      | Vercel Function Logs에서 `STORAGE_CLEANUP_COMPLETED` 검색                                       |
 
