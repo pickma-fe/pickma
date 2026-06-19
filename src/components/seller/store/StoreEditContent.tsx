@@ -13,9 +13,16 @@ import { StoreEditForm } from './StoreEditForm';
 
 export function StoreEditContent() {
   const router = useRouter();
-  const { data: storeInfo, isLoading: isStoreLoading } = useMyStore();
-  const { data: application, isLoading: isAppLoading } =
-    useMySellerApplication();
+  const {
+    data: storeInfo,
+    isLoading: isStoreLoading,
+    isError: isStoreError,
+  } = useMyStore();
+  const {
+    data: application,
+    isLoading: isAppLoading,
+    isError: isAppError,
+  } = useMySellerApplication();
   const { mutate: createStore, isPending: isCreating } = useCreateStore();
   const { mutate: updateStore, isPending: isUpdating } = useUpdateStore();
 
@@ -58,6 +65,16 @@ export function StoreEditContent() {
       );
     }
   };
+
+  if (isStoreError || isAppError) {
+    return (
+      <div className="flex min-h-[40vh] items-center justify-center">
+        <p className="text-sm text-red-500">
+          가게/사업자 정보를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.
+        </p>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
