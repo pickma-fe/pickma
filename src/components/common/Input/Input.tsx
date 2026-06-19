@@ -61,7 +61,7 @@ export function Input({
           aria-required={required}
           invalid={Boolean(error)}
           className={cn(
-            'focus:border-primary-500 focus:ring-primary-300 w-full rounded-md border py-2 text-sm outline-none placeholder:text-gray-300 focus:ring-2',
+            'focus:border-primary-500 focus:ring-primary-300 w-full rounded-md border bg-white py-2 text-sm outline-none placeholder:text-gray-300 focus:ring-2',
             'border-gray-200 data-invalid:border-red-500 data-invalid:focus:ring-red-300',
             'data-disabled:cursor-default data-disabled:bg-gray-100 data-disabled:text-gray-400',
             startIcon ? 'pl-9' : 'pl-4',

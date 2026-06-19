@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 import type { SellerApplicationDocument } from '@/types/seller-application';
 import { useMySellerApplication } from '@/hooks/seller/applications/useMySellerApplication';
@@ -16,16 +17,21 @@ import { DOC_TYPE_LABEL } from './certificationConstants';
 import { CertificationDetailModal } from './CertificationDetailModal';
 import { CertificationSection } from './CertificationSection';
 import { OperationInfoSection } from './OperationInfoSection';
-import { StoreEditForm } from './StoreEditForm';
-import type { StoreEditData } from './StoreEditForm';
 import { StoreImageEditForm } from './StoreImageEditForm';
 import { StoreImageSection } from './StoreImageSection';
 
-type ModalType = 'editStore' | 'editImage' | 'viewCertification' | null;
+type ModalType = 'editImage' | 'viewCertification' | null;
 
 export function StoreInfoContent() {
+  const router = useRouter();
   const { data: storeInfo, isLoading, isError } = useMyStore();
   const { mutate: updateStore, isPending: isUpdating } = useUpdateStore();
+
+  useEffect(() => {
+    if (!isLoading && !isError && !storeInfo) {
+      router.replace('/seller/store/edit');
+    }
+  }, [isLoading, isError, storeInfo, router]);
   const {
     data: application,
     isLoading: isApplicationLoading,
@@ -80,32 +86,6 @@ export function StoreInfoContent() {
     );
   };
 
-  const handleStoreEdit = (data: StoreEditData) => {
-    updateStore(
-      {
-        name: data.name,
-        phone: data.phone,
-        address: data.address,
-        addressDetail: data.addressDetail || undefined,
-        region: data.region,
-        latitude: data.latitude,
-        longitude: data.longitude,
-        description: data.description || undefined,
-        openTime: `${data.openTime}:00`,
-        closeTime: `${data.closeTime}:00`,
-      },
-      {
-        onSuccess: () => {
-          showToast('가게 정보가 저장되었습니다.');
-          handleCloseModal();
-        },
-        onError: () => {
-          showToast('가게 정보 저장에 실패했습니다.');
-        },
-      }
-    );
-  };
-
   const handleImageEdit = (imageUrl: string, file?: File) => {
     if (file) {
       updateStore(
@@ -154,7 +134,7 @@ export function StoreInfoContent() {
         </p>
       </div>
 
-      <Section variant="card" className="bg-white">
+      <Section variant="card">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
@@ -180,7 +160,7 @@ export function StoreInfoContent() {
           <Button
             variant="outline"
             color="gray"
-            onClick={() => handleOpenModal('editStore')}
+            onClick={() => router.push('/seller/store/edit')}
           >
             가게 정보 수정
           </Button>
@@ -202,7 +182,7 @@ export function StoreInfoContent() {
           onEditImage={() => handleOpenModal('editImage')}
         />
         {isApplicationError ? (
-          <Section variant="card" className="bg-white">
+          <Section variant="card">
             <p className="text-sm text-red-500">
               제출 서류 정보를 불러오지 못했습니다.
             </p>
@@ -216,20 +196,6 @@ export function StoreInfoContent() {
           />
         )}
       </div>
-
-      <Modal
-        isOpen={activeModal === 'editStore'}
-        onClose={handleCloseModal}
-        title="가게 정보 수정"
-        size="lg"
-      >
-        <StoreEditForm
-          storeInfo={storeInfo}
-          onSubmit={handleStoreEdit}
-          onCancel={handleCloseModal}
-          isPending={isUpdating}
-        />
-      </Modal>
 
       <Modal
         isOpen={activeModal === 'editImage'}

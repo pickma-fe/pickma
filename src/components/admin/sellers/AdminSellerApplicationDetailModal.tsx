@@ -3,6 +3,7 @@
 import { ExternalLink, FileText } from 'lucide-react';
 
 import type { AdminPendingSellerApplication } from '@/types/seller-application';
+import { Badge } from '@/components/common/Badge/Badge';
 import { Button } from '@/components/common/Button/Button';
 import { Modal } from '@/components/common/Modal/Modal';
 
@@ -34,7 +35,18 @@ export function AdminSellerApplicationDetailModal({
       {application && (
         <div className="space-y-6">
           <section className="rounded-lg border border-gray-200 p-4">
-            <h3 className="text-sm font-semibold text-gray-900">신청 정보</h3>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <h3 className="text-sm font-semibold text-gray-900">신청 정보</h3>
+              <Badge
+                color="warning"
+                rounded="md"
+                role="status"
+                aria-label="심사 상태: 검토 대기"
+                className="self-start"
+              >
+                검토 대기
+              </Badge>
+            </div>
             <dl className="mt-4 grid gap-4 text-sm sm:grid-cols-2">
               <div>
                 <dt className="text-gray-500">상호명</dt>
@@ -114,8 +126,9 @@ export function AdminSellerApplicationDetailModal({
                     <Button
                       variant="outline"
                       color="gray"
-                      className="h-8 shrink-0 gap-1 px-3 text-xs"
+                      className="h-10 shrink-0 gap-1 px-3 text-xs"
                       disabled={isDocumentLoading}
+                      aria-label={`${document.originalFileName} 문서 열기`}
                       onClick={() => onOpenDocument(document.id)}
                     >
                       열기

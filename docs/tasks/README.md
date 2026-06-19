@@ -52,7 +52,7 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 | T23 | E2E 테스트 및 결제 팝업 모킹 전략                            | P3       | 진행 전 | 확인 필요    | T01, T02, T03, T04, T24           | [T23_e2e_payment_popup_mocking_strategy.md](T23_e2e_payment_popup_mocking_strategy.md)                           |
 | T24 | CI 기본 파이프라인 구축                                      | P1       | 완료    | 173          | 없음                              | [T24_ci_lint_test_pipeline.md](T24_ci_lint_test_pipeline.md)                                                     |
 | T25 | hook input Domain/UI 타입 분리                               | P2       | 완료    | 252          | T15                               | [T25_hook_input_domain_ui_type_split.md](T25_hook_input_domain_ui_type_split.md)                                 |
-| T26 | 운영 화면 summary/list API 분리                              | P2       | 진행 중 | 264          | T04                               | [T26_admin_seller_summary_list_api_split.md](T26_admin_seller_summary_list_api_split.md)                         |
+| T26 | 운영 화면 summary/list API 분리                              | P2       | 완료    | 264          | T04                               | [T26_admin_seller_summary_list_api_split.md](T26_admin_seller_summary_list_api_split.md)                         |
 | T27 | Auth 이메일/Supabase SMTP/rate limit 정책 정리               | P0       | 완료    | 186          | 없음                              | [T27_auth_email_smtp_rate_limit_policy.md](T27_auth_email_smtp_rate_limit_policy.md)                             |
 | T28 | 판매자 상품 수정 진입점 결정 및 구현                         | P2       | 완료    | 229          | T15                               | [T28_seller_product_edit_entrypoint.md](T28_seller_product_edit_entrypoint.md)                                   |
 | T29 | 판매자 제출 문서 확인 UX 개선                                | P2       | 완료    | 236          | T06, T44, T61                     | [T29_seller_document_review_ux.md](T29_seller_document_review_ux.md)                                             |
@@ -73,8 +73,8 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 | T44 | 판매자 신분증 원본 처리 및 KYC 보관 정책 결정                | P0       | 완료    | 191          | T06                               | [T44_seller_id_document_kyc_policy.md](T44_seller_id_document_kyc_policy.md)                                     |
 | T45 | UI/UX 및 접근성 baseline 기준 수립                           | P1       | 완료    | 238          | T09                               | [T45_ui_accessibility_baseline_policy.md](T45_ui_accessibility_baseline_policy.md)                               |
 | T46 | Consumer UI/UX 및 접근성 개선                                | P2       | 완료    | 278          | T45, T64, T65, T12, T13           | [T46_consumer_ui_accessibility_improvement.md](T46_consumer_ui_accessibility_improvement.md)                     |
-| T47 | Seller UI/UX 및 접근성 개선                                  | P2       | 진행 전 | 확인 필요    | T45, T64, T65, T28, T29, T38, T52 | [T47_seller_ui_accessibility_improvement.md](T47_seller_ui_accessibility_improvement.md)                         |
-| T48 | Admin UI/UX 및 접근성 개선                                   | P2       | 진행 전 | 확인 필요    | T45, T64, T65, T03, T04, T26      | [T48_admin_ui_accessibility_improvement.md](T48_admin_ui_accessibility_improvement.md)                           |
+| T47 | Seller UI/UX 및 접근성 개선                                  | P2       | 완료    | 287          | T45, T64, T65, T28, T29, T38, T52 | [T47_seller_ui_accessibility_improvement.md](T47_seller_ui_accessibility_improvement.md)                         |
+| T48 | Admin UI/UX 및 접근성 개선                                   | P2       | 완료    | 282          | T45, T64, T65, T03, T04, T26      | [T48_admin_ui_accessibility_improvement.md](T48_admin_ui_accessibility_improvement.md)                           |
 | T49 | Auth/Payment/Legal UI/UX 및 접근성 개선                      | P2       | 완료    | 271          | T45, T64, T65, T27, T42           | [T49_auth_payment_legal_ui_accessibility_improvement.md](T49_auth_payment_legal_ui_accessibility_improvement.md) |
 | T50 | 판매자 심사 대기 화면 구현                                   | P1       | 완료    | 180          | 없음                              | [T50_seller_pending_page.md](T50_seller_pending_page.md)                                                         |
 | T51 | 판매자 대시보드 메인 화면 구현                               | P1       | 완료    | 202          | T10, T15                          | [T51_seller_dashboard_page.md](T51_seller_dashboard_page.md)                                                     |
@@ -103,7 +103,7 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 | T74 | Supabase select 쿼리 반환 타입 안전성 개선                   | P4       | 진행 전 | 확인 필요    | 없음                              | [T74_supabase_select_type_safety.md](T74_supabase_select_type_safety.md)                                         |
 | T75 | 백엔드 전용 lib을 app/api/\_lib으로 분리                     | P4       | 진행 전 | 확인 필요    | 없음                              | [T75_backend_lib_separation.md](T75_backend_lib_separation.md)                                                   |
 | T76 | Route Handler·Hook 테스트 보강                               | P3       | 진행 전 | 확인 필요    | T24                               | [T76_route_handler_hook_test_coverage.md](T76_route_handler_hook_test_coverage.md)                               |
-| T77 | 판매자 대시보드 매출 통계 구현 (S-DASH-02)                   | P3       | 진행 전 | 확인 필요    | T58                               | [T77_seller_dashboard_sales_stats.md](T77_seller_dashboard_sales_stats.md)                                       |
+| T77 | 판매자 대시보드 매출 통계 구현 (S-DASH-02)                   | P3       | 완료    | 285          | T58                               | [T77_seller_dashboard_sales_stats.md](T77_seller_dashboard_sales_stats.md)                                       |
 | T78 | 공지사항 도메인/API 구현                                     | P3       | 진행 전 | 확인 필요    | T58                               | [T78_notice_domain_api.md](T78_notice_domain_api.md)                                                             |
 | T79 | seed 상품 image_url 경로 수정                                | P4       | 진행 전 | 확인 필요    | T39                               | [T79_seed_product_image_url_fix.md](T79_seed_product_image_url_fix.md)                                           |
 | T80 | 프로모션 배너 DB/Storage 기반 관리 구조 전환                 | P3       | 진행 전 | 확인 필요    | T46, T41                          | [T80_promotion_banner_management.md](T80_promotion_banner_management.md)                                         |
@@ -113,11 +113,20 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 
 완료 task는 제외하고, `진행 중`과 `진행 전` task만 기준으로 정렬한다.
 
-1. P2 진행 중: T26
-2. P2 UI/UX 개선 묶음: T47
+## 추천 진행 흐름
+
+완료 task는 제외하고, `진행 중`과 `진행 전` task만 기준으로 정렬한다.
+
+1. P3 Backend/보안: T72, T73, T76
+2. P3 기능 확장: T59, T69, T78, T23
+3. P3 확장/운영 고도화: T32, T33, T34, T36, T37, T70, T71
+4. P3 별도 일정: T66(모바일 앱 래핑), T67(i18n)
+5. P4 기술 부채: T35, T74, T75
+6. P2 진행 중: T26
+7. P2 UI/UX 개선 묶음: T47
    - T48: T26 완료 후 착수
-3. P3 Backend/보안: T72, T73, T76
-4. P3 기능 확장: T59, T69, T77, T78, T23
-5. P3 확장/운영 고도화: T32, T33, T34, T36, T37, T70, T71
-6. P3 별도 일정: T66(모바일 앱 래핑), T67(i18n)
-7. P4 기술 부채: T35, T74, T75
+8. P3 Backend/보안: T72, T73, T76
+9. P3 기능 확장: T59, T69, T78, T23
+10. P3 확장/운영 고도화: T32, T33, T34, T36, T37, T70, T71
+11. P3 별도 일정: T66(모바일 앱 래핑), T67(i18n)
+12. P4 기술 부채: T35, T74, T75

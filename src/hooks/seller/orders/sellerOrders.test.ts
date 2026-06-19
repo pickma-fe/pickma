@@ -7,6 +7,7 @@ import { queryKeys } from '@/lib/queryKeys';
 import { sellerOrderApi } from '@/api/seller/orders/sellerOrderApi';
 
 import { useAcceptSellerOrder } from './useAcceptSellerOrder';
+import { useCancelSellerOrder } from './useCancelSellerOrder';
 import { useCompleteSellerOrder } from './useCompleteSellerOrder';
 import { useMarkSellerOrderReady } from './useMarkSellerOrderReady';
 import { useSellerOrder } from './useSellerOrder';
@@ -21,6 +22,7 @@ vi.mock('@/api/seller/orders/sellerOrderApi', () => ({
     acceptOrder: vi.fn(),
     markOrderReady: vi.fn(),
     completeOrder: vi.fn(),
+    cancelOrder: vi.fn(),
   },
 }));
 
@@ -211,5 +213,44 @@ describe('useCompleteSellerOrder', () => {
     expect(invalidateSpy).toHaveBeenCalledWith({
       queryKey: queryKeys.sellers.orders.all(),
     });
+  });
+});
+
+describe('useCancelSellerOrder', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('성공 시 주문 및 상품 관련 queryKey를 모두 invalidate한다', async () => {
+    vi.mocked(sellerOrderApi.cancelOrder).mockResolvedValue(undefined);
+
+    const { queryClient, wrapper } = createWrapper();
+    const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
+    const { result } = renderHook(() => useCancelSellerOrder(), { wrapper });
+
+    await act(async () => {
+      await result.current.mutateAsync({ id: ORDER_ID, reason: '재고 부족' });
+    });
+
+    expect(sellerOrderApi.cancelOrder).toHaveBeenCalledWith(
+      ORDER_ID,
+      '재고 부족'
+    );
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.sellers.orders.all(),
+    });
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.products.sellerList(),
+    });
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.products.sellerDetails(),
+    });
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.products.lists(),
+    });
+    expect(invalidateSpy).toHaveBeenCalledWith({
+      queryKey: queryKeys.products.details(),
+    });
+    expect(invalidateSpy).toHaveBeenCalledTimes(5);
   });
 });

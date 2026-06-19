@@ -1204,6 +1204,7 @@ Seller product API의 pickup time은 서버 schema에서 `HH:mm:ss`로 정규화
 | S-ORDER-06 | 준비 완료 처리 | PATCH  | `/api/seller/orders/:orderId/ready`    | seller | P0       |
 | S-ORDER-03 | 픽업 완료 처리 | PATCH  | `/api/seller/orders/:orderId/complete` | seller | P0       |
 | S-ORDER-04 | 노쇼 처리      | PATCH  | `/api/seller/orders/:orderId/no-show`  | seller | P1       |
+| S-ORDER-08 | 주문 취소      | PATCH  | `/api/seller/orders/:orderId/cancel`   | seller | P1       |
 
 Seller order API는 `requireSellerStore()`를 통과해야 하며, 해당 주문이 seller의 store에 속하는지 검증한다.
 
@@ -1212,17 +1213,34 @@ Seller order API는 `requireSellerStore()`를 통과해야 하며, 해당 주문
 ```
 
 reserved → (PATCH /accept) → accepted → (PATCH /ready) → ready → (PATCH /complete) → completed
+reserved or accepted → (PATCH /cancel) → cancelling → cancelled
 
 ```
 
 - accept 허용 상태: `reserved`
 - ready 허용 상태: `accepted`
 - complete 허용 상태: `ready`
+- cancel 허용 상태: `reserved`, `accepted` (결제 취소 포함)
 - 허용되지 않는 현재 상태에서 전이 시도 → `INVALID_ORDER_STATUS` 409
 - 상태 전이는 update query에 `store_id`, `orderId`, `expectedStatus` 조건을 모두 포함해 원자적으로 수행한다.
 - `complete` 처리 시 `picked_up_at = now()` 함께 기록한다.
+- `cancel` 처리 흐름: `cancelling` claim → Toss 결제 취소 → `cancel_order` RPC. Toss/RPC 실패 시 `payment_events` 보상 로그 기록 후 `PAYMENT_CANCEL_FAILED` 502.
 - MVP에서 `ready` 전이는 cron/자동이 아닌 seller 수동 처리다.
 - 응답: `void` (`success(undefined)`)
+
+#### S-ORDER-08 PATCH /api/seller/orders/:orderId/cancel
+
+```ts
+// Request body
+{ reason: string } // trim 후 1~500자
+
+// Response
+void
+```
+
+- `VALIDATION_ERROR` 400: orderId가 유효한 UUID가 아닌 경우, reason 누락/trim 후 빈 문자열/길이 초과
+- `INVALID_ORDER_STATUS` 409: cancel 허용 상태(`reserved`, `accepted`)가 아닌 경우, 또는 결제 내역 없는 경우
+- `PAYMENT_CANCEL_FAILED` 502: Toss API 취소 실패 또는 `cancel_order` RPC 실패
 
 ### 9.2 목록 query (SellerOrderListParams)
 
@@ -1276,11 +1294,69 @@ export interface SellerOrderSummaryResponse {
 
 ---
 
-## 10. Admin
+## 10. Seller Dashboard
+
+| PRD ID    | 기능             | Method | API                     | Auth        | Priority |
+| --------- | ---------------- | ------ | ----------------------- | ----------- | -------- |
+| S-DASH-02 | 판매자 매출 통계 | GET    | `/api/seller/dashboard` | sellerStore | P3       |
+
+### 10.1 `GET /api/seller/dashboard`
+
+Auth: `requireSellerStore()` — seller role + active store 보유 사용자만 호출할 수 있다.
+
+Response:
+
+```ts
+export interface SellerDashboardStatsResponse {
+  totalSalesAmount: number;
+  totalOrderCount: number;
+  dailyMetrics: SellerDashboardDailyMetricResponse[];
+  recentOrders: SellerDashboardRecentOrderResponse[];
+}
+
+export interface SellerDashboardDailyMetricResponse {
+  date: string; // ISO 8601 UTC format (e.g., "2026-06-18T15:00:00.000Z"), 한국 시간 자정(00:00:00+09:00)을 UTC로 변환한 값
+  orderCount: number;
+  salesAmount: number;
+}
+
+export interface SellerDashboardRecentOrderResponse {
+  id: string;
+  orderNumber: string;
+  productName: string;
+  paymentAmount: number;
+  status: OrderStatusParam;
+  createdAt: string; // ISO 8601 UTC format (e.g., "2026-06-19T05:32:00.000Z"), DB created_at 그대로 반환
+}
+```
+
+Behavior:
+
+- `requireSellerStore()`로 인증된 판매자의 store id 기준으로 본인 데이터만 조회한다.
+- `totalSalesAmount`: 누적 매출액 합산.
+- `totalOrderCount`: 누적 주문 수.
+- `dailyMetrics`: 한국 시간(Asia/Seoul) 기준 최근 7일 일별 주문 수 및 매출액.
+- `recentOrders`: 최근 주문 5건 (`created_at DESC`).
+- 집계 대상 status: `reserved`, `accepted`, `ready`, `completed`, `no_show`. `payment_pending`, `processing`, `cancelled`, `expired`는 제외한다.
+- mock 모드(`API_MOCK_ENABLED=true`)에서는 `requireSellerStore()` 없이 mock 데이터를 반환한다.
+
+에러 정책:
+
+| 조건                      | HTTP | error code              |
+| ------------------------- | ---- | ----------------------- |
+| 미인증 또는 inactive user | 401  | `UNAUTHORIZED`          |
+| seller role 아님          | 403  | `FORBIDDEN`             |
+| active store 없음         | 404  | `STORE_NOT_FOUND`       |
+| store status inactive     | 403  | `STORE_INACTIVE`        |
+| DB 조회 실패              | 500  | `INTERNAL_SERVER_ERROR` |
+
+---
+
+## 11. Admin
 
 Admin API는 `/api/admin/*`로 분리한다. 모든 Admin API는 `requireAdmin()`을 통과해야 한다.
 
-### 10.1 Seller Applications
+### 11.1 Seller Applications
 
 | 기능                       | Method | API                                                    | Priority |
 | -------------------------- | ------ | ------------------------------------------------------ | -------- |
@@ -1315,7 +1391,7 @@ Admin API는 `/api/admin/*`로 분리한다. 모든 Admin API는 `requireAdmin()
 - 관리자 UI가 첨부 파일 보기/다운로드를 요청하면 서버는 `requireAdmin()` 확인 후 짧은 만료 시간의 signed read URL을 발급한다.
 - seller application 문서 bucket은 private이며 public URL을 사용하지 않는다.
 
-### 10.2 Stores
+### 11.2 Stores
 
 | PRD ID     | 기능           | Method | API                                 | Priority |
 | ---------- | -------------- | ------ | ----------------------------------- | -------- |
@@ -1334,7 +1410,7 @@ Admin API는 `/api/admin/*`로 분리한다. 모든 Admin API는 `requireAdmin()
 
 응답은 공통 `PaginatedResult<AdminStoreResponse>` envelope를 사용하며, 모든 요청은 `requireAdmin()`을 통과해야 한다.
 
-### 10.3 Users
+### 11.3 Users
 
 | PRD ID    | 기능             | Method | API                               | Priority |
 | --------- | ---------------- | ------ | --------------------------------- | -------- |
@@ -1353,7 +1429,7 @@ Admin API는 `/api/admin/*`로 분리한다. 모든 Admin API는 `requireAdmin()
 
 사용자 상태 변경 API는 T57 범위에서 운영 UI에 노출하지 않는다. 실제 정지/활성화 정책과 audit logging 기준 확정 후 별도 구현한다.
 
-### 10.4 Products / Orders
+### 11.4 Products / Orders
 
 | PRD ID     | 기능           | Method | API                   | Priority |
 | ---------- | -------------- | ------ | --------------------- | -------- |
@@ -1383,7 +1459,7 @@ A-ORDER-01은 `status=processing` filter를 지원한다. `processing` 잔류 �
 
 응답은 공통 `PaginatedResult<AdminOrderResponse>` envelope를 사용하며, 모든 요청은 `requireAdmin()`을 통과해야 한다.
 
-### 10.5 Dashboard
+### 11.5 Dashboard
 
 | PRD ID    | 기능        | Method | API                          | Priority |
 | --------- | ----------- | ------ | ---------------------------- | -------- |
@@ -1403,7 +1479,7 @@ A-ORDER-01은 `status=processing` filter를 지원한다. `processing` 잔류 �
 
 ---
 
-## 11. Wishlist
+## 12. Wishlist
 
 | PRD ID  | 기능         | Method | API                      | Auth | Priority |
 | ------- | ------------ | ------ | ------------------------ | ---- | -------- |
@@ -1415,7 +1491,7 @@ Wishlist는 MVP 이후 기능으로 둔다.
 
 ---
 
-## 12. Error Code 초기 목록
+## 13. Error Code 초기 목록
 
 초기 에러 코드는 `src/lib/errors`에서 중앙 관리한다.
 
@@ -1496,7 +1572,7 @@ RPC에서 raise하는 예외는 아래 정책으로 API error code로 변환한�
 
 ---
 
-## 13. 미구현(501) Endpoint 현황
+## 14. 미구현(501) Endpoint 현황
 
 `API_MOCK_ENABLED=false`에서 `NOT_IMPLEMENTED` 501을 반환하는 endpoint 목록이다.
 각 endpoint의 실제 구현은 담당 task에서 진행하며, 담당 task 완료 기준에 `NOT_IMPLEMENTED` 반환 코드 제거가 포함된다.

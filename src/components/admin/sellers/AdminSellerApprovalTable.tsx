@@ -34,6 +34,7 @@ export function AdminSellerApprovalTable({
 }: AdminSellerApprovalTableProps) {
   return (
     <AdminTable
+      ariaLabel="판매자 승인 대기 신청 목록"
       data={applications}
       rowKey={(application) => application.id}
       isLoading={isLoading}
@@ -93,7 +94,12 @@ export function AdminSellerApprovalTable({
           key: 'status',
           header: '상태',
           render: () => (
-            <Badge color="warning" rounded="md">
+            <Badge
+              color="warning"
+              rounded="md"
+              role="status"
+              aria-label="심사 상태: 검토 대기"
+            >
               검토 대기
             </Badge>
           ),
@@ -108,30 +114,33 @@ export function AdminSellerApprovalTable({
             const isActionDisabled = isActionPending || isPending;
 
             return (
-              <div className="flex justify-center gap-2">
+              <div className="flex flex-col items-stretch justify-center gap-2 sm:flex-row sm:items-center">
                 <Button
-                  className="h-8 px-3 text-xs"
+                  className="h-10 px-3 text-xs"
                   disabled={isActionDisabled}
+                  aria-label={`${application.companyName} 신청 승인 검토`}
                   onClick={() => onApprove(application)}
                 >
-                  승인
+                  승인 검토
                 </Button>
                 <Button
                   variant="outline"
                   color="gray"
-                  className="h-8 px-3 text-xs"
+                  className="h-10 px-3 text-xs"
                   disabled={isActionDisabled}
+                  aria-label={`${application.companyName} 신청 거절 검토`}
                   onClick={() => onReject(application)}
                 >
-                  거절
+                  거절 검토
                 </Button>
                 <Button
                   variant="outline"
                   color="gray"
-                  className="h-8 px-3 text-xs"
+                  className="h-10 px-3 text-xs"
+                  aria-label={`${application.companyName} 신청 상세 보기`}
                   onClick={() => onOpenDetail(application)}
                 >
-                  상세
+                  상세 보기
                 </Button>
               </div>
             );

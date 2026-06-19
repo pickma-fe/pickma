@@ -17,12 +17,15 @@ import type {
   SellerOrderDisplayStatus,
 } from '@/types/seller-order';
 import { useAcceptSellerOrder } from '@/hooks/seller/orders/useAcceptSellerOrder';
+import { useCancelSellerOrder } from '@/hooks/seller/orders/useCancelSellerOrder';
 import { useCompleteSellerOrder } from '@/hooks/seller/orders/useCompleteSellerOrder';
 import { useMarkSellerOrderReady } from '@/hooks/seller/orders/useMarkSellerOrderReady';
 import { useSellerOrders } from '@/hooks/seller/orders/useSellerOrders';
 import { useSellerOrderSummary } from '@/hooks/seller/orders/useSellerOrderSummary';
 import { Section } from '@/components/common/Section/Section';
 
+import { OrderCancelModal } from './OrderCancelModal';
+import { OrderCompleteConfirmModal } from './OrderCompleteConfirmModal';
 import { OrderFilter } from './OrderFilter';
 import { OrderTable } from './OrderTable';
 
@@ -117,6 +120,17 @@ export function OrderManageContent() {
   const [actionError, setActionError] = useState<string | null>(null);
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
 
+  const [cancelPendingOrderId, setCancelPendingOrderId] = useState<
+    string | null
+  >(null);
+  const [cancelErrorMessage, setCancelErrorMessage] = useState<string | null>(
+    null
+  );
+
+  const [completePendingOrderId, setCompletePendingOrderId] = useState<
+    string | null
+  >(null);
+
   const serverStatus = selectedStatus === '전체' ? undefined : selectedStatus;
 
   const { data: summary } = useSellerOrderSummary();
@@ -132,11 +146,13 @@ export function OrderManageContent() {
   const acceptOrder = useAcceptSellerOrder();
   const markOrderReady = useMarkSellerOrderReady();
   const completeOrder = useCompleteSellerOrder();
+  const cancelOrder = useCancelSellerOrder();
 
   const isPending =
     acceptOrder.isPending ||
     markOrderReady.isPending ||
-    completeOrder.isPending;
+    completeOrder.isPending ||
+    cancelOrder.isPending;
 
   const displayOrders = (data?.items ?? []).filter(
     (order) =>
@@ -145,6 +161,10 @@ export function OrderManageContent() {
         .toLowerCase()
         .includes(searchKeyword.trim().toLowerCase())
   );
+
+  const completePendingOrder = completePendingOrderId
+    ? (displayOrders.find((o) => o.id === completePendingOrderId) ?? null)
+    : null;
 
   const totalPages = data?.totalPages ?? 0;
 
@@ -186,15 +206,57 @@ export function OrderManageContent() {
         });
         break;
       case 'completed':
-        completeOrder.mutate(orderId, {
-          onSuccess: () => onSuccess('픽업 완료'),
-          onError: () => onError('픽업 완료'),
-        });
-        break;
-      case 'cancelled':
-        // TODO: T31 주문 취소/환불 API 구현 후 연결
+        setCompletePendingOrderId(orderId);
         break;
     }
+  };
+
+  const handleCancelRequest = (orderId: string) => {
+    setCancelErrorMessage(null);
+    setCancelPendingOrderId(orderId);
+  };
+
+  const handleCancelConfirm = (reason: string) => {
+    if (!cancelPendingOrderId) return;
+    setActionError(null);
+    setActionSuccess(null);
+    cancelOrder.mutate(
+      { id: cancelPendingOrderId, reason },
+      {
+        onSuccess: () => {
+          setCancelPendingOrderId(null);
+          setCancelErrorMessage(null);
+          setActionError(null);
+          setActionSuccess('주문 취소 처리가 완료되었습니다.');
+          setCurrentPage(1);
+        },
+        onError: () => {
+          setActionSuccess(null);
+          setCancelErrorMessage(
+            '주문 취소 처리에 실패했습니다. 다시 시도해주세요.'
+          );
+        },
+      }
+    );
+  };
+
+  const handleCompleteConfirm = () => {
+    if (!completePendingOrderId) return;
+    setActionError(null);
+    setActionSuccess(null);
+    completeOrder.mutate(completePendingOrderId, {
+      onSuccess: () => {
+        setCompletePendingOrderId(null);
+        setActionError(null);
+        setActionSuccess('픽업 완료 처리가 완료되었습니다.');
+        setCurrentPage(1);
+      },
+      onError: () => {
+        setCompletePendingOrderId(null);
+        setActionSuccess(null);
+        setActionError('픽업 완료 처리에 실패했습니다. 다시 시도해주세요.');
+      },
+    });
   };
 
   const handleStatusChange = (status: string) => {
@@ -226,7 +288,7 @@ export function OrderManageContent() {
         </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-7">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7">
         {STAT_CARDS.map((card) => {
           const Icon = card.icon;
           const isSelected = selectedStatus === card.value;
@@ -262,6 +324,7 @@ export function OrderManageContent() {
                         <>
                           {count}
                           <span className="text-base font-normal text-gray-500">
+                            {' '}
                             건
                           </span>
                         </>
@@ -284,7 +347,7 @@ export function OrderManageContent() {
           aria-live="polite"
           className="flex items-center gap-2 rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700"
         >
-          <CheckCircle className="h-4 w-4 flex-shrink-0" />
+          <CheckCircle className="h-4 w-4 shrink-0" />
           {actionSuccess}
         </div>
       )}
@@ -294,15 +357,13 @@ export function OrderManageContent() {
           aria-live="assertive"
           className="flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
         >
-          <AlertCircle className="h-4 w-4 flex-shrink-0" />
+          <AlertCircle className="h-4 w-4 shrink-0" />
           {actionError}
         </div>
       )}
 
       <OrderFilter
-        selectedStatus={selectedStatus}
         searchKeyword={searchKeyword}
-        onStatusChange={handleStatusChange}
         onSearchChange={handleSearchChange}
       />
 
@@ -312,9 +373,32 @@ export function OrderManageContent() {
         totalPages={totalPages}
         onPageChange={setCurrentPage}
         onOrderAction={handleOrderAction}
+        onCancelRequest={handleCancelRequest}
         isLoading={isLoading}
         isError={isError}
         isActionPending={isPending}
+      />
+
+      <OrderCancelModal
+        key={cancelPendingOrderId ?? 'closed'}
+        isOpen={cancelPendingOrderId !== null}
+        isSubmitting={cancelOrder.isPending}
+        errorMessage={cancelErrorMessage}
+        onClose={() => {
+          setCancelPendingOrderId(null);
+          setCancelErrorMessage(null);
+        }}
+        onConfirm={handleCancelConfirm}
+      />
+
+      <OrderCompleteConfirmModal
+        isOpen={completePendingOrderId !== null}
+        isSubmitting={completeOrder.isPending}
+        orderNumber={completePendingOrder?.orderNumber ?? ''}
+        pickupNumber={completePendingOrder?.pickupNumber ?? null}
+        storeOrderNumber={completePendingOrder?.storeOrderNumber ?? null}
+        onClose={() => setCompletePendingOrderId(null)}
+        onConfirm={handleCompleteConfirm}
       />
     </div>
   );

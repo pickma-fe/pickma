@@ -1,54 +1,52 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
 
 import type { Product } from '@/types/product';
 import { Button } from '@/components/common/Button/Button';
 import { Input } from '@/components/common/Input/Input';
+import { TimePicker } from '@/components/common/TimePicker/TimePicker';
 
-const productEditFormSchema = z.object({
-  discountPrice: z
-    .string()
-    .min(1, '판매가를 입력해주세요.')
-    .refine(
-      (v) => Number.isInteger(Number(v)) && Number(v) >= 0,
-      '올바른 판매가를 입력해주세요.'
-    ),
-  stock: z
-    .string()
-    .min(1, '재고를 입력해주세요.')
-    .refine(
-      (v) => Number.isInteger(Number(v)) && Number(v) >= 0,
-      '올바른 재고를 입력해주세요.'
-    ),
-  endAt: z.string().min(1, '마감일시를 입력해주세요.'),
-  pickupStartTime: z.string().min(1, '픽업 시작 시간을 입력해주세요.'),
-  pickupEndTime: z.string().min(1, '픽업 종료 시간을 입력해주세요.'),
-  status: z.enum(['active', 'closed']),
-});
+const productEditFormSchema = z
+  .object({
+    discountPrice: z
+      .string()
+      .min(1, '판매가를 입력해주세요.')
+      .refine(
+        (v) => Number.isInteger(Number(v)) && Number(v) >= 0,
+        '올바른 판매가를 입력해주세요.'
+      ),
+    stock: z
+      .string()
+      .min(1, '재고를 입력해주세요.')
+      .refine(
+        (v) => Number.isInteger(Number(v)) && Number(v) >= 0,
+        '올바른 재고를 입력해주세요.'
+      ),
+    pickupStartTime: z.string().min(1, '픽업 시작 시간을 입력해주세요.'),
+    pickupEndTime: z.string().min(1, '픽업 종료 시간을 입력해주세요.'),
+    status: z.enum(['active', 'closed']),
+  })
+  .superRefine((data, ctx) => {
+    if (data.pickupStartTime >= data.pickupEndTime) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: '픽업 종료 시간은 시작 시간 이후여야 합니다.',
+        path: ['pickupEndTime'],
+      });
+    }
+  });
 
 export type ProductEditFormData = z.infer<typeof productEditFormSchema>;
 
 interface ProductEditFormProps {
-  defaultValues?: Partial<ProductEditFormData>;
   product: Product;
   isPending: boolean;
   onSubmit: (data: ProductEditFormData) => void;
   onCancel: () => void;
   submitLabel?: string;
-}
-
-const timeInputClass =
-  'rounded-md border border-gray-200 px-4 py-2 text-sm outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-300 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-400';
-
-function toDatetimeLocalValue(date: Date): string {
-  const pad = (n: number) => String(n).padStart(2, '0');
-  return (
-    `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}` +
-    `T${pad(date.getHours())}:${pad(date.getMinutes())}`
-  );
 }
 
 function toTimeValue(timeString: string): string {
@@ -63,15 +61,16 @@ export function ProductEditForm({
   submitLabel = '수정 완료',
 }: ProductEditFormProps) {
   const {
+    control,
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<ProductEditFormData>({
     resolver: zodResolver(productEditFormSchema),
+    mode: 'onTouched',
     defaultValues: {
       discountPrice: String(product.discountPrice),
       stock: String(product.stock),
-      endAt: toDatetimeLocalValue(product.endAt),
       pickupStartTime: toTimeValue(product.pickupStartTime),
       pickupEndTime: toTimeValue(product.pickupEndTime),
       status: product.status,
@@ -91,7 +90,7 @@ export function ProductEditForm({
         </legend>
         <div className="flex items-center gap-4 pt-2">
           {product.image && (
-            <div className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100">
+            <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-gray-100">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={product.image}
@@ -118,9 +117,10 @@ export function ProductEditForm({
       <fieldset className="flex flex-col gap-4">
         <legend className="text-sm font-medium text-gray-700">판매 정보</legend>
 
-        <div className="grid grid-cols-2 gap-4 pt-2">
+        <div className="grid grid-cols-1 gap-4 pt-2 sm:grid-cols-2">
           <Input
-            label="판매가 (원) *"
+            label="판매가 (원)"
+            required
             type="number"
             placeholder="0"
             {...register('discountPrice')}
@@ -128,7 +128,8 @@ export function ProductEditForm({
             disabled={isPending}
           />
           <Input
-            label="재고 (개) *"
+            label="재고 (개)"
+            required
             type="number"
             placeholder="0"
             {...register('stock')}
@@ -137,77 +138,83 @@ export function ProductEditForm({
           />
         </div>
 
-        <div className="flex flex-col gap-1">
-          <label htmlFor="endAt" className="text-sm text-gray-700">
-            판매 마감일시 *
-          </label>
-          <input
-            id="endAt"
-            type="datetime-local"
-            {...register('endAt')}
-            className={timeInputClass}
-            disabled={isPending}
-            aria-invalid={!!errors.endAt}
-            aria-describedby={errors.endAt ? 'endAt-error' : undefined}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <Controller
+            name="pickupStartTime"
+            control={control}
+            render={({ field, fieldState }) => (
+              <div className="flex flex-col gap-1">
+                <label
+                  htmlFor="pickupStartTime"
+                  className="text-sm text-gray-700"
+                >
+                  픽업 시작 시간{' '}
+                  <span aria-hidden="true" className="text-red-500">
+                    *
+                  </span>
+                </label>
+                <TimePicker
+                  id="pickupStartTime"
+                  label="픽업 시작 시간"
+                  value={field.value}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                  disabled={isPending}
+                  invalid={!!fieldState.error}
+                  describedBy={
+                    fieldState.error ? 'pickupStartTime-error' : undefined
+                  }
+                />
+                {fieldState.error && (
+                  <p
+                    id="pickupStartTime-error"
+                    className="text-sm text-red-500"
+                    role="alert"
+                  >
+                    {fieldState.error.message}
+                  </p>
+                )}
+              </div>
+            )}
           />
-          {errors.endAt && (
-            <p id="endAt-error" className="text-sm text-red-500" role="alert">
-              {errors.endAt.message}
-            </p>
-          )}
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <div className="flex flex-col gap-1">
-            <label htmlFor="pickupStartTime" className="text-sm text-gray-700">
-              픽업 시작 시간 *
-            </label>
-            <input
-              id="pickupStartTime"
-              type="time"
-              {...register('pickupStartTime')}
-              className={timeInputClass}
-              disabled={isPending}
-              aria-invalid={!!errors.pickupStartTime}
-              aria-describedby={
-                errors.pickupStartTime ? 'pickupStartTime-error' : undefined
-              }
-            />
-            {errors.pickupStartTime && (
-              <p
-                id="pickupStartTime-error"
-                className="text-sm text-red-500"
-                role="alert"
-              >
-                {errors.pickupStartTime.message}
-              </p>
+          <Controller
+            name="pickupEndTime"
+            control={control}
+            render={({ field, fieldState }) => (
+              <div className="flex flex-col gap-1">
+                <label
+                  htmlFor="pickupEndTime"
+                  className="text-sm text-gray-700"
+                >
+                  픽업 종료 시간{' '}
+                  <span aria-hidden="true" className="text-red-500">
+                    *
+                  </span>
+                </label>
+                <TimePicker
+                  id="pickupEndTime"
+                  label="픽업 종료 시간"
+                  value={field.value}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                  disabled={isPending}
+                  invalid={!!fieldState.error}
+                  describedBy={
+                    fieldState.error ? 'pickupEndTime-error' : undefined
+                  }
+                />
+                {fieldState.error && (
+                  <p
+                    id="pickupEndTime-error"
+                    className="text-sm text-red-500"
+                    role="alert"
+                  >
+                    {fieldState.error.message}
+                  </p>
+                )}
+              </div>
             )}
-          </div>
-          <div className="flex flex-col gap-1">
-            <label htmlFor="pickupEndTime" className="text-sm text-gray-700">
-              픽업 종료 시간 *
-            </label>
-            <input
-              id="pickupEndTime"
-              type="time"
-              {...register('pickupEndTime')}
-              className={timeInputClass}
-              disabled={isPending}
-              aria-invalid={!!errors.pickupEndTime}
-              aria-describedby={
-                errors.pickupEndTime ? 'pickupEndTime-error' : undefined
-              }
-            />
-            {errors.pickupEndTime && (
-              <p
-                id="pickupEndTime-error"
-                className="text-sm text-red-500"
-                role="alert"
-              >
-                {errors.pickupEndTime.message}
-              </p>
-            )}
-          </div>
+          />
         </div>
       </fieldset>
 

@@ -16,13 +16,18 @@ export default function SellerProductEditPage() {
   const { mutate: updateProduct, isPending } = useUpdateSellerProduct();
 
   const handleSubmit = (data: ProductEditFormData) => {
+    if (!product) return;
+    const endAt = new Date(product.endAt);
+    const [hour, minute] = data.pickupEndTime.split(':').map(Number);
+    endAt.setHours(hour, minute, 0, 0);
+
     updateProduct(
       {
         id,
         body: {
           discountPrice: Number(data.discountPrice),
           stock: Number(data.stock),
-          endAt: new Date(data.endAt),
+          endAt,
           pickupStartTime: data.pickupStartTime,
           pickupEndTime: data.pickupEndTime,
           status: data.status,

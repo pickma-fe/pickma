@@ -32,7 +32,7 @@ export function OperationInfoSection({
   const isOpen = storeInfo.operationStatus === 'open';
 
   return (
-    <Section variant="card" className="bg-white">
+    <Section variant="card">
       <h3 className="mb-4 text-base font-semibold text-gray-900">운영 정보</h3>
       <dl className="flex flex-col gap-3">
         <div className="flex items-center">

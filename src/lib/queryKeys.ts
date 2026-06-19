@@ -62,6 +62,9 @@ export const queryKeys = {
           'signed-url',
         ] as const,
     },
+    dashboard: {
+      stats: () => ['sellers', 'dashboard', 'stats'] as const,
+    },
   },
 
   admin: {

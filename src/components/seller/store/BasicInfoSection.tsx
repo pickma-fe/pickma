@@ -7,7 +7,7 @@ interface BasicInfoSectionProps {
 
 export function BasicInfoSection({ storeInfo }: BasicInfoSectionProps) {
   return (
-    <Section variant="card" className="bg-white">
+    <Section variant="card">
       <h3 className="mb-4 text-base font-semibold text-gray-900">기본 정보</h3>
       <dl className="flex flex-col gap-3">
         <div className="flex">

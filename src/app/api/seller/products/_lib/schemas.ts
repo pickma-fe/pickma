@@ -20,7 +20,16 @@ export const createSellerProductSchema = z
     pickupStartTime: timeStringSchema,
     pickupEndTime: timeStringSchema,
   })
-  .strict() satisfies z.ZodType<CreateSellerProductRequest>;
+  .strict()
+  .superRefine((data, ctx) => {
+    if (data.pickupStartTime >= data.pickupEndTime) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: '픽업 종료 시간은 시작 시간 이후여야 합니다.',
+        path: ['pickupEndTime'],
+      });
+    }
+  }) satisfies z.ZodType<CreateSellerProductRequest>;
 
 export const updateSellerProductSchema = z
   .object({
@@ -34,6 +43,19 @@ export const updateSellerProductSchema = z
   .strict()
   .refine((body) => Object.values(body).some((value) => value !== undefined), {
     message: '수정할 필드를 1개 이상 입력해야 합니다.',
+  })
+  .superRefine((data, ctx) => {
+    if (
+      data.pickupStartTime !== undefined &&
+      data.pickupEndTime !== undefined &&
+      data.pickupStartTime >= data.pickupEndTime
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: '픽업 종료 시간은 시작 시간 이후여야 합니다.',
+        path: ['pickupEndTime'],
+      });
+    }
   }) satisfies z.ZodType<UpdateSellerProductRequest>;
 
 export const updateSellerProductStockSchema = z

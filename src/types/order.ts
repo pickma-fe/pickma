@@ -21,6 +21,7 @@ export interface OrderItem {
   discountPrice: number;
   quantity: number;
   subtotal: number;
+  image?: string;
   createdAt: Date;
 }
 
