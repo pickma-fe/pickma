@@ -11,7 +11,6 @@ import {
 import Link from 'next/link';
 
 import { useSellerOrders } from '@/hooks/seller/orders/useSellerOrders';
-import { Button } from '@/components/common/Button/Button';
 import { Section } from '@/components/common/Section/Section';
 
 const TODAY_PAGE_SIZE = 100;
@@ -195,10 +194,12 @@ export function DashboardContent() {
             { label: '상품 관리', href: '/seller/products' },
             { label: '주문 관리', href: '/seller/orders' },
           ].map((item) => (
-            <Link key={item.href} href={item.href}>
-              <Button variant="outline" color="gray" className="w-full">
-                {item.label}
-              </Button>
+            <Link
+              key={item.href}
+              href={item.href}
+              className="inline-flex w-full items-center justify-center rounded-sm border border-gray-300 px-4 py-2 font-medium text-gray-900 transition hover:bg-gray-100 focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2 focus-visible:outline-none"
+            >
+              {item.label}
             </Link>
           ))}
         </div>

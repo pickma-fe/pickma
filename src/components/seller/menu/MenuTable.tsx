@@ -6,7 +6,6 @@ import { useState } from 'react';
 
 import type { MenuItem } from '@/types/menu-item';
 import { Badge } from '@/components/common/Badge/Badge';
-import { Button } from '@/components/common/Button/Button';
 import { Dropdown } from '@/components/common/Dropdown/Dropdown';
 import { Pagination } from '@/components/common/Pagination/Pagination';
 
@@ -200,10 +199,11 @@ export function MenuTable({
                   {formatDate(menu.updatedAt)}
                 </td>
                 <td className="py-4 pr-8 pl-4 whitespace-nowrap">
-                  <Link href={`/seller/menu/${menu.id}/edit`}>
-                    <Button variant="outline" color="gray">
-                      수정
-                    </Button>
+                  <Link
+                    href={`/seller/menu/${menu.id}/edit`}
+                    className="inline-flex items-center justify-center rounded-sm border border-gray-300 px-4 py-2 font-medium text-gray-900 transition hover:bg-gray-100 focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2 focus-visible:outline-none"
+                  >
+                    수정
                   </Link>
                 </td>
               </tr>

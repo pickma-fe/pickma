@@ -7,7 +7,6 @@ import { useEffect, useState } from 'react';
 import type { ModalType } from '@/types/seller-register';
 import type { BusinessInfoData } from '@/types/store';
 import { useSellerAuth } from '@/hooks/seller/register/useSellerAuth';
-import { Button } from '@/components/common/Button/Button';
 import { Section } from '@/components/common/Section/Section';
 
 import { AuthStepList } from './AuthStepList';
@@ -106,8 +105,11 @@ export function RegisterContent() {
             시작해보세요.
           </p>
           <div>
-            <Link href="/seller/store/edit">
-              <Button>가게 등록하기</Button>
+            <Link
+              href="/seller/store/edit"
+              className="bg-primary-500 hover:bg-primary-600 focus-visible:ring-primary-500 inline-flex items-center justify-center rounded-sm border border-transparent px-4 py-2 font-medium text-white transition focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+            >
+              가게 등록하기
             </Link>
           </div>
         </Section>
@@ -130,13 +132,17 @@ export function RegisterContent() {
             href="/support/inquiry"
             target="_blank"
             rel="noopener noreferrer"
+            className="inline-flex w-full items-center justify-center rounded-sm border border-gray-300 px-4 py-2 font-medium text-gray-900 transition hover:bg-gray-100 focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2 focus-visible:outline-none sm:w-auto"
           >
-            <Button variant="outline" color="gray" className="w-full sm:w-auto">
-              1:1 문의하기
-            </Button>
+            1:1 문의하기
           </Link>
-          <Link href="/support" target="_blank" rel="noopener noreferrer">
-            <Button className="w-full sm:w-auto">고객센터</Button>
+          <Link
+            href="/support"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-primary-500 hover:bg-primary-600 focus-visible:ring-primary-500 inline-flex w-full items-center justify-center rounded-sm border border-transparent px-4 py-2 font-medium text-white transition focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none sm:w-auto"
+          >
+            고객센터
           </Link>
         </div>
       </Section>
