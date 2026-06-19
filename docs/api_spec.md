@@ -1315,7 +1315,7 @@ export interface SellerDashboardStatsResponse {
 }
 
 export interface SellerDashboardDailyMetricResponse {
-  date: string; // ISO 8601 format, midnight Korea time (e.g., "2026-06-19T00:00:00+09:00")
+  date: string; // ISO 8601 UTC format (e.g., "2026-06-18T15:00:00.000Z"), 한국 시간 자정(00:00:00+09:00)을 UTC로 변환한 값
   orderCount: number;
   salesAmount: number;
 }
@@ -1326,7 +1326,7 @@ export interface SellerDashboardRecentOrderResponse {
   productName: string;
   paymentAmount: number;
   status: OrderStatusParam;
-  createdAt: string; // ISO 8601 format with timezone (e.g., "2026-06-19T14:32:00+09:00")
+  createdAt: string; // ISO 8601 UTC format (e.g., "2026-06-19T05:32:00.000Z"), DB created_at 그대로 반환
 }
 ```
 
