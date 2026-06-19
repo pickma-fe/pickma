@@ -307,7 +307,7 @@ export async function cancelSellerOrder(
         })
       ).catch(() => {});
 
-      const revertStatus = order.cancel_claimed_status ?? order.status;
+      const revertStatus = order.status;
       await supabase
         .from('orders')
         .update({
