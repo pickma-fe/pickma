@@ -128,7 +128,7 @@ export function MenuForm({ initialData, isEdit = false }: MenuFormProps) {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
         <Section variant="card">
           <h2 className="mb-4 text-lg font-semibold text-gray-900">
             기본 정보
