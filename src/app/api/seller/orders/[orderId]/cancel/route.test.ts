@@ -140,7 +140,11 @@ describe('PATCH /api/seller/orders/[orderId]/cancel', () => {
       STORE_ID,
       ORDER_ID,
       '재고 부족으로 취소합니다',
-      expect.any(Object)
+      expect.objectContaining({
+        info: expect.any(Function),
+        warn: expect.any(Function),
+        error: expect.any(Function),
+      })
     );
   });
 

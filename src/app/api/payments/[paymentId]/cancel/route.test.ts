@@ -114,7 +114,11 @@ describe('POST /api/payments/[paymentId]/cancel', () => {
     expect(cancelPaymentById).toHaveBeenCalledWith(
       VALID_UUID,
       '관리자 취소',
-      expect.any(Object)
+      expect.objectContaining({
+        info: expect.any(Function),
+        warn: expect.any(Function),
+        error: expect.any(Function),
+      })
     );
   });
 });

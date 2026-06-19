@@ -118,7 +118,11 @@ describe('PATCH /api/orders/[orderId]/cancel', () => {
       'user-1',
       VALID_UUID,
       '단순 변심',
-      expect.any(Object)
+      expect.objectContaining({
+        info: expect.any(Function),
+        warn: expect.any(Function),
+        error: expect.any(Function),
+      })
     );
   });
 });

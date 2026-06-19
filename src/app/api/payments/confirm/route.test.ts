@@ -70,7 +70,11 @@ describe('POST /api/payments/confirm', () => {
     expect(confirmPayment).toHaveBeenCalledWith(
       'user-1',
       validBody,
-      expect.any(Object)
+      expect.objectContaining({
+        info: expect.any(Function),
+        warn: expect.any(Function),
+        error: expect.any(Function),
+      })
     );
     expect(
       vi.mocked(expireUserOrders).mock.invocationCallOrder[0]
