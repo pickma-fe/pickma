@@ -218,16 +218,20 @@ export function OrderManageContent() {
 
   const handleCancelConfirm = (reason: string) => {
     if (!cancelPendingOrderId) return;
+    setActionError(null);
+    setActionSuccess(null);
     cancelOrder.mutate(
       { id: cancelPendingOrderId, reason },
       {
         onSuccess: () => {
           setCancelPendingOrderId(null);
           setCancelErrorMessage(null);
+          setActionError(null);
           setActionSuccess('주문 취소 처리가 완료되었습니다.');
           setCurrentPage(1);
         },
         onError: () => {
+          setActionSuccess(null);
           setCancelErrorMessage(
             '주문 취소 처리에 실패했습니다. 다시 시도해주세요.'
           );
@@ -238,14 +242,18 @@ export function OrderManageContent() {
 
   const handleCompleteConfirm = () => {
     if (!completePendingOrderId) return;
+    setActionError(null);
+    setActionSuccess(null);
     completeOrder.mutate(completePendingOrderId, {
       onSuccess: () => {
         setCompletePendingOrderId(null);
+        setActionError(null);
         setActionSuccess('픽업 완료 처리가 완료되었습니다.');
         setCurrentPage(1);
       },
       onError: () => {
         setCompletePendingOrderId(null);
+        setActionSuccess(null);
         setActionError('픽업 완료 처리에 실패했습니다. 다시 시도해주세요.');
       },
     });
