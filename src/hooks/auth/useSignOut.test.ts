@@ -3,7 +3,6 @@ import { act, renderHook, waitFor } from '@testing-library/react';
 import { createElement } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { queryKeys } from '@/lib/queryKeys';
 import { authApi } from '@/api/auth/authApi';
 
 import { useSignOut } from './useSignOut';
@@ -25,11 +24,11 @@ describe('useSignOut', () => {
     vi.clearAllMocks();
   });
 
-  it('성공 시 users.me 쿼리를 remove한다', async () => {
+  it('성공 시 전체 쿼리 캐시를 초기화한다', async () => {
     vi.mocked(authApi.signOut).mockResolvedValue(undefined);
 
     const { Wrapper, client } = createWrapper();
-    const removeSpy = vi.spyOn(client, 'removeQueries');
+    const clearSpy = vi.spyOn(client, 'clear');
 
     const { result } = renderHook(() => useSignOut(), { wrapper: Wrapper });
 
@@ -37,7 +36,7 @@ describe('useSignOut', () => {
       await result.current.mutateAsync();
     });
 
-    expect(removeSpy).toHaveBeenCalledWith({ queryKey: queryKeys.users.me() });
+    expect(clearSpy).toHaveBeenCalledOnce();
   });
 
   it('실패 시 error를 throw한다', async () => {

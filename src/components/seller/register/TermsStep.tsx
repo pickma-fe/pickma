@@ -1,5 +1,6 @@
 'use client';
 
+import { Check, X } from 'lucide-react';
 import { useState } from 'react';
 
 import { Button } from '@/components/common/Button/Button';
@@ -78,24 +79,35 @@ export function TermsStep({
   if (isViewMode) {
     return (
       <div className="flex flex-col gap-4">
-        <div className="rounded-md bg-green-50 p-4">
-          <p className="text-sm font-medium text-green-700">
-            ✓ 필수 약관에 동의하셨습니다.
-          </p>
-        </div>
+        {savedAgreed !== null && savedAgreed !== undefined && (
+          <div className="rounded-md bg-green-50 p-4">
+            <p className="flex items-center gap-1.5 text-sm font-medium text-green-700">
+              <Check className="h-4 w-4" aria-hidden="true" />
+              필수 약관에 동의하셨습니다.
+            </p>
+          </div>
+        )}
         <div className="flex flex-col gap-4">
           {TERMS.map((term) => {
             const isAgreed = agreed[term.id];
             return (
               <div key={term.id} className="flex flex-col gap-2">
                 <p
-                  className={`text-sm font-medium ${
+                  className={`flex items-center gap-1.5 text-sm font-medium ${
                     isAgreed ? 'text-green-700' : 'text-gray-400'
                   }`}
                 >
-                  {isAgreed ? '✓' : '✗'} {term.title}
+                  {isAgreed ? (
+                    <Check
+                      className="h-3.5 w-3.5 shrink-0"
+                      aria-hidden="true"
+                    />
+                  ) : (
+                    <X className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                  )}
+                  {term.title}
                 </p>
-                <div className="h-24 overflow-y-auto rounded-md border border-gray-200 bg-gray-50 p-3 text-xs whitespace-pre-line text-gray-500">
+                <div className="max-h-24 overflow-y-auto rounded-md border border-gray-200 bg-gray-50 p-3 text-xs whitespace-pre-line text-gray-500">
                   {term.content}
                 </div>
               </div>
@@ -136,7 +148,7 @@ export function TermsStep({
                 {term.title}
               </label>
             </div>
-            <div className="h-32 overflow-y-auto rounded-md border border-gray-200 p-3 text-xs whitespace-pre-line text-gray-500">
+            <div className="max-h-32 overflow-y-auto rounded-md border border-gray-200 p-3 text-xs whitespace-pre-line text-gray-500">
               {term.content}
             </div>
           </div>

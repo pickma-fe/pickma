@@ -1,13 +1,14 @@
 'use client';
 
-import { Pencil } from 'lucide-react';
 import Image from 'next/image';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 import type { Product } from '@/types/product';
 import { useUpdateSellerProduct } from '@/hooks/seller/products/useUpdateSellerProduct';
 import { Badge } from '@/components/common/Badge/Badge';
+import type { ActionMenuItem } from '@/components/common/Dropdown/ActionsMenu';
+import { ActionsMenu } from '@/components/common/Dropdown/ActionsMenu';
 import { Dropdown } from '@/components/common/Dropdown/Dropdown';
 import { Pagination } from '@/components/common/Pagination/Pagination';
 
@@ -22,6 +23,28 @@ const PAGE_SIZE_OPTIONS = [
   { label: '10개씩 보기', value: '10' },
   { label: '20개씩 보기', value: '20' },
 ];
+
+function ProductImageCell({ src, alt }: { src?: string; alt: string }) {
+  const [errorSrc, setErrorSrc] = useState<string | undefined>(undefined);
+  const error = errorSrc === src;
+  if (!src || error) {
+    return (
+      <div className="flex h-full w-full items-center justify-center text-gray-400">
+        🛍️
+      </div>
+    );
+  }
+  return (
+    <Image
+      src={src}
+      alt={alt}
+      fill
+      sizes="56px"
+      className="object-cover"
+      onError={() => setErrorSrc(src)}
+    />
+  );
+}
 
 const formatPrice = (price: number) => price.toLocaleString('ko-KR') + '원';
 const formatDate = (date: Date | undefined) =>
@@ -53,6 +76,7 @@ export function ProductTable({
   currentPage,
   onPageChange,
 }: ProductTableProps) {
+  const router = useRouter();
   const [pageSize, setPageSize] = useState(10);
   const { mutate: updateProduct } = useUpdateSellerProduct();
 
@@ -67,7 +91,7 @@ export function ProductTable({
 
   if (products.length === 0) {
     return (
-      <div className="flex min-h-[300px] items-center justify-center rounded-lg border border-gray-200 bg-white">
+      <div className="flex min-h-75 items-center justify-center rounded-lg border border-gray-200 bg-white">
         <div className="text-center">
           <p className="text-sm text-gray-500">등록된 상품이 없습니다.</p>
           <p className="text-xs text-gray-400">
@@ -93,7 +117,7 @@ export function ProductTable({
               </th>
               <th
                 scope="col"
-                className="px-4 py-3 text-left text-sm font-medium whitespace-nowrap text-gray-500"
+                className="hidden px-4 py-3 text-left text-sm font-medium whitespace-nowrap text-gray-500 lg:table-cell"
               >
                 카테고리
               </th>
@@ -117,7 +141,7 @@ export function ProductTable({
               </th>
               <th
                 scope="col"
-                className="px-4 py-3 text-left text-sm font-medium whitespace-nowrap text-gray-500"
+                className="hidden px-4 py-3 text-left text-sm font-medium whitespace-nowrap text-gray-500 xl:table-cell"
               >
                 등록일
               </th>
@@ -144,20 +168,11 @@ export function ProductTable({
                 >
                   <td className="px-4 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100">
-                        {product.image ? (
-                          <Image
-                            src={product.image}
-                            alt={product.name}
-                            fill
-                            sizes="56px"
-                            className="object-cover"
-                          />
-                        ) : (
-                          <div className="flex h-full w-full items-center justify-center text-gray-400">
-                            🛍️
-                          </div>
-                        )}
+                      <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-gray-100">
+                        <ProductImageCell
+                          src={product.image}
+                          alt={product.name}
+                        />
                       </div>
                       <div className="min-w-0">
                         <p className="truncate text-sm font-medium text-gray-900">
@@ -172,7 +187,7 @@ export function ProductTable({
                       </div>
                     </div>
                   </td>
-                  <td className="px-4 py-4 whitespace-nowrap">
+                  <td className="hidden px-4 py-4 whitespace-nowrap lg:table-cell">
                     <Badge variant="soft" color="gray">
                       {product.categoryName}
                     </Badge>
@@ -202,34 +217,44 @@ export function ProductTable({
                       </span>
                     </div>
                   </td>
-                  <td className="px-4 py-4 text-sm whitespace-nowrap text-gray-500">
+                  <td className="hidden px-4 py-4 text-sm whitespace-nowrap text-gray-500 xl:table-cell">
                     {formatDate(product.updatedAt)}
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap">
-                    <div className="flex items-center gap-2">
-                      <Dropdown
-                        type="select"
-                        items={[
-                          { label: '판매중', value: 'active' },
-                          { label: '판매중지', value: 'closed' },
-                        ]}
-                        value={product.status}
-                        onChange={(value) =>
-                          updateProduct({
-                            id: product.id,
-                            body: { status: value as 'active' | 'closed' },
-                          })
-                        }
-                        placeholder="관리"
-                      />
-                      <Link
-                        href={`/seller/products/${product.id}/edit`}
-                        className="hover:border-primary-300 hover:bg-primary-50 hover:text-primary-600 flex h-8 w-8 items-center justify-center rounded-md border border-gray-200 bg-white text-gray-500 transition-colors"
-                        aria-label={`${product.name} 상품 수정`}
-                      >
-                        <Pencil className="h-4 w-4" aria-hidden="true" />
-                      </Link>
-                    </div>
+                    <ActionsMenu
+                      aria-label={`${product.name} 관리 메뉴`}
+                      items={
+                        [
+                          product.status === 'active'
+                            ? {
+                                id: 'close',
+                                label: '판매중지',
+                                onClick: () =>
+                                  updateProduct({
+                                    id: product.id,
+                                    body: { status: 'closed' },
+                                  }),
+                              }
+                            : {
+                                id: 'activate',
+                                label: '판매중으로 변경',
+                                onClick: () =>
+                                  updateProduct({
+                                    id: product.id,
+                                    body: { status: 'active' },
+                                  }),
+                              },
+                          {
+                            id: 'edit',
+                            label: '상품 수정',
+                            onClick: () =>
+                              router.push(
+                                `/seller/products/${product.id}/edit`
+                              ),
+                          },
+                        ] satisfies ActionMenuItem[]
+                      }
+                    />
                   </td>
                 </tr>
               );

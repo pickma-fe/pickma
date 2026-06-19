@@ -13,6 +13,7 @@ import { useState } from 'react';
 import type { ReactNode } from 'react';
 
 import type { User } from '@/types/user';
+import type { SidebarSection } from '@/components/common/Sidebar/Sidebar.types';
 
 import { HamburgerDrawer, type HeaderMenuItem } from './HamburgerDrawer';
 import { Button } from '../Button/Button';
@@ -23,9 +24,16 @@ interface HeaderProps {
   logoHref?: string;
   menuItems?: HeaderMenuItem[];
   slot?: ReactNode;
+  sidebarSections?: SidebarSection[];
 }
 
-export function Header({ user, logoHref, menuItems, slot }: HeaderProps) {
+export function Header({
+  user,
+  logoHref,
+  menuItems,
+  slot,
+  sidebarSections,
+}: HeaderProps) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   return (
@@ -65,6 +73,7 @@ export function Header({ user, logoHref, menuItems, slot }: HeaderProps) {
           onClose={() => setIsDrawerOpen(false)}
           user={user}
           menuItems={menuItems ?? []}
+          sidebarSections={sidebarSections}
         />
       </div>
     </header>

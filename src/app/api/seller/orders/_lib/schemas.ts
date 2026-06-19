@@ -24,3 +24,7 @@ export const sellerOrderListQuerySchema = z
   .strict() satisfies z.ZodType<SellerOrderListParams>;
 
 export const orderIdSchema = z.uuid();
+
+export const cancelSellerOrderSchema = z.object({
+  reason: z.string().trim().min(1).max(500),
+});

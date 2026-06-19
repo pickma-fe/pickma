@@ -61,8 +61,15 @@ export function ProductFilter({
   ];
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex flex-wrap items-center gap-3">
+    <div className="flex flex-col gap-3">
+      <Input
+        aria-label="상품명 검색"
+        placeholder="상품명을 검색하세요"
+        value={searchKeyword}
+        onChange={(e) => onSearchChange(e.target.value)}
+        startIcon={<Search className="h-4 w-4" />}
+      />
+      <div className="flex flex-wrap gap-3">
         <Dropdown
           type="select"
           items={STATUS_OPTIONS}
@@ -77,16 +84,6 @@ export function ProductFilter({
           onChange={onCategoryChange}
           placeholder="전체 카테고리"
         />
-
-        <div className="min-w-[200px] flex-1">
-          <Input
-            placeholder="상품명을 검색하세요"
-            value={searchKeyword}
-            onChange={(e) => onSearchChange(e.target.value)}
-            startIcon={<Search className="h-4 w-4" />}
-          />
-        </div>
-
         <Dropdown
           type="select"
           items={DETAIL_FILTER_OPTIONS}
@@ -94,7 +91,6 @@ export function ProductFilter({
           onChange={onDetailFilterChange}
           placeholder="상세 필터"
         />
-
         <Dropdown
           type="select"
           items={SORT_OPTIONS}

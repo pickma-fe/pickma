@@ -11,7 +11,6 @@ import {
 import Link from 'next/link';
 
 import { useSellerOrders } from '@/hooks/seller/orders/useSellerOrders';
-import { Button } from '@/components/common/Button/Button';
 import { Section } from '@/components/common/Section/Section';
 
 const TODAY_PAGE_SIZE = 100;
@@ -109,7 +108,7 @@ export function DashboardContent() {
         <p className="mt-1 text-sm text-gray-500">{formattedDate}</p>
       </div>
 
-      <Section variant="card" className="bg-white">
+      <Section variant="card">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-base font-semibold text-gray-900">
             오늘의 주문 현황
@@ -134,12 +133,12 @@ export function DashboardContent() {
             role="alert"
             className="mb-4 flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
           >
-            <AlertCircle className="h-4 w-4 flex-shrink-0" />
+            <AlertCircle className="h-4 w-4 shrink-0" />
             주문 현황을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.
           </div>
         )}
 
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6">
           {STATUS_CARDS.map((card) => {
             const Icon = card.icon;
             const count = getCount(card.status);
@@ -152,7 +151,7 @@ export function DashboardContent() {
               >
                 <Section
                   variant="card"
-                  className="bg-white transition-all hover:ring-1 hover:ring-gray-300"
+                  className="transition-all hover:ring-1 hover:ring-gray-300"
                 >
                   <div className="flex flex-col gap-3">
                     <div
@@ -169,6 +168,7 @@ export function DashboardContent() {
                           <>
                             {count}
                             <span className="text-base font-normal text-gray-500">
+                              {' '}
                               건
                             </span>
                           </>
@@ -183,7 +183,7 @@ export function DashboardContent() {
         </div>
       </Section>
 
-      <Section variant="card" className="bg-white">
+      <Section variant="card">
         <h2 className="mb-4 text-base font-semibold text-gray-900">
           빠른 이동
         </h2>
@@ -194,10 +194,12 @@ export function DashboardContent() {
             { label: '상품 관리', href: '/seller/products' },
             { label: '주문 관리', href: '/seller/orders' },
           ].map((item) => (
-            <Link key={item.href} href={item.href}>
-              <Button variant="outline" color="gray" className="w-full">
-                {item.label}
-              </Button>
+            <Link
+              key={item.href}
+              href={item.href}
+              className="inline-flex w-full items-center justify-center rounded-sm border border-gray-300 px-4 py-2 font-medium text-gray-900 transition hover:bg-gray-100 focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2 focus-visible:outline-none"
+            >
+              {item.label}
             </Link>
           ))}
         </div>

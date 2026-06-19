@@ -1204,6 +1204,7 @@ Seller product API의 pickup time은 서버 schema에서 `HH:mm:ss`로 정규화
 | S-ORDER-06 | 준비 완료 처리 | PATCH  | `/api/seller/orders/:orderId/ready`    | seller | P0       |
 | S-ORDER-03 | 픽업 완료 처리 | PATCH  | `/api/seller/orders/:orderId/complete` | seller | P0       |
 | S-ORDER-04 | 노쇼 처리      | PATCH  | `/api/seller/orders/:orderId/no-show`  | seller | P1       |
+| S-ORDER-08 | 주문 취소      | PATCH  | `/api/seller/orders/:orderId/cancel`   | seller | P1       |
 
 Seller order API는 `requireSellerStore()`를 통과해야 하며, 해당 주문이 seller의 store에 속하는지 검증한다.
 
@@ -1212,17 +1213,34 @@ Seller order API는 `requireSellerStore()`를 통과해야 하며, 해당 주문
 ```
 
 reserved → (PATCH /accept) → accepted → (PATCH /ready) → ready → (PATCH /complete) → completed
+reserved or accepted → (PATCH /cancel) → cancelling → cancelled
 
 ```
 
 - accept 허용 상태: `reserved`
 - ready 허용 상태: `accepted`
 - complete 허용 상태: `ready`
+- cancel 허용 상태: `reserved`, `accepted` (결제 취소 포함)
 - 허용되지 않는 현재 상태에서 전이 시도 → `INVALID_ORDER_STATUS` 409
 - 상태 전이는 update query에 `store_id`, `orderId`, `expectedStatus` 조건을 모두 포함해 원자적으로 수행한다.
 - `complete` 처리 시 `picked_up_at = now()` 함께 기록한다.
+- `cancel` 처리 흐름: `cancelling` claim → Toss 결제 취소 → `cancel_order` RPC. Toss/RPC 실패 시 `payment_events` 보상 로그 기록 후 `PAYMENT_CANCEL_FAILED` 502.
 - MVP에서 `ready` 전이는 cron/자동이 아닌 seller 수동 처리다.
 - 응답: `void` (`success(undefined)`)
+
+#### S-ORDER-08 PATCH /api/seller/orders/:orderId/cancel
+
+```ts
+// Request body
+{ reason: string } // trim 후 1~500자
+
+// Response
+void
+```
+
+- `VALIDATION_ERROR` 400: orderId가 유효한 UUID가 아닌 경우, reason 누락/trim 후 빈 문자열/길이 초과
+- `INVALID_ORDER_STATUS` 409: cancel 허용 상태(`reserved`, `accepted`)가 아닌 경우, 또는 결제 내역 없는 경우
+- `PAYMENT_CANCEL_FAILED` 502: Toss API 취소 실패 또는 `cancel_order` RPC 실패
 
 ### 9.2 목록 query (SellerOrderListParams)
 

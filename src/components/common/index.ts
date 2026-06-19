@@ -1,3 +1,5 @@
+export type { ActionMenuItem } from './Dropdown/ActionsMenu';
+export { ActionsMenu } from './Dropdown/ActionsMenu';
 export { Badge } from './Badge/Badge';
 export { Button } from './Button/Button';
 export { Dropdown } from './Dropdown/Dropdown';

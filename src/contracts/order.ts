@@ -61,6 +61,7 @@ export interface OrderListItemResponse {
   storeOrderNumber?: string;
   pickupNumber?: string;
   expiresAt?: string;
+  image?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -90,6 +91,7 @@ export interface OrderItemResponse {
   discountPrice: number;
   quantity: number;
   subtotal: number;
+  image?: string;
   createdAt: string;
 }
 

@@ -139,6 +139,7 @@ export const mockSellerOrders: OrderListItemResponse[] = [
     storeOrderNumber: '20260429-0000001',
     pickupNumber: 'A-01',
     expiresAt: '2026-04-29T10:10:00.000Z',
+    image: '/images/mock/menus/menu-sandwich.jpg',
     createdAt: '2026-04-29T10:00:00.000Z',
     updatedAt: '2026-04-29T10:01:00.000Z',
   },
@@ -155,6 +156,7 @@ export const mockSellerOrders: OrderListItemResponse[] = [
     pickupServiceDate: '2026-04-29',
     storeOrderNumber: '20260429-0000002',
     pickupNumber: 'A-02',
+    image: '/images/mock/menus/menu-cheesecake.jpg',
     createdAt: '2026-04-29T10:10:00.000Z',
     updatedAt: '2026-04-29T10:10:00.000Z',
   },
@@ -171,6 +173,7 @@ export const mockSellerOrders: OrderListItemResponse[] = [
     pickupServiceDate: '2026-04-28',
     storeOrderNumber: '20260428-0000003',
     pickupNumber: 'B-03',
+    image: '/images/mock/menus/menu-coffee.jpg',
     createdAt: '2026-04-28T10:30:00.000Z',
     updatedAt: '2026-04-28T13:05:00.000Z',
   },
@@ -204,7 +207,6 @@ export const mockSellerOrderDetail: OrderDetailResponse = {
 
 type ReviewStatus = 'pending' | 'reviewing' | 'completed';
 type CertificationStatus = 'waiting' | 'approved' | 'rejected';
-type StoreReviewStatus = 'pending' | 'reviewing' | 'completed';
 type StoreStatus = 'waiting' | 'approved' | 'rejected';
 
 export interface MockAuthStepState {
@@ -218,7 +220,6 @@ export interface MockAuthStepState {
 
 export interface MockStoreStepState {
   storeInfoSubmitted: boolean;
-  reviewStatus: StoreReviewStatus;
   storeStatus: StoreStatus;
 }
 
@@ -233,7 +234,6 @@ export const mockSellerAuthState: MockAuthStepState = {
 
 export const mockStoreRegisterState: MockStoreStepState = {
   storeInfoSubmitted: false,
-  reviewStatus: 'pending',
   storeStatus: 'waiting',
 };
 
@@ -266,7 +266,6 @@ export const mockSellerAuthReviewing: MockAuthStepState = {
 
 export const mockStoreRegisterCompleted: MockStoreStepState = {
   storeInfoSubmitted: true,
-  reviewStatus: 'completed',
   storeStatus: 'approved',
 };
 

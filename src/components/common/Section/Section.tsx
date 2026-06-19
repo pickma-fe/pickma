@@ -13,7 +13,9 @@ export function Section({
 }: SectionProps) {
   const baseStyles = 'px-10 py-8';
   const variantStyles =
-    variant === 'card' ? 'border border-gray-200 shadow-sm rounded-lg' : '';
+    variant === 'card'
+      ? 'border border-gray-200 bg-white shadow-sm rounded-lg'
+      : '';
 
   return (
     <section

@@ -6,9 +6,11 @@ import type { MyStore } from '@/types/store';
 import { openPostcodeSearch } from '@/lib/kakao/postcode';
 import { Button } from '@/components/common/Button/Button';
 import { Input } from '@/components/common/Input/Input';
+import { TimePicker } from '@/components/common/TimePicker/TimePicker';
 
 interface StoreEditFormProps {
-  storeInfo: MyStore;
+  storeInfo?: MyStore;
+  businessNumber?: string;
   onSubmit: (data: StoreEditData) => void;
   onCancel: () => void;
   isPending?: boolean;
@@ -29,21 +31,22 @@ export interface StoreEditData {
 
 export function StoreEditForm({
   storeInfo,
+  businessNumber,
   onSubmit,
   onCancel,
   isPending = false,
 }: StoreEditFormProps) {
   const [formData, setFormData] = useState<StoreEditData>({
-    name: storeInfo.name,
-    phone: storeInfo.phone,
-    address: storeInfo.address,
-    addressDetail: storeInfo.addressDetail ?? '',
-    region: storeInfo.region,
-    latitude: storeInfo.latitude,
-    longitude: storeInfo.longitude,
-    description: storeInfo.description ?? '',
-    openTime: storeInfo.openTime?.slice(0, 5) ?? '09:00',
-    closeTime: storeInfo.closeTime?.slice(0, 5) ?? '22:00',
+    name: storeInfo?.name ?? '',
+    phone: storeInfo?.phone ?? '',
+    address: storeInfo?.address ?? '',
+    addressDetail: storeInfo?.addressDetail ?? '',
+    region: storeInfo?.region ?? '',
+    latitude: storeInfo?.latitude,
+    longitude: storeInfo?.longitude,
+    description: storeInfo?.description ?? '',
+    openTime: storeInfo?.openTime?.slice(0, 5) ?? '09:00',
+    closeTime: storeInfo?.closeTime?.slice(0, 5) ?? '22:00',
   });
   const [error, setError] = useState<string | null>(null);
 
@@ -98,6 +101,7 @@ export function StoreEditForm({
       <div className="flex flex-col gap-4">
         <Input
           label="가게 이름"
+          required
           value={formData.name}
           onChange={(e) => handleChange('name', e.target.value)}
           placeholder="가게 이름을 입력해주세요"
@@ -105,31 +109,36 @@ export function StoreEditForm({
 
         <Input
           label="사업자등록번호"
-          value={storeInfo.businessNumber}
+          value={storeInfo?.businessNumber ?? businessNumber ?? ''}
           disabled
         />
 
         <Input
           label="가게 전화번호"
+          required
           value={formData.phone}
           onChange={(e) => handleChange('phone', e.target.value)}
           placeholder="02-1234-5678"
+          autoComplete="tel"
         />
 
         <div className="flex flex-col gap-1">
-          <span className="text-sm text-gray-500">가게 주소</span>
           <div className="flex items-start gap-2">
             <div className="flex-1">
               <Input
+                label="가게 주소"
+                required
                 value={formData.address}
                 readOnly
                 placeholder="주소 검색 버튼을 눌러주세요"
+                autoComplete="street-address"
               />
             </div>
             <Button
               type="button"
               variant="outline"
               color="gray"
+              className="mt-6"
               onClick={() => void handleAddressSearch()}
             >
               주소 검색
@@ -151,19 +160,35 @@ export function StoreEditForm({
           placeholder="가게 소개를 입력해주세요"
         />
 
-        <div className="grid grid-cols-2 gap-4">
-          <Input
-            label="오픈 시간"
-            type="time"
-            value={formData.openTime}
-            onChange={(e) => handleChange('openTime', e.target.value)}
-          />
-          <Input
-            label="마감 시간"
-            type="time"
-            value={formData.closeTime}
-            onChange={(e) => handleChange('closeTime', e.target.value)}
-          />
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="flex flex-col gap-1">
+            <label className="text-sm text-gray-700">
+              오픈 시간{' '}
+              <span aria-hidden="true" className="text-red-500">
+                *
+              </span>
+            </label>
+            <TimePicker
+              label="오픈 시간"
+              value={formData.openTime}
+              onChange={(v) => handleChange('openTime', v)}
+              disabled={isPending}
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className="text-sm text-gray-700">
+              마감 시간{' '}
+              <span aria-hidden="true" className="text-red-500">
+                *
+              </span>
+            </label>
+            <TimePicker
+              label="마감 시간"
+              value={formData.closeTime}
+              onChange={(v) => handleChange('closeTime', v)}
+              disabled={isPending}
+            />
+          </div>
         </div>
       </div>
 

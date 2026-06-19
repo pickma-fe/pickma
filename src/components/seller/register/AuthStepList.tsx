@@ -1,5 +1,6 @@
 'use client';
 
+import { Check } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 import type { AuthStepState, ModalType } from '@/types/seller-register';
@@ -17,7 +18,7 @@ import {
   getButtonColor,
   getButtonVariant,
   getStepCircleClass,
-  getStepLabel,
+  isStepDone,
   getStepStatus,
 } from './utils';
 
@@ -83,11 +84,15 @@ export function AuthStepList({ state, onActionClick }: AuthStepListProps) {
             <div className="flex items-center gap-3">
               <div
                 className={cn(
-                  'flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-xs font-semibold',
+                  'flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold',
                   getStepCircleClass(status)
                 )}
               >
-                {getStepLabel(status, step.id)}
+                {isStepDone(status) ? (
+                  <Check className="h-3.5 w-3.5" aria-hidden="true" />
+                ) : (
+                  step.id
+                )}
               </div>
               <div className="min-w-0">
                 <p className="text-sm font-medium text-gray-900">
@@ -95,7 +100,7 @@ export function AuthStepList({ state, onActionClick }: AuthStepListProps) {
                 </p>
                 <p
                   className={cn(
-                    'text-xs break-words',
+                    'text-xs wrap-break-word',
                     step.id === 5 && state.certificationStatus === 'rejected'
                       ? 'text-red-500'
                       : 'text-gray-400'
@@ -113,14 +118,16 @@ export function AuthStepList({ state, onActionClick }: AuthStepListProps) {
                     text={REVIEW_STATUS_TEXT[state.reviewStatus]}
                     colorClass={REVIEW_STATUS_COLOR[state.reviewStatus]}
                   />
-                  <Button
-                    variant="outline"
-                    color="gray"
-                    className="text-xs whitespace-nowrap"
-                    onClick={() => router.push('/seller/pending')}
-                  >
-                    상세 확인
-                  </Button>
+                  {state.certificationStatus !== 'approved' && (
+                    <Button
+                      variant="outline"
+                      color="gray"
+                      className="text-xs whitespace-nowrap"
+                      onClick={() => router.push('/seller/pending')}
+                    >
+                      상세 확인
+                    </Button>
+                  )}
                 </>
               )}
 
