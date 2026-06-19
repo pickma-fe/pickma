@@ -67,4 +67,9 @@ export type {
   ProductListParams,
   ProductListResponse,
 } from './product';
+export type {
+  SellerDashboardDailyMetricResponse,
+  SellerDashboardRecentOrderResponse,
+  SellerDashboardStatsResponse,
+} from './seller';
 export type { UserResponse } from './user';

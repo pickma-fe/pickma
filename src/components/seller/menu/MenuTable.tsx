@@ -6,7 +6,6 @@ import { useState } from 'react';
 
 import type { MenuItem } from '@/types/menu-item';
 import { Badge } from '@/components/common/Badge/Badge';
-import { Button } from '@/components/common/Button/Button';
 import { Dropdown } from '@/components/common/Dropdown/Dropdown';
 import { Pagination } from '@/components/common/Pagination/Pagination';
 
@@ -16,6 +15,28 @@ interface MenuTableProps {
   onPageChange: (page: number) => void;
   selectedIds: Set<string>;
   onSelectionChange: (ids: Set<string>) => void;
+}
+
+function MenuImageCell({ src, alt }: { src?: string; alt: string }) {
+  const [errorSrc, setErrorSrc] = useState<string | undefined>(undefined);
+  const error = errorSrc === src;
+  if (!src || error) {
+    return (
+      <div className="flex h-full w-full items-center justify-center text-gray-400">
+        🍽️
+      </div>
+    );
+  }
+  return (
+    <Image
+      src={src}
+      alt={alt}
+      fill
+      sizes="56px"
+      className="object-cover"
+      onError={() => setErrorSrc(src)}
+    />
+  );
 }
 
 const PAGE_SIZE_OPTIONS = [
@@ -74,7 +95,7 @@ export function MenuTable({
 
   if (menus.length === 0) {
     return (
-      <div className="flex min-h-[300px] items-center justify-center rounded-lg border border-gray-200 bg-white">
+      <div className="flex min-h-75 items-center justify-center rounded-lg border border-gray-200 bg-white">
         <div className="text-center">
           <p className="text-sm text-gray-500">등록된 메뉴가 없습니다.</p>
           <p className="text-xs text-gray-400">
@@ -99,6 +120,7 @@ export function MenuTable({
                 <div className="flex items-center gap-4">
                   <input
                     type="checkbox"
+                    aria-label="전체 메뉴 선택"
                     checked={isAllSelected}
                     onChange={handleSelectAll}
                     className="text-primary-600 focus:ring-primary-500 h-4 w-4 rounded border-gray-300"
@@ -146,24 +168,13 @@ export function MenuTable({
                   <div className="flex items-center gap-7">
                     <input
                       type="checkbox"
+                      aria-label={`${menu.name} 선택`}
                       checked={selectedIds.has(menu.id)}
                       onChange={() => handleSelectOne(menu.id)}
                       className="text-primary-600 focus:ring-primary-500 h-4 w-4 rounded border-gray-300"
                     />
                     <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-gray-100">
-                      {menu.image ? (
-                        <Image
-                          src={menu.image}
-                          alt={menu.name}
-                          fill
-                          sizes="56px"
-                          className="object-cover"
-                        />
-                      ) : (
-                        <div className="flex h-full w-full items-center justify-center text-gray-400">
-                          🍽️
-                        </div>
-                      )}
+                      <MenuImageCell src={menu.image} alt={menu.name} />
                     </div>
                     <div className="min-w-0">
                       <p className="truncate text-sm font-medium text-gray-900">
@@ -189,10 +200,11 @@ export function MenuTable({
                   {formatDate(menu.updatedAt)}
                 </td>
                 <td className="py-4 pr-8 pl-4 whitespace-nowrap">
-                  <Link href={`/seller/menu/${menu.id}/edit`}>
-                    <Button variant="outline" color="gray">
-                      수정
-                    </Button>
+                  <Link
+                    href={`/seller/menu/${menu.id}/edit`}
+                    className="inline-flex items-center justify-center rounded-sm border border-gray-300 px-4 py-2 font-medium text-gray-900 transition hover:bg-gray-100 focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2 focus-visible:outline-none"
+                  >
+                    수정
                   </Link>
                 </td>
               </tr>

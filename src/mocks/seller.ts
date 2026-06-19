@@ -5,6 +5,7 @@ import type {
   OrderListResponse,
 } from '@/contracts/order';
 import type { ProductListItemResponse } from '@/contracts/product';
+import type { SellerDashboardStatsResponse } from '@/contracts/seller';
 import type {
   SellerApplicationResponse,
   SellerOnboardingStatusResponse,
@@ -139,6 +140,7 @@ export const mockSellerOrders: OrderListItemResponse[] = [
     storeOrderNumber: '20260429-0000001',
     pickupNumber: 'A-01',
     expiresAt: '2026-04-29T10:10:00.000Z',
+    image: '/images/mock/menus/menu-sandwich.jpg',
     createdAt: '2026-04-29T10:00:00.000Z',
     updatedAt: '2026-04-29T10:01:00.000Z',
   },
@@ -155,6 +157,7 @@ export const mockSellerOrders: OrderListItemResponse[] = [
     pickupServiceDate: '2026-04-29',
     storeOrderNumber: '20260429-0000002',
     pickupNumber: 'A-02',
+    image: '/images/mock/menus/menu-cheesecake.jpg',
     createdAt: '2026-04-29T10:10:00.000Z',
     updatedAt: '2026-04-29T10:10:00.000Z',
   },
@@ -171,6 +174,7 @@ export const mockSellerOrders: OrderListItemResponse[] = [
     pickupServiceDate: '2026-04-28',
     storeOrderNumber: '20260428-0000003',
     pickupNumber: 'B-03',
+    image: '/images/mock/menus/menu-coffee.jpg',
     createdAt: '2026-04-28T10:30:00.000Z',
     updatedAt: '2026-04-28T13:05:00.000Z',
   },
@@ -204,7 +208,6 @@ export const mockSellerOrderDetail: OrderDetailResponse = {
 
 type ReviewStatus = 'pending' | 'reviewing' | 'completed';
 type CertificationStatus = 'waiting' | 'approved' | 'rejected';
-type StoreReviewStatus = 'pending' | 'reviewing' | 'completed';
 type StoreStatus = 'waiting' | 'approved' | 'rejected';
 
 export interface MockAuthStepState {
@@ -218,7 +221,6 @@ export interface MockAuthStepState {
 
 export interface MockStoreStepState {
   storeInfoSubmitted: boolean;
-  reviewStatus: StoreReviewStatus;
   storeStatus: StoreStatus;
 }
 
@@ -233,7 +235,6 @@ export const mockSellerAuthState: MockAuthStepState = {
 
 export const mockStoreRegisterState: MockStoreStepState = {
   storeInfoSubmitted: false,
-  reviewStatus: 'pending',
   storeStatus: 'waiting',
 };
 
@@ -266,7 +267,6 @@ export const mockSellerAuthReviewing: MockAuthStepState = {
 
 export const mockStoreRegisterCompleted: MockStoreStepState = {
   storeInfoSubmitted: true,
-  reviewStatus: 'completed',
   storeStatus: 'approved',
 };
 
@@ -274,4 +274,44 @@ export const mockSellerOnboardingStatus: SellerOnboardingStatusResponse = {
   role: 'customer',
   applicationStatus: 'pending',
   hasStore: false,
+};
+
+export const mockSellerDashboardStats: SellerDashboardStatsResponse = {
+  totalSalesAmount: 1_480_000,
+  totalOrderCount: 124,
+  dailyMetrics: [
+    { date: '2026-05-30T00:00:00.000Z', orderCount: 8, salesAmount: 96_000 },
+    { date: '2026-05-31T00:00:00.000Z', orderCount: 12, salesAmount: 144_000 },
+    { date: '2026-06-01T00:00:00.000Z', orderCount: 6, salesAmount: 72_000 },
+    { date: '2026-06-02T00:00:00.000Z', orderCount: 15, salesAmount: 180_000 },
+    { date: '2026-06-03T00:00:00.000Z', orderCount: 10, salesAmount: 120_000 },
+    { date: '2026-06-04T00:00:00.000Z', orderCount: 18, salesAmount: 216_000 },
+    { date: '2026-06-05T00:00:00.000Z', orderCount: 14, salesAmount: 168_000 },
+  ],
+  recentOrders: [
+    {
+      id: 'order-mock-dash-1',
+      orderNumber: 'PM20260605A1B2C3D4E5',
+      productName: '딸기 케이크',
+      paymentAmount: 18_000,
+      status: 'reserved',
+      createdAt: '2026-06-05T03:10:00.000Z',
+    },
+    {
+      id: 'order-mock-dash-2',
+      orderNumber: 'PM20260605F6A7B8C9D0',
+      productName: '마카롱 세트',
+      paymentAmount: 24_000,
+      status: 'accepted',
+      createdAt: '2026-06-05T02:50:00.000Z',
+    },
+    {
+      id: 'order-mock-dash-3',
+      orderNumber: 'PM20260605E1F2A3B4C5',
+      productName: '소금빵',
+      paymentAmount: 9_000,
+      status: 'completed',
+      createdAt: '2026-06-05T02:00:00.000Z',
+    },
+  ],
 };

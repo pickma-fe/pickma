@@ -1,6 +1,9 @@
 'use client';
 
+import { Maximize2 } from 'lucide-react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 import type { Order } from '@/types/order';
 import type {
@@ -8,8 +11,11 @@ import type {
   SellerOrderDisplayStatus,
 } from '@/types/seller-order';
 import { Badge } from '@/components/common/Badge/Badge';
-import { Button } from '@/components/common/Button/Button';
+import type { ActionMenuItem } from '@/components/common/Dropdown/ActionsMenu';
+import { ActionsMenu } from '@/components/common/Dropdown/ActionsMenu';
+import { Modal } from '@/components/common/Modal/Modal';
 import { Pagination } from '@/components/common/Pagination/Pagination';
+import { Tooltip } from '@/components/common/Tooltip/Tooltip';
 
 type SellerOrderListItem = Omit<Order, 'items' | 'payment'>;
 
@@ -19,6 +25,7 @@ interface OrderTableProps {
   totalPages: number;
   onPageChange: (page: number) => void;
   onOrderAction: (orderId: string, newStatus: SellerOrderActionStatus) => void;
+  onCancelRequest: (orderId: string) => void;
   isLoading?: boolean;
   isError?: boolean;
   isActionPending?: boolean;
@@ -66,109 +73,62 @@ function isSellerDisplayStatus(
   return status in STATUS_BADGE;
 }
 
-function OrderActionButtons({
-  order,
-  onOrderAction,
-  onDetail,
-  isActionPending,
-}: {
-  order: SellerOrderListItem;
-  onOrderAction: (orderId: string, newStatus: SellerOrderActionStatus) => void;
-  onDetail: () => void;
-  isActionPending: boolean;
-}) {
+function buildOrderActionItems(
+  order: SellerOrderListItem,
+  onOrderAction: (orderId: string, newStatus: SellerOrderActionStatus) => void,
+  onCancelRequest: (orderId: string) => void,
+  onDetail: () => void,
+  isActionPending: boolean
+): ActionMenuItem[] {
+  const items: ActionMenuItem[] = [];
+
   switch (order.status) {
     case 'reserved':
-      return (
-        <div className="flex w-fit flex-col gap-2">
-          <Button
-            className="w-fit px-2 py-0.5 text-sm"
-            onClick={() => onOrderAction(order.id, 'accepted')}
-            disabled={isActionPending}
-          >
-            {isActionPending ? '처리 중...' : '주문 접수'}
-          </Button>
-          <Button
-            className="w-fit px-2 py-0.5 text-sm"
-            variant="outline"
-            color="danger"
-            disabled
-            title="주문 취소 기능은 준비 중입니다."
-          >
-            주문 취소
-          </Button>
-          <Button
-            className="w-fit px-2 py-0.5 text-sm"
-            variant="outline"
-            onClick={onDetail}
-          >
-            상세 보기
-          </Button>
-        </div>
+      items.push(
+        {
+          id: 'accept',
+          label: '주문 접수',
+          onClick: () => onOrderAction(order.id, 'accepted'),
+          disabled: isActionPending,
+        },
+        {
+          id: 'cancel',
+          label: '주문 취소',
+          onClick: () => onCancelRequest(order.id),
+          disabled: isActionPending,
+          variant: 'danger',
+        }
       );
+      break;
     case 'accepted':
-      return (
-        <div className="flex w-fit flex-col gap-2">
-          <Button
-            className="w-fit px-2 py-0.5 text-sm"
-            onClick={() => onOrderAction(order.id, 'ready')}
-            disabled={isActionPending}
-          >
-            {isActionPending ? '처리 중...' : '준비 완료'}
-          </Button>
-          <Button
-            className="w-fit px-2 py-0.5 text-sm"
-            variant="outline"
-            color="danger"
-            disabled
-            title="주문 취소 기능은 준비 중입니다."
-          >
-            주문 취소
-          </Button>
-          <Button
-            className="w-fit px-2 py-0.5 text-sm"
-            variant="outline"
-            onClick={onDetail}
-          >
-            상세 보기
-          </Button>
-        </div>
+      items.push(
+        {
+          id: 'ready',
+          label: '준비 완료',
+          onClick: () => onOrderAction(order.id, 'ready'),
+          disabled: isActionPending,
+        },
+        {
+          id: 'cancel',
+          label: '주문 취소',
+          onClick: () => onCancelRequest(order.id),
+          disabled: isActionPending,
+          variant: 'danger',
+        }
       );
+      break;
     case 'ready':
-      return (
-        <div className="flex w-fit flex-col gap-2">
-          <Button
-            className="w-fit px-2 py-0.5 text-sm"
-            onClick={() => onOrderAction(order.id, 'completed')}
-            disabled={isActionPending}
-          >
-            {isActionPending ? '처리 중...' : '픽업 완료'}
-          </Button>
-          <Button
-            className="w-fit px-2 py-0.5 text-sm"
-            variant="outline"
-            onClick={onDetail}
-          >
-            상세 보기
-          </Button>
-        </div>
-      );
-    case 'cancelling':
-    case 'completed':
-    case 'cancelled':
-    case 'noShow':
-      return (
-        <Button
-          className="w-fit px-2 py-0.5 text-sm"
-          variant="outline"
-          onClick={onDetail}
-        >
-          상세 보기
-        </Button>
-      );
-    default:
-      return null;
+      items.push({
+        id: 'complete',
+        label: '픽업 완료',
+        onClick: () => onOrderAction(order.id, 'completed'),
+        disabled: isActionPending,
+      });
+      break;
   }
+
+  items.push({ id: 'detail', label: '상세 보기', onClick: onDetail });
+  return items;
 }
 
 export function OrderTable({
@@ -177,15 +137,20 @@ export function OrderTable({
   totalPages,
   onPageChange,
   onOrderAction,
+  onCancelRequest,
   isLoading = false,
   isError = false,
   isActionPending = false,
 }: OrderTableProps) {
   const router = useRouter();
+  const [pickupModal, setPickupModal] = useState<{
+    pickupNumber: string;
+    orderNumber: string;
+  } | null>(null);
 
   if (isLoading) {
     return (
-      <div className="flex min-h-[300px] items-center justify-center rounded-lg border border-gray-200 bg-white">
+      <div className="flex min-h-75 items-center justify-center rounded-lg border border-gray-200 bg-white">
         <p className="text-sm text-gray-500">주문 목록을 불러오는 중...</p>
       </div>
     );
@@ -193,7 +158,7 @@ export function OrderTable({
 
   if (isError) {
     return (
-      <div className="flex min-h-[300px] items-center justify-center rounded-lg border border-gray-200 bg-white">
+      <div className="flex min-h-75 items-center justify-center rounded-lg border border-gray-200 bg-white">
         <div className="text-center">
           <p className="text-sm text-gray-500">
             주문 목록을 불러오지 못했습니다.
@@ -206,7 +171,7 @@ export function OrderTable({
 
   if (orders.length === 0 && totalPages === 0) {
     return (
-      <div className="flex min-h-[300px] items-center justify-center rounded-lg border border-gray-200 bg-white">
+      <div className="flex min-h-75 items-center justify-center rounded-lg border border-gray-200 bg-white">
         <div className="text-center">
           <p className="text-sm text-gray-500">주문 내역이 없습니다.</p>
           <p className="text-xs text-gray-400">아직 접수된 주문이 없습니다.</p>
@@ -282,10 +247,20 @@ export function OrderTable({
                   >
                     <td className="px-4 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100">
-                          <div className="flex h-full w-full items-center justify-center text-gray-400">
-                            🛍️
-                          </div>
+                        <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-gray-100">
+                          {order.image ? (
+                            <Image
+                              src={order.image}
+                              alt=""
+                              fill
+                              sizes="56px"
+                              className="object-cover"
+                            />
+                          ) : (
+                            <div className="flex h-full w-full items-center justify-center text-gray-400">
+                              🛍️
+                            </div>
+                          )}
                         </div>
                         <div className="flex flex-col gap-1">
                           <p className="text-sm font-medium text-gray-900">
@@ -318,32 +293,43 @@ export function OrderTable({
                           {formatTime(order.pickupAt)}
                         </p>
                         {order.pickupNumber && (
-                          <p className="text-xs text-gray-400">
-                            픽업 번호 {order.pickupNumber}
-                          </p>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const pickupNumber = order.pickupNumber;
+                              if (pickupNumber)
+                                setPickupModal({
+                                  pickupNumber,
+                                  orderNumber: order.orderNumber,
+                                });
+                            }}
+                            aria-label={`픽업 번호 ${order.pickupNumber} 크게 보기`}
+                            className="-mx-1 flex items-center gap-1 rounded px-1 py-0.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 focus-visible:ring-2 focus-visible:ring-gray-300 focus-visible:outline-none"
+                          >
+                            <span className="text-xs">
+                              픽업 번호 {order.pickupNumber}
+                            </span>
+                            <Maximize2 className="h-3 w-3 shrink-0" />
+                          </button>
                         )}
                       </div>
                     </td>
                     <td className="w-40 px-4 py-4">
-                      <div className="flex flex-col gap-1">
-                        <div className="w-fit">
-                          <Badge variant="soft" color={badge.color}>
-                            {badge.label}
-                          </Badge>
-                        </div>
-                        {description && (
-                          <p className="text-xs text-gray-400">{description}</p>
-                        )}
-                      </div>
+                      <Tooltip content={description}>
+                        <Badge variant="soft" color={badge.color}>
+                          {badge.label}
+                        </Badge>
+                      </Tooltip>
                     </td>
-                    <td className="px-4 py-4 whitespace-nowrap">
-                      <OrderActionButtons
-                        order={order}
-                        onOrderAction={onOrderAction}
-                        onDetail={() =>
-                          router.push(`/seller/orders/${order.id}`)
-                        }
-                        isActionPending={isActionPending}
+                    <td className="px-4 py-4">
+                      <ActionsMenu
+                        items={buildOrderActionItems(
+                          order,
+                          onOrderAction,
+                          onCancelRequest,
+                          () => router.push(`/seller/orders/${order.id}`),
+                          isActionPending
+                        )}
                       />
                     </td>
                   </tr>
@@ -361,6 +347,22 @@ export function OrderTable({
           onPageChange={onPageChange}
         />
       </div>
+
+      {pickupModal && (
+        <Modal
+          isOpen
+          onClose={() => setPickupModal(null)}
+          title="픽업 번호"
+          size="sm"
+        >
+          <div className="flex flex-col items-center gap-2 py-4">
+            <p className="text-8xl font-bold tracking-widest text-gray-900">
+              {pickupModal.pickupNumber}
+            </p>
+            <p className="text-sm text-gray-400">{pickupModal.orderNumber}</p>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }

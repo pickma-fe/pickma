@@ -2,7 +2,7 @@ import type { OrderStatus } from '@/types/order';
 
 export type SellerOrderActionStatus = Extract<
   OrderStatus,
-  'accepted' | 'ready' | 'completed' | 'cancelled'
+  'accepted' | 'ready' | 'completed'
 >;
 
 export type SellerOrderDisplayStatus = Extract<

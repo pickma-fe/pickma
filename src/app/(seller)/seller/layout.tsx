@@ -90,6 +90,7 @@ export default function SellerLayout({
       <Header
         user={user ?? null}
         logoHref="/seller"
+        sidebarSections={sellerUser ? sellerSidebarSections : undefined}
         menuItems={
           user
             ? [
@@ -101,7 +102,10 @@ export default function SellerLayout({
                 {
                   label: '로그아웃',
                   type: 'action',
-                  onClick: () => signOut(),
+                  onClick: () =>
+                    signOut(undefined, {
+                      onSuccess: () => router.push('/seller'),
+                    }),
                   className: 'text-red-500',
                 },
               ]
@@ -109,7 +113,11 @@ export default function SellerLayout({
                 {
                   label: '로그인',
                   type: 'action',
-                  onClick: () => openAuthModal('login'),
+                  onClick: () =>
+                    openAuthModal(
+                      'login',
+                      window.location.pathname + window.location.search
+                    ),
                 },
               ]
         }
@@ -120,7 +128,7 @@ export default function SellerLayout({
             <Sidebar sections={sellerSidebarSections} />
           </div>
         )}
-        <main className="flex-1 bg-gray-50 p-4 lg:p-8">{children}</main>
+        <main className="min-w-0 flex-1 bg-gray-50 p-4 lg:p-8">{children}</main>
       </div>
       <AuthModal />
     </div>

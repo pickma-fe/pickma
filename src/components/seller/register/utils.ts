@@ -17,9 +17,8 @@ export function getStepCircleClass(status: string): string {
   return 'bg-gray-200 text-gray-400';
 }
 
-export function getStepLabel(status: string, id: number): string | number {
-  if (status === 'done') return '✓';
-  return id;
+export function isStepDone(status: string): boolean {
+  return status === 'done';
 }
 
 export function getStepStatus(

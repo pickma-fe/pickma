@@ -84,4 +84,8 @@ export const sellerOrderApi = {
   noShowOrder(id: string): Promise<void> {
     return apiClient.patch<void>(`/api/seller/orders/${id}/no-show`);
   },
+
+  cancelOrder(id: string, reason: string): Promise<void> {
+    return apiClient.patch<void>(`/api/seller/orders/${id}/cancel`, { reason });
+  },
 };

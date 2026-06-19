@@ -34,7 +34,7 @@ export function StoreImageSection({
   };
 
   return (
-    <Section variant="card" className="bg-white">
+    <Section variant="card">
       <h3 className="mb-4 text-base font-semibold text-gray-900">
         대표 이미지
       </h3>

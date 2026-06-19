@@ -47,6 +47,7 @@ function mapOrderItem(dto: OrderItemResponse): OrderItem {
     discountPrice: dto.discountPrice,
     quantity: dto.quantity,
     subtotal: dto.subtotal,
+    image: dto.image,
     createdAt: new Date(dto.createdAt),
   };
 }
@@ -93,6 +94,7 @@ export function mapOrderListItem(
     storeOrderNumber: dto.storeOrderNumber,
     pickupNumber: dto.pickupNumber,
     expiresAt: dto.expiresAt ? new Date(dto.expiresAt) : undefined,
+    image: dto.image,
     createdAt: new Date(dto.createdAt),
     updatedAt: new Date(dto.updatedAt),
   };

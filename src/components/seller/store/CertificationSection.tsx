@@ -35,7 +35,7 @@ export function CertificationSection({
   const statusBadge = APPLICATION_STATUS_BADGE[applicationStatus];
 
   return (
-    <Section variant="card" className="bg-white">
+    <Section variant="card">
       <div className="mb-4 flex items-center justify-between">
         <h3 className="text-base font-semibold text-gray-900">인증 정보</h3>
         <Badge variant="soft" color={statusBadge.color}>

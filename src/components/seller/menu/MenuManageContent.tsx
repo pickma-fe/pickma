@@ -110,7 +110,7 @@ export function MenuManageContent() {
           등록한 메뉴를 확인하고 관리할 수 있습니다.
         </p>
       </div>
-      <Section variant="card" className="bg-white">
+      <Section variant="card">
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
           <div className="flex items-center gap-4">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100">
@@ -162,10 +162,11 @@ export function MenuManageContent() {
         />
         <div className="flex gap-2">
           <Button onClick={() => setShowProductModal(true)}>판매 등록</Button>
-          <Link href="/seller/menu/new">
-            <Button variant="outline" color="gray">
-              + 메뉴 등록
-            </Button>
+          <Link
+            href="/seller/menu/new"
+            className="inline-flex items-center justify-center rounded-sm border border-gray-300 px-4 py-2 font-medium text-gray-900 transition hover:bg-gray-100 focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2 focus-visible:outline-none"
+          >
+            + 메뉴 등록
           </Link>
         </div>
       </div>

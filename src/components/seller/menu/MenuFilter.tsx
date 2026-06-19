@@ -36,6 +36,7 @@ export function MenuFilter({
       />
       <div className="w-full sm:w-64">
         <Input
+          aria-label="메뉴명 검색"
           placeholder="메뉴명 검색"
           value={searchKeyword}
           onChange={(e) => onSearchChange(e.target.value)}

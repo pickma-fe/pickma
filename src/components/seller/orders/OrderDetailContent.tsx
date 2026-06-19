@@ -9,11 +9,13 @@ import {
   Package,
   ShoppingBag,
 } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
 
 import type { Order, OrderStatus } from '@/types/order';
 import { useAcceptSellerOrder } from '@/hooks/seller/orders/useAcceptSellerOrder';
+import { useCancelSellerOrder } from '@/hooks/seller/orders/useCancelSellerOrder';
 import { useCompleteSellerOrder } from '@/hooks/seller/orders/useCompleteSellerOrder';
 import { useMarkSellerOrderReady } from '@/hooks/seller/orders/useMarkSellerOrderReady';
 import { useNoShowSellerOrder } from '@/hooks/seller/orders/useNoShowSellerOrder';
@@ -21,6 +23,9 @@ import { useSellerOrder } from '@/hooks/seller/orders/useSellerOrder';
 import { Badge } from '@/components/common/Badge/Badge';
 import { Button } from '@/components/common/Button/Button';
 import { Section } from '@/components/common/Section/Section';
+
+import { OrderCancelModal } from './OrderCancelModal';
+import { OrderCompleteConfirmModal } from './OrderCompleteConfirmModal';
 
 interface OrderDetailContentProps {
   orderId: string;
@@ -85,6 +90,7 @@ interface ActionButtonsProps {
   onAccept: () => void;
   onReady: () => void;
   onComplete: () => void;
+  onCancel: () => void;
   onNoShow: () => void;
 }
 
@@ -94,6 +100,7 @@ function ActionButtons({
   onAccept,
   onReady,
   onComplete,
+  onCancel,
   onNoShow,
 }: ActionButtonsProps) {
   switch (order.status) {
@@ -106,8 +113,8 @@ function ActionButtons({
           <Button
             variant="outline"
             color="danger"
-            disabled
-            title="주문 취소 기능은 준비 중입니다."
+            onClick={onCancel}
+            disabled={isPending}
             className="flex-1"
           >
             주문 취소
@@ -123,8 +130,8 @@ function ActionButtons({
           <Button
             variant="outline"
             color="danger"
-            disabled
-            title="주문 취소 기능은 준비 중입니다."
+            onClick={onCancel}
+            disabled={isPending}
             className="flex-1"
           >
             주문 취소
@@ -168,7 +175,7 @@ interface InfoRowProps {
 function InfoRow({ icon, label, value }: InfoRowProps) {
   return (
     <div className="flex items-start gap-2">
-      <dt className="mt-0.5 flex min-w-[90px] items-center gap-1.5 text-xs text-gray-400">
+      <dt className="mt-0.5 flex min-w-22.5 items-center gap-1.5 text-xs text-gray-400">
         <span className="text-gray-400">{icon}</span>
         {label}
       </dt>
@@ -194,16 +201,23 @@ export function OrderDetailContent({ orderId }: OrderDetailContentProps) {
 
   const [actionError, setActionError] = useState<string | null>(null);
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
+  const [cancelModalOpen, setCancelModalOpen] = useState(false);
+  const [cancelErrorMessage, setCancelErrorMessage] = useState<string | null>(
+    null
+  );
+  const [completeModalOpen, setCompleteModalOpen] = useState(false);
 
   const acceptOrder = useAcceptSellerOrder();
   const markOrderReady = useMarkSellerOrderReady();
   const completeOrder = useCompleteSellerOrder();
+  const cancelOrder = useCancelSellerOrder();
   const noShowOrder = useNoShowSellerOrder();
 
   const isPending =
     acceptOrder.isPending ||
     markOrderReady.isPending ||
     completeOrder.isPending ||
+    cancelOrder.isPending ||
     noShowOrder.isPending;
 
   const handleAction = (
@@ -224,9 +238,48 @@ export function OrderDetailContent({ orderId }: OrderDetailContentProps) {
     });
   };
 
+  const handleCancelConfirm = (reason: string) => {
+    setActionError(null);
+    setActionSuccess(null);
+    cancelOrder.mutate(
+      { id: orderId, reason },
+      {
+        onSuccess: () => {
+          setCancelModalOpen(false);
+          setCancelErrorMessage(null);
+          setActionError(null);
+          setActionSuccess('주문 취소 처리가 완료되었습니다.');
+        },
+        onError: () => {
+          setActionSuccess(null);
+          setCancelErrorMessage(
+            '주문 취소 처리에 실패했습니다. 다시 시도해주세요.'
+          );
+        },
+      }
+    );
+  };
+
+  const handleCompleteConfirm = () => {
+    setActionError(null);
+    setActionSuccess(null);
+    completeOrder.mutate(orderId, {
+      onSuccess: () => {
+        setCompleteModalOpen(false);
+        setActionError(null);
+        setActionSuccess('픽업 완료 처리가 완료되었습니다.');
+      },
+      onError: () => {
+        setCompleteModalOpen(false);
+        setActionSuccess(null);
+        setActionError('픽업 완료 처리에 실패했습니다. 다시 시도해주세요.');
+      },
+    });
+  };
+
   if (isLoading) {
     return (
-      <div className="flex min-h-[400px] items-center justify-center">
+      <div className="flex min-h-100 items-center justify-center">
         <p className="text-sm text-gray-500">주문 정보를 불러오는 중...</p>
       </div>
     );
@@ -236,7 +289,7 @@ export function OrderDetailContent({ orderId }: OrderDetailContentProps) {
     return (
       <div className="flex flex-col gap-6">
         <BackButton />
-        <div className="flex min-h-[400px] flex-col items-center justify-center gap-2">
+        <div className="flex min-h-100 flex-col items-center justify-center gap-2">
           <AlertCircle className="h-8 w-8 text-gray-400" />
           <p className="text-sm text-gray-500">
             주문 정보를 불러오지 못했습니다.
@@ -274,7 +327,7 @@ export function OrderDetailContent({ orderId }: OrderDetailContentProps) {
           aria-live="polite"
           className="flex items-center gap-2 rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700"
         >
-          <CheckCircle className="h-4 w-4 flex-shrink-0" />
+          <CheckCircle className="h-4 w-4 shrink-0" />
           {actionSuccess}
         </div>
       )}
@@ -284,13 +337,13 @@ export function OrderDetailContent({ orderId }: OrderDetailContentProps) {
           aria-live="assertive"
           className="flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
         >
-          <AlertCircle className="h-4 w-4 flex-shrink-0" />
+          <AlertCircle className="h-4 w-4 shrink-0" />
           {actionError}
         </div>
       )}
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <div className="flex flex-col gap-6 lg:col-span-2">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+        <div className="flex flex-col gap-6 xl:col-span-2">
           <Section variant="card">
             <div className="flex flex-col gap-4">
               <div className="flex items-center justify-between">
@@ -323,13 +376,11 @@ export function OrderDetailContent({ orderId }: OrderDetailContentProps) {
                     '준비 완료'
                   )
                 }
-                onComplete={() =>
-                  handleAction(
-                    (id, cb) => completeOrder.mutate(id, cb),
-                    '픽업 완료',
-                    '픽업 완료'
-                  )
-                }
+                onComplete={() => setCompleteModalOpen(true)}
+                onCancel={() => {
+                  setCancelErrorMessage(null);
+                  setCancelModalOpen(true);
+                }}
                 onNoShow={() =>
                   handleAction(
                     (id, cb) => noShowOrder.mutate(id, cb),
@@ -356,8 +407,20 @@ export function OrderDetailContent({ orderId }: OrderDetailContentProps) {
                       className="flex items-center justify-between gap-4 py-3 first:pt-0 last:pb-0"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg bg-gray-100 text-xl">
-                          🛍️
+                        <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-gray-100">
+                          {item.image ? (
+                            <Image
+                              src={item.image}
+                              alt=""
+                              fill
+                              sizes="48px"
+                              className="object-cover"
+                            />
+                          ) : (
+                            <div className="flex h-full w-full items-center justify-center text-xl">
+                              🛍️
+                            </div>
+                          )}
                         </div>
                         <div>
                           <p className="text-sm font-medium text-gray-900">
@@ -403,18 +466,18 @@ export function OrderDetailContent({ orderId }: OrderDetailContentProps) {
               <h2 className="text-base font-semibold text-gray-900">
                 픽업 정보
               </h2>
+              {order.pickupNumber && (
+                <div className="flex flex-col items-center gap-1 rounded-lg bg-gray-50 py-4">
+                  <p className="flex items-center gap-1 text-xs text-gray-400">
+                    <Hash className="h-3 w-3" />
+                    픽업 번호
+                  </p>
+                  <p className="text-4xl font-bold tracking-widest text-gray-900">
+                    {order.pickupNumber}
+                  </p>
+                </div>
+              )}
               <dl className="flex flex-col gap-3">
-                {order.pickupNumber && (
-                  <InfoRow
-                    icon={<Hash className="h-4 w-4" />}
-                    label="픽업 번호"
-                    value={
-                      <span className="text-2xl font-bold text-gray-900">
-                        {order.pickupNumber}
-                      </span>
-                    }
-                  />
-                )}
                 <InfoRow
                   icon={<Clock className="h-4 w-4" />}
                   label="픽업 시간"
@@ -473,6 +536,28 @@ export function OrderDetailContent({ orderId }: OrderDetailContentProps) {
           </Section>
         </div>
       </div>
+
+      <OrderCancelModal
+        key={String(cancelModalOpen)}
+        isOpen={cancelModalOpen}
+        isSubmitting={cancelOrder.isPending}
+        errorMessage={cancelErrorMessage}
+        onClose={() => {
+          setCancelModalOpen(false);
+          setCancelErrorMessage(null);
+        }}
+        onConfirm={handleCancelConfirm}
+      />
+
+      <OrderCompleteConfirmModal
+        isOpen={completeModalOpen}
+        isSubmitting={completeOrder.isPending}
+        orderNumber={order.orderNumber}
+        pickupNumber={order.pickupNumber ?? null}
+        storeOrderNumber={order.storeOrderNumber ?? null}
+        onClose={() => setCompleteModalOpen(false)}
+        onConfirm={handleCompleteConfirm}
+      />
     </div>
   );
 }
