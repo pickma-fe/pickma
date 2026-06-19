@@ -9,6 +9,13 @@ import { isApiMockEnabled } from '@/app/api/_lib/mock';
 import { POST } from './route';
 import { rejectSellerApplication } from '../../_lib/service';
 
+const mockLogger = { info: vi.fn(), error: vi.fn() };
+
+vi.mock('@/app/api/_lib/logger', () => ({
+  generateReqId: vi.fn(() => 'test-req-id'),
+  createLogger: vi.fn(() => mockLogger),
+}));
+
 vi.mock('@/app/api/_lib/auth', () => ({
   requireAdmin: vi.fn(),
 }));
@@ -23,9 +30,10 @@ vi.mock('../../_lib/service', () => ({
 
 const APPLICATION_ID = '00000000-0000-4000-8000-000000000001';
 const REJECT_REASON = '서류 미제출';
+const ADMIN_USER_ID = 'admin-user-uuid';
 
 const adminResult = {
-  authUser: {},
+  authUser: { id: ADMIN_USER_ID },
   serviceUser: {},
 } as Awaited<ReturnType<typeof requireAdmin>>;
 
@@ -72,7 +80,7 @@ describe('POST /api/admin/sellers/[applicationId]/reject', () => {
     expect(body.error.code).toBe('VALIDATION_ERROR');
   });
 
-  it('real 모드에서 requireAdmin 호출 후 rejectSellerApplication을 호출한다', async () => {
+  it('real 모드에서 requireAdmin 호출 후 rejectSellerApplication을 호출하고 감사 로그를 기록한다', async () => {
     vi.mocked(isApiMockEnabled).mockReturnValue(false);
     vi.mocked(requireAdmin).mockResolvedValue(adminResult);
     vi.mocked(rejectSellerApplication).mockResolvedValue(undefined);
@@ -87,6 +95,13 @@ describe('POST /api/admin/sellers/[applicationId]/reject', () => {
     expect(rejectSellerApplication).toHaveBeenCalledWith(
       APPLICATION_ID,
       REJECT_REASON
+    );
+    expect(mockLogger.info).toHaveBeenCalledWith(
+      'ADMIN_REJECT_SELLER_SUCCEEDED',
+      expect.objectContaining({
+        adminUserId: ADMIN_USER_ID,
+        applicationId: APPLICATION_ID,
+      })
     );
   });
 

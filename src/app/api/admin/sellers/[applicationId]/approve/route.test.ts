@@ -9,6 +9,13 @@ import { isApiMockEnabled } from '@/app/api/_lib/mock';
 import { POST } from './route';
 import { approveSellerApplication } from '../../_lib/service';
 
+const mockLogger = { info: vi.fn(), error: vi.fn() };
+
+vi.mock('@/app/api/_lib/logger', () => ({
+  generateReqId: vi.fn(() => 'test-req-id'),
+  createLogger: vi.fn(() => mockLogger),
+}));
+
 vi.mock('@/app/api/_lib/auth', () => ({
   requireAdmin: vi.fn(),
 }));
@@ -22,9 +29,10 @@ vi.mock('../../_lib/service', () => ({
 }));
 
 const APPLICATION_ID = '00000000-0000-4000-8000-000000000001';
+const ADMIN_USER_ID = 'admin-user-uuid';
 
 const adminResult = {
-  authUser: {},
+  authUser: { id: ADMIN_USER_ID },
   serviceUser: {},
 } as Awaited<ReturnType<typeof requireAdmin>>;
 
@@ -53,7 +61,7 @@ describe('POST /api/admin/sellers/[applicationId]/approve', () => {
     expect(requireAdmin).not.toHaveBeenCalled();
   });
 
-  it('real 모드에서 requireAdmin 호출 후 approveSellerApplication을 호출한다', async () => {
+  it('real 모드에서 requireAdmin 호출 후 approveSellerApplication을 호출하고 감사 로그를 기록한다', async () => {
     vi.mocked(isApiMockEnabled).mockReturnValue(false);
     vi.mocked(requireAdmin).mockResolvedValue(adminResult);
     vi.mocked(approveSellerApplication).mockResolvedValue(undefined);
@@ -63,6 +71,13 @@ describe('POST /api/admin/sellers/[applicationId]/approve', () => {
     expect(res.status).toBe(200);
     expect(requireAdmin).toHaveBeenCalledOnce();
     expect(approveSellerApplication).toHaveBeenCalledWith(APPLICATION_ID);
+    expect(mockLogger.info).toHaveBeenCalledWith(
+      'ADMIN_APPROVE_SELLER_SUCCEEDED',
+      expect.objectContaining({
+        adminUserId: ADMIN_USER_ID,
+        applicationId: APPLICATION_ID,
+      })
+    );
   });
 
   it('잘못된 UUID params는 400을 반환하고 service를 호출하지 않는다', async () => {
