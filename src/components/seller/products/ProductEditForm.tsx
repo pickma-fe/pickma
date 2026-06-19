@@ -142,7 +142,7 @@ export function ProductEditForm({
           <Controller
             name="pickupStartTime"
             control={control}
-            render={({ field }) => (
+            render={({ field, fieldState }) => (
               <div className="flex flex-col gap-1">
                 <label
                   htmlFor="pickupStartTime"
@@ -158,18 +158,18 @@ export function ProductEditForm({
                   value={field.value}
                   onChange={field.onChange}
                   disabled={isPending}
-                  invalid={!!errors.pickupStartTime}
+                  invalid={!!fieldState.error}
                   describedBy={
-                    errors.pickupStartTime ? 'pickupStartTime-error' : undefined
+                    fieldState.error ? 'pickupStartTime-error' : undefined
                   }
                 />
-                {errors.pickupStartTime && (
+                {fieldState.error && (
                   <p
                     id="pickupStartTime-error"
                     className="text-sm text-red-500"
                     role="alert"
                   >
-                    {errors.pickupStartTime.message}
+                    {fieldState.error.message}
                   </p>
                 )}
               </div>
@@ -178,7 +178,7 @@ export function ProductEditForm({
           <Controller
             name="pickupEndTime"
             control={control}
-            render={({ field }) => (
+            render={({ field, fieldState }) => (
               <div className="flex flex-col gap-1">
                 <label
                   htmlFor="pickupEndTime"
@@ -194,18 +194,18 @@ export function ProductEditForm({
                   value={field.value}
                   onChange={field.onChange}
                   disabled={isPending}
-                  invalid={!!errors.pickupEndTime}
+                  invalid={!!fieldState.error}
                   describedBy={
-                    errors.pickupEndTime ? 'pickupEndTime-error' : undefined
+                    fieldState.error ? 'pickupEndTime-error' : undefined
                   }
                 />
-                {errors.pickupEndTime && (
+                {fieldState.error && (
                   <p
                     id="pickupEndTime-error"
                     className="text-sm text-red-500"
                     role="alert"
                   >
-                    {errors.pickupEndTime.message}
+                    {fieldState.error.message}
                   </p>
                 )}
               </div>
