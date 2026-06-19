@@ -778,6 +778,8 @@ Branch protection은 `dev` 대상 PR에서 `CI / Lint, typecheck, and test` 통�
 
 ### 15.3 RLS 전환 후보 목록
 
+> T37 범위 외, P4 유보. 아래 항목은 별도 task에서 우선순위에 따라 처리한다.
+
 현재 service role을 사용하지만 RLS+server client로 전환 가능한 후보다. 전환 전 해당 테이블의 RLS 정책 추가가 전제 조건이며, 실제 전환은 후속 task에서 수행한다.
 
 | 파일                                       | 함수                                                               | scope 유형                                 | 전제 조건          |
@@ -990,3 +992,70 @@ RootLayout
 
 - 비판매자/미로그인 화면에서는 `useMyStore()`를 호출하지 않아 `/api/stores/me` 불필요 요청을 만들지 않는다
 - `ToastContainer`는 `NotificationBridge` 내부에서 1회만 렌더링한다
+
+---
+
+## 19. 구조화 로그
+
+### 19.1 위치와 사용 범위
+
+`src/app/api/_lib/logger.ts`는 Route Handler 전용 구조화 로거다. 클라이언트 컴포넌트, hooks, API layer에서는 사용하지 않는다.
+
+### 19.2 Logger 인터페이스
+
+```ts
+interface Logger {
+  info(event: string, meta?: Record<string, unknown>): void;
+  warn(event: string, meta?: Record<string, unknown>): void;
+  error(event: string, meta?: Record<string, unknown>): void;
+}
+```
+
+- `generateReqId()`: `crypto.randomUUID()`로 per-request ID 생성
+- `createLogger(reqId, options?)`: reqId를 포함한 Logger 인스턴스 반환
+- test 환경(`NODE_ENV === 'test'`)에서 기본 silence. `{ silent: false }` 옵션으로 출력 강제 가능
+
+### 19.3 로그 출력 형식
+
+```json
+{
+  "level": "info",
+  "ts": "ISO-8601",
+  "reqId": "uuid",
+  "event": "EVENT_NAME",
+  "key": "value"
+}
+```
+
+undefined 필드는 출력에서 제외된다.
+
+### 19.4 reqId와 X-Request-Id
+
+- Route Handler 진입 시 `generateReqId()`로 요청 ID 생성
+- 성공 응답에만 `X-Request-Id: reqId` 헤더를 포함한다
+- `routeError()` 응답에는 헤더를 포함하지 않는다 (`response.ts` 수정 없이 호출 측에서 처리)
+
+### 19.5 PII 금지
+
+로그 `meta`에 다음 항목을 포함하지 않는다: raw email, IP 주소, 카드 번호, 계좌 번호.
+
+### 19.6 연동 이벤트 목록
+
+| 이벤트                                        | 경로                                              | level |
+| --------------------------------------------- | ------------------------------------------------- | ----- |
+| `PAYMENT_CONFIRM_OPTION_B_TOSS_CANCEL_FAILED` | 결제 confirm — toss 취소 실패                     | error |
+| `PAYMENT_CONFIRM_OPTION_B_REVERT_FAILED`      | 결제 confirm — 상태 복원 실패                     | error |
+| `PAYMENT_CANCEL_FAILED`                       | 결제 취소 실패                                    | error |
+| `CONSUMER_ORDER_CANCEL_REVERT_FAILED`         | 소비자 주문 취소 — 취소 claim 복원 실패           | error |
+| `CONSUMER_ORDER_CANCEL_FINALIZE_FAILED`       | 소비자 주문 취소 — cancel_order RPC 실패          | error |
+| `SELLER_ORDER_CANCEL_RESTORE_FAILED`          | 판매자 주문 취소 — toss 취소 후 상태 복원 실패    | error |
+| `SELLER_ORDER_CANCEL_FINALIZE_FAILED`         | 판매자 주문 취소 — cancel_order RPC 실패          | error |
+| `ADMIN_APPROVE_SELLER_SUCCEEDED`              | 판매자 승인 성공 감사 로그                        | info  |
+| `ADMIN_REJECT_SELLER_SUCCEEDED`               | 판매자 거절 성공 감사 로그                        | info  |
+| `STORAGE_CLEANUP_LIST_FAILED`                 | Storage 파일 목록 조회 실패                       | error |
+| `STORAGE_CLEANUP_DB_QUERY_FAILED`             | Storage cleanup DB 조회 실패                      | error |
+| `STORAGE_CLEANUP_REMOVE_FAILED`               | Storage orphan 파일 삭제 실패                     | error |
+| `STORAGE_CLEANUP_COMPLETED`                   | Storage cleanup 완료                              | info  |
+| `AUTH_SIGNUP_AUTH_USER_ORPHANED`              | 회원가입 users INSERT 실패 후 auth user 삭제 실패 | error |
+
+`AUTH_SIGNUP_AUTH_USER_ORPHANED`는 logger 파라미터 체인 없이 `signup-service.ts` 내부에서 `console.error(JSON.stringify({...}))` 직접 출력한다. `incidentId`는 별도 `crypto.randomUUID()`로 생성한다.
