@@ -38,11 +38,45 @@ PICKMA는 영업 종료 전 남을 가능성이 있는 음식을 소비자가 �
   </tr>
 </table>
 
+## 주요 기능
+
+### 소비자
+
+- 위치 기반 주변 매장 및 마감 임박 상품 조회 (지도 탐색 포함)
+- 카테고리·할인율·거리순 필터 및 정렬
+- 키워드 상품 검색
+- 상품 예약 및 Toss Payments 결제
+- 주문 취소 및 환불
+- 주문 내역 및 마이페이지 (프로필 수정)
+
+### 판매자
+
+- 가게 등록 및 운영 상태 관리
+- 메뉴·상품 등록 및 수정
+- 주문 목록 및 상세 관리
+- 판매자 신청 서류 제출 및 KYC 처리
+- 판매자 대시보드 (주문 현황)
+
+### 관리자
+
+- 판매자 신청 승인/반려
+- 가게 목록 및 상태 관리
+- 사용자·상품·주문 관리
+- 대시보드 통계
+
+### 시스템
+
+- 결제 outbox / webhook / idempotency 보장
+- 실시간 알림 (Supabase Realtime 기반)
+- Storage orphan 정리 Cron (Vercel)
+- CI 자동화 (lint, test, build)
+- 모바일 앱 래핑 (Capacitor / PWA, 진행 중)
+
 ## 기술 스택
 
 | 분류                | 기술                                             |
 | ------------------- | ------------------------------------------------ |
-| Framework           | Next.js 16, React 19                             |
+| Framework           | Next.js 15, React 19                             |
 | Language            | TypeScript                                       |
 | Styling             | Tailwind CSS                                     |
 | UI / A11y           | Headless UI, lucide-react                        |
@@ -51,6 +85,8 @@ PICKMA는 영업 종료 전 남을 가능성이 있는 음식을 소비자가 �
 | Form / Validation   | React Hook Form, Zod                             |
 | Auth / DB / Storage | Supabase                                         |
 | Payment             | Toss Payments SDK                                |
+| Infra               | Vercel (App + Cron)                              |
+| Mobile              | Capacitor (PWA 래핑, 진행 중)                    |
 | Test                | Vitest, Playwright, Storybook                    |
 | Quality             | ESLint, Prettier, Husky, lint-staged, Commitlint |
 
@@ -133,14 +169,15 @@ flowchart TD
 ├─ docs                         # API 명세 및 프로젝트 문서
 src
 ├─ app
-│  ├─ (consumer)                # 소비자 화면: 메인, 상품 상세, 주문/결제, 마이페이지
-│  ├─ (seller)                  # 판매자 화면: 온보딩, 가게, 메뉴, 상품, 주문 관리
-│  ├─ (admin)                   # 관리자 화면
+│  ├─ (consumer)                # 소비자 화면: 메인, 상품 상세, 검색, 주문/결제, 마이페이지
+│  ├─ (seller)                  # 판매자 화면: 온보딩, 대시보드, 가게, 메뉴, 상품, 주문 관리
+│  ├─ (admin)                   # 관리자 화면: 대시보드, 판매자 승인, 가게·사용자·주문 관리
 │  ├─ api                       # Next.js Route Handler
-│  │  ├─ products               # 상품 목록/상세 API
+│  │  ├─ products               # 상품 목록/상세/검색 API
 │  │  ├─ categories             # 카테고리 API
-│  │  ├─ orders                 # 주문 생성/목록/상세 API
-│  │  ├─ payments               # 결제 준비/승인 API
+│  │  ├─ orders                 # 주문 생성/목록/상세/취소 API
+│  │  ├─ payments               # 결제 준비/승인/webhook API
+│  │  ├─ notifications          # 실시간 알림 API
 │  │  ├─ seller                 # 판매자 전용 API
 │  │  └─ admin                  # 관리자 전용 API
 │  ├─ auth                      # 인증 관련 페이지
@@ -158,15 +195,19 @@ src
 │  ├─ auth                      # 로그인/회원가입 모달
 │  ├─ consumer                  # 소비자 도메인 컴포넌트
 │  │  ├─ order                  # 주문/결제 화면 컴포넌트
+│  │  ├─ search                 # 검색 결과 컴포넌트
 │  │  └─ mypage                 # 마이페이지 컴포넌트
-│  └─ dev                       # 개발 확인용 컴포넌트
+│  ├─ seller                    # 판매자 도메인 컴포넌트
+│  ├─ admin                     # 관리자 도메인 컴포넌트
+│  └─ dev                       # 개발 확인용 컴포넌트 (dev-only guard 적용)
 ├─ contracts                    # API 요청/응답 DTO
 ├─ hooks
 │  ├─ products                  # useProducts, useProduct
 │  ├─ categories                # useCategories
-│  ├─ orders                    # useOrders, useOrder, useCreateOrder
+│  ├─ orders                    # useOrders, useOrder, useCreateOrder, useCancelOrder
 │  ├─ payments                  # usePayment
 │  ├─ users                     # useMe
+│  ├─ notifications             # useNotifications (Supabase Realtime)
 │  ├─ seller                    # 판매자 기능 hook
 │  └─ admin                     # 관리자 기능 hook
 ├─ lib
@@ -181,15 +222,13 @@ src
 
 ## 향후 계획
 
-- 모바일 필터 Drawer 및 모바일 주문/마이페이지 UX 개선
-- 검색 결과 페이지 및 필터 URL query 동기화
-- 현재 위치 기반 상품 조회 및 지도 기반 탐색
-- 예약 취소/환불 플로우
-- 결제 웹훅 기반 상태 동기화
-- 판매자 주문 알림 및 분석 리포트
-- 관리자 대시보드 및 승인 관리 UI
-- E2E 테스트와 CI/CD 자동화
-- AI 추천, 실시간 알림, 리뷰/평점, 쿠폰/포인트 시스템
+- 모바일: Capacitor / PWA 래핑 마무리, i18n 기본 설정 (한국어)
+- 소비자: 찜 목록, 위치·검색 기능 확장, 알림 센터 UI
+- 관리자: 가게 상태 변경 API, 관리자 운영 알람
+- 도메인 확장: 리뷰/평점, 쿠폰/포인트, 공지사항
+- 보안/품질: 파일 업로드 MIME·크기 검증, Route Handler 테스트 보강
+- 기술 부채: AppError 리팩터링, Supabase 쿼리 반환 타입 안전성 개선
+- E2E: 결제 팝업 모킹 전략 수립 및 CI 연동
 
 ## 개발 규칙
 
@@ -198,3 +237,5 @@ src
 - API DTO는 `src/contracts`, 앱 내부 모델은 `src/types`에 둡니다.
 - 인라인 스타일보다 Tailwind CSS 유틸리티 클래스를 사용합니다.
 - 접근성이 필요한 복잡한 UI 패턴은 Headless UI 사용을 우선합니다.
+- mock import는 API_MOCK_ENABLED=true 환경에서만 허용합니다.
+- 스키마 변경이 포함된 작업은 docs/migration_policy.md를 먼저 확인합니다.
