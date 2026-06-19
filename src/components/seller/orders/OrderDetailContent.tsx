@@ -239,15 +239,19 @@ export function OrderDetailContent({ orderId }: OrderDetailContentProps) {
   };
 
   const handleCancelConfirm = (reason: string) => {
+    setActionError(null);
+    setActionSuccess(null);
     cancelOrder.mutate(
       { id: orderId, reason },
       {
         onSuccess: () => {
           setCancelModalOpen(false);
           setCancelErrorMessage(null);
+          setActionError(null);
           setActionSuccess('주문 취소 처리가 완료되었습니다.');
         },
         onError: () => {
+          setActionSuccess(null);
           setCancelErrorMessage(
             '주문 취소 처리에 실패했습니다. 다시 시도해주세요.'
           );
@@ -257,13 +261,17 @@ export function OrderDetailContent({ orderId }: OrderDetailContentProps) {
   };
 
   const handleCompleteConfirm = () => {
+    setActionError(null);
+    setActionSuccess(null);
     completeOrder.mutate(orderId, {
       onSuccess: () => {
         setCompleteModalOpen(false);
+        setActionError(null);
         setActionSuccess('픽업 완료 처리가 완료되었습니다.');
       },
       onError: () => {
         setCompleteModalOpen(false);
+        setActionSuccess(null);
         setActionError('픽업 완료 처리에 실패했습니다. 다시 시도해주세요.');
       },
     });
