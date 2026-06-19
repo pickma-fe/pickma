@@ -23,11 +23,11 @@ const slideTranslateClasses = [
 const promotionBanners: PromotionBanner[] = [
   {
     id: 1,
-    imageUrl: '/images/banners/pickma-banner2.png',
+    imageUrl: '/images/banners/pickma-banner-2.png',
   },
   {
     id: 2,
-    imageUrl: '/images/banners/pickma-banner-use.png',
+    imageUrl: '/images/banners/pickma-banner-1.png',
   },
 ];
 
