@@ -78,7 +78,7 @@ export function OrderCancelModal({
             aria-live="assertive"
             className="flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
           >
-            <AlertCircle className="h-4 w-4 flex-shrink-0" />
+            <AlertCircle className="h-4 w-4 shrink-0" />
             {errorMessage}
           </div>
         )}
