@@ -372,6 +372,7 @@ export function OrderManageContent() {
       />
 
       <OrderCancelModal
+        key={cancelPendingOrderId ?? 'closed'}
         isOpen={cancelPendingOrderId !== null}
         isSubmitting={cancelOrder.isPending}
         errorMessage={cancelErrorMessage}

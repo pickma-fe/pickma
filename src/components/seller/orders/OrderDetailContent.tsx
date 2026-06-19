@@ -530,6 +530,7 @@ export function OrderDetailContent({ orderId }: OrderDetailContentProps) {
       </div>
 
       <OrderCancelModal
+        key={String(cancelModalOpen)}
         isOpen={cancelModalOpen}
         isSubmitting={cancelOrder.isPending}
         errorMessage={cancelErrorMessage}
