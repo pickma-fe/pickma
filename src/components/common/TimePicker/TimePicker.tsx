@@ -60,11 +60,7 @@ export function TimePicker({
   );
 
   return (
-    <div
-      aria-invalid={invalid}
-      aria-describedby={describedBy}
-      className="flex items-center gap-2"
-    >
+    <div className="flex items-center gap-2">
       <div className="relative flex-1">
         <select
           id={id}
@@ -72,6 +68,8 @@ export function TimePicker({
           onChange={(e) => onChange(`${e.target.value}:${mm}`)}
           onBlur={onBlur}
           disabled={disabled}
+          aria-invalid={invalid || undefined}
+          aria-describedby={describedBy}
           aria-label={label ? `${label} 시` : '시'}
           className={selectClass}
         >
@@ -92,6 +90,8 @@ export function TimePicker({
           onChange={(e) => onChange(`${hh}:${e.target.value}`)}
           onBlur={onBlur}
           disabled={disabled}
+          aria-invalid={invalid || undefined}
+          aria-describedby={describedBy}
           aria-label={label ? `${label} 분` : '분'}
           className={selectClass}
         >
