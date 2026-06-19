@@ -169,6 +169,7 @@ export function StoreEditForm({
               </span>
             </label>
             <TimePicker
+              label="오픈 시간"
               value={formData.openTime}
               onChange={(v) => handleChange('openTime', v)}
               disabled={isPending}
@@ -182,6 +183,7 @@ export function StoreEditForm({
               </span>
             </label>
             <TimePicker
+              label="마감 시간"
               value={formData.closeTime}
               onChange={(v) => handleChange('closeTime', v)}
               disabled={isPending}

@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 
 interface TimePickerProps {
   id?: string;
+  label?: string;
   value: string;
   onChange: (value: string) => void;
   onBlur?: () => void;
@@ -35,6 +36,7 @@ const chevronClass =
 
 export function TimePicker({
   id,
+  label,
   value,
   onChange,
   onBlur,
@@ -70,7 +72,7 @@ export function TimePicker({
           onChange={(e) => onChange(`${e.target.value}:${mm}`)}
           onBlur={onBlur}
           disabled={disabled}
-          aria-label="시"
+          aria-label={label ? `${label} 시` : '시'}
           className={selectClass}
         >
           {HOURS.map((h) => (
@@ -90,7 +92,7 @@ export function TimePicker({
           onChange={(e) => onChange(`${hh}:${e.target.value}`)}
           onBlur={onBlur}
           disabled={disabled}
-          aria-label="분"
+          aria-label={label ? `${label} 분` : '분'}
           className={selectClass}
         >
           {minuteOptions.map((m) => (

@@ -155,6 +155,7 @@ export function ProductEditForm({
                 </label>
                 <TimePicker
                   id="pickupStartTime"
+                  label="픽업 시작 시간"
                   value={field.value}
                   onChange={field.onChange}
                   onBlur={field.onBlur}
@@ -192,6 +193,7 @@ export function ProductEditForm({
                 </label>
                 <TimePicker
                   id="pickupEndTime"
+                  label="픽업 종료 시간"
                   value={field.value}
                   onChange={field.onChange}
                   onBlur={field.onBlur}
