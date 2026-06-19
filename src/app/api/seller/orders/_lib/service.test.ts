@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ERROR_CODE } from '@/lib/errors/errorCodes';
 import { createServerClient } from '@/lib/supabase/server';
 import { createServiceRoleClient } from '@/lib/supabase/service';
+import type { Logger } from '@/app/api/_lib/logger';
 import { callTossCancel } from '@/app/api/_lib/toss-cancel';
 
 import {
@@ -14,6 +15,12 @@ import {
   getSellerOrders,
   markSellerOrderReady,
 } from './service';
+
+const mockLogger: Logger = {
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
+};
 
 vi.mock('@/lib/supabase/service');
 vi.mock('@/lib/supabase/server');
@@ -442,7 +449,7 @@ describe('cancelSellerOrder', () => {
     mockServiceClient(client);
 
     await expect(
-      cancelSellerOrder(STORE_ID, ORDER_ID, CANCEL_REASON)
+      cancelSellerOrder(STORE_ID, ORDER_ID, CANCEL_REASON, mockLogger)
     ).resolves.toBeUndefined();
 
     expect(chains[1].update).toHaveBeenCalledWith(
@@ -468,7 +475,7 @@ describe('cancelSellerOrder', () => {
     mockServiceClient(client);
 
     await expect(
-      cancelSellerOrder(STORE_ID, ORDER_ID, CANCEL_REASON)
+      cancelSellerOrder(STORE_ID, ORDER_ID, CANCEL_REASON, mockLogger)
     ).resolves.toBeUndefined();
 
     expect(chains[1].eq).toHaveBeenCalledWith('status', 'accepted');
@@ -479,7 +486,7 @@ describe('cancelSellerOrder', () => {
     mockServiceClient(client);
 
     await expect(
-      cancelSellerOrder(STORE_ID, ORDER_ID, CANCEL_REASON)
+      cancelSellerOrder(STORE_ID, ORDER_ID, CANCEL_REASON, mockLogger)
     ).rejects.toMatchObject({ code: ERROR_CODE.ORDER_NOT_FOUND });
   });
 
@@ -489,7 +496,7 @@ describe('cancelSellerOrder', () => {
     mockServiceClient(client);
 
     await expect(
-      cancelSellerOrder(STORE_ID, ORDER_ID, CANCEL_REASON)
+      cancelSellerOrder(STORE_ID, ORDER_ID, CANCEL_REASON, mockLogger)
     ).rejects.toMatchObject({ code: ERROR_CODE.INVALID_ORDER_STATUS });
   });
 
@@ -506,7 +513,7 @@ describe('cancelSellerOrder', () => {
     mockServiceClient(client);
 
     await expect(
-      cancelSellerOrder(STORE_ID, ORDER_ID, CANCEL_REASON)
+      cancelSellerOrder(STORE_ID, ORDER_ID, CANCEL_REASON, mockLogger)
     ).rejects.toMatchObject({ code: ERROR_CODE.INVALID_ORDER_STATUS });
   });
 
@@ -516,7 +523,7 @@ describe('cancelSellerOrder', () => {
     mockServiceClient(client);
 
     await expect(
-      cancelSellerOrder(STORE_ID, ORDER_ID, CANCEL_REASON)
+      cancelSellerOrder(STORE_ID, ORDER_ID, CANCEL_REASON, mockLogger)
     ).rejects.toMatchObject({ code: ERROR_CODE.INVALID_ORDER_STATUS });
   });
 
@@ -530,7 +537,7 @@ describe('cancelSellerOrder', () => {
     mockServiceClient(client);
 
     await expect(
-      cancelSellerOrder(STORE_ID, ORDER_ID, CANCEL_REASON)
+      cancelSellerOrder(STORE_ID, ORDER_ID, CANCEL_REASON, mockLogger)
     ).rejects.toMatchObject({ code: ERROR_CODE.ORDER_NOT_FOUND });
   });
 
@@ -548,7 +555,7 @@ describe('cancelSellerOrder', () => {
     mockServiceClient(client);
 
     await expect(
-      cancelSellerOrder(STORE_ID, ORDER_ID, CANCEL_REASON)
+      cancelSellerOrder(STORE_ID, ORDER_ID, CANCEL_REASON, mockLogger)
     ).rejects.toMatchObject({ code: ERROR_CODE.PAYMENT_CANCEL_FAILED });
 
     expect(chains[0].update).not.toHaveBeenCalled();
@@ -568,7 +575,7 @@ describe('cancelSellerOrder', () => {
     vi.mocked(callTossCancel).mockRejectedValue(new Error('toss error'));
 
     await expect(
-      cancelSellerOrder(STORE_ID, ORDER_ID, CANCEL_REASON)
+      cancelSellerOrder(STORE_ID, ORDER_ID, CANCEL_REASON, mockLogger)
     ).rejects.toMatchObject({ code: ERROR_CODE.PAYMENT_CANCEL_FAILED });
   });
 });

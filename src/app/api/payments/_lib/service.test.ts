@@ -2,9 +2,16 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ERROR_CODE } from '@/lib/errors/errorCodes';
 import { createServiceRoleClient } from '@/lib/supabase/service';
+import type { Logger } from '@/app/api/_lib/logger';
 
 import { cancelPaymentById, confirmPayment, preparePayment } from './service';
 import type { TossConfirmResult } from './toss';
+
+const mockLogger: Logger = {
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
+};
 
 vi.mock('@/lib/supabase/service');
 vi.mock('./toss');
@@ -205,11 +212,15 @@ describe('confirmPayment', () => {
     );
     const { callTossConfirm } = await import('./toss');
     await expect(
-      confirmPayment(mockUserId, {
-        paymentKey: 'mock_pk_test',
-        orderNumber: 'PM2026TEST',
-        amount: 5000,
-      })
+      confirmPayment(
+        mockUserId,
+        {
+          paymentKey: 'mock_pk_test',
+          orderNumber: 'PM2026TEST',
+          amount: 5000,
+        },
+        mockLogger
+      )
     ).resolves.toBeUndefined();
     expect(callTossConfirm).not.toHaveBeenCalled();
     expect(client.rpc).toHaveBeenCalledWith('begin_payment_processing', {
@@ -240,11 +251,15 @@ describe('confirmPayment', () => {
     vi.mocked(createServiceRoleClient).mockReturnValue(
       client as unknown as ReturnType<typeof createServiceRoleClient>
     );
-    await confirmPayment(mockUserId, {
-      paymentKey: 'toss_pk_test',
-      orderNumber: 'PM2026TEST',
-      amount: 5000,
-    });
+    await confirmPayment(
+      mockUserId,
+      {
+        paymentKey: 'toss_pk_test',
+        orderNumber: 'PM2026TEST',
+        amount: 5000,
+      },
+      mockLogger
+    );
     expect(callTossConfirm).toHaveBeenCalledWith({
       paymentKey: 'toss_pk_test',
       orderNumber: 'PM2026TEST',
@@ -260,11 +275,15 @@ describe('confirmPayment', () => {
       client as unknown as ReturnType<typeof createServiceRoleClient>
     );
     await expect(
-      confirmPayment(mockUserId, {
-        paymentKey: 'mock_pk_test',
-        orderNumber: 'PM2026TEST',
-        amount: 5000,
-      })
+      confirmPayment(
+        mockUserId,
+        {
+          paymentKey: 'mock_pk_test',
+          orderNumber: 'PM2026TEST',
+          amount: 5000,
+        },
+        mockLogger
+      )
     ).rejects.toMatchObject({ code: ERROR_CODE.ORDER_EXPIRED });
   });
 
@@ -276,11 +295,15 @@ describe('confirmPayment', () => {
       client as unknown as ReturnType<typeof createServiceRoleClient>
     );
     await expect(
-      confirmPayment(mockUserId, {
-        paymentKey: 'mock_pk_test',
-        orderNumber: 'PM2026TEST',
-        amount: 5000,
-      })
+      confirmPayment(
+        mockUserId,
+        {
+          paymentKey: 'mock_pk_test',
+          orderNumber: 'PM2026TEST',
+          amount: 5000,
+        },
+        mockLogger
+      )
     ).rejects.toMatchObject({
       code: ERROR_CODE.PAYMENT_ALREADY_CONFIRMED,
       statusCode: 409,
@@ -295,11 +318,15 @@ describe('confirmPayment', () => {
       client as unknown as ReturnType<typeof createServiceRoleClient>
     );
     await expect(
-      confirmPayment(mockUserId, {
-        paymentKey: 'mock_pk_test',
-        orderNumber: 'PM2026TEST',
-        amount: 5000,
-      })
+      confirmPayment(
+        mockUserId,
+        {
+          paymentKey: 'mock_pk_test',
+          orderNumber: 'PM2026TEST',
+          amount: 5000,
+        },
+        mockLogger
+      )
     ).rejects.toMatchObject({ code: ERROR_CODE.INVALID_ORDER_STATUS });
   });
 
@@ -311,11 +338,15 @@ describe('confirmPayment', () => {
       client as unknown as ReturnType<typeof createServiceRoleClient>
     );
     await expect(
-      confirmPayment(mockUserId, {
-        paymentKey: 'mock_pk_test',
-        orderNumber: 'PM2026TEST',
-        amount: 5000,
-      })
+      confirmPayment(
+        mockUserId,
+        {
+          paymentKey: 'mock_pk_test',
+          orderNumber: 'PM2026TEST',
+          amount: 5000,
+        },
+        mockLogger
+      )
     ).rejects.toMatchObject({ code: ERROR_CODE.ORDER_EXPIRED });
     expect(client.rpc).toHaveBeenCalledWith('expire_order', {
       p_order_id: 'order-uuid-1',
@@ -331,11 +362,15 @@ describe('confirmPayment', () => {
       client as unknown as ReturnType<typeof createServiceRoleClient>
     );
     await expect(
-      confirmPayment(mockUserId, {
-        paymentKey: 'mock_pk_test',
-        orderNumber: 'PM2026TEST',
-        amount: 5000,
-      })
+      confirmPayment(
+        mockUserId,
+        {
+          paymentKey: 'mock_pk_test',
+          orderNumber: 'PM2026TEST',
+          amount: 5000,
+        },
+        mockLogger
+      )
     ).rejects.toMatchObject({ code: ERROR_CODE.INTERNAL_SERVER_ERROR });
   });
 
@@ -345,11 +380,15 @@ describe('confirmPayment', () => {
       client as unknown as ReturnType<typeof createServiceRoleClient>
     );
     await expect(
-      confirmPayment(mockUserId, {
-        paymentKey: 'mock_pk_test',
-        orderNumber: 'PM2026TEST',
-        amount: 9999,
-      })
+      confirmPayment(
+        mockUserId,
+        {
+          paymentKey: 'mock_pk_test',
+          orderNumber: 'PM2026TEST',
+          amount: 9999,
+        },
+        mockLogger
+      )
     ).rejects.toMatchObject({ code: ERROR_CODE.PAYMENT_AMOUNT_MISMATCH });
   });
 
@@ -359,11 +398,15 @@ describe('confirmPayment', () => {
       client as unknown as ReturnType<typeof createServiceRoleClient>
     );
     await expect(
-      confirmPayment(mockUserId, {
-        paymentKey: 'mock_pk_test',
-        orderNumber: 'NOTFOUND',
-        amount: 5000,
-      })
+      confirmPayment(
+        mockUserId,
+        {
+          paymentKey: 'mock_pk_test',
+          orderNumber: 'NOTFOUND',
+          amount: 5000,
+        },
+        mockLogger
+      )
     ).rejects.toMatchObject({ code: ERROR_CODE.ORDER_NOT_FOUND });
   });
 
@@ -373,11 +416,15 @@ describe('confirmPayment', () => {
       client as unknown as ReturnType<typeof createServiceRoleClient>
     );
     await expect(
-      confirmPayment(mockUserId, {
-        paymentKey: 'mock_pk_test',
-        orderNumber: 'PM2026TEST',
-        amount: 5000,
-      })
+      confirmPayment(
+        mockUserId,
+        {
+          paymentKey: 'mock_pk_test',
+          orderNumber: 'PM2026TEST',
+          amount: 5000,
+        },
+        mockLogger
+      )
     ).rejects.toMatchObject({
       code: ERROR_CODE.PICKUP_NUMBER_EXHAUSTED,
       statusCode: 409,
@@ -398,11 +445,15 @@ describe('confirmPayment', () => {
       client as unknown as ReturnType<typeof createServiceRoleClient>
     );
     await expect(
-      confirmPayment(mockUserId, {
-        paymentKey: 'mock_pk_test',
-        orderNumber: 'PM2026TEST',
-        amount: 5000,
-      })
+      confirmPayment(
+        mockUserId,
+        {
+          paymentKey: 'mock_pk_test',
+          orderNumber: 'PM2026TEST',
+          amount: 5000,
+        },
+        mockLogger
+      )
     ).rejects.toMatchObject({
       code: ERROR_CODE.INVALID_ORDER_STATUS,
       statusCode: 409,
@@ -420,11 +471,15 @@ describe('confirmPayment', () => {
       client as unknown as ReturnType<typeof createServiceRoleClient>
     );
     await expect(
-      confirmPayment(mockUserId, {
-        paymentKey: 'toss_pk_test',
-        orderNumber: 'PM2026TEST',
-        amount: 5000,
-      })
+      confirmPayment(
+        mockUserId,
+        {
+          paymentKey: 'toss_pk_test',
+          orderNumber: 'PM2026TEST',
+          amount: 5000,
+        },
+        mockLogger
+      )
     ).rejects.toMatchObject({
       code: ERROR_CODE.PAYMENT_CONFIRM_FAILED,
       statusCode: 500,
@@ -446,11 +501,15 @@ describe('confirmPayment', () => {
       client as unknown as ReturnType<typeof createServiceRoleClient>
     );
     await expect(
-      confirmPayment(mockUserId, {
-        paymentKey: 'toss_pk_dup',
-        orderNumber: 'PM2026TEST',
-        amount: 5000,
-      })
+      confirmPayment(
+        mockUserId,
+        {
+          paymentKey: 'toss_pk_dup',
+          orderNumber: 'PM2026TEST',
+          amount: 5000,
+        },
+        mockLogger
+      )
     ).rejects.toMatchObject({
       code: ERROR_CODE.INVALID_ORDER_STATUS,
       statusCode: 409,
@@ -468,11 +527,15 @@ describe('confirmPayment', () => {
       client as unknown as ReturnType<typeof createServiceRoleClient>
     );
     await expect(
-      confirmPayment(mockUserId, {
-        paymentKey: 'mock_pk_test',
-        orderNumber: 'PM2026TEST',
-        amount: 5000,
-      })
+      confirmPayment(
+        mockUserId,
+        {
+          paymentKey: 'mock_pk_test',
+          orderNumber: 'PM2026TEST',
+          amount: 5000,
+        },
+        mockLogger
+      )
     ).rejects.toMatchObject({
       code: ERROR_CODE.INVALID_ORDER_STATUS,
       statusCode: 409,
@@ -487,11 +550,15 @@ describe('confirmPayment', () => {
       client as unknown as ReturnType<typeof createServiceRoleClient>
     );
     await expect(
-      confirmPayment(mockUserId, {
-        paymentKey: 'mock_pk_test',
-        orderNumber: 'PM2026TEST',
-        amount: 5000,
-      })
+      confirmPayment(
+        mockUserId,
+        {
+          paymentKey: 'mock_pk_test',
+          orderNumber: 'PM2026TEST',
+          amount: 5000,
+        },
+        mockLogger
+      )
     ).rejects.toMatchObject({
       code: ERROR_CODE.ORDER_EXPIRED,
       statusCode: 409,
@@ -506,11 +573,15 @@ describe('confirmPayment', () => {
       client as unknown as ReturnType<typeof createServiceRoleClient>
     );
     await expect(
-      confirmPayment(mockUserId, {
-        paymentKey: 'mock_pk_test',
-        orderNumber: 'PM2026TEST',
-        amount: 5000,
-      })
+      confirmPayment(
+        mockUserId,
+        {
+          paymentKey: 'mock_pk_test',
+          orderNumber: 'PM2026TEST',
+          amount: 5000,
+        },
+        mockLogger
+      )
     ).rejects.toMatchObject({
       code: ERROR_CODE.PICKUP_NUMBER_EXHAUSTED,
       statusCode: 409,
@@ -525,11 +596,15 @@ describe('confirmPayment', () => {
       client as unknown as ReturnType<typeof createServiceRoleClient>
     );
     await expect(
-      confirmPayment(mockUserId, {
-        paymentKey: 'mock_pk_test',
-        orderNumber: 'PM2026TEST',
-        amount: 5000,
-      })
+      confirmPayment(
+        mockUserId,
+        {
+          paymentKey: 'mock_pk_test',
+          orderNumber: 'PM2026TEST',
+          amount: 5000,
+        },
+        mockLogger
+      )
     ).rejects.toMatchObject({ code: ERROR_CODE.PAYMENT_CONFIRM_FAILED });
   });
 
@@ -548,11 +623,15 @@ describe('confirmPayment', () => {
       );
 
       await expect(
-        confirmPayment(mockUserId, {
-          paymentKey: 'toss_pk_test',
-          orderNumber: 'PM2026TEST',
-          amount: 5000,
-        })
+        confirmPayment(
+          mockUserId,
+          {
+            paymentKey: 'toss_pk_test',
+            orderNumber: 'PM2026TEST',
+            amount: 5000,
+          },
+          mockLogger
+        )
       ).rejects.toMatchObject({ code: ERROR_CODE.PAYMENT_CONFIRM_FAILED });
 
       expect(callTossCancel).toHaveBeenCalledWith(
@@ -584,11 +663,15 @@ describe('confirmPayment', () => {
       );
 
       await expect(
-        confirmPayment(mockUserId, {
-          paymentKey: 'toss_pk_test',
-          orderNumber: 'PM2026TEST',
-          amount: 5000,
-        })
+        confirmPayment(
+          mockUserId,
+          {
+            paymentKey: 'toss_pk_test',
+            orderNumber: 'PM2026TEST',
+            amount: 5000,
+          },
+          mockLogger
+        )
       ).rejects.toMatchObject({ code: ERROR_CODE.PAYMENT_CONFIRM_FAILED });
 
       expect(client.rpc).not.toHaveBeenCalledWith(
@@ -620,11 +703,15 @@ describe('confirmPayment', () => {
       );
 
       await expect(
-        confirmPayment(mockUserId, {
-          paymentKey: 'toss_pk_test',
-          orderNumber: 'PM2026TEST',
-          amount: 5000,
-        })
+        confirmPayment(
+          mockUserId,
+          {
+            paymentKey: 'toss_pk_test',
+            orderNumber: 'PM2026TEST',
+            amount: 5000,
+          },
+          mockLogger
+        )
       ).rejects.toMatchObject({ code: ERROR_CODE.PAYMENT_CONFIRM_FAILED });
 
       expect(client.rpc).toHaveBeenCalledWith('revert_payment_processing', {
@@ -650,11 +737,15 @@ describe('confirmPayment', () => {
       );
 
       await expect(
-        confirmPayment(mockUserId, {
-          paymentKey: 'mock_pk_test',
-          orderNumber: 'PM2026TEST',
-          amount: 5000,
-        })
+        confirmPayment(
+          mockUserId,
+          {
+            paymentKey: 'mock_pk_test',
+            orderNumber: 'PM2026TEST',
+            amount: 5000,
+          },
+          mockLogger
+        )
       ).rejects.toMatchObject({ code: ERROR_CODE.PAYMENT_CONFIRM_FAILED });
 
       expect(callTossCancel).not.toHaveBeenCalled();
@@ -766,7 +857,7 @@ describe('cancelPaymentById', () => {
     );
 
     await expect(
-      cancelPaymentById('payment-uuid-1', '관리자 취소')
+      cancelPaymentById('payment-uuid-1', '관리자 취소', mockLogger)
     ).rejects.toMatchObject({ code: ERROR_CODE.NOT_FOUND, statusCode: 404 });
   });
 
@@ -779,7 +870,7 @@ describe('cancelPaymentById', () => {
     );
 
     await expect(
-      cancelPaymentById('payment-uuid-1', '관리자 취소')
+      cancelPaymentById('payment-uuid-1', '관리자 취소', mockLogger)
     ).rejects.toMatchObject({
       code: ERROR_CODE.INVALID_ORDER_STATUS,
       statusCode: 409,
@@ -795,7 +886,7 @@ describe('cancelPaymentById', () => {
     );
 
     await expect(
-      cancelPaymentById('payment-uuid-1', '관리자 취소')
+      cancelPaymentById('payment-uuid-1', '관리자 취소', mockLogger)
     ).rejects.toMatchObject({
       code: ERROR_CODE.INVALID_ORDER_STATUS,
       statusCode: 409,
@@ -818,7 +909,7 @@ describe('cancelPaymentById', () => {
     );
 
     await expect(
-      cancelPaymentById('payment-uuid-1', '관리자 취소')
+      cancelPaymentById('payment-uuid-1', '관리자 취소', mockLogger)
     ).rejects.toMatchObject({
       code: ERROR_CODE.INVALID_ORDER_STATUS,
       statusCode: 409,
@@ -831,7 +922,7 @@ describe('cancelPaymentById', () => {
       client as unknown as ReturnType<typeof createServiceRoleClient>
     );
 
-    await cancelPaymentById('payment-uuid-1', '관리자 취소');
+    await cancelPaymentById('payment-uuid-1', '관리자 취소', mockLogger);
 
     expect(client.rpc).toHaveBeenCalledWith('cancel_order', {
       p_order_id: 'order-uuid-1',
@@ -848,7 +939,7 @@ describe('cancelPaymentById', () => {
       client as unknown as ReturnType<typeof createServiceRoleClient>
     );
 
-    await cancelPaymentById('payment-uuid-1', '관리자 취소');
+    await cancelPaymentById('payment-uuid-1', '관리자 취소', mockLogger);
 
     expect(callTossCancel).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -869,7 +960,7 @@ describe('cancelPaymentById', () => {
     );
 
     await expect(
-      cancelPaymentById('payment-uuid-1', '관리자 취소')
+      cancelPaymentById('payment-uuid-1', '관리자 취소', mockLogger)
     ).rejects.toMatchObject({
       code: ERROR_CODE.PAYMENT_CANCEL_FAILED,
       statusCode: 502,
@@ -884,7 +975,7 @@ describe('cancelPaymentById', () => {
     );
 
     await expect(
-      cancelPaymentById('payment-uuid-1', '관리자 취소')
+      cancelPaymentById('payment-uuid-1', '관리자 취소', mockLogger)
     ).rejects.toMatchObject({
       code: ERROR_CODE.PAYMENT_CANCEL_FAILED,
       statusCode: 502,

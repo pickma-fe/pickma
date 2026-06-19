@@ -111,6 +111,10 @@ describe('POST /api/payments/[paymentId]/cancel', () => {
     });
     const res = await POST(request, { params });
     expect(res.status).toBe(200);
-    expect(cancelPaymentById).toHaveBeenCalledWith(VALID_UUID, '관리자 취소');
+    expect(cancelPaymentById).toHaveBeenCalledWith(
+      VALID_UUID,
+      '관리자 취소',
+      expect.any(Object)
+    );
   });
 });
