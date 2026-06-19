@@ -1232,13 +1232,13 @@ reserved or accepted → (PATCH /cancel) → cancelling → cancelled
 
 ```ts
 // Request body
-{ reason: string } // 1~500자
+{ reason: string } // trim 후 1~500자
 
 // Response
 void
 ```
 
-- `VALIDATION_ERROR` 400: orderId가 유효한 UUID가 아닌 경우, reason 누락 또는 길이 초과
+- `VALIDATION_ERROR` 400: orderId가 유효한 UUID가 아닌 경우, reason 누락/trim 후 빈 문자열/길이 초과
 - `INVALID_ORDER_STATUS` 409: cancel 허용 상태(`reserved`, `accepted`)가 아닌 경우, 또는 결제 내역 없는 경우
 - `PAYMENT_CANCEL_FAILED` 502: Toss API 취소 실패 또는 `cancel_order` RPC 실패
 
