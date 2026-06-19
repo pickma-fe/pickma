@@ -9,6 +9,9 @@ import { runStorageCleanup } from './_lib/service';
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest): Promise<Response> {
+  const reqId = generateReqId();
+  const logger = createLogger(reqId);
+
   const secret = process.env.CRON_SECRET;
   if (!secret) {
     return fail(ERROR_CODE.UNAUTHORIZED, 401);
@@ -18,9 +21,6 @@ export async function GET(request: NextRequest): Promise<Response> {
   if (authHeader !== `Bearer ${secret}`) {
     return fail(ERROR_CODE.UNAUTHORIZED, 401);
   }
-
-  const reqId = generateReqId();
-  const logger = createLogger(reqId);
 
   try {
     const { deletedCount } = await runStorageCleanup(logger);
