@@ -43,7 +43,17 @@ function buildEntry(
     }
   }
 
-  return JSON.stringify(base);
+  try {
+    return JSON.stringify(base);
+  } catch (err) {
+    return JSON.stringify({
+      level,
+      ts: base.ts,
+      reqId,
+      event,
+      serializationError: err instanceof Error ? err.message : 'unknown',
+    });
+  }
 }
 
 export function createLogger(reqId: string, options?: LoggerOptions): Logger {
