@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 import { useMySellerApplication } from '@/hooks/seller/applications/useMySellerApplication';
 import { useCreateStore } from '@/hooks/stores/useCreateStore';
@@ -29,6 +30,8 @@ export function StoreEditContent() {
   const isLoading = isStoreLoading || isAppLoading;
   const isPending = isCreating || isUpdating;
 
+  const [formError, setFormError] = useState<string | null>(null);
+
   const handleSubmit = (data: StoreEditData) => {
     if (storeInfo !== null && storeInfo !== undefined) {
       updateStore(
@@ -47,6 +50,14 @@ export function StoreEditContent() {
         { onSuccess: () => router.push('/seller/store') }
       );
     } else {
+      const businessNumber = application?.businessNumber?.trim();
+      if (!businessNumber) {
+        setFormError(
+          '사업자등록번호 정보를 불러오지 못했습니다. 페이지를 새로고침 후 다시 시도해 주세요.'
+        );
+        return;
+      }
+      setFormError(null);
       createStore(
         {
           name: data.name,
@@ -57,7 +68,7 @@ export function StoreEditContent() {
           latitude: data.latitude,
           longitude: data.longitude,
           description: data.description || undefined,
-          businessNumber: application?.businessNumber ?? '',
+          businessNumber,
           openTime: data.openTime ? `${data.openTime}:00` : undefined,
           closeTime: data.closeTime ? `${data.closeTime}:00` : undefined,
         },
@@ -98,6 +109,7 @@ export function StoreEditContent() {
             : '가게 기본 정보를 입력해주세요.'}
         </p>
       </div>
+      {formError && <p className="text-sm text-red-500">{formError}</p>}
       <Section variant="card">
         <StoreEditForm
           storeInfo={storeInfo ?? undefined}
