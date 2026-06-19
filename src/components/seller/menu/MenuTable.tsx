@@ -18,6 +18,27 @@ interface MenuTableProps {
   onSelectionChange: (ids: Set<string>) => void;
 }
 
+function MenuImageCell({ src, alt }: { src?: string; alt: string }) {
+  const [error, setError] = useState(false);
+  if (!src || error) {
+    return (
+      <div className="flex h-full w-full items-center justify-center text-gray-400">
+        🍽️
+      </div>
+    );
+  }
+  return (
+    <Image
+      src={src}
+      alt={alt}
+      fill
+      sizes="56px"
+      className="object-cover"
+      onError={() => setError(true)}
+    />
+  );
+}
+
 const PAGE_SIZE_OPTIONS = [
   { label: '5개씩 보기', value: '5' },
   { label: '10개씩 보기', value: '10' },
@@ -153,19 +174,7 @@ export function MenuTable({
                       className="text-primary-600 focus:ring-primary-500 h-4 w-4 rounded border-gray-300"
                     />
                     <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-gray-100">
-                      {menu.image ? (
-                        <Image
-                          src={menu.image}
-                          alt={menu.name}
-                          fill
-                          sizes="56px"
-                          className="object-cover"
-                        />
-                      ) : (
-                        <div className="flex h-full w-full items-center justify-center text-gray-400">
-                          🍽️
-                        </div>
-                      )}
+                      <MenuImageCell src={menu.image} alt={menu.name} />
                     </div>
                     <div className="min-w-0">
                       <p className="truncate text-sm font-medium text-gray-900">
