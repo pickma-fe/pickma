@@ -24,10 +24,14 @@ export function OrderCompleteConfirmModal({
   onClose,
   onConfirm,
 }: OrderCompleteConfirmModalProps) {
+  const handleClose = () => {
+    if (!isSubmitting) onClose();
+  };
+
   return (
     <Modal
       isOpen={isOpen}
-      onClose={onClose}
+      onClose={handleClose}
       title="픽업 완료 확인"
       size="sm"
       closeOnOverlayClick={!isSubmitting}
@@ -60,7 +64,7 @@ export function OrderCompleteConfirmModal({
           <Button
             variant="outline"
             color="gray"
-            onClick={onClose}
+            onClick={handleClose}
             disabled={isSubmitting}
             className="flex-1"
           >
