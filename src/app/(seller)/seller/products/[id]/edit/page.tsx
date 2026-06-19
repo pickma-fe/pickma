@@ -16,10 +16,10 @@ export default function SellerProductEditPage() {
   const { mutate: updateProduct, isPending } = useUpdateSellerProduct();
 
   const handleSubmit = (data: ProductEditFormData) => {
-    const today = new Date();
-    const pad = (n: number) => String(n).padStart(2, '0');
-    const todayStr = `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`;
-    const endAt = new Date(`${todayStr}T${data.pickupEndTime}:00`);
+    if (!product) return;
+    const endAt = new Date(product.endAt);
+    const [hour, minute] = data.pickupEndTime.split(':').map(Number);
+    endAt.setHours(hour, minute, 0, 0);
 
     updateProduct(
       {
