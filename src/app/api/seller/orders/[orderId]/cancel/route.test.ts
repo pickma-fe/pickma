@@ -97,6 +97,20 @@ describe('PATCH /api/seller/orders/[orderId]/cancel', () => {
     expect(body.error.code).toBe('VALIDATION_ERROR');
   });
 
+  it('reason이 공백만 있으면 400을 반환한다', async () => {
+    vi.mocked(isApiMockEnabled).mockReturnValue(false);
+    vi.mocked(requireSellerStore).mockResolvedValue(sellerResult);
+
+    const res = await PATCH(
+      makeRequest({ reason: '   ' }) as never,
+      makeParams(ORDER_ID)
+    );
+    const body = (await res.json()) as { error: { code: string } };
+
+    expect(res.status).toBe(400);
+    expect(body.error.code).toBe('VALIDATION_ERROR');
+  });
+
   it('reason이 500자를 초과하면 400을 반환한다', async () => {
     vi.mocked(isApiMockEnabled).mockReturnValue(false);
     vi.mocked(requireSellerStore).mockResolvedValue(sellerResult);
