@@ -12,7 +12,7 @@ export function Tooltip({ content, children, position = 'top' }: TooltipProps) {
       {children}
       <div
         role="tooltip"
-        className={`pointer-events-none absolute left-1/2 z-10 -translate-x-1/2 rounded bg-gray-900 px-2 py-1 text-xs whitespace-nowrap text-white opacity-0 transition-opacity group-hover:opacity-100 ${
+        className={`pointer-events-none absolute left-1/2 z-10 -translate-x-1/2 rounded bg-gray-900 px-2 py-1 text-xs whitespace-nowrap text-white opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100 ${
           isTop ? 'bottom-full mb-1.5' : 'top-full mt-1.5'
         }`}
       >
