@@ -88,8 +88,11 @@ export function mapOrderItemRow(row: OrderItemRow): OrderItemResponse {
 }
 
 export function mapOrderDetailRow(row: OrderDetailRow): OrderDetailResponse {
+  const image = row.order_items?.[0]?.products?.menu_items?.image ?? undefined;
+
   return {
     ...mapOrderListRow({ ...row, order_items: undefined }),
+    image,
     cancelledAt: row.cancelled_at ?? undefined,
     cancelReason: row.cancel_reason ?? undefined,
     pickedUpAt: row.picked_up_at ?? undefined,
