@@ -89,6 +89,7 @@ export function mapOrderItemRow(row: OrderItemRow): OrderItemResponse {
 
 export function mapOrderDetailRow(row: OrderDetailRow): OrderDetailResponse {
   const image = row.order_items?.[0]?.products?.menu_items?.image ?? undefined;
+  const payment = Array.isArray(row.payments) ? row.payments[0] : row.payments;
 
   return {
     ...mapOrderListRow({ ...row, order_items: undefined }),
@@ -97,8 +98,6 @@ export function mapOrderDetailRow(row: OrderDetailRow): OrderDetailResponse {
     cancelReason: row.cancel_reason ?? undefined,
     pickedUpAt: row.picked_up_at ?? undefined,
     items: row.order_items.map(mapOrderItemRow),
-    payment: row.payments
-      ? mapPaymentRow(row.payments, row.order_number)
-      : undefined,
+    payment: payment ? mapPaymentRow(payment, row.order_number) : undefined,
   };
 }
