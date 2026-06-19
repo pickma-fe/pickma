@@ -25,7 +25,8 @@ const PAGE_SIZE_OPTIONS = [
 ];
 
 function ProductImageCell({ src, alt }: { src?: string; alt: string }) {
-  const [error, setError] = useState(false);
+  const [errorSrc, setErrorSrc] = useState<string | undefined>(undefined);
+  const error = errorSrc === src;
   if (!src || error) {
     return (
       <div className="flex h-full w-full items-center justify-center text-gray-400">
@@ -40,7 +41,7 @@ function ProductImageCell({ src, alt }: { src?: string; alt: string }) {
       fill
       sizes="56px"
       className="object-cover"
-      onError={() => setError(true)}
+      onError={() => setErrorSrc(src)}
     />
   );
 }
