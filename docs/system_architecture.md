@@ -856,7 +856,7 @@ Branch protection은 `dev` 대상 PR에서 `CI / Lint, typecheck, and test` 통�
 | `PATCH /api/orders/[orderId]/cancel`                         | P1       | activeUser (자기 주문)   | 없음        | 구현됨 (T31)          | —                       |
 | `POST /api/payments/[paymentId]/cancel`                      | P1       | admin                    | 없음        | 구현됨 (T31)          | —                       |
 | `PATCH /api/seller/orders/[orderId]/no-show`                 | P1       | sellerStore              | 없음        | 구현됨, 테스트 미추가 | T52                     |
-| `PATCH /api/seller/orders/[orderId]/cancel`                  | P1       | sellerStore              | 없음        | 구현됨 (T47)          | —                       |
+| `PATCH /api/seller/orders/[orderId]/cancel`                  | P1       | sellerStore              | 있음        | 구현됨 (T47)          | —                       |
 | `PATCH /api/seller/products/[productId]/stock`               | P1       | sellerStore              | 없음        | 구현됨                | T28                     |
 
 ---
