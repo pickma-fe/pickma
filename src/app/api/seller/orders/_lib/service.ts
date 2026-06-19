@@ -291,11 +291,6 @@ export async function cancelSellerOrder(
         cancelAmount: order.payment_amount,
       });
     } catch {
-      logger.error('SELLER_ORDER_CANCEL_RESTORE_FAILED', {
-        orderId: order.id,
-        orderNumber: order.order_number,
-        paymentKey: payment.payment_key ?? undefined,
-      });
       await Promise.resolve(
         supabase.from('payment_events').insert({
           order_id: order.id,
@@ -315,7 +310,7 @@ export async function cancelSellerOrder(
       ).catch(() => {});
 
       const revertStatus = order.status;
-      await supabase
+      const { data: reverted, error: revertError } = await supabase
         .from('orders')
         .update({
           status: revertStatus,
@@ -324,7 +319,16 @@ export async function cancelSellerOrder(
           updated_at: new Date().toISOString(),
         })
         .eq('id', order.id)
-        .eq('status', 'cancelling');
+        .eq('status', 'cancelling')
+        .select('id');
+
+      if (revertError || !reverted || reverted.length === 0) {
+        logger.error('SELLER_ORDER_CANCEL_RESTORE_FAILED', {
+          orderId: order.id,
+          orderNumber: order.order_number,
+          paymentKey: payment.payment_key ?? undefined,
+        });
+      }
       throw new AppError(ERROR_CODE.PAYMENT_CANCEL_FAILED, 502);
     }
   }

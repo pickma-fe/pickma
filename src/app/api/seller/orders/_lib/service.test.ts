@@ -569,6 +569,31 @@ describe('cancelSellerOrder', () => {
       { data: cancelOrderRow, error: null },
       { data: [{ id: ORDER_ID }], error: null },
       { data: [{ id: ORDER_ID }], error: null },
+      { data: [{ id: ORDER_ID }], error: null },
+    ]);
+    client.rpc.mockResolvedValue({ error: null });
+    mockServiceClient(client);
+    vi.mocked(callTossCancel).mockRejectedValue(new Error('toss error'));
+
+    await expect(
+      cancelSellerOrder(STORE_ID, ORDER_ID, CANCEL_REASON, mockLogger)
+    ).rejects.toMatchObject({ code: ERROR_CODE.PAYMENT_CANCEL_FAILED });
+
+    expect(mockLogger.error).not.toHaveBeenCalledWith(
+      'SELLER_ORDER_CANCEL_RESTORE_FAILED',
+      expect.anything()
+    );
+  });
+
+  it('Toss cancel 실패 후 상태 복원 실패 시 SELLER_ORDER_CANCEL_RESTORE_FAILED를 로그한다', async () => {
+    vi.unstubAllEnvs();
+    vi.stubEnv('PAYMENT_MOCK', 'false');
+
+    const { client } = buildCancelChain([
+      { data: cancelOrderRow, error: null },
+      { data: [{ id: ORDER_ID }], error: null },
+      { data: [{ id: ORDER_ID }], error: null },
+      { data: [], error: null },
     ]);
     client.rpc.mockResolvedValue({ error: null });
     mockServiceClient(client);
