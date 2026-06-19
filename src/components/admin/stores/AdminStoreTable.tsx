@@ -27,6 +27,7 @@ export function AdminStoreTable({
 }: AdminStoreTableProps) {
   return (
     <AdminTable
+      ariaLabel="관리자 가게 목록"
       data={stores}
       rowKey={(store) => store.id}
       isLoading={isLoading}
@@ -61,12 +62,16 @@ export function AdminStoreTable({
         {
           key: 'region',
           header: '지역',
-          render: (store) => store.region,
+          render: (store) => (
+            <span className="text-gray-700">{store.region}</span>
+          ),
         },
         {
           key: 'phone',
           header: '연락처',
-          render: (store) => store.phone,
+          render: (store) => (
+            <span className="text-gray-700">{store.phone}</span>
+          ),
         },
         {
           key: 'address',
@@ -84,6 +89,8 @@ export function AdminStoreTable({
             <Badge
               color={store.status === 'active' ? 'success' : 'gray'}
               rounded="md"
+              role="status"
+              aria-label={`가게 상태: ${STORE_STATUS_LABELS[store.status]}`}
             >
               {STORE_STATUS_LABELS[store.status]}
             </Badge>
@@ -96,6 +103,8 @@ export function AdminStoreTable({
             <Badge
               color={store.operationStatus === 'open' ? 'info' : 'warning'}
               rounded="md"
+              role="status"
+              aria-label={`운영 상태: ${OPERATION_STATUS_LABELS[store.operationStatus]}`}
             >
               {OPERATION_STATUS_LABELS[store.operationStatus]}
             </Badge>

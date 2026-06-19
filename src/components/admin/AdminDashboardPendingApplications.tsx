@@ -23,7 +23,7 @@ export function AdminDashboardPendingApplications({
       action={
         <Link
           href="/admin/sellers/pending"
-          className="text-sm font-medium text-gray-500 hover:text-gray-900"
+          className="rounded-sm text-sm font-medium text-gray-500 hover:text-gray-900 focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2 focus-visible:outline-none"
         >
           전체 보기
         </Link>
@@ -48,7 +48,7 @@ export function AdminDashboardPendingApplications({
               <div className="flex shrink-0 items-center gap-2">
                 <Link
                   href="/admin/sellers/pending"
-                  className="border-primary-200 text-primary-700 hover:bg-primary-50 rounded-sm border px-3 py-1.5 text-sm font-semibold"
+                  className="border-primary-200 text-primary-700 hover:bg-primary-50 focus-visible:ring-primary-500 rounded-sm border px-3 py-1.5 text-sm font-semibold focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
                 >
                   검토
                 </Link>
@@ -57,7 +57,7 @@ export function AdminDashboardPendingApplications({
           ))
         ) : (
           <li className="py-6 text-sm text-gray-500">
-            승인 대기 중인 가게가 없습니다.
+            현재 검토 대기 중인 가게가 없습니다.
           </li>
         )}
       </ul>
