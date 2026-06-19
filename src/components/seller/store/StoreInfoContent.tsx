@@ -28,10 +28,10 @@ export function StoreInfoContent() {
   const { mutate: updateStore, isPending: isUpdating } = useUpdateStore();
 
   useEffect(() => {
-    if (!isLoading && !storeInfo) {
+    if (!isLoading && !isError && !storeInfo) {
       router.replace('/seller/store/edit');
     }
-  }, [isLoading, storeInfo, router]);
+  }, [isLoading, isError, storeInfo, router]);
   const {
     data: application,
     isLoading: isApplicationLoading,
