@@ -23,7 +23,7 @@ const BAR_HEIGHT_STEPS: [number, string][] = [
   [60, 'h-14'],
   [70, 'h-16'],
   [80, 'h-20'],
-  [90, 'h-22'],
+  [90, 'h-[5.5rem]'],
   [Infinity, 'h-24'],
 ];
 
