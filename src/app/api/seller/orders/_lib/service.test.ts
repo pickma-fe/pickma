@@ -534,6 +534,26 @@ describe('cancelSellerOrder', () => {
     ).rejects.toMatchObject({ code: ERROR_CODE.ORDER_NOT_FOUND });
   });
 
+  it('real mode에서 payment_key 없으면 claim 없이 PAYMENT_CANCEL_FAILED를 던진다', async () => {
+    vi.unstubAllEnvs();
+    vi.stubEnv('PAYMENT_MOCK', 'false');
+
+    const noKeyRow = {
+      ...cancelOrderRow,
+      payments: [{ id: PAYMENT_ID, payment_key: null, status: 'paid' }],
+    };
+    const { client, chains } = buildCancelChain([
+      { data: noKeyRow, error: null },
+    ]);
+    mockServiceClient(client);
+
+    await expect(
+      cancelSellerOrder(STORE_ID, ORDER_ID, CANCEL_REASON)
+    ).rejects.toMatchObject({ code: ERROR_CODE.PAYMENT_CANCEL_FAILED });
+
+    expect(chains[0].update).not.toHaveBeenCalled();
+  });
+
   it('Toss cancel 실패 시 PAYMENT_CANCEL_FAILED를 던진다', async () => {
     vi.unstubAllEnvs();
     vi.stubEnv('PAYMENT_MOCK', 'false');

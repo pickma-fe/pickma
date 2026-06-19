@@ -258,6 +258,10 @@ export async function cancelSellerOrder(
     throw new AppError(ERROR_CODE.INVALID_ORDER_STATUS, 409);
   }
 
+  if (process.env.PAYMENT_MOCK !== 'true' && !payment.payment_key) {
+    throw new AppError(ERROR_CODE.PAYMENT_CANCEL_FAILED, 502);
+  }
+
   const { data: claimed, error: claimError } = await supabase
     .from('orders')
     .update({
@@ -277,9 +281,6 @@ export async function cancelSellerOrder(
   }
 
   if (process.env.PAYMENT_MOCK !== 'true') {
-    if (!payment.payment_key) {
-      throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
-    }
     try {
       await callTossCancel({
         orderNumber: order.order_number,
