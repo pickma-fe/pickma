@@ -9,25 +9,35 @@ import { Button } from '@/components/common/Button/Button';
 import { Input } from '@/components/common/Input/Input';
 import { TimePicker } from '@/components/common/TimePicker/TimePicker';
 
-const productEditFormSchema = z.object({
-  discountPrice: z
-    .string()
-    .min(1, '판매가를 입력해주세요.')
-    .refine(
-      (v) => Number.isInteger(Number(v)) && Number(v) >= 0,
-      '올바른 판매가를 입력해주세요.'
-    ),
-  stock: z
-    .string()
-    .min(1, '재고를 입력해주세요.')
-    .refine(
-      (v) => Number.isInteger(Number(v)) && Number(v) >= 0,
-      '올바른 재고를 입력해주세요.'
-    ),
-  pickupStartTime: z.string().min(1, '픽업 시작 시간을 입력해주세요.'),
-  pickupEndTime: z.string().min(1, '픽업 종료 시간을 입력해주세요.'),
-  status: z.enum(['active', 'closed']),
-});
+const productEditFormSchema = z
+  .object({
+    discountPrice: z
+      .string()
+      .min(1, '판매가를 입력해주세요.')
+      .refine(
+        (v) => Number.isInteger(Number(v)) && Number(v) >= 0,
+        '올바른 판매가를 입력해주세요.'
+      ),
+    stock: z
+      .string()
+      .min(1, '재고를 입력해주세요.')
+      .refine(
+        (v) => Number.isInteger(Number(v)) && Number(v) >= 0,
+        '올바른 재고를 입력해주세요.'
+      ),
+    pickupStartTime: z.string().min(1, '픽업 시작 시간을 입력해주세요.'),
+    pickupEndTime: z.string().min(1, '픽업 종료 시간을 입력해주세요.'),
+    status: z.enum(['active', 'closed']),
+  })
+  .superRefine((data, ctx) => {
+    if (data.pickupStartTime >= data.pickupEndTime) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: '픽업 종료 시간은 시작 시간 이후여야 합니다.',
+        path: ['pickupEndTime'],
+      });
+    }
+  });
 
 export type ProductEditFormData = z.infer<typeof productEditFormSchema>;
 
