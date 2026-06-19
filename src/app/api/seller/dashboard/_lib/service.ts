@@ -3,6 +3,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import type { SellerDashboardStatsResponse } from '@/contracts/seller';
 import { AppError } from '@/lib/errors/appError';
 import { ERROR_CODE } from '@/lib/errors/errorCodes';
+import type { Database } from '@/lib/supabase/database';
 
 type DailyOrderRow = {
   created_at: string;
@@ -64,7 +65,7 @@ function getDailyMetricRange(now = new Date()): {
 }
 
 async function getDailyMetrics(
-  supabase: SupabaseClient,
+  supabase: SupabaseClient<Database>,
   storeId: string
 ): Promise<SellerDashboardStatsResponse['dailyMetrics']> {
   const { start, end, dates } = getDailyMetricRange();
@@ -105,7 +106,7 @@ async function getDailyMetrics(
 }
 
 async function getTotalStats(
-  supabase: SupabaseClient,
+  supabase: SupabaseClient<Database>,
   storeId: string
 ): Promise<{ totalSalesAmount: number; totalOrderCount: number }> {
   const { data, error } = await supabase
@@ -127,7 +128,7 @@ async function getTotalStats(
 }
 
 async function getRecentOrders(
-  supabase: SupabaseClient,
+  supabase: SupabaseClient<Database>,
   storeId: string
 ): Promise<SellerDashboardStatsResponse['recentOrders']> {
   const { data, error } = await supabase
@@ -154,7 +155,7 @@ async function getRecentOrders(
 }
 
 export async function getSellerDashboardStats(
-  supabase: SupabaseClient,
+  supabase: SupabaseClient<Database>,
   storeId: string
 ): Promise<SellerDashboardStatsResponse> {
   const [{ totalSalesAmount, totalOrderCount }, dailyMetrics, recentOrders] =

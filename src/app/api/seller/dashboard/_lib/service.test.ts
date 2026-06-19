@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { AppError } from '@/lib/errors/appError';
 import { ERROR_CODE } from '@/lib/errors/errorCodes';
+import type { Database } from '@/lib/supabase/database';
 
 import { getSellerDashboardStats } from './service';
 
@@ -20,7 +21,7 @@ function buildClient(options: {
     order_items: { product_name: string }[];
   }[];
   errorOn?: 'total' | 'daily' | 'recent';
-}): SupabaseClient {
+}): SupabaseClient<Database> {
   const now = new Date().toISOString();
 
   const totalRows = options.totalRows ?? [{ payment_amount: 12000 }];
@@ -94,7 +95,7 @@ function buildClient(options: {
         }),
       };
     }),
-  } as unknown as SupabaseClient;
+  } as unknown as SupabaseClient<Database>;
 
   return client;
 }
