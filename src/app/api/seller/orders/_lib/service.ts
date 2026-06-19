@@ -289,6 +289,24 @@ export async function cancelSellerOrder(
         cancelAmount: order.payment_amount,
       });
     } catch {
+      await Promise.resolve(
+        supabase.from('payment_events').insert({
+          order_id: order.id,
+          order_number: order.order_number,
+          store_id: order.store_id,
+          event_type: 'payment_compensation_failed',
+          status: 'processed',
+          processed_at: new Date().toISOString(),
+          payload: {
+            failureStage: 'toss_cancel',
+            paymentStateAssumption: 'approved_may_remain',
+            manualAction: 'check_toss_and_cancel_or_refund',
+            orderStatus: 'cancelling',
+            paymentKey: payment.payment_key,
+          } satisfies PaymentCompensationFailedPayload,
+        })
+      ).catch(() => {});
+
       const revertStatus = order.cancel_claimed_status ?? order.status;
       await supabase
         .from('orders')
