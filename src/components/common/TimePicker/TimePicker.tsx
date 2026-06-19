@@ -51,8 +51,9 @@ export function TimePicker({
 
   const selectClass = cn(
     'w-full appearance-none rounded-md border bg-white py-2 pl-3 pr-8 text-sm outline-none',
-    'focus:border-primary-500 focus:ring-2 focus:ring-primary-300',
-    invalid ? 'border-red-500 focus:ring-red-300' : 'border-gray-200',
+    invalid
+      ? 'border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-300'
+      : 'border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-300',
     disabled ? 'cursor-default bg-gray-100 text-gray-400' : 'text-gray-700'
   );
 
