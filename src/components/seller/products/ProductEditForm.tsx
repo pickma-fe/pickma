@@ -67,6 +67,7 @@ export function ProductEditForm({
     formState: { errors },
   } = useForm<ProductEditFormData>({
     resolver: zodResolver(productEditFormSchema),
+    mode: 'onTouched',
     defaultValues: {
       discountPrice: String(product.discountPrice),
       stock: String(product.stock),
