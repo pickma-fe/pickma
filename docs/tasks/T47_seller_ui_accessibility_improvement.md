@@ -99,3 +99,33 @@
 - `npx vitest run src/app/api/seller/orders src/api/seller/orders src/hooks/seller/orders`: 83개 테스트 통과
 - `npm run lint`: 전체 통과
 - `npx tsc --noEmit`: 타입 오류 없음 (기존 `@storybook/test` 관련 오류는 pre-existing)
+
+### 시각 리뷰 추가 개선
+
+#### `/seller/products`
+
+- `ProductTable`: 이미지 로드 실패 시 폴백 처리 (`ProductImageCell` 컴포넌트, `onError` → 아이콘 fallback)
+- `ProductManageContent` / `ProductFilter`: 필터 레이아웃 개선, Input 흰색 배경, 가로 overflow 방지, 관리 컬럼 액션 메뉴로 교체
+
+#### `/seller/products/[id]/edit`
+
+- `TimePicker` 컴포넌트 신규: HH/MM select dropdown, `appearance-none` + 커스텀 chevron, `onBlur` 연결, 에러 상태 focus 스타일 분리
+- `ProductEditForm`: `endAt` 필드 제거, 픽업 시작/종료 시간 cross-field validation (`superRefine`), `mode: 'onTouched'`, 판매 정보 그리드 모바일 반응형 (`grid-cols-1 sm:grid-cols-2`)
+- `page.tsx`: `endAt` 제출 시 `오늘 날짜 + pickupEndTime`으로 자동 계산
+- API `schemas.ts`: `superRefine` 픽업 시간 순서 체크 추가 (create/update 모두)
+
+#### `/seller/menu`
+
+- `MenuTable`: 이미지 로드 실패 시 폴백 처리 (`MenuImageCell` 컴포넌트)
+
+#### `/seller/menu/new` · `/seller/menu/[id]/edit`
+
+- `MenuForm`: 2열 레이아웃 기준 `lg` → `xl`로 변경 (1024px 공간 부족 해소)
+
+#### `/seller/store`
+
+- `StoreInfoContent`: "가게 정보 수정" 버튼 클릭 시 모달 대신 `/seller/store/edit`으로 이동, `editStore` 모달 및 관련 핸들러 제거
+
+#### `/seller/store/edit`
+
+- `StoreEditForm`: 필수 필드(가게 이름, 전화번호, 주소, 오픈/마감 시간) `required` 표시 추가, 오픈/마감 시간 `<input type="time">` → `TimePicker`로 교체
