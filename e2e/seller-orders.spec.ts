@@ -1,6 +1,6 @@
 import { test, expect } from './fixtures/auth';
 
-const E2E_ORDER_NUMBER = 'E2E-SELLER-00000001';
+const E2E_ORDER_NUMBER = 'PM20991231E2E0000001';
 
 test('판매자 주문 목록 진입 및 seed 주문 확인', async ({
   sellerPage: page,
