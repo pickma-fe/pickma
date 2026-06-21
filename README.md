@@ -266,12 +266,13 @@ src
 - 기술 부채: AppError 리팩터링, Supabase 쿼리 반환 타입 안전성 개선
 - E2E: 결제 팝업 모킹 전략 수립 및 CI 연동
 
-## 개발 규칙
+## 📏 개발 규칙
 
-- 커밋 메시지는 Conventional Commits를 사용합니다.
+- 커밋 메시지는 [Conventional Commits](https://www.conventionalcommits.org/)를 사용합니다.
 - 공통 UI는 `src/components/common` 컴포넌트를 우선 사용합니다.
 - API DTO는 `src/contracts`, 앱 내부 모델은 `src/types`에 둡니다.
 - 인라인 스타일보다 Tailwind CSS 유틸리티 클래스를 사용합니다.
 - 접근성이 필요한 복잡한 UI 패턴은 Headless UI 사용을 우선합니다.
-- mock import는 API_MOCK_ENABLED=true 환경에서만 허용합니다.
-- 스키마 변경이 포함된 작업은 docs/migration_policy.md를 먼저 확인합니다.
+- mock import는 `API_MOCK_ENABLED=true` 환경에서만 허용합니다.
+- Toss Payments 키가 없는 환경에서는 `PAYMENT_MOCK=true`로 결제 도메인 모킹을 사용합니다.
+- 스키마 변경이 포함된 작업은 `docs/migration_policy.md`를 먼저 확인합니다.
