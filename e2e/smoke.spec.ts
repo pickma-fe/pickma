@@ -7,7 +7,7 @@ const LOCATION_PAYLOAD = JSON.stringify({
   savedAt: Date.now(),
 });
 
-const SMOKE_PRODUCT_ID = '00000000-0000-4000-8000-000000000051';
+const SMOKE_PRODUCT_ID = '00000000-0000-4000-8000-000000000e01';
 
 test('홈 접속 및 상품 목록 표시', async ({ page }) => {
   await page.addInitScript((location) => {
