@@ -101,18 +101,22 @@ jobs:
           npx supabase start
           npx supabase db reset --local --yes
           DB_CONTAINER="$(docker ps --format '{{.Names}}' | grep '^supabase_db_' | head -n 1)"
-          docker exec -i "$DB_CONTAINER" psql -U postgres -d postgres < supabase/seeds/e2e-auth.sql
-          docker exec -i "$DB_CONTAINER" psql -U postgres -d postgres < supabase/seeds/e2e-data.sql
+          docker exec -i "$DB_CONTAINER" psql -v ON_ERROR_STOP=1 -U postgres -d postgres < supabase/seeds/e2e-auth.sql
+          docker exec -i "$DB_CONTAINER" psql -v ON_ERROR_STOP=1 -U postgres -d postgres < supabase/seeds/e2e-data.sql
 
       - name: Export Supabase local env
         run: |
+          SUPABASE_STATUS="$(npx supabase status -o env)"
+          ANON_KEY="$(echo "$SUPABASE_STATUS" | grep '^ANON_KEY=' | cut -d= -f2-)"
+          SERVICE_ROLE_KEY="$(echo "$SUPABASE_STATUS" | grep '^SERVICE_ROLE_KEY=' | cut -d= -f2-)"
+          if [ -z "$ANON_KEY" ] || [ -z "$SERVICE_ROLE_KEY" ]; then
+            echo "ERROR: Failed to extract Supabase keys from status output" >&2
+            echo "$SUPABASE_STATUS" >&2
+            exit 1
+          fi
           echo "NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321" >> "$GITHUB_ENV"
-          npx supabase status -o env | while IFS='=' read -r key value; do
-            case "$key" in
-              ANON_KEY)         echo "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=${value}" >> "$GITHUB_ENV" ;;
-              SERVICE_ROLE_KEY) echo "SUPABASE_SECRET_KEY=${value}"                  >> "$GITHUB_ENV" ;;
-            esac
-          done
+          echo "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=${ANON_KEY}" >> "$GITHUB_ENV"
+          echo "SUPABASE_SECRET_KEY=${SERVICE_ROLE_KEY}" >> "$GITHUB_ENV"
 
       - name: Run E2E tests
         run: npm run e2e -- --project=public --project=consumer --project=seller --project=admin
