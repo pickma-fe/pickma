@@ -1,5 +1,6 @@
 'use client';
 
+import { Dialog, DialogPanel, DialogTitle } from '@headlessui/react';
 import { ClockIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -50,37 +51,6 @@ export function PendingView() {
         </ul>
       </div>
 
-      {/* 취소 확인 다이얼로그 */}
-      {showConfirm && (
-        <div className="w-full max-w-sm rounded-lg border border-red-200 bg-red-50 p-4 text-left">
-          <p className="text-sm font-medium text-red-700">신청을 취소할까요?</p>
-          <p className="mt-1 text-xs text-red-600">
-            취소 후에는 서류를 다시 제출하고 재신청해야 합니다.
-            <br />
-            제출된 파일은 보관 정책에 따라 자동으로 정리됩니다.
-          </p>
-          <div className="mt-3 flex gap-2">
-            <Button
-              color="danger"
-              className="flex-1 text-xs"
-              disabled={isCancelling}
-              onClick={handleCancelConfirm}
-            >
-              {isCancelling ? '취소 중...' : '신청 취소 확정'}
-            </Button>
-            <Button
-              variant="outline"
-              color="gray"
-              className="flex-1 text-xs"
-              disabled={isCancelling}
-              onClick={() => setShowConfirm(false)}
-            >
-              돌아가기
-            </Button>
-          </div>
-        </div>
-      )}
-
       <div className="flex gap-3">
         <Button
           variant="outline"
@@ -89,15 +59,13 @@ export function PendingView() {
         >
           신청 내역 확인
         </Button>
-        {!showConfirm && (
-          <Button
-            variant="outline"
-            color="danger"
-            onClick={() => setShowConfirm(true)}
-          >
-            신청 취소
-          </Button>
-        )}
+        <Button
+          variant="outline"
+          color="danger"
+          onClick={() => setShowConfirm(true)}
+        >
+          신청 취소
+        </Button>
         <Button
           variant="outline"
           color="gray"
@@ -108,6 +76,46 @@ export function PendingView() {
           고객센터
         </Button>
       </div>
+
+      {/* 취소 확인 다이얼로그 */}
+      <Dialog
+        open={showConfirm}
+        onClose={() => setShowConfirm(false)}
+        className="relative z-50"
+      >
+        <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
+        <div className="fixed inset-0 flex items-center justify-center p-4">
+          <DialogPanel className="w-full max-w-sm rounded-lg border border-red-200 bg-red-50 p-4 text-left">
+            <DialogTitle className="text-sm font-medium text-red-700">
+              신청을 취소할까요?
+            </DialogTitle>
+            <p className="mt-1 text-xs text-red-600">
+              취소 후에는 서류를 다시 제출하고 재신청해야 합니다.
+              <br />
+              제출된 파일은 보관 정책에 따라 자동으로 정리됩니다.
+            </p>
+            <div className="mt-3 flex gap-2">
+              <Button
+                color="danger"
+                className="flex-1 text-xs"
+                disabled={isCancelling}
+                onClick={handleCancelConfirm}
+              >
+                {isCancelling ? '취소 중...' : '신청 취소 확정'}
+              </Button>
+              <Button
+                variant="outline"
+                color="gray"
+                className="flex-1 text-xs"
+                disabled={isCancelling}
+                onClick={() => setShowConfirm(false)}
+              >
+                돌아가기
+              </Button>
+            </div>
+          </DialogPanel>
+        </div>
+      </Dialog>
     </div>
   );
 }

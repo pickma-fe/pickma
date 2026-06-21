@@ -61,6 +61,7 @@ function buildSupabaseMock({
   signedUrl = 'https://example.com/signed',
   signedError = null,
   deleteError = null,
+  deletedApp = { id: APP_ID },
 }: {
   appData?: typeof MOCK_APP | { id: string; status: string } | null;
   appError?: unknown;
@@ -73,10 +74,19 @@ function buildSupabaseMock({
   signedUrl?: string;
   signedError?: unknown;
   deleteError?: unknown;
+  deletedApp?: { id: string } | null;
 } = {}) {
   const deleteMock = vi.fn().mockReturnValue({
     eq: vi.fn().mockReturnValue({
-      eq: vi.fn().mockResolvedValue({ error: deleteError }),
+      eq: vi.fn().mockReturnValue({
+        eq: vi.fn().mockReturnValue({
+          select: vi.fn().mockReturnValue({
+            maybeSingle: vi
+              .fn()
+              .mockResolvedValue({ data: deletedApp, error: deleteError }),
+          }),
+        }),
+      }),
     }),
   });
 
@@ -243,6 +253,7 @@ describe('cancelMySellerApplication', () => {
   it('pending 신청이 있으면 삭제 후 정상 반환한다', async () => {
     const mock = buildSupabaseMock({
       appData: { id: APP_ID, status: 'pending' },
+      deletedApp: { id: APP_ID },
     });
     vi.mocked(createServiceRoleClient).mockReturnValue(
       mock as unknown as ReturnType<typeof createServiceRoleClient>
@@ -294,6 +305,22 @@ describe('cancelMySellerApplication', () => {
     );
   });
 
+  it('경합으로 삭제된 행이 없으면 APPLICATION_CANCEL_NOT_ALLOWED를 던진다', async () => {
+    const mock = buildSupabaseMock({
+      appData: { id: APP_ID, status: 'pending' },
+      deletedApp: null,
+    });
+    vi.mocked(createServiceRoleClient).mockReturnValue(
+      mock as unknown as ReturnType<typeof createServiceRoleClient>
+    );
+
+    await expect(cancelMySellerApplication(USER_ID)).rejects.toSatisfy(
+      (e: unknown) =>
+        e instanceof AppError &&
+        e.code === ERROR_CODE.APPLICATION_CANCEL_NOT_ALLOWED
+    );
+  });
+
   it('DB 조회 에러 시 INTERNAL_SERVER_ERROR를 던진다', async () => {
     const mock = buildSupabaseMock({ appError: { message: 'db error' } });
     vi.mocked(createServiceRoleClient).mockReturnValue(
@@ -310,6 +337,7 @@ describe('cancelMySellerApplication', () => {
     const mock = buildSupabaseMock({
       appData: { id: APP_ID, status: 'pending' },
       deleteError: { message: 'delete failed' },
+      deletedApp: null,
     });
     vi.mocked(createServiceRoleClient).mockReturnValue(
       mock as unknown as ReturnType<typeof createServiceRoleClient>

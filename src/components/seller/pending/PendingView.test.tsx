@@ -18,6 +18,37 @@ vi.mock('@/hooks/seller/applications/useCancelSellerApplication', () => ({
   useCancelSellerApplication: vi.fn(),
 }));
 
+// Headless UI Dialog는 portal로 렌더링되므로 테스트 환경에서 inline 렌더링으로 모킹
+vi.mock('@headlessui/react', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@headlessui/react')>();
+  return {
+    ...actual,
+    Dialog: ({
+      open,
+      children,
+    }: {
+      open: boolean;
+      onClose: () => void;
+      children: React.ReactNode;
+      className?: string;
+    }) => (open ? <div role="dialog">{children}</div> : null),
+    DialogPanel: ({
+      children,
+      className,
+    }: {
+      children: React.ReactNode;
+      className?: string;
+    }) => <div className={className}>{children}</div>,
+    DialogTitle: ({
+      children,
+      className,
+    }: {
+      children: React.ReactNode;
+      className?: string;
+    }) => <p className={className}>{children}</p>,
+  };
+});
+
 function createWrapper() {
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -76,6 +107,7 @@ describe('PendingView', () => {
 
     fireEvent.click(screen.getByRole('button', { name: '신청 취소' }));
 
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
     expect(screen.getByText('신청을 취소할까요?')).toBeInTheDocument();
     expect(
       screen.getByRole('button', { name: '신청 취소 확정' })
@@ -91,6 +123,7 @@ describe('PendingView', () => {
     fireEvent.click(screen.getByRole('button', { name: '신청 취소' }));
     fireEvent.click(screen.getByRole('button', { name: '돌아가기' }));
 
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     expect(screen.queryByText('신청을 취소할까요?')).not.toBeInTheDocument();
     expect(
       screen.getByRole('button', { name: '신청 취소' })
