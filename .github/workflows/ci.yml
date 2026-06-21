@@ -106,11 +106,16 @@ jobs:
 
       - name: Export Supabase local env
         run: |
+          echo "=== supabase status -o env ==="
+          npx supabase status -o env
+          echo "==="
+          echo "NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321" >> "$GITHUB_ENV"
           npx supabase status -o env | while IFS='=' read -r key value; do
             case "$key" in
-              API_URL)     echo "NEXT_PUBLIC_SUPABASE_URL=${value}"                  >> "$GITHUB_ENV" ;;
-              ANON_KEY)    echo "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=${value}"      >> "$GITHUB_ENV" ;;
-              SERVICE_ROLE_KEY) echo "SUPABASE_SECRET_KEY=${value}"                 >> "$GITHUB_ENV" ;;
+              ANON_KEY|AUTH_ANON_KEY)
+                echo "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=${value}" >> "$GITHUB_ENV" ;;
+              SERVICE_ROLE_KEY|AUTH_SERVICE_ROLE_KEY)
+                echo "SUPABASE_SECRET_KEY=${value}" >> "$GITHUB_ENV" ;;
             esac
           done
 
