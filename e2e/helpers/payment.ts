@@ -17,7 +17,11 @@ export async function waitForPaymentPopupAndComplete(
 
   const popup = await popupPromise;
 
-  await popup.waitForEvent('close', { timeout }).catch(() => {});
+  if (!popup.isClosed()) {
+    await popup
+      .waitForEvent('close', { timeout: 5_000 })
+      .catch(() => undefined);
+  }
 
   await page.waitForURL('**/order/complete**', { timeout });
 
