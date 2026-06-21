@@ -111,7 +111,7 @@ jobs:
           SERVICE_ROLE_KEY="$(echo "$SUPABASE_STATUS" | grep '^SERVICE_ROLE_KEY=' | cut -d= -f2-)"
           if [ -z "$ANON_KEY" ] || [ -z "$SERVICE_ROLE_KEY" ]; then
             echo "ERROR: Failed to extract Supabase keys from status output" >&2
-            echo "$SUPABASE_STATUS" >&2
+            echo "$SUPABASE_STATUS" | sed -E 's/(ANON_KEY|SERVICE_ROLE_KEY)=.*/\1=[REDACTED]/' >&2
             exit 1
           fi
           echo "NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321" >> "$GITHUB_ENV"
