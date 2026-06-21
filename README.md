@@ -256,7 +256,7 @@ src
 └─ types                        # 앱 내부 Domain Type
 ```
 
-## 향후 계획
+## 🔮 향후 계획
 
 - 모바일: Capacitor / PWA 래핑 마무리, i18n 기본 설정 (한국어)
 - 소비자: 찜 목록, 위치·검색 기능 확장, 알림 센터 UI
@@ -274,5 +274,5 @@ src
 - 인라인 스타일보다 Tailwind CSS 유틸리티 클래스를 사용합니다.
 - 접근성이 필요한 복잡한 UI 패턴은 Headless UI 사용을 우선합니다.
 - mock import는 `API_MOCK_ENABLED=true` 환경에서만 허용합니다.
-- Toss Payments 키가 없는 환경에서는 `PAYMENT_MOCK=true`로 결제 도메인 모킹을 사용합니다.
+- 로컬 개발 환경에서 Toss Payments 키가 없을 때는 `PAYMENT_MOCK=true`로 결제 도메인 모킹을 사용합니다.
 - 스키마 변경이 포함된 작업은 `docs/migration_policy.md`를 먼저 확인합니다.
