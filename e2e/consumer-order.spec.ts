@@ -11,14 +11,10 @@ test('상품 상세 → 주문 → 결제 팝업 → 완료', async ({ consumerP
 
   await page.goto(`/products/${E2E_PRODUCT_ID}`);
 
-  // 첫 번째 사용 가능한 픽업 슬롯 선택
+  // 첫 번째 사용 가능한 픽업 슬롯 선택 (hydration 후 clock 00:00 기준으로 enabled)
   const firstSlot = page
     .getByRole('button', { name: /^\d{2}:\d{2}~\d{2}:\d{2}$/ })
     .first();
-  // The server renders with real time before Playwright's browser clock hydrates.
-  await firstSlot.evaluate((button) => {
-    button.removeAttribute('disabled');
-  });
   await expect(firstSlot).toBeEnabled({ timeout: 10_000 });
   await firstSlot.click();
 
