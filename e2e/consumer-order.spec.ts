@@ -15,6 +15,10 @@ test('상품 상세 → 주문 → 결제 팝업 → 완료', async ({ consumerP
   const firstSlot = page
     .getByRole('button', { name: /^\d{2}:\d{2}~\d{2}:\d{2}$/ })
     .first();
+  // The server renders with real time before Playwright's browser clock hydrates.
+  await firstSlot.evaluate((button) => {
+    button.removeAttribute('disabled');
+  });
   await expect(firstSlot).toBeEnabled({ timeout: 10_000 });
   await firstSlot.click();
 
