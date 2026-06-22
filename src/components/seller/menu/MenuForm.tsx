@@ -52,6 +52,7 @@ export function MenuForm({ initialData, isEdit = false }: MenuFormProps) {
   const [previewUrl, setPreviewUrl] = useState<string | null>(
     initialData?.image ?? null
   );
+  const [imageRemoved, setImageRemoved] = useState(false);
   const [imageError, setImageError] = useState('');
 
   useEffect(() => {
@@ -107,6 +108,9 @@ export function MenuForm({ initialData, isEdit = false }: MenuFormProps) {
     }
     setImageFile(null);
     setPreviewUrl(null);
+    if (isEdit && initialData?.image) {
+      setImageRemoved(true);
+    }
   };
 
   const onSubmit = (data: MenuFormData) => {
@@ -118,8 +122,16 @@ export function MenuForm({ initialData, isEdit = false }: MenuFormProps) {
     };
 
     if (isEdit && initialData) {
+      const editBody = {
+        ...body,
+        ...(imageRemoved && !imageFile && { image: null }),
+      };
       updateMenuItem(
-        { id: initialData.id, body, imageFile: imageFile ?? undefined },
+        {
+          id: initialData.id,
+          body: editBody,
+          imageFile: imageFile ?? undefined,
+        },
         { onSuccess: () => router.push('/seller/menu') }
       );
     } else {
