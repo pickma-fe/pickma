@@ -25,9 +25,10 @@ vi.mock('@/app/api/_lib/mock', () => ({
   isApiMockEnabled: vi.fn(),
 }));
 
-vi.mock('./_lib/service', () => ({
-  createFileUploadUrl: vi.fn(),
-}));
+vi.mock('./_lib/service', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('./_lib/service')>();
+  return { ...actual, createFileUploadUrl: vi.fn() };
+});
 
 const USER_ID = '00000000-0000-4000-8000-000000000001';
 const STORE_ID = '00000000-0000-4000-8000-000000000031';
@@ -67,22 +68,62 @@ describe('POST /api/files/upload-url', () => {
   it('mock 모드에서 signedUrl과 storagePath를 201로 반환한다', async () => {
     vi.mocked(isApiMockEnabled).mockReturnValue(true);
 
-    const body = {
-      purpose: 'profile_image',
-      fileName: 'photo.jpg',
-      fileSize: 1024,
-      mimeType: 'image/jpeg',
-    };
-
-    const res = await POST(makePostRequest(body));
+    const res = await POST(
+      makePostRequest({
+        purpose: 'profile_image',
+        fileName: 'photo.jpg',
+        fileSize: 1024,
+        mimeType: 'image/jpeg',
+      })
+    );
     const resBody = (await res.json()) as {
-      data: { signedUrl: string; storagePath: string };
+      data: { signedUrl: string; storagePath: string; publicUrl?: string };
     };
 
     expect(res.status).toBe(201);
     expect(resBody.data.signedUrl).toBe('/api/mock/upload');
     expect(resBody.data.storagePath).toBe('mock/profile_image/mock-file');
+    expect(resBody.data.publicUrl).toBeDefined();
     expect(requireActiveUser).not.toHaveBeenCalled();
+  });
+
+  it('mock 모드에서 공개 목적(seller_product_image)은 publicUrl을 포함한다', async () => {
+    vi.mocked(isApiMockEnabled).mockReturnValue(true);
+
+    const res = await POST(
+      makePostRequest({
+        purpose: 'seller_product_image',
+        fileName: 'product.jpg',
+        fileSize: 1024,
+        mimeType: 'image/jpeg',
+      })
+    );
+    const resBody = (await res.json()) as {
+      data: { publicUrl?: string };
+    };
+
+    expect(res.status).toBe(201);
+    expect(resBody.data.publicUrl).toBeDefined();
+  });
+
+  it('mock 모드에서 비공개 목적(seller_application_document)은 publicUrl을 포함하지 않는다', async () => {
+    vi.mocked(isApiMockEnabled).mockReturnValue(true);
+
+    const res = await POST(
+      makePostRequest({
+        purpose: 'seller_application_document',
+        fileName: 'doc.pdf',
+        fileSize: 2048,
+        mimeType: 'application/pdf',
+        documentType: 'business_license',
+      })
+    );
+    const resBody = (await res.json()) as {
+      data: { publicUrl?: string };
+    };
+
+    expect(res.status).toBe(201);
+    expect(resBody.data.publicUrl).toBeUndefined();
   });
 
   it('body 누락 시 400을 반환한다', async () => {
