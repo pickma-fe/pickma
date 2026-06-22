@@ -105,7 +105,7 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 | T76 | Route Handler·Hook 테스트 보강                               | P3       | 진행 전 | 확인 필요    | T24                               | [T76_route_handler_hook_test_coverage.md](T76_route_handler_hook_test_coverage.md)                               |
 | T77 | 판매자 대시보드 매출 통계 구현 (S-DASH-02)                   | P3       | 완료    | 285          | T58                               | [T77_seller_dashboard_sales_stats.md](T77_seller_dashboard_sales_stats.md)                                       |
 | T78 | 공지사항 도메인/API 구현                                     | P3       | 진행 전 | 확인 필요    | T58                               | [T78_notice_domain_api.md](T78_notice_domain_api.md)                                                             |
-| T79 | seed 상품 image_url 경로 수정                                | P4       | 진행 전 | 확인 필요    | T39                               | [T79_seed_product_image_url_fix.md](T79_seed_product_image_url_fix.md)                                           |
+| T79 | seed 상품 이미지 경로 수정                                   | P4       | 완료    | 없음         | T39                               | [T79_seed_product_image_url_fix.md](T79_seed_product_image_url_fix.md)                                           |
 | T80 | 프로모션 배너 DB/Storage 기반 관리 구조 전환                 | P3       | 진행 전 | 확인 필요    | T46, T41                          | [T80_promotion_banner_management.md](T80_promotion_banner_management.md)                                         |
 | T81 | 상품 영양 정보 필드 추가                                     | P3       | 진행 전 | 확인 필요    | 없음                              | [T81_product_nutrition_info.md](T81_product_nutrition_info.md)                                                   |
 
