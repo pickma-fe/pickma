@@ -108,13 +108,27 @@ jobs:
       - name: Export Supabase local env
         run: |
           SUPABASE_STATUS="$(npx supabase status -o env)"
-          ANON_KEY="$(echo "$SUPABASE_STATUS" | awk -F= '$1 == "ANON_KEY" {print substr($0, index($0, "=") + 1); exit}')"
-          SERVICE_ROLE_KEY="$(echo "$SUPABASE_STATUS" | awk -F= '$1 == "SERVICE_ROLE_KEY" {print substr($0, index($0, "=") + 1); exit}')"
+          extract_env_value() {
+            printf '%s\n' "$SUPABASE_STATUS" | awk -F= -v key="$1" '
+              $1 == key {
+                value = substr($0, index($0, "=") + 1)
+                sub(/\r$/, "", value)
+                if (value ~ /^".*"$/ || value ~ /^\047.*\047$/) {
+                  value = substr(value, 2, length(value) - 2)
+                }
+                print value
+                exit
+              }
+            '
+          }
+
+          ANON_KEY="$(extract_env_value ANON_KEY)"
+          SERVICE_ROLE_KEY="$(extract_env_value SERVICE_ROLE_KEY)"
           if [ -z "$ANON_KEY" ]; then
-            ANON_KEY="$(echo "$SUPABASE_STATUS" | awk -F= '$1 == "AUTH_ANON_KEY" {print substr($0, index($0, "=") + 1); exit}')"
+            ANON_KEY="$(extract_env_value AUTH_ANON_KEY)"
           fi
           if [ -z "$SERVICE_ROLE_KEY" ]; then
-            SERVICE_ROLE_KEY="$(echo "$SUPABASE_STATUS" | awk -F= '$1 == "AUTH_SERVICE_ROLE_KEY" {print substr($0, index($0, "=") + 1); exit}')"
+            SERVICE_ROLE_KEY="$(extract_env_value AUTH_SERVICE_ROLE_KEY)"
           fi
           if [ -z "$ANON_KEY" ] || [ -z "$SERVICE_ROLE_KEY" ]; then
             echo "ERROR: Failed to extract Supabase keys from status output" >&2
