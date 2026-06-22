@@ -11,10 +11,23 @@ test('상품 상세 → 주문 → 결제 팝업 → 완료', async ({ consumerP
     page.getByRole('button', { name: /^\d{2}:\d{2}~\d{2}:\d{2}$/ }).first()
   ).toBeVisible({ timeout: 10_000 });
 
-  // SSR 이후 리렌더 시 정오 기준으로 슬롯 disabled를 재계산하도록 한다
+  // SSR 이후 브라우저 Date를 정오로 고정해 슬롯 disabled 재계산을 보장한다
+  // setFixedTime은 리렌더 간 지속이 불안정하므로 Proxy로 영구 패치한다
   const noon = new Date();
   noon.setHours(12, 0, 0, 0);
-  await page.clock.setFixedTime(noon);
+  const noonMs = noon.getTime();
+  await page.evaluate((ms) => {
+    const D = window.Date;
+    Object.defineProperty(window, 'Date', {
+      configurable: true,
+      writable: true,
+      value: new Proxy(D, {
+        construct: (_, args) =>
+          args.length ? Reflect.construct(D, args) : new D(ms),
+        get: (_, p, r) => (p === 'now' ? () => ms : Reflect.get(D, p, r)),
+      }),
+    });
+  }, noonMs);
   await page.getByRole('button', { name: '수량 증가' }).click();
 
   // 활성화된 첫 번째 픽업 슬롯 선택 (정오 기준 12:30+ 슬롯)
