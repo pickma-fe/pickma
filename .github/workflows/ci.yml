@@ -107,8 +107,8 @@ jobs:
       - name: Export Supabase local env
         run: |
           SUPABASE_STATUS="$(npx supabase status -o env)"
-          ANON_KEY="$(echo "$SUPABASE_STATUS" | grep '^ANON_KEY=' | cut -d= -f2-)"
-          SERVICE_ROLE_KEY="$(echo "$SUPABASE_STATUS" | grep '^SERVICE_ROLE_KEY=' | cut -d= -f2-)"
+          ANON_KEY="$(echo "$SUPABASE_STATUS" | grep -E '^(AUTH_)?ANON_KEY=' | cut -d= -f2-)"
+          SERVICE_ROLE_KEY="$(echo "$SUPABASE_STATUS" | grep -E '^(AUTH_)?SERVICE_ROLE_KEY=' | cut -d= -f2-)"
           if [ -z "$ANON_KEY" ] || [ -z "$SERVICE_ROLE_KEY" ]; then
             echo "ERROR: Failed to extract Supabase keys from status output" >&2
             echo "$SUPABASE_STATUS" | sed -E 's/(ANON_KEY|SERVICE_ROLE_KEY)=.*/\1=[REDACTED]/' >&2
