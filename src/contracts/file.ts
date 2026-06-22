@@ -19,6 +19,7 @@ export interface CreateFileUploadUrlRequest {
 export interface FileUploadUrlResponse {
   signedUrl: string;
   storagePath: string;
+  publicUrl?: string;
 }
 
 export interface DeleteFilesRequest {

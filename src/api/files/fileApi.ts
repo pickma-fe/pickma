@@ -36,7 +36,7 @@ export async function uploadFile(
   file: File,
   options?: UploadFileOptions
 ): Promise<string> {
-  const { signedUrl, storagePath } = await createUploadUrl({
+  const { signedUrl, storagePath, publicUrl } = await createUploadUrl({
     purpose,
     fileName: file.name,
     fileSize: file.size,
@@ -54,7 +54,7 @@ export async function uploadFile(
     throw new Error(`FILE_UPLOAD_FAILED: ${res.status}`);
   }
 
-  return storagePath;
+  return publicUrl ?? storagePath;
 }
 
 export function uploadFiles(

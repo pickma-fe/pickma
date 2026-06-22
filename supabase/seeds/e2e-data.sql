@@ -36,7 +36,7 @@ END $$;
 -- 2. E2E 전용 product upsert
 -- ──────────────────────────────────────────────────────────────────
 
--- consumer-order 전용 product (pickup 10:00-22:00, end_at seed 시점 +2년)
+-- consumer-order 전용 product (pickup 00:30-23:30, end_at seed 시점 +2년)
 INSERT INTO public.products (
   id, store_id, menu_item_id, category_id,
   original_price, discount_price,
@@ -51,15 +51,15 @@ INSERT INTO public.products (
   12000, 7200,
   99, 0,
   NOW() + INTERVAL '2 years',
-  '10:00:00', '22:00:00',
+  '00:30:00', '23:30:00',
   'active'
 )
 ON CONFLICT (id) DO UPDATE
   SET stock          = 99,
       reserved_stock = 0,
       end_at         = NOW() + INTERVAL '2 years',
-      pickup_start_time = '10:00:00',
-      pickup_end_time   = '22:00:00',
+      pickup_start_time = '00:30:00',
+      pickup_end_time   = '23:30:00',
       status            = 'active',
       updated_at        = now();
 

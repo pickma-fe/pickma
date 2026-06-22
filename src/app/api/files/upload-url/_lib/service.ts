@@ -12,6 +12,7 @@ interface BucketPolicy {
   bucket: string;
   allowedMimeTypes: string[];
   maxBytes: number;
+  isPublic: boolean;
 }
 
 const BUCKET_POLICIES: Record<FileUploadPurpose, BucketPolicy> = {
@@ -19,21 +20,25 @@ const BUCKET_POLICIES: Record<FileUploadPurpose, BucketPolicy> = {
     bucket: 'seller-application-documents',
     allowedMimeTypes: ['image/png', 'image/jpeg', 'application/pdf'],
     maxBytes: 10 * 1024 * 1024,
+    isPublic: false,
   },
   store_image: {
     bucket: 'store-images',
     allowedMimeTypes: ['image/png', 'image/jpeg'],
     maxBytes: 5 * 1024 * 1024,
+    isPublic: true,
   },
   seller_product_image: {
     bucket: 'product-images',
     allowedMimeTypes: ['image/png', 'image/jpeg'],
     maxBytes: 5 * 1024 * 1024,
+    isPublic: true,
   },
   profile_image: {
     bucket: 'profile-images',
     allowedMimeTypes: ['image/png', 'image/jpeg'],
     maxBytes: 3 * 1024 * 1024,
+    isPublic: true,
   },
 };
 
@@ -65,6 +70,10 @@ function buildStoragePath(
   }
 }
 
+export function isPublicUploadPurpose(purpose: FileUploadPurpose): boolean {
+  return BUCKET_POLICIES[purpose].isPublic;
+}
+
 export async function createFileUploadUrl(
   req: CreateFileUploadUrlRequest,
   userId: string,
@@ -92,8 +101,14 @@ export async function createFileUploadUrl(
     throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
   }
 
+  const publicUrl = policy.isPublic
+    ? supabase.storage.from(policy.bucket).getPublicUrl(storagePath).data
+        .publicUrl
+    : undefined;
+
   return {
     signedUrl: data.signedUrl,
     storagePath,
+    ...(publicUrl !== undefined && { publicUrl }),
   };
 }

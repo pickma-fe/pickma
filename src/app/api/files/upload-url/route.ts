@@ -13,17 +13,22 @@ import { routeError, success } from '@/app/api/_lib/response';
 import { validateBody } from '@/app/api/_lib/validation';
 
 import { createFileUploadUrlSchema } from './_lib/schemas';
-import { createFileUploadUrl } from './_lib/service';
+import { createFileUploadUrl, isPublicUploadPurpose } from './_lib/service';
 
 export async function POST(request: NextRequest): Promise<Response> {
   try {
     const body = await validateBody(createFileUploadUrlSchema, request);
 
     if (isApiMockEnabled()) {
+      const isPublicPurpose = isPublicUploadPurpose(body.purpose);
+      const storagePath = `mock/${body.purpose}/mock-file`;
       return success(
         {
           signedUrl: '/api/mock/upload',
-          storagePath: `mock/${body.purpose}/mock-file`,
+          storagePath,
+          ...(isPublicPurpose && {
+            publicUrl: `/images/mock/${body.purpose}/mock-file`,
+          }),
         },
         201
       );

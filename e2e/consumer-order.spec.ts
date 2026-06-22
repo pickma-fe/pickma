@@ -4,19 +4,41 @@ import { waitForPaymentPopupAndComplete } from './helpers/payment';
 const E2E_PRODUCT_ID = '00000000-0000-4000-8000-000000000e01';
 
 test('상품 상세 → 주문 → 결제 팝업 → 완료', async ({ consumerPage: page }) => {
-  // 픽업 슬롯(10:00~22:00)이 시간대에 따라 모두 만료되지 않도록 오늘 자정으로 고정
-  const todayMidnight = new Date();
-  todayMidnight.setHours(0, 0, 0, 0);
-  await page.clock.install({ time: todayMidnight });
-
   await page.goto(`/products/${E2E_PRODUCT_ID}`);
 
-  // 첫 번째 사용 가능한 픽업 슬롯 선택 (hydration 후 clock 00:00 기준으로 enabled)
-  const firstSlot = page
-    .getByRole('button', { name: /^\d{2}:\d{2}~\d{2}:\d{2}$/ })
+  // SSR 완료 대기
+  await expect(
+    page.getByRole('button', { name: /^\d{2}:\d{2}~\d{2}:\d{2}$/ }).first()
+  ).toBeVisible({ timeout: 10_000 });
+
+  // SSR 이후 브라우저 Date를 정오로 고정해 슬롯 disabled 재계산을 보장한다
+  // setFixedTime은 리렌더 간 지속이 불안정하므로 Proxy로 영구 패치한다
+  const noon = new Date();
+  noon.setHours(12, 0, 0, 0);
+  const noonMs = noon.getTime();
+  await page.evaluate((ms) => {
+    const D = window.Date;
+    Object.defineProperty(window, 'Date', {
+      configurable: true,
+      writable: true,
+      value: new Proxy(D, {
+        construct: (_, args) =>
+          args.length ? Reflect.construct(D, args) : new D(ms),
+        get: (_, p, r) => (p === 'now' ? () => ms : Reflect.get(D, p, r)),
+      }),
+    });
+  }, noonMs);
+  await page.getByRole('button', { name: '수량 증가' }).click();
+
+  // 활성화된 첫 번째 픽업 슬롯 선택 (정오 기준 12:30+ 슬롯)
+  const firstAvailableSlot = page
+    .getByRole('button', {
+      name: /^\d{2}:\d{2}~\d{2}:\d{2}$/,
+      disabled: false,
+    })
     .first();
-  await expect(firstSlot).toBeEnabled({ timeout: 10_000 });
-  await firstSlot.click();
+  await expect(firstAvailableSlot).toBeVisible({ timeout: 5_000 });
+  await firstAvailableSlot.click();
 
   // 담기 버튼 클릭 → 주문 페이지 진입
   await page.getByRole('button', { name: /원 담기/ }).click();
