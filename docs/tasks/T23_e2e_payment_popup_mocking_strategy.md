@@ -1,10 +1,10 @@
 # T23. E2E 테스트 및 결제 팝업 모킹 전략
 
 - 상태:
-  진행 전
+  완료
 
 - GitHub Issue:
-  확인 필요
+  298
 
 - 우선순위:
   P3
@@ -63,3 +63,19 @@
   - 결제 팝업 모킹 방식이 안정적으로 동작한다.
   - 실패 시 CI에서 원인을 파악할 trace/screenshot 설정이 있다.
   - CI workflow에 E2E job을 추가하기 위한 후속 작업이 명확하다.
+
+- 구현 결과:
+  - `e2e/example.spec.ts` 제거 완료
+  - `playwright.config.ts`: public/auth-setup/consumer/seller/admin project 분리, workers=1, screenshot/trace, dotenv .env.e2e 로드
+  - `e2e/smoke.spec.ts`: 홈 상품 목록 + 상품 상세 진입 smoke (public project)
+  - `e2e/auth.setup.ts`: consumer/seller/admin 계정 로그인 → /api/users/me role/status 검증 → storage state 저장
+  - `e2e/fixtures/auth.ts`: consumerPage/sellerPage/adminPage fixture
+  - `e2e/helpers/payment.ts`: waitForPaymentPopupAndComplete helper
+  - `e2e/consumer-order.spec.ts`: 상품 상세 → 픽업 슬롯 선택 → 주문 → 결제 팝업 → /order/complete
+  - `e2e/seller-orders.spec.ts`: 판매자 주문 목록 진입 및 seed 주문 확인
+  - `e2e/admin-approval.spec.ts`: 관리자 판매자 승인 페이지 접근 및 버튼 확인
+  - `supabase/seeds/e2e-auth.sql`: consumer/seller password 설정, admin 신규 계정 생성
+  - `supabase/seeds/e2e-data.sql`: E2E 전용 product, seller-orders 주문/결제 seed, admin-approval pending 신청 seed, cleanup 블록
+  - `.github/workflows/ci.yml`: e2e job 추가 (supabase start/reset/seed → env export → npm run e2e → artifact upload)
+  - `package.json`: dotenv, supabase devDependency 추가
+  - `.env.e2e.example`: E2E 환경변수 예시 파일
