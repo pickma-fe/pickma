@@ -70,6 +70,10 @@ function buildStoragePath(
   }
 }
 
+export function isPublicUploadPurpose(purpose: FileUploadPurpose): boolean {
+  return BUCKET_POLICIES[purpose].isPublic;
+}
+
 export async function createFileUploadUrl(
   req: CreateFileUploadUrlRequest,
   userId: string,
