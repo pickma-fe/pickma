@@ -56,7 +56,12 @@ export function FooterGroup() {
             {section.items.map((item) => (
               <li key={item.label}>
                 {item.href === null ? (
-                  <span className="text-gray-400">{item.label}</span>
+                  <span
+                    className="cursor-not-allowed text-gray-400"
+                    aria-disabled="true"
+                  >
+                    {item.label}
+                  </span>
                 ) : (
                   <Link
                     href={item.href}
