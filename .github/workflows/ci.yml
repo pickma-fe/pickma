@@ -103,6 +103,7 @@ jobs:
           DB_CONTAINER="$(docker ps --format '{{.Names}}' | grep '^supabase_db_' | head -n 1)"
           docker exec -i "$DB_CONTAINER" psql -v ON_ERROR_STOP=1 -U postgres -d postgres < supabase/seeds/e2e-auth.sql
           docker exec -i "$DB_CONTAINER" psql -v ON_ERROR_STOP=1 -U postgres -d postgres < supabase/seeds/e2e-data.sql
+          docker exec -i "$DB_CONTAINER" psql -v ON_ERROR_STOP=1 -U postgres -d postgres -c "NOTIFY pgrst, 'reload schema';"
 
       - name: Export Supabase local env
         run: |
@@ -117,6 +118,135 @@ jobs:
           echo "NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321" >> "$GITHUB_ENV"
           echo "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=${ANON_KEY}" >> "$GITHUB_ENV"
           echo "SUPABASE_SECRET_KEY=${SERVICE_ROLE_KEY}" >> "$GITHUB_ENV"
+
+      - name: Verify E2E seed and Supabase REST readiness
+        run: |
+          DB_CONTAINER="$(docker ps --format '{{.Names}}' | grep '^supabase_db_' | head -n 1)"
+          docker exec -i "$DB_CONTAINER" psql -v ON_ERROR_STOP=1 -U postgres -d postgres <<'SQL'
+          DO $$
+          DECLARE
+            product_count integer;
+            order_count integer;
+            application_count integer;
+          BEGIN
+            SELECT count(*) INTO product_count
+            FROM public.products
+            WHERE id = '00000000-0000-4000-8000-000000000e01';
+
+            SELECT count(*) INTO order_count
+            FROM public.orders
+            WHERE order_number = 'PM20991231E2E0000001';
+
+            SELECT count(*) INTO application_count
+            FROM public.seller_applications
+            WHERE company_name = 'E2E 테스트 매장' AND status = 'pending';
+
+            IF product_count <> 1 OR order_count <> 1 OR application_count <> 1 THEN
+              RAISE EXCEPTION 'E2E seed verification failed: product %, order %, application %',
+                product_count,
+                order_count,
+                application_count;
+            END IF;
+          END $$;
+          SQL
+
+          node <<'NODE'
+          const baseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+          const anonKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+          const serviceRoleKey = process.env.SUPABASE_SECRET_KEY;
+
+          if (!baseUrl || !anonKey || !serviceRoleKey) {
+            throw new Error('Missing Supabase REST environment variables');
+          }
+
+          const buildPath = (table, params) => {
+            const searchParams = new URLSearchParams(params);
+            return `/rest/v1/${table}?${searchParams.toString()}`;
+          };
+
+          const checks = [
+            {
+              name: 'categories',
+              key: anonKey,
+              path: buildPath('categories', { select: 'id', limit: '1' }),
+              expect: (json) => Array.isArray(json) && json.length > 0,
+            },
+            {
+              name: 'E2E product',
+              key: anonKey,
+              path: buildPath('products', {
+                select: 'id',
+                id: 'eq.00000000-0000-4000-8000-000000000e01',
+              }),
+              expect: (json) => Array.isArray(json) && json.length === 1,
+            },
+            {
+              name: 'E2E order',
+              key: serviceRoleKey,
+              path: buildPath('orders', {
+                select: 'id',
+                order_number: 'eq.PM20991231E2E0000001',
+              }),
+              expect: (json) => Array.isArray(json) && json.length === 1,
+            },
+            {
+              name: 'E2E seller application',
+              key: serviceRoleKey,
+              path: buildPath('seller_applications', {
+                select: 'id',
+                company_name: 'eq.E2E 테스트 매장',
+                status: 'eq.pending',
+              }),
+              expect: (json) => Array.isArray(json) && json.length === 1,
+            },
+          ];
+
+          const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+          for (let attempt = 1; attempt <= 30; attempt += 1) {
+            let allReady = true;
+
+            for (const check of checks) {
+              try {
+                const response = await fetch(`${baseUrl}${check.path}`, {
+                  headers: {
+                    apikey: check.key,
+                    Authorization: `Bearer ${check.key}`,
+                  },
+                });
+
+                if (!response.ok) {
+                  allReady = false;
+                  console.log(
+                    `${check.name} is not ready (${response.status}): ${await response.text()}`,
+                  );
+                  break;
+                }
+
+                const json = await response.json();
+                if (!check.expect(json)) {
+                  allReady = false;
+                  console.log(`${check.name} returned unexpected data: ${JSON.stringify(json)}`);
+                  break;
+                }
+              } catch (error) {
+                allReady = false;
+                console.log(`${check.name} readiness check failed: ${error.message}`);
+                break;
+              }
+            }
+
+            if (allReady) {
+              console.log('Supabase REST is ready for E2E seed data');
+              process.exit(0);
+            }
+
+            console.log(`Waiting for Supabase REST readiness (${attempt}/30)`);
+            await sleep(1000);
+          }
+
+          throw new Error('Supabase REST was not ready for E2E seed data');
+          NODE
 
       - name: Run E2E tests
         run: npm run e2e -- --project=public --project=consumer --project=seller --project=admin
