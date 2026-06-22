@@ -20,8 +20,9 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 | P0       | 심화 프로젝트 전에 반드시 처리                  |
 | P1       | 심화 프로젝트 초반 필수                         |
 | P2       | 심화 프로젝트 중 진행                           |
-| P3       | 이후 확장 단계 고려                             |
+| P3       | 서비스 운용 보강에 필요한 확장                  |
 | P4       | 사용자 영향 없는 기술 부채 · 코드 품질 · 최적화 |
+| P5       | 서비스 운용 필수는 아닌 선택 확장               |
 
 ## Task Breakdown
 
@@ -60,7 +61,7 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 | T31 | 주문 취소/환불 API 구현                                      | P1       | 완료    | 246          | T11, T02, T62                     | [T31_order_cancel_refund_api.md](T31_order_cancel_refund_api.md)                                                 |
 | T32 | 정산/수수료 시스템 설계                                      | P3       | 진행 전 | 확인 필요    | T31                               | [T32_settlement_fee_system_design.md](T32_settlement_fee_system_design.md)                                       |
 | T33 | 네이티브 앱 결제 방식 재검토                                 | P3       | 완료    | 281          | T01                               | [T33_native_app_payment_review.md](T33_native_app_payment_review.md)                                             |
-| T34 | 리뷰/평점 도메인 설계                                        | P3       | 진행 전 | 확인 필요    | 없음                              | [T34_review_rating_domain_design.md](T34_review_rating_domain_design.md)                                         |
+| T34 | 리뷰/평점 도메인 설계                                        | P5       | 진행 전 | 확인 필요    | 없음                              | [T34_review_rating_domain_design.md](T34_review_rating_domain_design.md)                                         |
 | T35 | AppError 객체 인수 리팩터링                                  | P4       | 진행 전 | 확인 필요    | 없음                              | [T35_apperror_object_argument_refactor.md](T35_apperror_object_argument_refactor.md)                             |
 | T36 | 판매자 신청 서류 수정/재업로드 정책                          | P3       | 완료    | 289          | T06, T44, T61                     | [T36_seller_application_document_reupload_policy.md](T36_seller_application_document_reupload_policy.md)         |
 | T37 | 운영 CS/모니터링/관리자 권한 정책 정리                       | P3       | 완료    | 293          | T01, T06                          | [T37_ops_cs_monitoring_admin_permission_policy.md](T37_ops_cs_monitoring_admin_permission_policy.md)             |
@@ -85,7 +86,7 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 | T56 | 상품 검색 결과 화면 구현                                     | P2       | 완료    | 194          | T05, T12                          | [T56_search_result_page.md](T56_search_result_page.md)                                                           |
 | T57 | 관리자 사용자·상품·주문 관리 화면 구현                       | P3       | 완료    | 245          | T04                               | [T57_admin_users_products_orders_pages.md](T57_admin_users_products_orders_pages.md)                             |
 | T58 | 관리자 대시보드 통계 화면 구현                               | P1       | 완료    | 239          | T07                               | [T58_admin_dashboard_statistics.md](T58_admin_dashboard_statistics.md)                                           |
-| T59 | 소비자 찜 목록 화면 및 API 구현                              | P3       | 진행 전 | 확인 필요    | T15                               | [T59_consumer_wishlist_page.md](T59_consumer_wishlist_page.md)                                                   |
+| T59 | 소비자 찜 목록 화면 및 API 구현                              | P5       | 진행 전 | 확인 필요    | T15                               | [T59_consumer_wishlist_page.md](T59_consumer_wishlist_page.md)                                                   |
 | T60 | Auth 비밀번호 정책 강화                                      | P1       | 완료    | 223          | T27                               | [T60_auth_password_policy.md](T60_auth_password_policy.md)                                                       |
 | T61 | 판매자 신청 서류 문서 타입 정리 (신분증 제거 및 타입명 통일) | P1       | 완료    | 195          | T44                               | [T61_seller_id_card_removal.md](T61_seller_id_card_removal.md)                                                   |
 | T62 | payment_events 테이블 migration 및 이벤트 contract 구현      | P1       | 완료    | 226          | T11                               | [T62_payment_events_migration_contract.md](T62_payment_events_migration_contract.md)                             |
@@ -93,9 +94,9 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 | T64 | 공통 컴포넌트 접근성 baseline 적용                           | P1       | 완료    | 250          | T45                               | [T64_shared_component_accessibility_baseline.md](T64_shared_component_accessibility_baseline.md)                 |
 | T65 | 도메인 컴포넌트 폴더 구조 통일                               | P1       | 완료    | 253          | T64                               | [T65_domain_component_folder_unification.md](T65_domain_component_folder_unification.md)                         |
 | T66 | 모바일 앱 래핑 (Capacitor / PWA)                             | P3       | 완료    | 277          | T45                               | [T66_mobile_app_capacitor_pwa.md](T66_mobile_app_capacitor_pwa.md)                                               |
-| T67 | i18n 기본 설정 (next-intl, 한국어)                           | P3       | 진행 전 | 확인 필요    | T45                               | [T67_i18n_setup.md](T67_i18n_setup.md)                                                                           |
+| T67 | i18n 기본 설정 (next-intl, 한국어)                           | P5       | 진행 전 | 확인 필요    | T45                               | [T67_i18n_setup.md](T67_i18n_setup.md)                                                                           |
 | T68 | 지도 UI/UX 개선                                              | P2       | 완료    | 266          | T21                               | [T68_map_ui_ux_improvement.md](T68_map_ui_ux_improvement.md)                                                     |
-| T69 | 소비자 위치/검색 기능 확장                                   | P3       | 진행 전 | 확인 필요    | T21                               | [T69_consumer_location_search_extension.md](T69_consumer_location_search_extension.md)                           |
+| T69 | 소비자 위치/검색 기능 확장                                   | P5       | 진행 전 | 확인 필요    | T21                               | [T69_consumer_location_search_extension.md](T69_consumer_location_search_extension.md)                           |
 | T70 | 알림 센터 UI 구현                                            | P3       | 진행 전 | 확인 필요    | T22                               | [T70_notification_center_ui.md](T70_notification_center_ui.md)                                                   |
 | T71 | 관리자 운영 알람 구현                                        | P3       | 진행 전 | 확인 필요    | T22, T63                          | [T71_admin_operation_alert.md](T71_admin_operation_alert.md)                                                     |
 | T72 | 관리자 가게 상태 변경 API 구현                               | P3       | 진행 전 | 확인 필요    | T04                               | [T72_admin_store_status_api.md](T72_admin_store_status_api.md)                                                   |
@@ -104,17 +105,16 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 | T75 | 백엔드 전용 lib을 app/api/\_lib으로 분리                     | P4       | 진행 전 | 확인 필요    | 없음                              | [T75_backend_lib_separation.md](T75_backend_lib_separation.md)                                                   |
 | T76 | Route Handler·Hook 테스트 보강                               | P3       | 진행 전 | 확인 필요    | T24                               | [T76_route_handler_hook_test_coverage.md](T76_route_handler_hook_test_coverage.md)                               |
 | T77 | 판매자 대시보드 매출 통계 구현 (S-DASH-02)                   | P3       | 완료    | 285          | T58                               | [T77_seller_dashboard_sales_stats.md](T77_seller_dashboard_sales_stats.md)                                       |
-| T78 | 공지사항 도메인/API 구현                                     | P3       | 진행 전 | 확인 필요    | T58                               | [T78_notice_domain_api.md](T78_notice_domain_api.md)                                                             |
+| T78 | 공지사항 도메인/API 구현                                     | P5       | 진행 전 | 확인 필요    | T58                               | [T78_notice_domain_api.md](T78_notice_domain_api.md)                                                             |
 | T79 | seed 상품 이미지 경로 수정                                   | P4       | 완료    | 없음         | T39                               | [T79_seed_product_image_url_fix.md](T79_seed_product_image_url_fix.md)                                           |
-| T80 | 프로모션 배너 DB/Storage 기반 관리 구조 전환                 | P3       | 진행 전 | 확인 필요    | T46, T41                          | [T80_promotion_banner_management.md](T80_promotion_banner_management.md)                                         |
-| T81 | 상품 영양 정보 필드 추가                                     | P3       | 진행 전 | 확인 필요    | 없음                              | [T81_product_nutrition_info.md](T81_product_nutrition_info.md)                                                   |
+| T80 | 프로모션 배너 DB/Storage 기반 관리 구조 전환                 | P5       | 진행 전 | 확인 필요    | T46, T41                          | [T80_promotion_banner_management.md](T80_promotion_banner_management.md)                                         |
+| T81 | 상품 영양 정보 필드 추가                                     | P5       | 진행 전 | 확인 필요    | 없음                              | [T81_product_nutrition_info.md](T81_product_nutrition_info.md)                                                   |
 
 ## 추천 진행 흐름
 
 완료 task는 제외하고, `진행 중`과 `진행 전` task만 기준으로 정렬한다.
 
 1. P3 Backend/보안: T72, T73, T76
-2. P3 기능 확장: T59, T69, T78
-3. P3 확장/운영 고도화: T32, T34, T70, T71
-4. P3 별도 일정: T67(i18n)
-5. P4 기술 부채: T35, T74, T75
+2. P3 운영 고도화: T32, T70, T71
+3. P4 기술 부채: T35, T74, T75
+4. P5 선택 확장: T34, T59, T67, T69, T78, T80, T81
