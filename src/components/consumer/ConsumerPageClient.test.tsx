@@ -1,4 +1,4 @@
-import { render } from '@testing-library/react';
+import { act, render } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -63,6 +63,7 @@ const mockCategory: Category = {
 
 describe('ConsumerPageClient', () => {
   beforeEach(() => {
+    vi.stubGlobal('innerWidth', 1440);
     vi.mocked(useCategories).mockReset();
     vi.mocked(useProducts).mockReset();
     vi.mocked(useUserLocation).mockReset();
@@ -87,7 +88,7 @@ describe('ConsumerPageClient', () => {
     render(<ConsumerPageClient />);
 
     expect(useProducts).toHaveBeenCalledWith(
-      expect.objectContaining({ page: 1, pageSize: 10 }),
+      expect.objectContaining({ page: 1, pageSize: 12 }),
       { enabled: false }
     );
   });
@@ -111,9 +112,28 @@ describe('ConsumerPageClient', () => {
         userLat: 37.5665,
         userLng: 126.978,
         page: 1,
-        pageSize: 10,
+        pageSize: 12,
       }),
       { enabled: true }
+    );
+  });
+
+  it('화면 폭이 바뀌면 홈 상품 pageSize를 갱신한다', () => {
+    render(<ConsumerPageClient />);
+
+    expect(useProducts).toHaveBeenLastCalledWith(
+      expect.objectContaining({ pageSize: 12 }),
+      { enabled: false }
+    );
+
+    act(() => {
+      vi.stubGlobal('innerWidth', 375);
+      window.dispatchEvent(new Event('resize'));
+    });
+
+    expect(useProducts).toHaveBeenLastCalledWith(
+      expect.objectContaining({ page: 1, pageSize: 6 }),
+      { enabled: false }
     );
   });
 

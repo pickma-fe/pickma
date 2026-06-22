@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import type { Category } from '@/types/category';
 import {
-  CONSUMER_PRODUCTS_PER_PAGE,
+  getHomeProductsPageSize,
   getProductSortQuery,
 } from '@/lib/consumerPageConfig';
 import {
@@ -50,6 +50,10 @@ export function ConsumerPageClient({
   const [selectedDiscountOption, setSelectedDiscountOption] =
     useState<ProductDiscountOptionId>(DEFAULT_DISCOUNT_OPTION_ID);
   const [currentPage, setCurrentPage] = useState(1);
+  const [productsPerPage, setProductsPerPage] = useState(
+    getHomeProductsPageSize
+  );
+  const productsPerPageRef = useRef(productsPerPage);
   const productSortQuery = getProductSortQuery(selectedSortOption);
   const { data: categories = [] } = useCategories({
     initialData: initialCategories,
@@ -76,7 +80,7 @@ export function ConsumerPageClient({
   } = useProducts(
     {
       page: currentPage,
-      pageSize: CONSUMER_PRODUCTS_PER_PAGE,
+      pageSize: productsPerPage,
       categoryId:
         selectedCategoryId === ALL_CATEGORY_ID ? undefined : selectedCategoryId,
       discountOption:
@@ -92,6 +96,27 @@ export function ConsumerPageClient({
     { enabled: !!location }
   );
   const products = productList?.items;
+
+  useEffect(() => {
+    const handleResize = () => {
+      const nextPageSize = getHomeProductsPageSize();
+
+      if (productsPerPageRef.current === nextPageSize) {
+        return;
+      }
+
+      productsPerPageRef.current = nextPageSize;
+      setProductsPerPage(nextPageSize);
+      setCurrentPage(1);
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
 
   useEffect(() => {
     if (!productList) {

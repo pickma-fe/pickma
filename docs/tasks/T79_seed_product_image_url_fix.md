@@ -1,12 +1,12 @@
-# T79 — seed 상품 image_url 경로 수정
+# T79 — seed 상품 이미지 경로 수정
 
 ## 상태
 
-진행 전
+완료
 
 ## GitHub Issue
 
-확인 필요
+없음
 
 ## 직접 선행 task
 
@@ -14,30 +14,32 @@ T39
 
 ## 배경
 
-seed 상품 데이터의 `image_url` 값이 `/images/products/` 경로를 참조하고 있으나,
-해당 디렉터리는 `public/`에 존재하지 않아 Next.js Image 최적화 요청 시 400 에러 발생.
+seed 상품 데이터의 `menu_items.image` 값이 `/images/products/` 경로를 참조하고 있으나,
+해당 디렉터리는 `public/`에 존재하지 않아 Next.js Image 최적화 요청 시 400 에러가 발생했다.
 
-실제 fallback 이미지는 `public/images/fallback/`에 위치한다 (`bread.jpg`, `noimage.png`).
+실제 seed fixture 이미지는 `public/images/mock/products/`에 위치한다.
 
 ## 범위
 
-- 원격 개발 DB의 seed 상품 레코드(`products` 테이블) `image_url` 값을 실제 존재하는 경로로 수정
-- `supabase/refresh-seed-products.sql`에도 image_url 복원 항목 반영
+- `supabase/seed.sql`의 `menu_items.image` 경로를 실제 존재하는 mock 상품 이미지 경로로 수정
+- linked 개발 DB의 기존 잘못된 `menu_items.image` 값은 단일 UPDATE로 수정
+- `supabase/refresh-seed-products.sql`는 상품 날짜·재고 refresh 용도로 유지하고 이미지 경로 복원은 포함하지 않음
 
 ## 구현 방안 (후보)
 
-| 방안                    | 설명                                                                 | 비고      |
-| ----------------------- | -------------------------------------------------------------------- | --------- |
-| A. DB 경로 수정         | seed 상품의 `image_url`을 `/images/fallback/bread.jpg` 등으로 UPDATE | 근본 수정 |
-| B. public 디렉터리 추가 | `public/images/products/`에 이미지 복사                              | 경로 유지 |
+| 방안                    | 설명                                                                              | 비고   |
+| ----------------------- | --------------------------------------------------------------------------------- | ------ |
+| A. DB 경로 수정         | seed 메뉴의 `image`를 `/images/mock/products/product-croissant.jpg` 등으로 UPDATE | 적용   |
+| B. public 디렉터리 추가 | `public/images/products/`에 이미지 복사                                           | 미적용 |
 
-방안 A를 권장한다. seed 상품은 Storage를 사용하지 않으므로 `fallback/` 경로가 의미상으로도 맞다.
+방안 A를 적용했다. seed 상품은 개발/테스트 fixture이므로 `public/images/mock/products/`의 실제 존재하는 이미지를 참조한다.
 
 ## 확인 필요 사항
 
-- seed 상품 레코드의 `image_url` 현황 (bread.jpg 외 다른 경로도 있는지)
-- `refresh-seed-products.sql`에서 image_url을 함께 리셋할지 여부
+없음
 
 ## 검증
 
-- `supabase db query --linked --file supabase/refresh-seed-products.sql` 실행 후 `/search` 또는 홈에서 콘솔 400 에러 없음 확인
+- `rg -n "/images/products/bread\.jpg|/images/products/" supabase docs src public --glob '*.{sql,md,ts,tsx,json}'`
+- `npm run typecheck`
+- `supabase db query --linked "UPDATE public.menu_items SET image = '/images/mock/products/product-croissant.jpg' WHERE image = '/images/products/bread.jpg' RETURNING id, name, image;"`

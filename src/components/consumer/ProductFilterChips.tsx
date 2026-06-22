@@ -44,7 +44,7 @@ export function ProductFilterChips({
   return (
     <div className="mb-6 space-y-2">
       {/* 카테고리 가로 스크롤 */}
-      <div className="scrollbar-hide flex gap-2 overflow-x-auto py-0.5">
+      <div className="scrollbar-hide -mx-2 flex gap-2 overflow-x-auto px-2 py-2">
         {categories.map((category) => {
           const isSelected = selectedCategoryId === category.id;
 
@@ -69,7 +69,7 @@ export function ProductFilterChips({
       </div>
 
       {/* 정렬 + 할인율 + 초기화 */}
-      <div className="scrollbar-hide flex items-center gap-2 overflow-x-auto">
+      <div className="scrollbar-hide -mx-2 flex items-center gap-2 overflow-x-auto px-2 py-2">
         <FilterDropdown
           label={currentSortLabel}
           isActive={selectedSortOption !== DEFAULT_SORT_OPTION_ID}

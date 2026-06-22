@@ -63,7 +63,7 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 | T34 | 리뷰/평점 도메인 설계                                        | P3       | 진행 전 | 확인 필요    | 없음                              | [T34_review_rating_domain_design.md](T34_review_rating_domain_design.md)                                         |
 | T35 | AppError 객체 인수 리팩터링                                  | P4       | 진행 전 | 확인 필요    | 없음                              | [T35_apperror_object_argument_refactor.md](T35_apperror_object_argument_refactor.md)                             |
 | T36 | 판매자 신청 서류 수정/재업로드 정책                          | P3       | 완료    | 289          | T06, T44, T61                     | [T36_seller_application_document_reupload_policy.md](T36_seller_application_document_reupload_policy.md)         |
-| T37 | 운영 CS/모니터링/관리자 권한 정책 정리                       | P3       | 진행 전 | 확인 필요    | T01, T06                          | [T37_ops_cs_monitoring_admin_permission_policy.md](T37_ops_cs_monitoring_admin_permission_policy.md)             |
+| T37 | 운영 CS/모니터링/관리자 권한 정책 정리                       | P3       | 완료    | 293          | T01, T06                          | [T37_ops_cs_monitoring_admin_permission_policy.md](T37_ops_cs_monitoring_admin_permission_policy.md)             |
 | T38 | 판매자 랜딩/온보딩 CTA 정리                                  | P2       | 완료    | 244          | T10                               | [T38_seller_landing_onboarding_cta.md](T38_seller_landing_onboarding_cta.md)                                     |
 | T39 | public 이미지 자산 구조 및 Footer badge 크기 정리            | P1       | 완료    | 259          | T18                               | [T39_public_image_asset_footer_badge_cleanup.md](T39_public_image_asset_footer_badge_cleanup.md)                 |
 | T40 | Storage orphan cleanup API 및 hook 통합                      | P1       | 완료    | 235          | T06                               | [T40_storage_orphan_cleanup_api_hook.md](T40_storage_orphan_cleanup_api_hook.md)                                 |
@@ -92,7 +92,7 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 | T63 | POST /api/payments/webhook Route Handler 구현                | P1       | 완료    | 231          | T62                               | [T63_payment_webhook_route_handler.md](T63_payment_webhook_route_handler.md)                                     |
 | T64 | 공통 컴포넌트 접근성 baseline 적용                           | P1       | 완료    | 250          | T45                               | [T64_shared_component_accessibility_baseline.md](T64_shared_component_accessibility_baseline.md)                 |
 | T65 | 도메인 컴포넌트 폴더 구조 통일                               | P1       | 완료    | 253          | T64                               | [T65_domain_component_folder_unification.md](T65_domain_component_folder_unification.md)                         |
-| T66 | 모바일 앱 래핑 (Capacitor / PWA)                             | P3       | 진행 중 | 277          | T45                               | [T66_mobile_app_capacitor_pwa.md](T66_mobile_app_capacitor_pwa.md)                                               |
+| T66 | 모바일 앱 래핑 (Capacitor / PWA)                             | P3       | 완료    | 277          | T45                               | [T66_mobile_app_capacitor_pwa.md](T66_mobile_app_capacitor_pwa.md)                                               |
 | T67 | i18n 기본 설정 (next-intl, 한국어)                           | P3       | 진행 전 | 확인 필요    | T45                               | [T67_i18n_setup.md](T67_i18n_setup.md)                                                                           |
 | T68 | 지도 UI/UX 개선                                              | P2       | 완료    | 266          | T21                               | [T68_map_ui_ux_improvement.md](T68_map_ui_ux_improvement.md)                                                     |
 | T69 | 소비자 위치/검색 기능 확장                                   | P3       | 진행 전 | 확인 필요    | T21                               | [T69_consumer_location_search_extension.md](T69_consumer_location_search_extension.md)                           |
@@ -105,7 +105,7 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 | T76 | Route Handler·Hook 테스트 보강                               | P3       | 진행 전 | 확인 필요    | T24                               | [T76_route_handler_hook_test_coverage.md](T76_route_handler_hook_test_coverage.md)                               |
 | T77 | 판매자 대시보드 매출 통계 구현 (S-DASH-02)                   | P3       | 완료    | 285          | T58                               | [T77_seller_dashboard_sales_stats.md](T77_seller_dashboard_sales_stats.md)                                       |
 | T78 | 공지사항 도메인/API 구현                                     | P3       | 진행 전 | 확인 필요    | T58                               | [T78_notice_domain_api.md](T78_notice_domain_api.md)                                                             |
-| T79 | seed 상품 image_url 경로 수정                                | P4       | 진행 전 | 확인 필요    | T39                               | [T79_seed_product_image_url_fix.md](T79_seed_product_image_url_fix.md)                                           |
+| T79 | seed 상품 이미지 경로 수정                                   | P4       | 완료    | 없음         | T39                               | [T79_seed_product_image_url_fix.md](T79_seed_product_image_url_fix.md)                                           |
 | T80 | 프로모션 배너 DB/Storage 기반 관리 구조 전환                 | P3       | 진행 전 | 확인 필요    | T46, T41                          | [T80_promotion_banner_management.md](T80_promotion_banner_management.md)                                         |
 | T81 | 상품 영양 정보 필드 추가                                     | P3       | 진행 전 | 확인 필요    | 없음                              | [T81_product_nutrition_info.md](T81_product_nutrition_info.md)                                                   |
 
@@ -114,7 +114,7 @@ PickMa 심화 프로젝트 task의 공유 기준 문서다. `temp/`는 로컬 �
 완료 task는 제외하고, `진행 중`과 `진행 전` task만 기준으로 정렬한다.
 
 1. P3 Backend/보안: T72, T73, T76
-2. P3 기능 확장: T59, T69, T78, T23
-3. P3 확장/운영 고도화: T32, T34, T37, T70, T71
-4. P3 별도 일정: T66(모바일 앱 래핑), T67(i18n)
+2. P3 기능 확장: T59, T69, T78
+3. P3 확장/운영 고도화: T32, T34, T70, T71
+4. P3 별도 일정: T67(i18n)
 5. P4 기술 부채: T35, T74, T75

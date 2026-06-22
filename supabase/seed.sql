@@ -145,7 +145,7 @@ INSERT INTO public.menu_items (id, store_id, category_id, name, description, ima
    '00000000-0000-4000-8000-000000000011',
    '페이스트리 박스',
    '갓 구운 페이스트리 모음 박스입니다.',
-   '/images/products/bread.jpg',
+   '/images/mock/products/product-croissant.jpg',
    9000),
   ('00000000-0000-4000-8000-000000000043',
    '00000000-0000-4000-8000-000000000032',
@@ -284,7 +284,7 @@ FROM (
     END AS product_label
   FROM (
     VALUES
-      (60, 77, '마포', '00000000-0000-4000-8000-000000000031', '00000000-0000-4000-8000-000000000011', '00000000-0000-4000-8000-000000000011', '베이커리 박스', '페이스트리 세트', '/images/mock/products/product-croissant.jpg', '/images/products/bread.jpg', 9000),
+      (60, 77, '마포', '00000000-0000-4000-8000-000000000031', '00000000-0000-4000-8000-000000000011', '00000000-0000-4000-8000-000000000011', '베이커리 박스', '페이스트리 세트', '/images/mock/products/product-croissant.jpg', '/images/mock/products/product-croissant.jpg', 9000),
       (80, 97, '강남', '00000000-0000-4000-8000-000000000033', '00000000-0000-4000-8000-000000000017', '00000000-0000-4000-8000-000000000014', '샌드위치 팩', '샐러드 볼', '/images/mock/products/product-sandwich.jpg', '/images/mock/products/product-salad.jpg', 10000),
       (100, 117, '송파', '00000000-0000-4000-8000-000000000034', '00000000-0000-4000-8000-000000000013', '00000000-0000-4000-8000-000000000015', '도시락 세트', '꼬마 김밥', '/images/mock/products/product-dosirak.jpg', '/images/mock/products/product-gimbap.jpg', 9500),
       (120, 137, '성동', '00000000-0000-4000-8000-000000000035', '00000000-0000-4000-8000-000000000014', '00000000-0000-4000-8000-000000000012', '샐러드 컵', '콜드브루 세트', '/images/mock/products/product-chicken-salad.jpg', '/images/mock/products/product-americano.jpg', 9800),
