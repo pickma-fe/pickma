@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ERROR_CODE } from '@/lib/errors/errorCodes';
+import type { Logger } from '@/app/api/_lib/logger';
 
 vi.stubEnv('AUTH_EMAIL_HASH_SECRET', 'test-secret-for-unit-tests-32bytes!!');
 
@@ -36,6 +37,12 @@ const PASSWORD = 'password123';
 const NAME = '테스트';
 const AUTH_USER_ID = 'auth-user-uuid';
 
+const mockLogger: Logger = {
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
+};
+
 describe('completeEmailSignup', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -56,7 +63,7 @@ describe('completeEmailSignup', () => {
     );
 
     await expect(
-      completeEmailSignup(EMAIL, TOKEN, PASSWORD, NAME, false)
+      completeEmailSignup(EMAIL, TOKEN, PASSWORD, NAME, false, mockLogger)
     ).rejects.toMatchObject({
       code: ERROR_CODE.AUTH_EMAIL_STORE_UNAVAILABLE,
       statusCode: 503,
@@ -71,7 +78,7 @@ describe('completeEmailSignup', () => {
     });
 
     await expect(
-      completeEmailSignup(EMAIL, TOKEN, PASSWORD, NAME, false)
+      completeEmailSignup(EMAIL, TOKEN, PASSWORD, NAME, false, mockLogger)
     ).rejects.toMatchObject({
       code: ERROR_CODE.AUTH_EMAIL_SIGNUP_IN_PROGRESS,
       statusCode: 409,
@@ -82,7 +89,7 @@ describe('completeEmailSignup', () => {
     mockStore.beginSignupWithVerificationToken.mockResolvedValue({ ok: false });
 
     await expect(
-      completeEmailSignup(EMAIL, TOKEN, PASSWORD, NAME, false)
+      completeEmailSignup(EMAIL, TOKEN, PASSWORD, NAME, false, mockLogger)
     ).rejects.toMatchObject({
       code: ERROR_CODE.AUTH_EMAIL_VERIFICATION_TOKEN_INVALID,
       statusCode: 400,
@@ -96,7 +103,7 @@ describe('completeEmailSignup', () => {
     });
 
     await expect(
-      completeEmailSignup(EMAIL, TOKEN, PASSWORD, NAME, false)
+      completeEmailSignup(EMAIL, TOKEN, PASSWORD, NAME, false, mockLogger)
     ).rejects.toMatchObject({
       code: ERROR_CODE.AUTH_EMAIL_ALREADY_EXISTS,
       statusCode: 409,
@@ -111,7 +118,7 @@ describe('completeEmailSignup', () => {
     });
 
     await expect(
-      completeEmailSignup(EMAIL, TOKEN, PASSWORD, NAME, false)
+      completeEmailSignup(EMAIL, TOKEN, PASSWORD, NAME, false, mockLogger)
     ).rejects.toMatchObject({
       code: ERROR_CODE.INTERNAL_SERVER_ERROR,
       statusCode: 500,
@@ -124,7 +131,7 @@ describe('completeEmailSignup', () => {
     mockDeleteUser.mockResolvedValue({ error: null });
 
     await expect(
-      completeEmailSignup(EMAIL, TOKEN, PASSWORD, NAME, false)
+      completeEmailSignup(EMAIL, TOKEN, PASSWORD, NAME, false, mockLogger)
     ).rejects.toMatchObject({
       code: ERROR_CODE.INTERNAL_SERVER_ERROR,
     });
@@ -133,27 +140,23 @@ describe('completeEmailSignup', () => {
   });
 
   it('users insert 실패 후 deleteUser 실패 시 token을 소비한다', async () => {
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     mockInsert.mockResolvedValue({ error: new Error('Insert failed') });
     mockDeleteUser.mockResolvedValue({ error: new Error('Delete failed') });
 
     await expect(
-      completeEmailSignup(EMAIL, TOKEN, PASSWORD, NAME, false)
+      completeEmailSignup(EMAIL, TOKEN, PASSWORD, NAME, false, mockLogger)
     ).rejects.toMatchObject({
       code: ERROR_CODE.INTERNAL_SERVER_ERROR,
     });
     expect(mockStore.completeSignupWithVerificationToken).toHaveBeenCalled();
-    expect(consoleSpy).toHaveBeenCalledWith(
-      expect.stringContaining('AUTH_SIGNUP_AUTH_USER_ORPHANED')
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      'AUTH_SIGNUP_AUTH_USER_ORPHANED',
+      expect.objectContaining({ userId: AUTH_USER_ID })
     );
-    expect(consoleSpy).toHaveBeenCalledWith(
-      expect.stringContaining(AUTH_USER_ID)
-    );
-    consoleSpy.mockRestore();
   });
 
   it('성공 시 token을 소비한다', async () => {
-    await completeEmailSignup(EMAIL, TOKEN, PASSWORD, NAME, false);
+    await completeEmailSignup(EMAIL, TOKEN, PASSWORD, NAME, false, mockLogger);
 
     expect(mockStore.completeSignupWithVerificationToken).toHaveBeenCalled();
     expect(mockInsert).toHaveBeenCalledWith(
@@ -165,7 +168,7 @@ describe('completeEmailSignup', () => {
   });
 
   it('마케팅 수신 동의 시 users에 동의 상태와 시각을 저장한다', async () => {
-    await completeEmailSignup(EMAIL, TOKEN, PASSWORD, NAME, true);
+    await completeEmailSignup(EMAIL, TOKEN, PASSWORD, NAME, true, mockLogger);
 
     expect(mockInsert).toHaveBeenCalledWith(
       expect.objectContaining({

@@ -72,6 +72,7 @@ export function createLogger(reqId: string, options?: LoggerOptions): Logger {
     };
   }
 
+  /* eslint-disable no-console */
   return {
     info(event, meta) {
       console.info(buildEntry('info', reqId, event, meta));
@@ -83,4 +84,5 @@ export function createLogger(reqId: string, options?: LoggerOptions): Logger {
       console.error(buildEntry('error', reqId, event, meta));
     },
   };
+  /* eslint-enable no-console */
 }
