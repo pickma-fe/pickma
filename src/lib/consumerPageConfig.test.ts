@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
-import { getProductSortQuery } from './consumerPageConfig';
+import {
+  getHomeProductsPageSizeForWidth,
+  getProductSortQuery,
+} from './consumerPageConfig';
 
 describe('getProductSortQuery', () => {
   it('AI 추천 정렬을 aiRecommendation query로 변환한다', () => {
@@ -20,5 +23,15 @@ describe('getProductSortQuery', () => {
       sort: 'endAt',
       order: 'asc',
     });
+  });
+});
+
+describe('getHomeProductsPageSizeForWidth', () => {
+  it('상품 grid 열 수에 맞춰 홈 pageSize를 반환한다', () => {
+    expect(getHomeProductsPageSizeForWidth(375)).toBe(6);
+    expect(getHomeProductsPageSizeForWidth(768)).toBe(8);
+    expect(getHomeProductsPageSizeForWidth(1024)).toBe(9);
+    expect(getHomeProductsPageSizeForWidth(1440)).toBe(12);
+    expect(getHomeProductsPageSizeForWidth(1536)).toBe(15);
   });
 });

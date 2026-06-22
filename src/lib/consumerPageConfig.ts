@@ -13,6 +13,35 @@ type ProductSortQuery =
   | { sort: 'distance' };
 
 export const CONSUMER_PRODUCTS_PER_PAGE = 10;
+export const DEFAULT_HOME_PRODUCTS_PER_PAGE = 10;
+
+export function getHomeProductsPageSizeForWidth(width: number): number {
+  if (width >= 1536) {
+    return 15;
+  }
+
+  if (width >= 1280) {
+    return 12;
+  }
+
+  if (width >= 1024) {
+    return 9;
+  }
+
+  if (width >= 640) {
+    return 8;
+  }
+
+  return 6;
+}
+
+export function getHomeProductsPageSize(): number {
+  if (typeof window === 'undefined') {
+    return DEFAULT_HOME_PRODUCTS_PER_PAGE;
+  }
+
+  return getHomeProductsPageSizeForWidth(window.innerWidth);
+}
 
 export function getProductSortQuery(
   sortOption: ProductSortOptionId
