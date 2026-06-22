@@ -1,3 +1,4 @@
+import type * as HeadlessUI from '@headlessui/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { createElement } from 'react';
@@ -20,7 +21,7 @@ vi.mock('@/hooks/seller/applications/useCancelSellerApplication', () => ({
 
 // Headless UI Dialog는 portal로 렌더링되므로 테스트 환경에서 inline 렌더링으로 모킹
 vi.mock('@headlessui/react', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@headlessui/react')>();
+  const actual = await importOriginal<typeof HeadlessUI>();
   return {
     ...actual,
     Dialog: ({

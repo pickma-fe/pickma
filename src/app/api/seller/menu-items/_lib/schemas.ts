@@ -29,7 +29,7 @@ export const updateMenuItemSchema = z
     categoryId: z.uuid().optional(),
     name: z.string().trim().min(1).max(100).optional(),
     description: z.string().trim().min(1).optional(),
-    image: z.string().trim().min(1).optional(),
+    image: z.string().trim().min(1).nullable().optional(),
     originalPrice: z.number().int().positive().optional(),
     status: z.enum(['active', 'inactive']).optional(),
   })

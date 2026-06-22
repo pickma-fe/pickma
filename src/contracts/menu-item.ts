@@ -32,7 +32,7 @@ export interface UpdateMenuItemRequest {
   categoryId?: string;
   name?: string;
   description?: string;
-  image?: string;
+  image?: string | null;
   originalPrice?: number;
   status?: MenuItemStatus;
 }

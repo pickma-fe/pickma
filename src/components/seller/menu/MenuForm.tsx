@@ -4,8 +4,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Upload, X } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
-import { Controller, useForm, useWatch } from 'react-hook-form';
+import { useEffect, useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
 
 import type { MenuItem } from '@/types/menu-item';
@@ -34,7 +34,6 @@ const menuFormSchema = z.object({
       '올바른 가격을 입력해주세요.'
     )
     .refine((value) => Number(value) >= 1, '가격을 입력해주세요.'),
-  image: z.string().optional(),
 });
 
 type MenuFormData = z.infer<typeof menuFormSchema>;
@@ -49,7 +48,21 @@ export function MenuForm({ initialData, isEdit = false }: MenuFormProps) {
   const { mutate: updateMenuItem, isPending: isUpdating } =
     useUpdateSellerMenuItem();
 
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(
+    initialData?.image ?? null
+  );
+  const [imageRemoved, setImageRemoved] = useState(false);
   const [imageError, setImageError] = useState('');
+
+  useEffect(() => {
+    const currentUrl = previewUrl;
+    return () => {
+      if (currentUrl?.startsWith('blob:')) {
+        URL.revokeObjectURL(currentUrl);
+      }
+    };
+  }, [previewUrl]);
 
   const categoryOptions = [
     { label: '카테고리를 선택해주세요', value: '' },
@@ -59,7 +72,6 @@ export function MenuForm({ initialData, isEdit = false }: MenuFormProps) {
   const {
     register,
     handleSubmit,
-    setValue,
     control,
     formState: { errors },
   } = useForm<MenuFormData>({
@@ -69,11 +81,8 @@ export function MenuForm({ initialData, isEdit = false }: MenuFormProps) {
       name: initialData?.name ?? '',
       description: initialData?.description ?? '',
       originalPrice: initialData?.originalPrice?.toString() ?? '',
-      image: initialData?.image ?? '',
     },
   });
-
-  const image = useWatch({ control, name: 'image' });
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -83,18 +92,25 @@ export function MenuForm({ initialData, isEdit = false }: MenuFormProps) {
         e.currentTarget.value = '';
         return;
       }
+      if (previewUrl?.startsWith('blob:')) {
+        URL.revokeObjectURL(previewUrl);
+      }
       setImageError('');
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setValue('image', event.target?.result as string);
-      };
-      reader.readAsDataURL(file);
+      setImageFile(file);
+      setPreviewUrl(URL.createObjectURL(file));
     }
     e.currentTarget.value = '';
   };
 
   const handleRemoveImage = () => {
-    setValue('image', '');
+    if (previewUrl?.startsWith('blob:')) {
+      URL.revokeObjectURL(previewUrl);
+    }
+    setImageFile(null);
+    setPreviewUrl(null);
+    if (isEdit && initialData?.image) {
+      setImageRemoved(true);
+    }
   };
 
   const onSubmit = (data: MenuFormData) => {
@@ -102,19 +118,27 @@ export function MenuForm({ initialData, isEdit = false }: MenuFormProps) {
       categoryId: data.categoryId,
       name: data.name,
       description: data.description || undefined,
-      image: data.image || undefined,
       originalPrice: Number(data.originalPrice),
     };
 
     if (isEdit && initialData) {
+      const editBody = {
+        ...body,
+        ...(imageRemoved && !imageFile && { image: null }),
+      };
       updateMenuItem(
-        { id: initialData.id, body },
+        {
+          id: initialData.id,
+          body: editBody,
+          imageFile: imageFile ?? undefined,
+        },
         { onSuccess: () => router.push('/seller/menu') }
       );
     } else {
-      createMenuItem(body, {
-        onSuccess: () => router.push('/seller/menu'),
-      });
+      createMenuItem(
+        { ...body, imageFile: imageFile ?? undefined },
+        { onSuccess: () => router.push('/seller/menu') }
+      );
     }
   };
 
@@ -189,14 +213,15 @@ export function MenuForm({ initialData, isEdit = false }: MenuFormProps) {
             메뉴 이미지
           </h2>
           <div className="flex flex-col gap-4">
-            {image ? (
+            {previewUrl ? (
               <div className="relative aspect-square w-full overflow-hidden rounded-lg bg-gray-100">
                 <Image
-                  src={image}
+                  src={previewUrl}
                   alt="메뉴 이미지"
                   fill
                   sizes="(max-width: 768px) 100vw, 400px"
                   className="object-cover"
+                  unoptimized={previewUrl.startsWith('blob:')}
                 />
                 <button
                   type="button"

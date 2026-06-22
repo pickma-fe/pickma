@@ -1,6 +1,7 @@
 import { AppError } from '@/lib/errors/appError';
 import { ERROR_CODE } from '@/lib/errors/errorCodes';
 import { createServiceRoleClient } from '@/lib/supabase/service';
+import type { Logger } from '@/app/api/_lib/logger';
 
 import { hashValue } from './email-verification-keys';
 import { getEmailVerificationStore } from './upstash-email-verification-store';
@@ -10,7 +11,8 @@ export async function completeEmailSignup(
   verificationToken: string,
   password: string,
   name: string,
-  marketingAgreed: boolean
+  marketingAgreed: boolean,
+  logger: Logger
 ): Promise<void> {
   const store = getEmailVerificationStore();
   const emailHash = hashValue(email);
@@ -84,15 +86,7 @@ export async function completeEmailSignup(
     if (!deleteError) {
       await store.releaseSignupVerificationToken(tokenHash).catch(() => {});
     } else {
-      console.error(
-        JSON.stringify({
-          level: 'error',
-          ts: new Date().toISOString(),
-          incidentId: crypto.randomUUID(),
-          event: 'AUTH_SIGNUP_AUTH_USER_ORPHANED',
-          userId: authUserId,
-        })
-      );
+      logger.error('AUTH_SIGNUP_AUTH_USER_ORPHANED', { userId: authUserId });
       await store
         .completeSignupWithVerificationToken(tokenHash)
         .catch(() => {});
