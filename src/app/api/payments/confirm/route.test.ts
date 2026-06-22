@@ -67,7 +67,15 @@ describe('POST /api/payments/confirm', () => {
   it('expireUserOrders 후 confirmPayment 호출', async () => {
     await POST(makeRequest(validBody));
     expect(expireUserOrders).toHaveBeenCalledWith();
-    expect(confirmPayment).toHaveBeenCalledWith('user-1', validBody);
+    expect(confirmPayment).toHaveBeenCalledWith(
+      'user-1',
+      validBody,
+      expect.objectContaining({
+        info: expect.any(Function),
+        warn: expect.any(Function),
+        error: expect.any(Function),
+      })
+    );
     expect(
       vi.mocked(expireUserOrders).mock.invocationCallOrder[0]
     ).toBeLessThan(vi.mocked(confirmPayment).mock.invocationCallOrder[0]);

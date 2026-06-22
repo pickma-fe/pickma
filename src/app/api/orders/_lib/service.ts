@@ -10,6 +10,7 @@ import type { PaymentCompensationFailedPayload } from '@/contracts/payment-event
 import { AppError } from '@/lib/errors/appError';
 import { ERROR_CODE } from '@/lib/errors/errorCodes';
 import { createServiceRoleClient } from '@/lib/supabase/service';
+import type { Logger } from '@/app/api/_lib/logger';
 import { callTossCancel } from '@/app/api/_lib/toss-cancel';
 
 import {
@@ -61,7 +62,8 @@ function mapRpcError(message: string): AppError {
 export async function cancelOrder(
   userId: string,
   orderId: string,
-  reason: string
+  reason: string,
+  logger: Logger
 ): Promise<void> {
   const supabase = createServiceRoleClient();
 
@@ -111,6 +113,11 @@ export async function cancelOrder(
         { p_order_id: orderId }
       );
       if (revertError) {
+        logger.error('CONSUMER_ORDER_CANCEL_REVERT_FAILED', {
+          orderId,
+          orderNumber: order.order_number,
+          paymentKey: paymentKey ?? undefined,
+        });
         await Promise.resolve(
           supabase.from('payment_events').insert({
             order_id: orderId,
@@ -138,6 +145,11 @@ export async function cancelOrder(
     p_reason: reason,
   });
   if (finalizeError) {
+    logger.error('CONSUMER_ORDER_CANCEL_FINALIZE_FAILED', {
+      orderId,
+      orderNumber: order.order_number,
+      paymentKey: paymentKey ?? undefined,
+    });
     await Promise.resolve(
       supabase.from('payment_events').insert({
         order_id: orderId,

@@ -7,6 +7,7 @@ import type { PaymentCompensationFailedPayload } from '@/contracts/payment-event
 import { AppError } from '@/lib/errors/appError';
 import { ERROR_CODE } from '@/lib/errors/errorCodes';
 import { createServiceRoleClient } from '@/lib/supabase/service';
+import type { Logger } from '@/app/api/_lib/logger';
 import { callTossCancel } from '@/app/api/_lib/toss-cancel';
 
 import {
@@ -95,7 +96,8 @@ export async function preparePayment(
 
 export async function confirmPayment(
   userId: string,
-  body: ConfirmPaymentRequest
+  body: ConfirmPaymentRequest,
+  logger: Logger
 ): Promise<void> {
   const supabase = createServiceRoleClient();
 
@@ -200,6 +202,10 @@ export async function confirmPayment(
         });
       } catch {
         // cancel 실패: 결제 승인 + processing 잔류 — 30분 알람 대상
+        logger.error('PAYMENT_CONFIRM_OPTION_B_TOSS_CANCEL_FAILED', {
+          orderNumber: body.orderNumber,
+          paymentKey: confirmed.paymentKey,
+        });
         await Promise.resolve(
           supabase.from('payment_events').insert({
             order_id: order.id,
@@ -227,6 +233,10 @@ export async function confirmPayment(
     );
     if (revertError) {
       // revert 실패: 결제는 취소됐지만 processing 잔류 — 30분 알람 대상
+      logger.error('PAYMENT_CONFIRM_OPTION_B_REVERT_FAILED', {
+        orderNumber: body.orderNumber,
+        paymentKey: confirmed.paymentKey,
+      });
       await Promise.resolve(
         supabase.from('payment_events').insert({
           order_id: order.id,
@@ -257,7 +267,8 @@ const ADMIN_CANCEL_ALLOWED_STATUSES = new Set([
 
 export async function cancelPaymentById(
   paymentId: string,
-  reason: string
+  reason: string,
+  logger: Logger
 ): Promise<void> {
   const supabase = createServiceRoleClient();
 
@@ -338,6 +349,10 @@ export async function cancelPaymentById(
     p_reason: reason,
   });
   if (finalizeError) {
+    logger.error('PAYMENT_CANCEL_FAILED', {
+      orderNumber: order.order_number,
+      paymentKey: payment.payment_key,
+    });
     await Promise.resolve(
       supabase.from('payment_events').insert({
         order_id: order.id,

@@ -9,6 +9,7 @@ import { AppError } from '@/lib/errors/appError';
 import { ERROR_CODE } from '@/lib/errors/errorCodes';
 import { createServerClient } from '@/lib/supabase/server';
 import { createServiceRoleClient } from '@/lib/supabase/service';
+import type { Logger } from '@/app/api/_lib/logger';
 import {
   mapOrderDetailRow,
   mapOrderListRow,
@@ -235,7 +236,8 @@ const SELLER_CANCEL_ALLOWED_STATUSES = new Set(['reserved', 'accepted']);
 export async function cancelSellerOrder(
   storeId: string,
   orderId: string,
-  reason: string
+  reason: string,
+  logger: Logger
 ): Promise<void> {
   const supabase = createServiceRoleClient();
 
@@ -308,7 +310,7 @@ export async function cancelSellerOrder(
       ).catch(() => {});
 
       const revertStatus = order.status;
-      await supabase
+      const { data: reverted, error: revertError } = await supabase
         .from('orders')
         .update({
           status: revertStatus,
@@ -317,7 +319,16 @@ export async function cancelSellerOrder(
           updated_at: new Date().toISOString(),
         })
         .eq('id', order.id)
-        .eq('status', 'cancelling');
+        .eq('status', 'cancelling')
+        .select('id');
+
+      if (revertError || !reverted || reverted.length === 0) {
+        logger.error('SELLER_ORDER_CANCEL_RESTORE_FAILED', {
+          orderId: order.id,
+          orderNumber: order.order_number,
+          paymentKey: payment.payment_key ?? undefined,
+        });
+      }
       throw new AppError(ERROR_CODE.PAYMENT_CANCEL_FAILED, 502);
     }
   }
@@ -327,6 +338,11 @@ export async function cancelSellerOrder(
     p_reason: reason,
   });
   if (finalizeError) {
+    logger.error('SELLER_ORDER_CANCEL_FINALIZE_FAILED', {
+      orderId: order.id,
+      orderNumber: order.order_number,
+      paymentKey: payment.payment_key ?? undefined,
+    });
     await Promise.resolve(
       supabase.from('payment_events').insert({
         order_id: order.id,

@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ERROR_CODE } from '@/lib/errors/errorCodes';
 import { createServiceRoleClient } from '@/lib/supabase/service';
+import type { Logger } from '@/app/api/_lib/logger';
 import {
   buildOrderName,
   mapCreateOrderResponse,
@@ -10,6 +11,12 @@ import {
 } from '@/app/api/orders/_lib/mapper';
 
 import { cancelOrder, createOrder, getOrder, getOrders } from './service';
+
+const mockLogger: Logger = {
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
+};
 
 vi.mock('@/lib/supabase/service');
 vi.mock('@/app/api/orders/_lib/mapper');
@@ -582,7 +589,7 @@ describe('cancelOrder', () => {
       client as unknown as ReturnType<typeof createServiceRoleClient>
     );
 
-    await cancelOrder('user-1', 'order-uuid-1', '단순 변심');
+    await cancelOrder('user-1', 'order-uuid-1', '단순 변심', mockLogger);
 
     expect(client.rpc).toHaveBeenCalledWith('begin_order_cancel', {
       p_order_id: 'order-uuid-1',
@@ -601,7 +608,7 @@ describe('cancelOrder', () => {
     );
 
     await expect(
-      cancelOrder('user-1', 'order-uuid-1', '취소')
+      cancelOrder('user-1', 'order-uuid-1', '취소', mockLogger)
     ).rejects.toMatchObject({ code: ERROR_CODE.ORDER_NOT_FOUND });
   });
 
@@ -614,7 +621,7 @@ describe('cancelOrder', () => {
     );
 
     await expect(
-      cancelOrder('user-1', 'order-uuid-1', '취소')
+      cancelOrder('user-1', 'order-uuid-1', '취소', mockLogger)
     ).rejects.toMatchObject({
       code: ERROR_CODE.INVALID_ORDER_STATUS,
       statusCode: 409,
@@ -630,7 +637,7 @@ describe('cancelOrder', () => {
     );
 
     await expect(
-      cancelOrder('user-1', 'order-uuid-1', '취소')
+      cancelOrder('user-1', 'order-uuid-1', '취소', mockLogger)
     ).rejects.toMatchObject({
       code: ERROR_CODE.INVALID_ORDER_STATUS,
       statusCode: 409,
@@ -648,7 +655,7 @@ describe('cancelOrder', () => {
     );
 
     await expect(
-      cancelOrder('user-1', 'order-uuid-1', '취소')
+      cancelOrder('user-1', 'order-uuid-1', '취소', mockLogger)
     ).rejects.toMatchObject({
       code: ERROR_CODE.PAYMENT_CANCEL_FAILED,
       statusCode: 502,
@@ -668,7 +675,7 @@ describe('cancelOrder', () => {
     );
 
     await expect(
-      cancelOrder('user-1', 'order-uuid-1', '취소')
+      cancelOrder('user-1', 'order-uuid-1', '취소', mockLogger)
     ).rejects.toMatchObject({
       code: ERROR_CODE.PAYMENT_CANCEL_FAILED,
       statusCode: 502,
@@ -678,6 +685,14 @@ describe('cancelOrder', () => {
       expect.objectContaining({
         event_type: 'payment_compensation_failed',
         payload: expect.objectContaining({ failureStage: 'cancel_finalize' }),
+      })
+    );
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      'CONSUMER_ORDER_CANCEL_FINALIZE_FAILED',
+      expect.objectContaining({
+        orderId: 'order-uuid-1',
+        orderNumber: 'PM2026TEST',
+        paymentKey: 'toss_ppk_test',
       })
     );
   });
@@ -695,7 +710,7 @@ describe('cancelOrder', () => {
     );
 
     await expect(
-      cancelOrder('user-1', 'order-uuid-1', '취소')
+      cancelOrder('user-1', 'order-uuid-1', '취소', mockLogger)
     ).rejects.toMatchObject({
       code: ERROR_CODE.PAYMENT_CANCEL_FAILED,
       statusCode: 502,
@@ -721,7 +736,7 @@ describe('cancelOrder', () => {
     );
 
     await expect(
-      cancelOrder('user-1', 'order-uuid-1', '취소')
+      cancelOrder('user-1', 'order-uuid-1', '취소', mockLogger)
     ).rejects.toMatchObject({
       code: ERROR_CODE.PAYMENT_CANCEL_FAILED,
       statusCode: 502,
@@ -731,6 +746,14 @@ describe('cancelOrder', () => {
       expect.objectContaining({
         event_type: 'payment_compensation_failed',
         payload: expect.objectContaining({ failureStage: 'revert_processing' }),
+      })
+    );
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      'CONSUMER_ORDER_CANCEL_REVERT_FAILED',
+      expect.objectContaining({
+        orderId: 'order-uuid-1',
+        orderNumber: 'PM2026TEST',
+        paymentKey: 'toss_ppk_test',
       })
     );
   });

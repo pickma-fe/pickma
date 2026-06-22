@@ -1,8 +1,15 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createServiceRoleClient } from '@/lib/supabase/service';
+import type { Logger } from '@/app/api/_lib/logger';
 
 import { runStorageCleanup } from './service';
+
+const mockLogger: Logger = {
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
+};
 
 vi.mock('@/lib/supabase/service', () => ({
   createServiceRoleClient: vi.fn(),
@@ -77,7 +84,7 @@ describe('runStorageCleanup', () => {
   it('bucket이 비어있으면 deletedCount: 0, remove 미호출', async () => {
     const { mockRemove } = makeClient({ listResponses: [[]] });
 
-    const result = await runStorageCleanup();
+    const result = await runStorageCleanup(mockLogger);
 
     expect(result.deletedCount).toBe(0);
     expect(mockRemove).not.toHaveBeenCalled();
@@ -95,7 +102,7 @@ describe('runStorageCleanup', () => {
       ],
     });
 
-    const result = await runStorageCleanup();
+    const result = await runStorageCleanup(mockLogger);
 
     expect(result.deletedCount).toBe(0);
     expect(mockRemove).not.toHaveBeenCalled();
@@ -111,7 +118,7 @@ describe('runStorageCleanup', () => {
       ],
     });
 
-    const result = await runStorageCleanup();
+    const result = await runStorageCleanup(mockLogger);
 
     expect(result.deletedCount).toBe(0);
     expect(mockRemove).not.toHaveBeenCalled();
@@ -124,7 +131,7 @@ describe('runStorageCleanup', () => {
       ],
     });
 
-    const result = await runStorageCleanup();
+    const result = await runStorageCleanup(mockLogger);
 
     expect(result.deletedCount).toBe(0);
     expect(mockRemove).not.toHaveBeenCalled();
@@ -140,12 +147,16 @@ describe('runStorageCleanup', () => {
       ],
     });
 
-    const result = await runStorageCleanup();
+    const result = await runStorageCleanup(mockLogger);
 
     expect(result.deletedCount).toBe(1);
     expect(mockRemove).toHaveBeenCalledWith([
       'user-1/upload-1/business_license/file.pdf',
     ]);
+    expect(mockLogger.info).toHaveBeenCalledWith(
+      'STORAGE_CLEANUP_COMPLETED',
+      expect.objectContaining({ deletedCount: 1 })
+    );
   });
 
   it('created_at이 null인 파일은 삭제하지 않는다', async () => {
@@ -153,7 +164,7 @@ describe('runStorageCleanup', () => {
       listResponses: [[{ name: 'file.pdf', id: 'file-id', created_at: null }]],
     });
 
-    const result = await runStorageCleanup();
+    const result = await runStorageCleanup(mockLogger);
 
     expect(result.deletedCount).toBe(0);
     expect(mockRemove).not.toHaveBeenCalled();
@@ -173,7 +184,7 @@ describe('runStorageCleanup', () => {
       ],
     });
 
-    const result = await runStorageCleanup();
+    const result = await runStorageCleanup(mockLogger);
 
     expect(result.deletedCount).toBe(1);
     expect(mockRemove).toHaveBeenCalledWith(['user-1/upload-1/file-a.pdf']);
@@ -193,7 +204,7 @@ describe('runStorageCleanup', () => {
       ],
     });
 
-    const result = await runStorageCleanup();
+    const result = await runStorageCleanup(mockLogger);
 
     expect(result.deletedCount).toBe(0);
     expect(mockRemove).not.toHaveBeenCalled();
@@ -204,10 +215,14 @@ describe('runStorageCleanup', () => {
       dbResponses: [{ error: { message: 'db error' } }],
     });
 
-    await expect(runStorageCleanup()).rejects.toMatchObject({
+    await expect(runStorageCleanup(mockLogger)).rejects.toMatchObject({
       statusCode: 500,
     });
     expect(mockRemove).not.toHaveBeenCalled();
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      'STORAGE_CLEANUP_DB_QUERY_FAILED',
+      expect.objectContaining({ message: 'db error' })
+    );
   });
 
   it('storage.list() 오류 시 AppError(500)을 throw하고 remove 미호출', async () => {
@@ -215,10 +230,18 @@ describe('runStorageCleanup', () => {
       listResponses: [{ error: { message: 'storage error' } }],
     });
 
-    await expect(runStorageCleanup()).rejects.toMatchObject({
+    await expect(runStorageCleanup(mockLogger)).rejects.toMatchObject({
       statusCode: 500,
     });
     expect(mockRemove).not.toHaveBeenCalled();
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      'STORAGE_CLEANUP_LIST_FAILED',
+      expect.objectContaining({
+        bucket: 'seller-application-documents',
+        parentPath: '',
+        message: 'storage error',
+      })
+    );
   });
 
   it('삭제 실패 시 AppError(500)을 throw한다', async () => {
@@ -229,8 +252,16 @@ describe('runStorageCleanup', () => {
       removeError: { message: 'remove error' },
     });
 
-    await expect(runStorageCleanup()).rejects.toMatchObject({
+    await expect(runStorageCleanup(mockLogger)).rejects.toMatchObject({
       statusCode: 500,
     });
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      'STORAGE_CLEANUP_REMOVE_FAILED',
+      expect.objectContaining({
+        bucket: 'seller-application-documents',
+        count: 1,
+        message: 'remove error',
+      })
+    );
   });
 });
