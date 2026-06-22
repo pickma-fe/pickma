@@ -1075,34 +1075,47 @@ DB source:
 - Response: `200 { statusCode: 200, data: StoreResponse }`
 - 정책: `businessNumber` 수정 불가
 
-### 7.6 `GET /api/seller-applications/me`
+### 7.6 `GET /api/seller-applications/me` / `DELETE /api/seller-applications/me`
 
-판매자 본인의 최신 신청 정보와 제출 문서 목록을 조회한다.
+판매자 본인의 최신 신청 정보 조회 및 pending 신청 취소 API이다.
 
-| 기능                | Method | API                           | Auth   | Priority |
-| ------------------- | ------ | ----------------------------- | ------ | -------- |
-| 본인 신청 정보 조회 | GET    | `/api/seller-applications/me` | seller | P2       |
+| 기능                | Method | API                           | Auth | Priority |
+| ------------------- | ------ | ----------------------------- | ---- | -------- |
+| 본인 신청 정보 조회 | GET    | `/api/seller-applications/me` | user | P2       |
+| 본인 신청 취소      | DELETE | `/api/seller-applications/me` | user | P2       |
 
 Auth 조건:
 
 - `requireActiveUser()`를 통과한 로그인 사용자만 호출할 수 있다.
 
-Response: `SellerApplicationResponse` (기존 7.1 참조)
+Response (GET): `SellerApplicationResponse` (기존 7.1 참조)
 
-Behavior:
+Response (DELETE): `200 { data: null }`
+
+#### GET Behavior
 
 - `seller_applications` 테이블을 `user_id = authUser.id` 조건으로 조회한다. service role client + `eq('user_id', userId)` 소유권 조건을 사용하며, 해당 테이블은 RLS enable 상태이나 authenticated 직접 접근을 막는 정책으로 운영된다.
 - 최신 신청(`created_at DESC LIMIT 1`)을 반환하며, `seller_application_documents`를 함께 조회해 `documents` 배열에 포함한다.
 - 신청 이력이 없으면 `SELLER_APPLICATION_NOT_FOUND (404)`를 반환한다.
 - `SellerApplicationDocumentResponse.storagePath`는 응답에 포함되나, 클라이언트는 이 값으로 Storage에 직접 접근하지 않는다. 문서 미리보기는 반드시 아래 7.7 signed URL API를 경유한다.
 
+#### DELETE Behavior
+
+- 본인의 최신 신청(`created_at DESC LIMIT 1`)을 조회한다.
+- 신청이 없으면 `SELLER_APPLICATION_NOT_FOUND (404)`를 반환한다.
+- `pending` 상태인 신청만 취소할 수 있다. `approved` / `rejected` 상태이면 `APPLICATION_CANCEL_NOT_ALLOWED (409)`를 반환한다.
+- 삭제 쿼리에 `status = 'pending'` 조건을 포함해 경합 상황에서 승인/반려 건의 우회 삭제를 방지한다.
+- 삭제된 행이 없으면 경합으로 인한 상태 변경으로 판단하고 `APPLICATION_CANCEL_NOT_ALLOWED (409)`를 반환한다.
+- 취소 시 Storage 파일은 즉시 삭제하지 않는다. T06/T41 orphan scanner에 위임한다.
+
 에러 정책:
 
-| 조건                      | HTTP | error code                     |
-| ------------------------- | ---- | ------------------------------ |
-| 미인증 또는 inactive user | 401  | `UNAUTHORIZED`                 |
-| 신청 이력 없음            | 404  | `SELLER_APPLICATION_NOT_FOUND` |
-| DB 조회 실패              | 500  | `INTERNAL_SERVER_ERROR`        |
+| 조건                               | HTTP | error code                       |
+| ---------------------------------- | ---- | -------------------------------- |
+| 미인증 또는 inactive user          | 401  | `UNAUTHORIZED`                   |
+| 신청 이력 없음                     | 404  | `SELLER_APPLICATION_NOT_FOUND`   |
+| pending 상태가 아닌 신청 취소 시도 | 409  | `APPLICATION_CANCEL_NOT_ALLOWED` |
+| DB 조회/삭제 실패                  | 500  | `INTERNAL_SERVER_ERROR`          |
 
 ---
 
@@ -1541,6 +1554,7 @@ RPC에서 raise하는 예외는 아래 정책으로 API error code로 변환한�
 | `APPLICATION_ALREADY_SUBMITTED`         | 409  | 진행 중이거나 승인된 판매자 신청이 있습니다.                   |
 | `SELLER_ALREADY_REGISTERED`             | 409  | 이미 판매자로 등록되어 있습니다.                               |
 | `APPLICATION_DOCUMENT_NOT_FOUND`        | 404  | 신청 서류를 찾을 수 없습니다.                                  |
+| `APPLICATION_CANCEL_NOT_ALLOWED`        | 409  | pending 상태의 신청만 취소할 수 있습니다.                      |
 | `FILE_UPLOAD_NOT_ALLOWED`               | 403  | 파일을 업로드할 권한이 없습니다.                               |
 | `FILE_TYPE_NOT_ALLOWED`                 | 400  | 허용되지 않는 파일 형식입니다.                                 |
 | `FILE_TOO_LARGE`                        | 400  | 파일 용량이 너무 큽니다.                                       |
