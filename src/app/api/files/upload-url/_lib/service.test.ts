@@ -11,8 +11,12 @@ vi.mock('@/lib/supabase/service', () => ({
 }));
 
 const mockCreateSignedUploadUrl = vi.fn();
+const mockGetPublicUrl = vi.fn();
 
 function setupStorageMock(signedUrl = 'https://storage.example.com/upload') {
+  mockGetPublicUrl.mockReturnValue({
+    data: { publicUrl: 'https://storage.example.com/public/mock-path' },
+  });
   vi.mocked(createServiceRoleClient).mockReturnValue({
     storage: {
       from: vi.fn().mockReturnValue({
@@ -20,6 +24,7 @@ function setupStorageMock(signedUrl = 'https://storage.example.com/upload') {
           data: { signedUrl, path: '' },
           error: null,
         }),
+        getPublicUrl: mockGetPublicUrl,
       }),
     },
   } as unknown as ReturnType<typeof createServiceRoleClient>);
