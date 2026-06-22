@@ -102,7 +102,11 @@ describe('POST /api/auth/email-signup', () => {
       VALID_BODY.verificationToken,
       VALID_BODY.password,
       VALID_BODY.name,
-      VALID_BODY.marketingAgreed
+      VALID_BODY.marketingAgreed,
+      expect.objectContaining({
+        info: expect.any(Function),
+        error: expect.any(Function),
+      })
     );
   });
 });
