@@ -1,10 +1,10 @@
 # T36. 판매자 신청 서류 수정/재업로드 정책
 
 - 상태:
-  진행 전
+  완료
 
 - GitHub Issue:
-  확인 필요
+  289
 
 - 우선순위:
   P3
@@ -51,3 +51,36 @@
   - pending 신청의 서류 수정 가능 여부가 정책으로 확정된다.
   - 선택한 정책에 맞는 API/UI 작업이 분리된다.
   - 민감 문서 보관/삭제 기준이 T06과 충돌하지 않는다.
+
+## 구현 결과
+
+### 정책 결정
+
+- **수정 방식**: pending 신청 취소 후 재신청 (cancel API)
+- **취소 가능 조건**: `pending` 상태인 신청만 취소 가능. `approved` / `rejected` 상태에서는 `APPLICATION_CANCEL_NOT_ALLOWED (409)` 반환
+- **취소 시 파일 처리**: Storage 파일 즉시 삭제 없음. T06/T41 orphan scanner에 위임
+- **관리자 검토 중 취소**: 허용 (pending 상태이므로)
+- **rejected 후 재신청**: 횟수/대기기간 제한 없음. `checkApplicationEligibility`가 `pending/approved`만 차단하므로 자동 허용
+- **재신청 시 기존 서류**: orphan 처리 (cron scanner 위임)
+
+### 구현 범위
+
+#### 신규 파일
+
+- `src/app/api/seller-applications/me/route.test.ts` — GET/DELETE Route Handler 테스트
+- `src/hooks/seller/applications/useCancelSellerApplication.ts` — 신청 취소 mutation hook
+- `src/hooks/seller/applications/useCancelSellerApplication.test.ts` — hook 테스트
+- `src/components/seller/pending/PendingView.test.tsx` — PendingView 컴포넌트 테스트
+
+#### 수정 파일
+
+- `src/lib/errors/errorCodes.ts` — `APPLICATION_CANCEL_NOT_ALLOWED` 추가
+- `src/lib/errors/errorMessages.ts` — `APPLICATION_CANCEL_NOT_ALLOWED` 메시지 추가
+- `src/app/api/seller-applications/me/_lib/service.ts` — `cancelMySellerApplication` 함수 추가
+- `src/app/api/seller-applications/me/_lib/service.test.ts` — `cancelMySellerApplication` 테스트 추가
+- `src/app/api/seller-applications/me/route.ts` — `DELETE` handler 추가
+- `src/app/api/_lib/auth.ts` — `rejected` 상태 재신청 허용 주석 명시
+- `src/app/api/_lib/auth.test.ts` — `rejected` 신청 eligible true 테스트 추가
+- `src/api/seller-applications/sellerApplicationApi.ts` — `cancelMyApplication` 추가
+- `src/api/seller-applications/sellerApplicationApi.test.ts` — `cancelMyApplication` 테스트 추가
+- `src/components/seller/pending/PendingView.tsx` — 취소 버튼 및 확인 다이얼로그 추가

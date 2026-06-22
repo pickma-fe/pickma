@@ -280,6 +280,13 @@ describe('checkApplicationEligibility', () => {
     expect(result).toEqual({ eligible: true });
   });
 
+  // rejected 상태는 재신청 가능 → pending/approved만 차단하므로 eligible true
+  it('rejected 신청만 있으면 eligible true를 반환한다', async () => {
+    setupServiceClient([]);
+    const result = await checkApplicationEligibility('user-1', 'customer');
+    expect(result).toEqual({ eligible: true });
+  });
+
   it('DB 에러 시 INTERNAL_SERVER_ERROR를 던진다', async () => {
     setupServiceClient([], { message: 'connection error' });
     await expect(

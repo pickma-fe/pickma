@@ -23,6 +23,8 @@ export async function checkApplicationEligibility(
   }
 
   const supabase = createServiceRoleClient();
+
+  // rejected 상태는 재신청 가능 → pending/approved만 차단
   const { data, error } = await supabase
     .from('seller_applications')
     .select('id')

@@ -42,4 +42,10 @@ export const sellerApplicationApi = {
       )
       .then(({ signedUrl }) => signedUrl);
   },
+
+  cancelMyApplication(): Promise<void> {
+    return apiClient
+      .delete<null>('/api/seller-applications/me')
+      .then(() => undefined);
+  },
 };
