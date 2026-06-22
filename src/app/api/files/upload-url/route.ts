@@ -20,10 +20,15 @@ export async function POST(request: NextRequest): Promise<Response> {
     const body = await validateBody(createFileUploadUrlSchema, request);
 
     if (isApiMockEnabled()) {
+      const isPublicPurpose = body.purpose !== 'seller_application_document';
+      const storagePath = `mock/${body.purpose}/mock-file`;
       return success(
         {
           signedUrl: '/api/mock/upload',
-          storagePath: `mock/${body.purpose}/mock-file`,
+          storagePath,
+          ...(isPublicPurpose && {
+            publicUrl: `/images/mock/${body.purpose}/mock-file`,
+          }),
         },
         201
       );
