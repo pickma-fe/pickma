@@ -136,7 +136,7 @@ export function MypageReservationCard({
   return (
     <>
       <article className="rounded-lg border border-gray-200 bg-white p-5">
-        <div className="grid gap-12 md:grid-cols-[150px_minmax(0,1fr)_120px_240px] md:items-center">
+        <div className="grid gap-5 sm:grid-cols-[128px_minmax(0,1fr)] md:grid-cols-[128px_minmax(0,1fr)_160px] lg:grid-cols-[150px_minmax(0,1fr)_160px]">
           <div className="relative aspect-square overflow-hidden rounded-md bg-gray-100">
             <Image
               src={reservation.imageUrl}
@@ -156,10 +156,10 @@ export function MypageReservationCard({
             >
               {status.label}
             </span>
-            <p className="mt-4 text-xl font-bold text-gray-900">
+            <p className="mt-3 text-xl leading-7 font-bold text-gray-900">
               {reservationTitle}
             </p>
-            <dl className="mt-4 grid gap-2 text-base md:grid-cols-[72px_minmax(0,1fr)]">
+            <dl className="mt-4 grid gap-2 text-base sm:grid-cols-[72px_minmax(0,1fr)]">
               <dt className="text-gray-500">픽업 날짜</dt>
               <dd className="text-gray-700">
                 {reservation.pickupDate} &nbsp; {reservation.pickupTime}
@@ -169,49 +169,51 @@ export function MypageReservationCard({
             </dl>
           </div>
 
-          <div>
-            <p className="text-2xl font-bold text-gray-900">
-              {reservation.price.toLocaleString()}원
-            </p>
-            {reservation.quantity ? (
-              <p className="mt-2 text-base text-gray-500">
-                수량&nbsp; {reservation.quantity}개
+          <div className="flex flex-col gap-4 md:items-end md:text-right">
+            <div className="shrink-0">
+              <p className="text-2xl font-bold text-gray-900">
+                {reservation.price.toLocaleString()}원
               </p>
-            ) : null}
-          </div>
+              {reservation.quantity ? (
+                <p className="mt-2 text-base text-gray-500">
+                  수량&nbsp; {reservation.quantity}개
+                </p>
+              ) : null}
+            </div>
 
-          <div className="flex gap-2 md:justify-end">
-            <Button
-              variant="outline"
-              color="gray"
-              className="h-12 min-w-32 px-5 text-sm"
-              onClick={handleOpenDetailModal}
-            >
-              예약 상세보기
-            </Button>
-            {shouldShowPickupCodeButton ? (
+            <div className="flex flex-col gap-2 sm:flex-row md:w-full md:flex-col">
               <Button
-                variant={status.actionVariant}
-                color="primary"
-                disabled={!isPickupCodeAvailable}
-                className="h-12 min-w-32 px-5 text-sm"
-                onClick={handleOpenPickupCodeModal}
+                variant="outline"
+                color="gray"
+                className="h-12 w-full px-5 text-base whitespace-nowrap sm:w-auto sm:min-w-32 md:w-full md:min-w-0"
+                onClick={handleOpenDetailModal}
               >
-                {reservation.pickupCode
-                  ? '픽업 코드 보기'
-                  : '픽업 코드 발급 전'}
+                예약 상세보기
               </Button>
-            ) : null}
-            {shouldShowPaymentButton ? (
-              <Button
-                color="primary"
-                disabled={isPaymentPending}
-                className="h-12 min-w-32 px-5 text-sm"
-                onClick={handleOpenPayment}
-              >
-                {isPaymentPending ? '결제 준비 중' : '결제하기'}
-              </Button>
-            ) : null}
+              {shouldShowPickupCodeButton ? (
+                <Button
+                  variant={status.actionVariant}
+                  color="primary"
+                  disabled={!isPickupCodeAvailable}
+                  className="h-12 w-full px-5 text-base whitespace-nowrap sm:w-auto sm:min-w-32 md:w-full md:min-w-0"
+                  onClick={handleOpenPickupCodeModal}
+                >
+                  {reservation.pickupCode
+                    ? '픽업 코드 보기'
+                    : '픽업 코드 발급 전'}
+                </Button>
+              ) : null}
+              {shouldShowPaymentButton ? (
+                <Button
+                  color="primary"
+                  disabled={isPaymentPending}
+                  className="h-12 w-full px-5 text-base whitespace-nowrap sm:w-auto sm:min-w-32 md:w-full md:min-w-0"
+                  onClick={handleOpenPayment}
+                >
+                  {isPaymentPending ? '결제 준비 중' : '결제하기'}
+                </Button>
+              ) : null}
+            </div>
           </div>
         </div>
         {paymentErrorMessage ? (
