@@ -44,7 +44,7 @@ export function ProductReservationPanel({
   pickupEndTime,
 }: ProductReservationPanelProps) {
   const router = useRouter();
-  const [now] = useState(() => new Date());
+  const now = new Date();
   const timeSlots = useMemo(
     () => createPickupTimeOptions(pickupStartTime, pickupEndTime),
     [pickupStartTime, pickupEndTime]
