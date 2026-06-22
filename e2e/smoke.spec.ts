@@ -25,6 +25,10 @@ test('홈 접속 및 상품 목록 표시', async ({ page }) => {
 });
 
 test('상품 상세 진입', async ({ page }) => {
+  await page.addInitScript((location) => {
+    localStorage.setItem('pickma_user_location', location);
+  }, LOCATION_PAYLOAD);
+
   await page.goto(`/products/${SMOKE_PRODUCT_ID}`);
   await expect(page.getByRole('main')).toBeVisible({ timeout: 15_000 });
   await expect(page.getByRole('heading').first()).toBeVisible({
