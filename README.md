@@ -77,7 +77,7 @@ PICKMA는 영업 종료 전 남을 가능성이 있는 음식을 소비자가 �
 - 결제 outbox / webhook / idempotency 보장
 - 실시간 알림 (Supabase Realtime 기반)
 - Storage orphan 정리 Cron (Vercel)
-- CI 자동화 (lint, test, build)
+- CI 자동화 (lint, typecheck, test)
 - 모바일 앱 래핑 (Capacitor / PWA, 진행 중)
 
 ---
@@ -96,7 +96,7 @@ PICKMA는 영업 종료 전 남을 가능성이 있는 음식을 소비자가 �
 | Auth / DB / Storage | ![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=flat-square&logo=supabase&logoColor=white)                                                                                                                                                                                                                        | Auth·Postgres·Realtime·Storage를 단일 플랫폼으로 통합                                |
 | Payment             | ![Toss Payments](https://img.shields.io/badge/Toss_Payments-0064FF?style=flat-square)                                                                                                                                                                                                                                            | 국내 결제 환경에 최적화된 SDK, 팝업 기반 결제 흐름                                   |
 | Infra               | ![Vercel](https://img.shields.io/badge/Vercel-000000?style=flat-square&logo=vercel&logoColor=white)                                                                                                                                                                                                                              | Next.js와 통합 배포, Cron으로 Storage orphan 정리 자동화                             |
-| Mobile              | ![Capacitor](https://img.shields.io/badge/Capacitor-119EFF?style=flat-square&logo=capacitor&logoColor=white)                                                                                                                                                                                                                     | 웹 코드베이스 재사용으로 네이티브 앱 빌드 (진행 중)                                  |
+| Mobile              | ![PWA](https://img.shields.io/badge/PWA-5A0FC8?style=flat-square&logo=pwa&logoColor=white)                                                                                                                                                                                                                                       | 웹 코드베이스 재사용으로 PWA 방식 적용, 앱스토어 배포 필요 시 Capacitor 재검토 예정  |
 | Test                | ![Vitest](https://img.shields.io/badge/Vitest-6E9F18?style=flat-square&logo=vitest&logoColor=white) ![Playwright](https://img.shields.io/badge/Playwright-2EAD33?style=flat-square&logo=playwright&logoColor=white) ![Storybook](https://img.shields.io/badge/Storybook-FF4785?style=flat-square&logo=storybook&logoColor=white) | 단위·E2E·컴포넌트 테스트 레이어 분리                                                 |
 | Quality             | ![ESLint](https://img.shields.io/badge/ESLint-4B32C3?style=flat-square&logo=eslint&logoColor=white) ![Prettier](https://img.shields.io/badge/Prettier-F7B93E?style=flat-square&logo=prettier&logoColor=black) ![Husky](https://img.shields.io/badge/Husky-000000?style=flat-square)                                              | 커밋 시점 자동 교정으로 CI·로컬 환경 일치                                            |
 
@@ -208,12 +208,11 @@ src
 │  ├─ (consumer)                # 소비자 화면: 메인, 상품 상세, 검색, 주문/결제, 마이페이지
 │  ├─ (seller)                  # 판매자 화면: 온보딩, 대시보드, 가게, 메뉴, 상품, 주문 관리
 │  ├─ (admin)                   # 관리자 화면: 대시보드, 판매자 승인, 가게·사용자·주문 관리
-│  ├─ api
+│  │  ├─ api
 │  │  ├─ products               # 상품 목록/상세/검색 API
 │  │  ├─ categories             # 카테고리 API
 │  │  ├─ orders                 # 주문 생성/목록/상세/취소 API
 │  │  ├─ payments               # 결제 준비/승인/webhook API
-│  │  ├─ notifications          # 실시간 알림 API
 │  │  ├─ seller                 # 판매자 전용 API
 │  │  └─ admin                  # 관리자 전용 API
 │  ├─ auth                      # 인증 관련 페이지
@@ -243,7 +242,7 @@ src
 │  ├─ orders                    # useOrders, useOrder, useCreateOrder, useCancelOrder
 │  ├─ payments                  # usePayment
 │  ├─ users                     # useMe
-│  ├─ notifications             # useNotifications (Supabase Realtime)
+│  ├─ notifications             # useNotifications (Supabase Realtime 직접 구독)
 │  ├─ seller                    # 판매자 기능 hook
 │  └─ admin                     # 관리자 기능 hook
 ├─ lib
