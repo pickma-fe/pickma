@@ -34,6 +34,7 @@ export function MenuManageContent() {
   const filteredMenus = useMemo(
     () =>
       menuItems.filter((menu) => {
+        if (menu.status !== 'active') return false;
         const matchCategory =
           selectedCategory === '전체' || menu.categoryName === selectedCategory;
         const matchSearch =
