@@ -342,7 +342,7 @@ function makeListClient({
   const client = {
     from: vi.fn().mockReturnValue({ select: selectFn }),
   };
-  return { client, userEqFn, statusEqFn, orderFn, rangeFn };
+  return { client, selectFn, userEqFn, statusEqFn, orderFn, rangeFn };
 }
 
 function makeDetailClient({
@@ -379,6 +379,20 @@ describe('getOrders', () => {
     expect(result.pageSize).toBe(20);
     expect(result.totalCount).toBe(1);
     expect(result.totalPages).toBe(1);
+  });
+
+  it('주문 목록 조회 시 상품 이미지 조인을 포함한다', async () => {
+    const { client, selectFn } = makeListClient();
+    vi.mocked(createServiceRoleClient).mockReturnValue(
+      client as unknown as ReturnType<typeof createServiceRoleClient>
+    );
+
+    await getOrders('user-1', defaultParams);
+
+    expect(selectFn).toHaveBeenCalledWith(
+      expect.stringContaining('order_items(products(menu_items(image)))'),
+      { count: 'exact' }
+    );
   });
 
   it('status 필터 있음: eq("status", ...) 호출', async () => {

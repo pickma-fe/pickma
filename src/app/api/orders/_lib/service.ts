@@ -181,7 +181,7 @@ export async function getOrders(
   let query = supabase
     .from('orders')
     .select(
-      'id, order_number, store_id, total_amount, discount_amount, payment_amount, status, pickup_at, pickup_service_date, store_order_number, pickup_number, expires_at, created_at, updated_at, stores(name)',
+      'id, order_number, store_id, total_amount, discount_amount, payment_amount, status, pickup_at, pickup_service_date, store_order_number, pickup_number, expires_at, created_at, updated_at, stores(name), order_items(products(menu_items(image)))',
       { count: 'exact' }
     )
     .eq('user_id', userId);

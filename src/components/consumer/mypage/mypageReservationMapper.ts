@@ -51,7 +51,7 @@ export function mapOrderToMypageReservation(
     orderNumber: order.storeOrderNumber ?? order.orderNumber,
     storeName: order.storeName,
     productName: null,
-    imageUrl: FALLBACK_RESERVATION_IMAGE_URL,
+    imageUrl: order.image ?? FALLBACK_RESERVATION_IMAGE_URL,
     pickupDate: formatPickupDate(order.pickupAt),
     pickupTime: formatPickupTime(order.pickupAt),
     pickupCode: order.pickupNumber ?? null,
