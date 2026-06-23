@@ -17,9 +17,7 @@ test('상품 상세 → 주문 → 결제 팝업 → 완료', async ({ consumerP
   await targetSlot.click();
 
   // 담기 버튼 클릭 → 주문 페이지 진입
-  const cartButton = page.getByRole('button', { name: /원 담기/ });
-  await expect(cartButton).toBeEnabled({ timeout: 15_000 });
-  await cartButton.click();
+  await page.getByRole('button', { name: /원 담기/ }).click();
   await expect(page).toHaveURL(/\/order\//, { timeout: 10_000 });
 
   // 주문 페이지에서 결제 팝업 흐름
