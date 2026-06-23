@@ -113,7 +113,19 @@ INSERT INTO public.orders (
   1, '20991231-0000001', 'A-01'
 )
 ON CONFLICT (id) DO UPDATE
-  SET order_number = EXCLUDED.order_number;
+  SET order_number         = EXCLUDED.order_number,
+      user_id              = EXCLUDED.user_id,
+      store_id             = EXCLUDED.store_id,
+      total_amount         = EXCLUDED.total_amount,
+      discount_amount      = EXCLUDED.discount_amount,
+      payment_amount       = EXCLUDED.payment_amount,
+      status               = EXCLUDED.status,
+      pickup_at            = EXCLUDED.pickup_at,
+      pickup_service_date  = EXCLUDED.pickup_service_date,
+      store_order_sequence = EXCLUDED.store_order_sequence,
+      store_order_number   = EXCLUDED.store_order_number,
+      pickup_number        = EXCLUDED.pickup_number,
+      updated_at           = now();
 
 -- order_items
 INSERT INTO public.order_items (
