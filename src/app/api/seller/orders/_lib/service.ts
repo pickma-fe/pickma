@@ -251,7 +251,9 @@ export async function cancelSellerOrder(
   if (orderError) throw new AppError(ERROR_CODE.INTERNAL_SERVER_ERROR, 500);
   if (!order) throw new AppError(ERROR_CODE.ORDER_NOT_FOUND, 404);
 
-  const payment = Array.isArray(order.payments) ? order.payments[0] : null;
+  const payment = Array.isArray(order.payments)
+    ? order.payments[0]
+    : order.payments;
   if (payment?.status !== 'paid') {
     throw new AppError(ERROR_CODE.INVALID_ORDER_STATUS, 409);
   }

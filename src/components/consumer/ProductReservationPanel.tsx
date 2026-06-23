@@ -2,7 +2,7 @@
 
 import { Minus, Plus, ShieldCheck } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import {
   createPickupTimeOptions,
@@ -44,7 +44,13 @@ export function ProductReservationPanel({
   pickupEndTime,
 }: ProductReservationPanelProps) {
   const router = useRouter();
-  const now = new Date();
+  const [now, setNow] = useState<Date | null>(null);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setNow(new Date()); // SSR 이후 브라우저 전용 시각 초기화 — 마운트 1회만 실행
+  }, []);
+
   const timeSlots = useMemo(
     () => createPickupTimeOptions(pickupStartTime, pickupEndTime),
     [pickupStartTime, pickupEndTime]
@@ -56,6 +62,7 @@ export function ProductReservationPanel({
   );
   const activeTimeSlot =
     selectedSlot &&
+    now !== null &&
     !isPastPickupTimeSlot(selectedSlot.startAt, pickupStartTime, now)
       ? selectedSlot
       : null;
@@ -70,10 +77,11 @@ export function ProductReservationPanel({
   };
   const handleAddButtonClick = () => {
     if (
+      now === null ||
       activeTimeSlot === null ||
       availableStock <= 0 ||
       quantity <= 0 ||
-      isPastPickupTimeSlot(activeTimeSlot.startAt, pickupStartTime, new Date())
+      isPastPickupTimeSlot(activeTimeSlot.startAt, pickupStartTime, now)
     ) {
       setSelectedTimeSlot('');
       return;
@@ -101,18 +109,16 @@ export function ProductReservationPanel({
       <h2 className="mb-4 text-lg font-bold text-gray-900">픽업 시간 선택</h2>
       <div className="flex items-center justify-center rounded-md border border-gray-200 px-4 py-3">
         <span className="text-base font-semibold text-gray-900">
-          {formatPickupDateLabel(pickupStartTime, now) ?? '-'}
+          {formatPickupDateLabel(pickupStartTime, now ?? undefined) ?? '-'}
         </span>
       </div>
 
       <div className="mt-3 mb-6 grid grid-cols-2 gap-2 sm:grid-cols-3">
         {timeSlots.map((slot) => {
           const isSelected = activeTimeSlot?.startAt === slot.startAt;
-          const isDisabled = isPastPickupTimeSlot(
-            slot.startAt,
-            pickupStartTime,
-            now
-          );
+          const isDisabled =
+            now === null ||
+            isPastPickupTimeSlot(slot.startAt, pickupStartTime, now);
 
           return (
             <Button
