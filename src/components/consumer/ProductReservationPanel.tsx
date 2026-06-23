@@ -62,8 +62,8 @@ export function ProductReservationPanel({
   );
   const activeTimeSlot =
     selectedSlot &&
-    (now === null ||
-      !isPastPickupTimeSlot(selectedSlot.startAt, pickupStartTime, now))
+    now !== null &&
+    !isPastPickupTimeSlot(selectedSlot.startAt, pickupStartTime, now)
       ? selectedSlot
       : null;
 
@@ -77,11 +77,11 @@ export function ProductReservationPanel({
   };
   const handleAddButtonClick = () => {
     if (
+      now === null ||
       activeTimeSlot === null ||
       availableStock <= 0 ||
       quantity <= 0 ||
-      (now !== null &&
-        isPastPickupTimeSlot(activeTimeSlot.startAt, pickupStartTime, now))
+      isPastPickupTimeSlot(activeTimeSlot.startAt, pickupStartTime, now)
     ) {
       setSelectedTimeSlot('');
       return;
@@ -117,7 +117,7 @@ export function ProductReservationPanel({
         {timeSlots.map((slot) => {
           const isSelected = activeTimeSlot?.startAt === slot.startAt;
           const isDisabled =
-            now !== null &&
+            now === null ||
             isPastPickupTimeSlot(slot.startAt, pickupStartTime, now);
 
           return (
