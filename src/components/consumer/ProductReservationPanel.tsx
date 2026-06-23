@@ -73,7 +73,7 @@ export function ProductReservationPanel({
       activeTimeSlot === null ||
       availableStock <= 0 ||
       quantity <= 0 ||
-      isPastPickupTimeSlot(activeTimeSlot.startAt, pickupStartTime, new Date())
+      isPastPickupTimeSlot(activeTimeSlot.startAt, pickupStartTime, now)
     ) {
       setSelectedTimeSlot('');
       return;

@@ -30,15 +30,11 @@ test('상품 상세 → 주문 → 결제 팝업 → 완료', async ({ consumerP
   }, noonMs);
   await page.getByRole('button', { name: '수량 증가' }).click();
 
-  // 활성화된 첫 번째 픽업 슬롯 선택 (정오 기준 12:30+ 슬롯)
-  const firstAvailableSlot = page
-    .getByRole('button', {
-      name: /^\d{2}:\d{2}~\d{2}:\d{2}$/,
-      disabled: false,
-    })
-    .first();
-  await expect(firstAvailableSlot).toBeVisible({ timeout: 5_000 });
-  await firstAvailableSlot.click();
+  // 정오 기준 유효한 슬롯 선택 (12:30은 noon 이후가 아니므로 항상 활성화)
+  // 첫 번째 non-disabled 슬롯이 아닌 고정 슬롯을 사용해 오전 슬롯 선택 방지
+  const targetSlot = page.getByRole('button', { name: '12:30~13:00' });
+  await expect(targetSlot).not.toBeDisabled({ timeout: 5_000 });
+  await targetSlot.click();
 
   // 담기 버튼 클릭 → 주문 페이지 진입
   await page.getByRole('button', { name: /원 담기/ }).click();
