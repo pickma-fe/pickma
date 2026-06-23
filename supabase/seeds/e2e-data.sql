@@ -6,31 +6,26 @@
 -- ──────────────────────────────────────────────────────────────────
 -- 1. consumer-order 전용 product 기준 동적 주문 cleanup
 -- ──────────────────────────────────────────────────────────────────
-DO $$
-DECLARE
-  v_consumer_product_id uuid := '00000000-0000-4000-8000-000000000e01';
-BEGIN
-  DELETE FROM payment_events
-   WHERE order_id IN (
-     SELECT o.id FROM orders o
-     JOIN order_items oi ON oi.order_id = o.id
-     WHERE oi.product_id = v_consumer_product_id
-   );
+DELETE FROM payment_events
+ WHERE order_id IN (
+   SELECT o.id FROM orders o
+   JOIN order_items oi ON oi.order_id = o.id
+   WHERE oi.product_id = '00000000-0000-4000-8000-000000000e01'
+ );
 
-  DELETE FROM payments
-   WHERE order_id IN (
-     SELECT o.id FROM orders o
-     JOIN order_items oi ON oi.order_id = o.id
-     WHERE oi.product_id = v_consumer_product_id
-   );
+DELETE FROM payments
+ WHERE order_id IN (
+   SELECT o.id FROM orders o
+   JOIN order_items oi ON oi.order_id = o.id
+   WHERE oi.product_id = '00000000-0000-4000-8000-000000000e01'
+ );
 
-  DELETE FROM orders
-   WHERE id IN (
-     SELECT o.id FROM orders o
-     JOIN order_items oi ON oi.order_id = o.id
-     WHERE oi.product_id = v_consumer_product_id
-   );
-END $$;
+DELETE FROM orders
+ WHERE id IN (
+   SELECT o.id FROM orders o
+   JOIN order_items oi ON oi.order_id = o.id
+   WHERE oi.product_id = '00000000-0000-4000-8000-000000000e01'
+ );
 
 -- ──────────────────────────────────────────────────────────────────
 -- 2. E2E 전용 product upsert
@@ -117,7 +112,8 @@ INSERT INTO public.orders (
   '2099-12-31 14:00:00+09', '2099-12-31',
   1, '20991231-0000001', 'A-01'
 )
-ON CONFLICT (id) DO NOTHING;
+ON CONFLICT (id) DO UPDATE
+  SET order_number = EXCLUDED.order_number;
 
 -- order_items
 INSERT INTO public.order_items (
